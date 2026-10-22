@@ -1,0 +1,20 @@
+<!-- @dsCard group="Controls" height=150 subtitle="One gold captain action, outlines for the rest" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+body{margin:0;background:var(--bg);color:var(--text)}
+.r{display:flex;gap:var(--space-3);padding:var(--space-7);flex-wrap:wrap;align-items:center}
+button,a{min-height:40px;padding:0 16px;border-radius:var(--radius-sm);font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--text);background:transparent;border:var(--stroke) solid var(--border-strong);display:inline-flex;align-items:center;text-decoration:none;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:var(--stroke-tile) solid var(--focus);outline-offset:2px}
+.gold{background:var(--captain);color:var(--captain-ink);border:0}
+.nav{min-height:44px;border-color:var(--captain);color:var(--captain)}
+.rail{border-color:var(--rail-local);color:var(--text)}
+.on{background:var(--surface-selected)}
+</style>
+<div class="r">
+ <button class="gold">Approve</button>
+ <button>Decline</button>
+ <a class="nav" href="#">Deck plan</a>
+ <button class="rail">Ask Quartermaster</button>
+ <button class="on" aria-pressed="true">All campaigns</button>
+</div>
+<script></script>

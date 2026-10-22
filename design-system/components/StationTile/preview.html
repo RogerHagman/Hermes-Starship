@@ -1,0 +1,23 @@
+<!-- @dsCard group="Deck plan" height=200 subtitle="Rail colour, status line style, working dot" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+body{margin:0;background:var(--bg);font-family:var(--font-body);color:var(--text)}
+.row{display:flex;gap:var(--space-6);padding:var(--space-7);flex-wrap:wrap;align-items:flex-start}
+.tile{position:relative;width:150px;height:52px;box-sizing:border-box;padding:6px 10px;border:var(--stroke-tile) solid var(--c);border-radius:var(--radius-tile);background:var(--surface);overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.tile::before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:var(--c)}
+.tile.on{background:var(--surface-selected);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent),0 0 28px var(--c)}
+.tile.proposed{border-style:dashed;opacity:.8}.tile.future{border-style:dotted;opacity:.6}
+.name{display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-display);font-weight:600;font-size:13.5px}
+.name svg{fill:none;stroke:var(--c);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.h{font-family:var(--font-mono);font-size:10.5px;color:var(--text-label)}
+.dot{position:absolute;right:6px;top:7px;width:6px;height:6px;border-radius:3px;background:var(--c);box-shadow:0 0 6px var(--c)}
+.cap{font-family:var(--font-mono);font-size:10.5px;color:var(--text-muted);margin-top:6px;letter-spacing:.08em}
+</style>
+<div class="row">
+ <div><div class="tile on" style="--c:var(--rail-local)"><span class="dot"></span><span class="name"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/></svg>Number One</span><span class="h">@xo · hermes</span></div><div class="cap">LOCAL · LIVE · PICKED</div></div>
+ <div><div class="tile" style="--c:var(--rail-codex)"><span class="name"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 6l4 4-8 8H6v-4z M13 7l4 4"/></svg>Engineering</span><span class="h">@forge</span></div><div class="cap">CODEX · LIVE</div></div>
+ <div><div class="tile" style="--c:var(--rail-claude)"><span class="name"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2z M9 4v14 M15 6v14"/></svg>Cartography</span><span class="h">@studio</span></div><div class="cap">CLAUDE · LIVE</div></div>
+ <div><div class="tile proposed" style="--c:var(--rail-claude)"><span class="name"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 19h14 M8 19v-3h8v3 M10 16l-1-5h6l-1 5 M12 11V8 M10 6a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></svg>Strategist</span><span class="h">@strategist</span></div><div class="cap">CLAUDE · PROPOSED</div></div>
+ <div><div class="tile future" style="--c:var(--rail-local)"><span class="name"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M4 6h16v12H4z M4 7l8 6 8-6"/></svg>Comms</span><span class="h">not created</span></div><div class="cap">LOCAL · FUTURE HIRE</div></div>
+</div>
+<script></script>

@@ -1,0 +1,18 @@
+<!-- @dsCard group="Labels" height=210 subtitle="Rail, tier, status and comm-badge kinds" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+body{margin:0;background:var(--bg);color:var(--text)}
+.wrap{padding:var(--space-7);display:flex;flex-direction:column;gap:var(--space-5)}
+.r{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+.lab{width:64px;font-family:var(--font-mono);font-size:10.5px;color:var(--text-muted);letter-spacing:.08em}
+.p{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;padding:3px 10px;border-radius:var(--radius-pill);border:var(--stroke) solid var(--c);color:var(--c)}
+.p.dash{border-style:dashed}.p.dot{border-style:dotted}
+.k{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;padding:3px 8px;border-radius:var(--radius-xs);background:var(--surface-raised);border:var(--stroke) solid var(--c);color:var(--c)}
+</style>
+<div class="wrap">
+ <div class="r"><span class="lab">RAIL</span><span class="p" style="--c:var(--rail-local)">LOCAL</span><span class="p" style="--c:var(--rail-codex)">CODEX</span><span class="p" style="--c:var(--rail-claude)">CLAUDE</span><span class="p" style="--c:var(--rail-mixed)">MIXED</span></div>
+ <div class="r"><span class="lab">TIER</span><span class="p" style="--c:var(--tier-0)">T0 READ</span><span class="p" style="--c:var(--tier-1)">T1 LOGGED</span><span class="p" style="--c:var(--tier-2)">T2 CHECKPOINT</span><span class="p" style="--c:var(--tier-3)">T3 STOP</span></div>
+ <div class="r"><span class="lab">STATUS</span><span class="p" style="--c:var(--good)">LIVE</span><span class="p dash" style="--c:var(--text-label)">PROPOSED</span><span class="p dot" style="--c:var(--text-muted)">FUTURE HIRE</span><span class="p" style="--c:var(--bad)">DOWN</span></div>
+ <div class="r"><span class="lab">KIND</span><span class="k" style="--c:var(--text-label)">ASK</span><span class="k" style="--c:var(--rail-mixed)">ORDER</span><span class="k" style="--c:var(--captain)">APPROVE</span></div>
+</div>
+<script></script>
