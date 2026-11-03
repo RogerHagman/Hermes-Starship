@@ -1,0 +1,43 @@
+<!-- @dsCard height=288 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Barlow:wght@400&display=swap">
+<style>
+html,body{margin:0;background:var(--bg)}
+.cover{position:relative;width:960px;height:288px;overflow:hidden;background:var(--bg)}
+svg{position:absolute;left:0;top:0}
+.local{fill:var(--rail-local)}.codex{fill:var(--rail-codex)}.claude{fill:var(--rail-claude)}.gold{fill:var(--captain)}.slab{fill:var(--surface-selected)}
+.blk{rx:var(--radius-panel)}
+.tile{rx:var(--radius-tile);fill:var(--surface);stroke-width:var(--stroke-tile)}
+.tl{stroke:var(--rail-local)}.tc{stroke:var(--rail-codex)}.tp{stroke:var(--rail-claude)}.tm{stroke:var(--rail-mixed)}.tg{stroke:var(--captain)}
+.prop{stroke-dasharray:6 4}
+.text{position:absolute;left:var(--space-9);bottom:var(--space-9);max-width:440px}
+h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:88px;line-height:.95;color:var(--text)}
+p{margin:var(--space-5) 0 0;font-family:var(--font-body);font-size:14px;color:var(--text-muted)}
+</style>
+<div class="cover">
+<!--
+blocks: rail-local 128x144, captain 128x130, surface-selected slab 338x288, rail-claude 120x98, rail-codex 120x60; all radius-panel (14)
+arrangement: flush modular grid from x=480, bleeding off top, right and bottom like the deck plan hull
+pattern: geometric/modular dense UI -> station tiles (radius-tile, stroke-tile, 3px rail bar) on the slab, one dashed as "proposed"; this is the deck plan itself
+scales: gaps space-6 (14), tiles 72x34 at pitch 86x48, radius-tile 10, radius-panel 14
+-->
+<svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+ <rect class="local blk" x="480" y="-14" width="128" height="158"/>
+ <rect class="gold blk" x="480" y="158" width="128" height="144"/>
+ <rect class="slab blk" x="622" y="-14" width="204" height="316"/>
+ <rect class="codex blk" x="840" y="-14" width="134" height="74"/>
+ <rect class="claude blk" x="840" y="190" width="134" height="112"/>
+ <rect class="slab blk" x="840" y="74" width="134" height="102"/>
+ <g>
+  <rect class="tile tl" x="638" y="30" width="72" height="34"/>
+  <rect class="tile tc" x="724" y="30" width="72" height="34"/>
+  <rect class="tile tp" x="638" y="78" width="72" height="34"/>
+  <rect class="tile tl" x="724" y="78" width="72" height="34"/>
+  <rect class="tile tm" x="638" y="126" width="72" height="34"/>
+  <rect class="tile tp prop" x="724" y="126" width="72" height="34"/>
+  <rect class="tile tg" x="638" y="174" width="158" height="34"/>
+  <rect class="tile tl" x="856" y="108" width="102" height="34"/>
+ </g>
+</svg>
+<div class="text"><h1>Hermes Starship</h1><p>A calm ship's console at night. Colour is the rail, gold is the captain.</p></div>
+</div>
+<script></script>

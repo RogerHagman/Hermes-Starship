@@ -1,0 +1,660 @@
+<title>Hermes Starship Concept Art</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-bleed WebGL bands (exterior, crew) alternating with a framed deck-plan board and an engine room; one centred 1240px column for text. */
+:root {
+  /* Hermes Starship design system, bridge theme: a calm ship's console at night */
+  --hull-0: #070b14;   /* bg */
+  --hull-1: #0c1526;   /* surface */
+  --hull-2: #142238;   /* surface-raised */
+  --hull-3: #1d3256;   /* surface-selected */
+  --line: #22344f;     /* border */
+  --line-2: #2e4569;   /* border-strong */
+  --ink: #e6ecf5;      /* text */
+  --ink-2: #9fb0cc;    /* text-label */
+  --ink-3: #8ea3c4;    /* text-muted */
+  /* Colour means rail; gold means the captain */
+  --local: #3fc1a5;
+  --codex: #f0a948;
+  --claude: #e889b6;
+  --mixed: #8fa8e0;
+  --gold: #e8c37a;
+  --gold-ink: #1a1420;
+  --hull-glow: #4fa3ff;
+  --ok: #7fd8a8;
+  --bad: #f08a7a;
+
+  --display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --body: "Barlow", "Helvetica Neue", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  --r-xs: 4px; --r-sm: 8px; --r-tile: 10px; --r-card: 12px; --r-panel: 14px;
+  --stroke: 1.5px;
+  /* LCARS frame sizes: sidebar width, bar height, gap between blocks */
+  --lw: 118px; --bh: 18px; --lg: 6px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--hull-0); }
+body {
+  background: var(--hull-0);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 50; background: var(--hull-1);
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+
+/* ───────── top bar ───────── */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40;
+  background: color-mix(in srgb, var(--hull-1) 82%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.topbar .wrap { display: flex; align-items: center; gap: 20px; padding-block: 9px; }
+.mark { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 700; letter-spacing: .18em; font-size: 14px; white-space: nowrap; }
+.mark svg { width: 26px; height: 26px; flex: none; }
+.nav { display: flex; gap: 6px; margin-left: auto; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+.nav::-webkit-scrollbar { display: none; }
+/* navigation is always outlined; gold marks where the captain is */
+.nav a { text-decoration: none; font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-2); padding: 0 12px; min-height: 32px; display: inline-flex; align-items: center; border: var(--stroke) solid var(--line-2); border-radius: var(--r-sm); white-space: nowrap; transition: color .2s, border-color .2s; }
+.nav a:hover { color: var(--ink); border-color: var(--ink-3); }
+.nav a.on { color: var(--gold); border-color: var(--gold); }
+/* LCARS strip under the top bar */
+.lc-strip { display: flex; gap: var(--lg); height: 6px; }
+.lc-strip i { flex: 1; background: var(--c, var(--hull-3)); }
+.lc-strip i:first-child { border-radius: 99px 0 0 99px; }
+.lc-strip i:last-child { border-radius: 0 99px 99px 0; }
+
+/* ───────── shared type ───────── */
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(26px, 3.4vw, 40px); line-height: 1.08; letter-spacing: .01em; }
+h3 { font-size: 20px; line-height: 1.2; }
+.lede { color: var(--ink-2); max-width: 62ch; margin: 0; font-size: 17px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.section-head { display: grid; gap: 10px; margin-bottom: 26px; }
+
+/* chips */
+/* pills: rail, status, tier. Outline and text in the pill's colour */
+.chip { --c: var(--ink-2); display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px 3px 9px; border: var(--stroke) solid var(--c); border-radius: 99px; color: var(--c); white-space: nowrap; background: var(--hull-1); }
+.chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); display: block; flex: none; }
+.chip.local { --c: var(--local); }
+.chip.codex { --c: var(--codex); }
+.chip.claude { --c: var(--claude); }
+.chip.mixed { --c: var(--mixed); }
+.chip.gold { --c: var(--gold); }
+.chip.status-live { --c: var(--ok); }
+.chip.status-proposed { --c: var(--ink-2); border-style: dashed; }
+.chip.status-future { --c: var(--ink-3); border-style: dotted; border-width: 2px; }
+
+/* buttons: gold filled for the one captain action, outlined in border-strong for the rest */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; min-height: 40px;
+  font-family: var(--display); font-weight: 600; font-size: 14px; line-height: 1; letter-spacing: .03em;
+  background: color-mix(in srgb, var(--hull-1) 80%, transparent); border: var(--stroke) solid var(--line-2);
+  padding: 0 16px; border-radius: var(--r-sm); color: var(--ink);
+  transition: border-color .2s, background .2s, transform .1s;
+}
+.btn:hover { border-color: var(--ink-3); background: var(--hull-2); }
+.btn:active { transform: translateY(1px); }
+.btn[aria-pressed="true"] { background: var(--hull-3); border-color: var(--mixed); }
+.btn.primary { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
+.btn.primary:hover { background: color-mix(in srgb, var(--gold) 86%, #ffffff); box-shadow: 0 0 22px -6px var(--gold); }
+.btn svg { width: 14px; height: 14px; }
+
+/* ───────── LCARS frames ─────────
+   An elbow is one box with a thick left and top border and a large top-left radius: the outer corner sweeps,
+   and the inner corner gets the radius minus the border. Bars and side blocks are flex rows of plain blocks. */
+.lcars { --c: var(--mixed); --eh: 104px; --ew: calc(var(--lw) + 64px); position: relative; display: grid; gap: 10px; align-content: start; padding: calc(var(--bh) + 22px) 0 4px calc(var(--lw) + 26px); min-height: 182px; }
+.lc-elbow { position: absolute; left: 0; top: 0; width: var(--ew); height: var(--eh); border-left: var(--lw) solid var(--c); border-top: var(--bh) solid var(--c); border-top-left-radius: calc(var(--lw) + 26px) calc(var(--bh) + 44px); pointer-events: none; }
+.lc-num { position: absolute; left: 0; top: calc(var(--eh) - 22px); width: calc(var(--lw) - 10px); text-align: right; font: 500 11px/1 var(--mono); letter-spacing: .08em; color: var(--hull-0); pointer-events: none; }
+.lc-bar { position: absolute; top: 0; left: calc(var(--ew) + var(--lg)); right: 0; height: var(--bh); display: flex; gap: var(--lg); align-items: center; }
+.lc-bar i, .lc-side i, .msd .side i, .msd .bar i { display: block; flex: 1; align-self: stretch; background: var(--hull-3); font-style: normal; }
+.lc-bar i.cap, .msd .bar i.cap { flex: 0 0 34px; border-radius: 0 99px 99px 0; background: var(--c); }
+.lc-label { flex: none; font: 600 15px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--c); white-space: nowrap; padding: 0 4px; }
+.lc-side { position: absolute; left: 0; top: calc(var(--eh) + var(--lg)); bottom: 0; width: var(--lw); display: flex; flex-direction: column; gap: var(--lg); pointer-events: none; }
+.lc-side i, .msd .side i { display: flex; align-items: flex-end; justify-content: flex-end; padding: 0 10px 5px; min-height: 26px; font: 400 10.5px/1 var(--mono); letter-spacing: .08em; color: var(--ink-2); }
+.lcars h2 { max-width: 30ch; }
+.lcars:not(:last-child) { margin-bottom: 30px; }
+/* Master systems display: a bracket of two elbows and a side column round the deck plan */
+.msd { --c: var(--mixed); --c2: var(--local); --sw: 84px; --ew: calc(var(--sw) + 56px); position: relative; padding: calc(var(--bh) + 12px) 0 26px calc(var(--sw) + 14px); min-width: 0; }
+.msd .el-t, .msd .el-b { position: absolute; left: 0; width: var(--ew); pointer-events: none; }
+.msd .el-t { top: 0; height: 92px; border-left: var(--sw) solid var(--c); border-top: var(--bh) solid var(--c); border-top-left-radius: calc(var(--sw) + 24px) calc(var(--bh) + 40px); }
+.msd .el-b { bottom: 0; height: 76px; border-left: var(--sw) solid var(--c2); border-bottom: 12px solid var(--c2); border-bottom-left-radius: calc(var(--sw) + 24px) 50px; }
+.msd .bar { position: absolute; left: calc(var(--ew) + var(--lg)); right: 0; display: flex; gap: var(--lg); align-items: center; pointer-events: none; }
+.msd .bar.t { top: 0; height: var(--bh); }
+.msd .bar.b { bottom: 0; height: 12px; }
+.msd .bar.b i.cap { background: var(--c2); }
+.msd .side { position: absolute; left: 0; width: var(--sw); top: calc(92px + var(--lg)); bottom: calc(76px + var(--lg)); display: flex; flex-direction: column; gap: var(--lg); pointer-events: none; }
+/* LCARS label tag: a filled block with dark text */
+.lc-tag { justify-self: start; display: inline-flex; align-items: center; font: 600 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--hull-0); background: var(--c, var(--local)); padding: 6px 14px 6px 20px; border-radius: 99px var(--r-xs) var(--r-xs) 99px; text-shadow: none; }
+@media (max-width: 720px) {
+  :root { --lw: 34px; --bh: 12px; --lg: 4px; }
+  .lcars { --eh: 64px; --ew: calc(var(--lw) + 30px); padding-left: calc(var(--lw) + 14px); padding-top: calc(var(--bh) + 16px); min-height: 0; }
+  .lc-elbow { border-top-left-radius: calc(var(--lw) + 14px) calc(var(--bh) + 26px); }
+  .lc-num, .lc-side i, .msd .side i { font-size: 0; padding: 0; min-height: 14px; }
+  .lc-label { font-size: 11px; letter-spacing: .08em; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .lc-bar i.cap { flex-basis: 18px; }
+  .msd { --sw: 18px; --ew: calc(var(--sw) + 26px); padding-left: calc(var(--sw) + 8px); }
+  .msd .el-t { height: 60px; border-top-left-radius: calc(var(--sw) + 14px) calc(var(--bh) + 24px); }
+  .msd .el-b { height: 50px; border-bottom-width: 8px; border-bottom-left-radius: calc(var(--sw) + 14px) 30px; }
+  .msd .bar.b { height: 8px; }
+  .msd .side { top: calc(60px + var(--lg)); bottom: calc(50px + var(--lg)); }
+  .msd { padding-bottom: 20px; }
+}
+
+/* ───────── hero / exterior ───────── */
+.hero { position: relative; height: clamp(520px, 82vh, 860px); overflow: hidden; background: var(--hull-0); isolation: isolate; }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+.hero.free canvas { touch-action: none; cursor: grab; }
+.hero.free canvas:active { cursor: grabbing; }
+.hud { position: absolute; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(ellipse 58% 52% at 10% 18%, rgba(2, 4, 10, .6), rgba(2, 4, 10, 0) 72%); }
+.hud .wrap { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding-block: clamp(22px, 4vh, 44px) 22px; }
+.title-block { display: grid; gap: 14px; max-width: 520px; }
+.title-block h1 {
+  font-size: clamp(64px, 11vw, 148px); line-height: .82; font-weight: 700; letter-spacing: .06em;
+  background: linear-gradient(180deg, #ffffff 0%, #cdd6ff 55%, #8590c9 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 60px rgba(140, 160, 255, .18);
+}
+.title-block .lede { font-size: clamp(15px, 1.3vw, 18px); text-shadow: 0 1px 12px rgba(0,0,0,.8); }
+.reg { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.reg span { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.reg b { color: var(--gold); font-weight: 600; }
+
+.telemetry {
+  position: absolute; top: clamp(22px, 4vh, 44px); right: var(--gutter-r);
+  display: grid; gap: 2px; text-align: right; font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; color: var(--ink-3); text-transform: uppercase;
+  padding: 12px 16px 8px 0; border-right: 12px solid var(--mixed); border-top: 7px solid var(--mixed); border-top-right-radius: 30px 22px;
+}
+.telemetry::after { content: ""; position: absolute; right: -12px; bottom: -22px; width: 12px; height: 16px; background: var(--local); border-radius: 0 0 99px 99px; }
+.telemetry div { display: flex; justify-content: flex-end; gap: 14px; }
+.telemetry b { color: var(--ink); font-weight: 500; min-width: 10ch; display: inline-block; font-variant-numeric: tabular-nums; }
+.telemetry .rails b { color: var(--ok); }
+
+.hud-bottom { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; pointer-events: none; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; pointer-events: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; pointer-events: auto; justify-content: flex-end; align-items: center; }
+.hint { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-right: 8px; width: 100%; text-align: right; padding-bottom: 4px; }
+
+.callouts { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.callouts svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.callout {
+  position: absolute; left: 0; top: 0; transform: translate(-9999px, 0); will-change: transform, opacity;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; line-height: 1.35; white-space: nowrap;
+  padding: 6px 11px 6px 16px; background: rgba(7, 11, 20, .76); border: var(--stroke) solid var(--line-2); border-left: 0;
+  box-shadow: inset 7px 0 0 var(--c, var(--mixed)); border-radius: 99px var(--r-sm) var(--r-sm) 99px; color: var(--ink-2); transition: opacity .35s;
+}
+.callout b { display: block; color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+.hero.no-callouts .callouts { opacity: 0; }
+.callouts { transition: opacity .4s; }
+
+.warp-flash { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: radial-gradient(circle at 55% 50%, rgba(220,230,255,.9), rgba(160,175,255,.2) 40%, transparent 70%); opacity: 0; }
+
+.scroll-hint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 2; font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; color: var(--ink-3); text-transform: uppercase; pointer-events: none; }
+
+.hero .title-block, .hero .telemetry, .hero .legend, .hero .controls .btn { transition: opacity .5s; }
+.hero.poster .title-block, .hero.poster .telemetry, .hero.poster .legend, .hero.poster .scroll-hint, .hero.poster .callouts { opacity: 0; pointer-events: none; }
+.hero.poster .controls .btn:not(#btn-poster) { display: none; }
+.hero.poster .hud { background: none; }
+.hero.poster #btn-poster { opacity: .55; }
+.hero.poster #btn-poster:hover, .hero.poster #btn-poster:focus-visible { opacity: 1; }
+
+/* ───────── bridge interior ───────── */
+.bridge { position: relative; height: clamp(540px, 80vh, 820px); overflow: hidden; background: var(--hull-0); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); isolation: isolate; }
+.bridge canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+.bridge-tags { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.tag { position: absolute; left: 0; top: 0; display: flex; gap: 7px; align-items: stretch; white-space: nowrap; font-family: var(--mono); font-size: 10.5px; line-height: 1.5; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); background: rgba(7, 11, 20, .76); border: var(--stroke) solid var(--line-2); border-radius: 99px; padding: 0 10px 0 0; overflow: hidden; transition: opacity .3s; will-change: transform; }
+.tag i { width: 9px; background: var(--c); display: block; flex: none; }
+.tag span { padding-block: 2px; }
+.bridge-hud { position: absolute; inset: 0; pointer-events: none; z-index: 2; background: linear-gradient(100deg, rgba(3, 5, 12, .82) 0%, rgba(3, 5, 12, .45) 30%, rgba(3, 5, 12, 0) 52%); }
+.bridge-hud .wrap { height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding-block: clamp(26px, 5vh, 48px) 22px; }
+.bridge-copy { max-width: 470px; display: grid; gap: 10px; text-shadow: 0 1px 14px rgba(0, 0, 0, .95), 0 0 2px rgba(0, 0, 0, .8); }
+.bridge-bottom { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; pointer-events: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .1em; }
+.bridge-bottom b { color: var(--ink); font-weight: 500; }
+@media (max-width: 720px) { .bridge-copy .lede { font-size: 14.5px; } .tag { font-size: 9.5px; padding-right: 8px; } }
+
+/* ───────── bands ───────── */
+.band { padding-block: clamp(56px, 9vw, 110px); position: relative; }
+.band.alt { background: linear-gradient(180deg, var(--hull-0), var(--hull-1) 18%, var(--hull-1) 82%, var(--hull-0)); }
+
+/* ───────── deck plan ───────── */
+.deck-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.board {
+  position: relative; border: var(--stroke) solid var(--line); border-radius: var(--r-panel); overflow: hidden;
+  background:
+    radial-gradient(ellipse at 60% 50%, rgba(80, 100, 200, .10), transparent 60%),
+    linear-gradient(var(--hull-1), var(--hull-1));
+}
+.board-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+.board svg.deck { display: block; width: 100%; min-width: 820px; height: auto; }
+.board-bar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 18px; padding: 10px 16px; border-top: var(--stroke) solid var(--line); font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); letter-spacing: .06em; }
+.board-bar .keys { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+.linekey { display: inline-flex; align-items: center; gap: 7px; text-transform: uppercase; }
+.linekey svg { width: 28px; height: 8px; }
+
+.room { cursor: pointer; }
+.room .shell { transition: fill .25s, stroke-width .25s, filter .25s; }
+.room:hover .shell, .room.sel .shell { stroke-width: 2.4; }
+.room.sel .shell { filter: url(#glow); }
+.room text { pointer-events: none; }
+.room:focus-visible { outline: none; }
+.room:focus-visible .shell { stroke-width: 3; stroke: var(--ink); }
+.rlabel { font-family: var(--display); font-weight: 600; font-size: 12px; letter-spacing: .04em; fill: var(--ink); text-transform: uppercase; }
+.rsub { font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; fill: var(--ink-3); }
+.room.future .rlabel { fill: var(--ink-3); }
+
+.panel {
+  border: var(--stroke) solid var(--line); border-radius: var(--r-panel); background: var(--hull-1);
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 0; overflow: hidden; min-width: 0;
+}
+.panel > * { padding: 18px 22px; min-width: 0; }
+.panel > * + * { border-left: 1px solid var(--line); }
+@media (max-width: 760px) { .panel { grid-template-columns: minmax(0, 1fr); } .panel > * + * { border-left: 0; border-top: 1px solid var(--line); } }
+.station-card { display: grid; gap: 10px; }
+.station-card h3 { font-size: 24px; }
+.station-card .who { font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: .06em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+dl.facts { margin: 0; display: grid; grid-template-columns: 74px minmax(0,1fr); gap: 8px 12px; font-size: 14px; }
+dl.facts dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); padding-top: 3px; }
+dl.facts dd { margin: 0; color: var(--ink-2); min-width: 0; overflow-wrap: anywhere; }
+dl.facts dd.mono { font-size: 12.5px; color: var(--ink); }
+.say { font-family: var(--mono); font-size: 12.5px; color: var(--ink); }
+.say span { display: inline-block; background: var(--hull-3); border-radius: var(--r-xs); padding: 1px 6px; margin: 0 4px 4px 0; }
+.log { font-family: var(--mono); font-size: 12px; line-height: 1.55; color: var(--ink-3); display: grid; gap: 5px; align-content: start; height: 236px; overflow: hidden; position: relative; }
+.log::after { content: ""; position: absolute; inset: auto 0 0; height: 40px; background: linear-gradient(transparent, var(--hull-1)); }
+.log .row { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 8px; animation: logIn .5s ease-out; }
+.log .row time { color: var(--ink-3); }
+.log .row span { color: var(--ink-2); }
+.log .row .ok { color: var(--ok); }
+.log .row .k { color: var(--ink); }
+@keyframes logIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.panel-title { font-family: var(--display); font-weight: 600; font-size: 15px; line-height: 1.2; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 6px 12px; flex-wrap: wrap; }
+.panel-title > span:first-child { display: inline-flex; align-items: center; gap: 9px; }
+.panel-title > span:first-child::before { content: ""; width: 22px; height: 12px; border-radius: 99px 0 0 99px; background: var(--c, var(--mixed)); flex: none; }
+.panel-title .live { color: var(--ok); font-family: var(--mono); font-weight: 400; font-size: 10.5px; letter-spacing: .14em; }
+.panel-title .live::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--ok); margin-right: 6px; vertical-align: 1px; animation: blink 1.6s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.textlink { background: none; border: 0; padding: 0; cursor: pointer; font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--mixed); text-align: left; }
+.textlink:hover { color: var(--ink); }
+
+/* ───────── crew ───────── */
+.crew-stage { position: relative; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--hull-0); }
+.crew-inner { display: grid; grid-template-columns: minmax(0, 1fr) 360px; min-height: clamp(520px, 74vh, 720px); }
+.crew-canvas-wrap { position: relative; min-width: 0; }
+.crew-canvas-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: pointer; }
+.crew-side { border-left: 1px solid var(--line); background: linear-gradient(180deg, var(--hull-1), var(--hull-0)); display: flex; flex-direction: column; min-width: 0; }
+.crew-side > * { padding: 18px 20px; }
+.crew-side > * + * { border-top: 1px solid var(--line); }
+.crew-card { display: grid; gap: 12px; }
+.crew-card .num { font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: .1em; }
+.crew-card h3 { font-size: 30px; line-height: 1.05; }
+.crew-card .who { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+.crew-nav { display: flex; gap: 8px; align-items: center; }
+.crew-nav .spacer { flex: 1; }
+.roster { display: flex; flex-wrap: wrap; gap: 5px; align-content: flex-start; }
+.roster button {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; cursor: pointer;
+  padding: 4px 9px; border-radius: 99px; border: var(--stroke) solid var(--line-2); background: transparent; color: var(--ink-3);
+  display: inline-flex; gap: 6px; align-items: center;
+}
+.roster button i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+.roster button.status-proposed { border-style: dashed; }
+.roster button.status-future { border-style: dotted; border-width: 1.5px; }
+.roster button:hover { color: var(--ink); border-color: var(--ink-3); }
+.roster button[aria-current="true"] { color: var(--ink); border-color: var(--ink-2); background: var(--hull-3); }
+.crew-overlay { position: absolute; left: var(--gutter-l); top: 18px; pointer-events: none; display: grid; gap: 6px; }
+.crew-overlay .big { font-family: var(--display); font-weight: 700; font-size: clamp(40px, 6vw, 84px); line-height: .9; letter-spacing: .04em; color: transparent; -webkit-text-stroke: 1px rgba(170, 182, 230, .28); text-transform: uppercase; }
+.crew-hint { position: absolute; right: 16px; bottom: 14px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; color: var(--ink-3); text-transform: uppercase; pointer-events: none; text-align: right; }
+
+/* ───────── briefing room ───────── */
+.tag.on { border-color: var(--c); color: #fff; box-shadow: 0 0 16px -4px var(--c); }
+.brief-stage { position: relative; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--hull-0); }
+.brief-inner { display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: clamp(540px, 76vh, 740px); }
+.brief-canvas-wrap { position: relative; min-width: 0; overflow: hidden; }
+.brief-canvas-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+.subtitle { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); width: min(700px, calc(100% - 32px)); z-index: 2; pointer-events: none; display: grid; gap: 6px; justify-items: center; text-align: center; }
+.subtitle .who { display: inline-flex; gap: 8px; align-items: center; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--c, var(--ink-2)); text-shadow: 0 1px 8px rgba(0, 0, 0, .9); }
+.subtitle .who i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); display: block; }
+.subtitle .line { font-family: var(--display); font-weight: 500; font-size: clamp(16px, 1.55vw, 21px); line-height: 1.3; color: var(--ink); background: rgba(7, 11, 20, .78); box-shadow: inset 7px 0 0 var(--c, var(--mixed)); padding: 8px 16px 8px 20px; border-radius: 99px var(--r-sm) var(--r-sm) 99px; min-height: calc(1.3em + 16px); text-wrap: balance; }
+.brief-side { border-left: 1px solid var(--line); background: linear-gradient(180deg, var(--hull-1), var(--hull-0)); padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.agenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.agenda > li { border: var(--stroke) dashed var(--line-2); border-radius: var(--r-tile); padding: 10px 12px; display: grid; gap: 7px; opacity: .3; transition: opacity .5s, border-color .3s, background .3s; }
+.agenda > li.shown { opacity: 1; }
+.agenda > li.on { border-color: var(--mixed); background: color-mix(in srgb, var(--mixed) 8%, transparent); }
+.agenda .ah { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.agenda .ah b { font-family: var(--display); font-weight: 600; font-size: 15.5px; letter-spacing: .02em; }
+.agenda .ah span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+.agenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.agenda ul:empty { display: none; }
+.agenda ul li { display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 9px; align-items: baseline; font-size: 14px; line-height: 1.35; color: var(--ink-2); animation: logIn .5s ease-out; }
+.agenda ul li i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px var(--c); display: block; transform: translateY(-1px); }
+.agenda ul li em { font-style: normal; font-family: var(--mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.brief-verdict { margin-top: auto; border-top: var(--stroke) solid var(--line); padding-top: 12px; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--ink-3); }
+.brief-verdict.done { color: var(--ink-2); }
+.brief-verdict b { color: var(--gold); font-weight: 500; }
+@media (max-width: 980px) {
+  .brief-inner { grid-template-columns: minmax(0, 1fr); }
+  .brief-canvas-wrap { height: clamp(440px, 64vh, 580px); }
+  .brief-side { border-left: 0; border-top: 1px solid var(--line); }
+}
+@media (max-width: 720px) { .subtitle { bottom: 12px; } .subtitle .line { font-size: 15px; padding: 7px 11px; } }
+
+/* ───────── engine room ───────── */
+.engines { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.core { border: var(--stroke) solid var(--line); border-radius: var(--r-panel); background: var(--hull-1); overflow: hidden; display: grid; grid-template-rows: auto 1fr; --c: var(--local); }
+.core.codex { --c: var(--codex); }
+.core.claude { --c: var(--claude); }
+.core canvas { width: 100%; height: 300px; display: block; }
+.core-body { padding: 16px 18px 18px; display: grid; gap: 12px; align-content: start; border-top: 3px solid var(--c); }
+.core-body h3 { display: flex; align-items: baseline; gap: 10px; }
+.core-body h3 span { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--c); letter-spacing: .08em; }
+.meter { display: grid; gap: 6px; }
+.meter .bar { height: 6px; border-radius: 99px; background: var(--hull-3); overflow: hidden; }
+.meter .bar i { display: block; height: 100%; background: var(--c); box-shadow: 0 0 12px var(--c); border-radius: 99px; transition: width 1.2s cubic-bezier(.2,.8,.2,1); }
+.meter .lbl { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; }
+.meter .lbl b { color: var(--ink); font-weight: 500; }
+.runs { display: flex; flex-wrap: wrap; gap: 5px; }
+.runs span { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: var(--r-xs); background: var(--hull-3); color: var(--ink-2); }
+.customs { margin-top: 22px; border: var(--stroke) solid var(--line); border-radius: var(--r-panel); background: var(--hull-1); overflow: hidden; }
+.customs-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.table-scroll { overflow-x: auto; }
+table.clog { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; min-width: 640px; }
+table.clog th { text-align: left; font-weight: 500; color: var(--ink-3); letter-spacing: .1em; text-transform: uppercase; font-size: 10.5px; padding: 9px 16px; border-bottom: 1px solid var(--line); }
+table.clog td { padding: 8px 16px; border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.clog tr:last-child td { border-bottom: 0; }
+table.clog tr.new td { animation: rowIn 1.2s ease-out; }
+@keyframes rowIn { from { background: color-mix(in srgb, var(--mixed) 18%, transparent); } to { background: transparent; } }
+.pass { color: var(--ok); }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+/* ───────── comm badge ───────── */
+.comm { position: fixed; right: var(--gutter-r); bottom: max(16px, env(safe-area-inset-bottom, 0px)); z-index: 45; width: 56px; height: 56px; padding: 0; border-radius: 50%; border: 1px solid var(--line-2); background: radial-gradient(circle at 50% 38%, var(--hull-3), var(--hull-1) 75%); display: grid; place-items: center; cursor: pointer; box-shadow: 0 8px 26px rgba(0, 0, 0, .55); transition: opacity .35s, transform .35s, border-color .2s; }
+.comm:hover { border-color: var(--gold); }
+.comm.away { opacity: 0; transform: translateY(14px); pointer-events: none; }
+.comm svg { width: 34px; height: 34px; display: block; }
+.comm .n { position: absolute; top: -3px; right: -3px; min-width: 20px; height: 20px; border-radius: 10px; background: var(--gold); color: var(--gold-ink); font: 600 11px/20px var(--mono); text-align: center; padding: 0 5px; }
+.comm[data-n="0"] .n { display: none; }
+.comm:not([data-n="0"])::after { content: ""; position: absolute; inset: -1px; border-radius: 50%; border: 1px solid var(--gold); animation: commPing 2.8s ease-out infinite; pointer-events: none; }
+@keyframes commPing { 0% { transform: scale(1); opacity: .8; } 70%, 100% { transform: scale(1.65); opacity: 0; } }
+.comm.chirp svg { animation: chirp .55s ease-out; }
+@keyframes chirp { 30% { transform: scale(1.16) rotate(-7deg); } 60% { transform: scale(.94) rotate(4deg); } }
+.comm-panel { position: fixed; right: var(--gutter-r); bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 68px); z-index: 45; width: min(360px, calc(100vw - 32px)); max-height: calc(100vh - 140px); overflow: auto; background: color-mix(in srgb, var(--hull-1) 95%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: var(--stroke) solid var(--line-2); border-radius: var(--r-panel); box-shadow: 0 18px 50px rgba(0, 0, 0, .6); padding: 16px; display: grid; gap: 12px; animation: logIn .25s ease-out; }
+.comm-panel[hidden] { display: none; }
+.comm-head { display: flex; justify-content: space-between; gap: 6px 10px; align-items: baseline; flex-wrap: wrap; }
+.comm-head .mono { font-size: 11.5px; color: var(--gold); }
+.comm-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.comm-list li { border: var(--stroke) solid var(--line); border-radius: var(--r-tile); box-shadow: inset 0 3px 0 var(--c); padding: 12px; display: grid; gap: 4px; background: var(--hull-0); transition: opacity .3s; }
+.comm-list li.done { opacity: .75; }
+.comm-list .cw { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.comm-list .cw i { width: 6px; height: 6px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px var(--c); display: block; }
+.comm-list b { font-family: var(--display); font-weight: 600; font-size: 15.5px; line-height: 1.25; }
+.comm-list .note { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+.comm-list .acts { display: flex; gap: 8px; margin-top: 6px; min-height: 34px; align-items: center; }
+.comm-list .acts .btn { padding: 7px 11px; }
+.comm-list .okay { font-family: var(--mono); font-size: 11.5px; color: var(--ok); letter-spacing: .06em; text-transform: uppercase; }
+.comm-list li.later .okay { color: var(--ink-3); }
+.comm-foot { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-3); }
+
+/* ───────── footer ───────── */
+footer { padding-block: 0 48px; color: var(--ink-3); font-size: 14px; }
+footer .lc-strip { margin-bottom: 34px; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px 30px; }
+footer p { margin: 0; max-width: 64ch; }
+
+/* ───────── responsive ───────── */
+@media (max-width: 980px) {
+  .deck-grid { grid-template-columns: minmax(0, 1fr); }
+  .crew-inner { grid-template-columns: minmax(0, 1fr); }
+  .crew-canvas-wrap { height: clamp(420px, 62vh, 560px); }
+  .crew-side { border-left: 0; border-top: 1px solid var(--line); }
+  .engines { grid-template-columns: minmax(0, 1fr); }
+  .core { grid-template-columns: 150px minmax(0, 1fr); grid-template-rows: none; }
+  .core canvas { height: 100%; min-height: 260px; }
+  .core-body { border-top: 0; border-left: 3px solid var(--c); }
+}
+@media (max-width: 720px) {
+  .telemetry { display: none; }
+  .mark span.full { display: none; }
+  .hero { height: clamp(560px, 88vh, 760px); }
+  .title-block .lede { font-size: 15px; }
+  .legend { display: none; }
+  .core { grid-template-columns: 110px minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="mark" href="#exterior" aria-label="HSS Hermes, back to top">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 L29 16 L16 29 L3 16 Z" fill="none" stroke="#8fa8e0" stroke-width="1.5"/><path d="M8 17 C 12 13, 14 11, 16 7 C 18 11, 20 13, 24 17" fill="none" stroke="#e8c37a" stroke-width="1.8" stroke-linecap="round"/><path d="M11 21 C 13 18.5, 14.5 17.5, 16 15 C 17.5 17.5, 19 18.5, 21 21" fill="none" stroke="#3fc1a5" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>HSS HERMES<span class="full"> · CONCEPT</span></span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#exterior" data-sec="exterior">Exterior</a>
+      <a href="#bridge" data-sec="bridge">Bridge</a>
+      <a href="#decks" data-sec="decks">Deck plan</a>
+      <a href="#crew" data-sec="crew">Crew</a>
+      <a href="#briefing" data-sec="briefing">Briefing</a>
+      <a href="#engines" data-sec="engines">Engine room</a>
+    </nav>
+  </div>
+  <div class="lc-strip" aria-hidden="true"><i style="--c:var(--mixed);flex:0 0 64px"></i><i style="--c:var(--local);flex:6"></i><i style="flex:1"></i><i style="--c:var(--codex);flex:2"></i><i style="--c:var(--claude);flex:2"></i><i style="flex:4"></i><i style="--c:var(--mixed);flex:0 0 40px"></i></div>
+</header>
+
+<main>
+  <!-- ═══════════ EXTERIOR ═══════════ -->
+  <section class="hero" id="exterior" aria-label="The ship, exterior">
+    <canvas id="hero-canvas" aria-label="Animated 3D render of the starship Hermes in orbit"></canvas>
+    <div class="callouts" id="callouts"><svg id="callout-lines" aria-hidden="true"></svg></div>
+    <div class="warp-flash" id="warp-flash"></div>
+    <div class="hud">
+      <div class="wrap">
+        <div class="title-block">
+          <div class="lc-tag" style="--c: var(--mixed)">01 · Exterior</div>
+          <div class="reg"><span>HSS Hermes</span><span>Courier class</span><span>Captain <b>the Captain</b></span></div>
+          <h1>HERMES</h1>
+          <p class="lede" id="hero-lede">the Captain's agent crew, drawn as the ship it serves on. A captain, a first officer and a crew of stations, each running on one of three rails.</p>
+        </div>
+        <div class="hud-bottom">
+          <div class="controls">
+            <button class="btn primary" id="btn-warp" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h9M4 4.5h8M4 11.5h8M12 8h3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>Engage warp</button>
+            <button class="btn" id="btn-look" type="button" aria-pressed="false"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M2.5 8h11M8 2.5c2 2 2 9 0 11M8 2.5c-2 2-2 9 0 11" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>Free look</button>
+            <button class="btn" id="btn-callouts" type="button" aria-pressed="true">Callouts</button>
+            <button class="btn" id="btn-poster" type="button" aria-pressed="false" title="Hide the text for a clean view of the ship">Poster view</button>
+          </div>
+          <div class="legend" aria-label="Rail colours">
+            <span class="hint">Tap the hull to raise the shields</span>
+            <span class="chip local"><i></i>Local</span>
+            <span class="chip codex"><i></i>Codex</span>
+            <span class="chip claude"><i></i>Claude</span>
+            <span class="chip mixed"><i></i>Mixed</span>
+            <span class="chip gold"><i></i>Captain</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="telemetry" aria-hidden="true">
+      <div>Stardate <b id="t-stardate">—</b></div>
+      <div>Velocity <b id="t-vel">0.18 c</b></div>
+      <div>Heading <b id="t-head">—</b></div>
+      <div>Camera <b id="t-cam">—</b></div>
+      <div class="rails">Rails <b>3 / 3 nominal</b></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ BRIDGE ═══════════ -->
+  <section class="bridge" id="bridge" aria-labelledby="bridge-h">
+    <canvas id="bridge-canvas" aria-label="Animated 3D render of the bridge, with the crew at their consoles in front of the main viewscreen"></canvas>
+    <div class="bridge-tags" id="bridge-tags" aria-hidden="true"></div>
+    <div class="bridge-hud">
+      <div class="wrap">
+        <div class="bridge-copy">
+          <div class="lc-tag" style="--c: var(--local)">02 · Interior · the bridge</div>
+          <h2 id="bridge-h">Number One has the conn</h2>
+          <p class="lede">Helm and Navigation face the main viewscreen and Ops works the side console. Security stands at tactical on the wooden rail behind the command chairs, Sensors and Science sit aft, and the Ship's Computer turns at the back. Whatever goes on screen stays on the local rail.</p>
+        </div>
+        <div class="bridge-bottom">
+          <button class="btn" id="bridge-next" type="button">Next camera</button>
+          <span>Camera <b id="bridge-shot">—</b></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ DECK PLAN ═══════════ -->
+  <section class="band" id="decks" aria-labelledby="decks-h">
+    <div class="wrap">
+      <div class="lcars" style="--c: var(--mixed)">
+        <span class="lc-elbow" aria-hidden="true"></span><span class="lc-num" aria-hidden="true">03-1041</span>
+        <div class="lc-bar"><span class="lc-label">Deck plan · top-down cutaway</span><i style="flex:5"></i><i style="flex:1;background:var(--local)"></i><i style="flex:1;background:var(--codex)"></i><i style="flex:1;background:var(--claude)"></i><i class="cap"></i></div>
+        <div class="lc-side" aria-hidden="true"><i>DECK 1–9</i><i style="background:var(--line-2)">MSD</i></div>
+
+        <h2 id="decks-h">Every station has a room. The nacelles are where work crosses to the cloud.</h2>
+        <p class="lede">The saucer and the engineering hull run on the local rail. The port nacelle holds Codex work and the starboard nacelle holds Claude work, and the only way out to either is up a pylon, through Security's customs gate. Watch orders leave the bridge and get scanned on the way out. Pick any room to see who works there.</p>
+      </div>
+      <div class="deck-grid">
+        <div class="msd">
+          <span class="el-t" aria-hidden="true"></span>
+          <div class="bar t" aria-hidden="true"><span class="lc-label">Master systems display · HSS Hermes</span><i style="flex:5"></i><i style="flex:1;background:var(--local)"></i><i style="flex:2"></i><i class="cap"></i></div>
+          <div class="side" aria-hidden="true"><i>03</i><i style="background:var(--line-2)">1041</i><i>27</i></div>
+          <span class="el-b" aria-hidden="true"></span>
+          <div class="bar b" aria-hidden="true"><i style="flex:6"></i><i style="flex:1;background:var(--mixed)"></i><i class="cap"></i></div>
+        <div class="board">
+          <div class="board-scroll"><svg class="deck" id="deck" viewBox="0 0 1200 600" role="group" aria-label="Deck plan of the ship with clickable station rooms"></svg></div>
+          <div class="board-bar">
+            <div class="keys">
+              <span class="linekey"><svg viewBox="0 0 28 8" aria-hidden="true"><line x1="1" y1="4" x2="27" y2="4" stroke="#9fb0cc" stroke-width="2"/></svg>Live</span>
+              <span class="linekey"><svg viewBox="0 0 28 8" aria-hidden="true"><line x1="1" y1="4" x2="27" y2="4" stroke="#9fb0cc" stroke-width="2" stroke-dasharray="5 3"/></svg>Proposed</span>
+              <span class="linekey"><svg viewBox="0 0 28 8" aria-hidden="true"><line x1="2" y1="4" x2="27" y2="4" stroke="#9fb0cc" stroke-width="2" stroke-dasharray="0.1 4" stroke-linecap="round"/></svg>Future</span>
+            </div>
+            <span>Illustrative traffic, made-up data</span>
+          </div>
+        </div>
+        </div>
+        <aside class="panel" aria-live="polite">
+          <div class="station-card" id="station-card"></div>
+          <div>
+            <div class="panel-title"><span>Ship's log</span><span class="live">Sample</span></div>
+            <div class="log" id="ship-log"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CREW ═══════════ -->
+  <section id="crew" aria-labelledby="crew-h">
+    <div class="band" style="padding-bottom: 28px">
+      <div class="wrap"><div class="lcars" style="--c: var(--local)">
+        <span class="lc-elbow" aria-hidden="true"></span><span class="lc-num" aria-hidden="true">04-0217</span>
+        <div class="lc-bar"><span class="lc-label">Crew quarters · character sheets</span><i style="flex:4"></i><i style="flex:1;background:var(--mixed)"></i><i style="flex:2"></i><i class="cap"></i></div>
+        <div class="lc-side" aria-hidden="true"><i>18 CREW</i><i style="background:var(--line-2)">RAILS 3</i></div>
+
+        <h2 id="crew-h">Meet the crew</h2>
+        <p class="lede">Each station gets a character in a two-tone uniform. The tunic shows the rail it thinks on, and only the Captain wears gold. The ring under its feet shows its status: solid for live, dashed for proposed, dotted for future hires, who appear only as holograms until the captain approves them.</p>
+      </div></div>
+    </div>
+    <div class="crew-stage">
+      <div class="crew-inner">
+        <div class="crew-canvas-wrap">
+          <canvas id="crew-canvas" aria-label="3D crew lineup; use the buttons beside it to change crew member"></canvas>
+          <div class="crew-overlay" aria-hidden="true"><div class="big" id="crew-big">Crew</div></div>
+          <div class="crew-hint" aria-hidden="true">Click a crew member · ← → keys</div>
+        </div>
+        <div class="crew-side">
+          <div class="crew-card" id="crew-card" aria-live="polite"></div>
+          <div class="crew-nav">
+            <button class="btn" id="crew-prev" type="button" aria-label="Previous crew member">←</button>
+            <button class="btn" id="crew-next" type="button" aria-label="Next crew member">→</button>
+            <span class="spacer"></span>
+            <button class="btn" id="crew-tour" type="button" aria-pressed="true">Tour</button>
+          </div>
+          <div class="roster" id="roster" aria-label="Jump to a crew member"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ BRIEFING ROOM ═══════════ -->
+  <section id="briefing" aria-labelledby="brief-h">
+    <div class="band" style="padding-bottom: 28px">
+      <div class="wrap"><div class="lcars" style="--c: var(--hull-glow)">
+        <span class="lc-elbow" aria-hidden="true"></span><span class="lc-num" aria-hidden="true">05-0930</span>
+        <div class="lc-bar"><span class="lc-label">Observation lounge · briefing room</span><i style="flex:3"></i><i style="flex:1;background:var(--mixed)"></i><i style="flex:2"></i><i class="cap" style="background:var(--mixed)"></i></div>
+        <div class="lc-side" aria-hidden="true"><i>LOUNGE</i><i style="background:var(--line-2)">MINUTES</i></div>
+
+        <h2 id="brief-h">The first briefing: how to build the ship</h2>
+        <p class="lede">The idea doc leaves the stack, the hosting, the look and the data flow open on purpose. Here the crew meets round the plotting table to work through them. Each station speaks to its part, the Ship's Computer keeps the minutes on the local rail, and nothing is decided until the captain says so. A made-up session that plays on a loop.</p>
+      </div></div>
+    </div>
+    <div class="brief-stage">
+      <div class="brief-inner">
+        <div class="brief-canvas-wrap">
+          <canvas id="brief-canvas" aria-label="Animated 3D render of nine crew members standing round a holographic table in the observation lounge, taking turns to speak"></canvas>
+          <div class="bridge-tags" id="brief-tags" aria-hidden="true"></div>
+          <div class="subtitle" id="brief-sub" aria-live="off"><div class="who"><i></i><span></span></div><div class="line"></div></div>
+        </div>
+        <aside class="brief-side" aria-label="Minutes of the session">
+          <div class="panel-title" style="margin:0"><span>Minutes · kept by the Ship's Computer</span><span class="live">Recording</span></div>
+          <ol class="agenda" id="brief-agenda"></ol>
+          <div class="brief-verdict" id="brief-verdict">Waiting for the captain</div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ ENGINE ROOM ═══════════ -->
+  <section class="band alt" id="engines" aria-labelledby="eng-h">
+    <div class="wrap">
+      <div class="lcars" style="--c: var(--mixed)">
+        <span class="lc-elbow" aria-hidden="true"></span><span class="lc-num" aria-hidden="true">06-0003</span>
+        <div class="lc-bar"><span class="lc-label">Main engineering · the three rails</span><i style="flex:3"></i><i style="flex:1;background:var(--local)"></i><i style="flex:1;background:var(--codex)"></i><i style="flex:1;background:var(--claude)"></i><i class="cap"></i></div>
+        <div class="lc-side" aria-hidden="true"><i>CORES 3</i><i style="background:var(--line-2)">CUSTOMS</i></div>
+
+        <h2 id="eng-h">Three cores power the ship</h2>
+        <p class="lede">Every station draws on one core. The local core never leaves the Captain's hardware; the two cloud cores sit behind customs. Quota figures here are made up to show the look.</p>
+      </div>
+      <div class="engines" id="engine-cores"></div>
+      <div class="customs">
+        <div class="customs-head"><span class="eyebrow">Customs log · what crossed a rail</span><span class="eyebrow">Sample rows</span></div>
+        <div class="table-scroll"><table class="clog"><thead><tr><th>Time</th><th>From</th><th>To rail</th><th>Order</th><th>Scan</th></tr></thead><tbody id="clog"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="comm away" id="comm" type="button" aria-expanded="false" aria-controls="comm-panel" aria-label="Comm badge">
+  <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="cgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#8f9ac8"/></linearGradient></defs><ellipse cx="24" cy="29" rx="19" ry="10.5" fill="none" stroke="#e8c37a" stroke-width="2.6"/><path d="M24 5 L35.5 39 L24 31.5 L12.5 39 Z" fill="url(#cgrad)" stroke="#04070f" stroke-width="1.2" stroke-linejoin="round"/></svg>
+  <span class="n">2</span>
+</button>
+<div class="comm-panel" id="comm-panel" role="dialog" aria-label="Comm badge" hidden>
+  <div class="comm-head"><span class="eyebrow">Comm · Number One</span><span class="mono" id="comm-status"></span></div>
+  <ul class="comm-list" id="comm-list"></ul>
+  <p class="comm-foot">Concept only. Approving here writes a line in the ship's log on the deck plan, and nothing else runs.</p>
+</div>
+
+<footer>
+  <div class="lc-strip" aria-hidden="true"><i style="--c:var(--local);flex:0 0 64px"></i><i style="flex:5"></i><i style="--c:var(--mixed);flex:1"></i><i style="flex:2"></i><i style="--c:var(--hull-glow);flex:0 0 40px"></i></div>
+  <div class="wrap">
+    <p>Concept art for the Hermes Starship interface. Everything is drawn in your browser from made-up data. Nothing here reads Hermes's files or calls a model.</p>
+    <p class="mono" style="font-size:12px">Built on the Holodeck · Milestone 0 mood board</p>
+  </div>
+</footer>

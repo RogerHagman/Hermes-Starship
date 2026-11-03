@@ -1,0 +1,35 @@
+<!-- @dsCard group="Quarters" height=330 subtitle="Awaiting your orders, collapsed and expanded" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body)}
+.panel{margin:var(--space-7);max-width:460px;background:var(--surface);border:var(--stroke) solid var(--border);border-radius:var(--radius-panel);padding:var(--space-7);display:flex;flex-direction:column;gap:var(--space-4)}
+.hd{display:flex;justify-content:space-between;align-items:baseline}
+h2{margin:0;font-family:var(--font-display);font-weight:600;font-size:19px}
+.m{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em}
+.help{font-size:12.5px;color:var(--text-muted)}
+.card{background:var(--surface-raised);border:var(--stroke) solid var(--c);border-radius:var(--radius-tile);padding:var(--space-5);display:flex;flex-direction:column;gap:var(--space-3)}
+.t{font-size:14.5px;line-height:1.35}
+.btns{display:flex;gap:var(--space-3);align-items:center}
+button{min-height:40px;padding:0 14px;border-radius:var(--radius-sm);font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--text);background:transparent;border:var(--stroke) solid var(--border-strong);cursor:pointer;white-space:nowrap}
+button:focus-visible{outline:var(--stroke-tile) solid var(--focus);outline-offset:2px}
+.gold{background:var(--captain);color:var(--captain-ink);border:0}
+.ic{min-width:40px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
+.ic svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sp{flex:1}
+.det{font-size:13px;color:var(--text-muted);border-top:var(--stroke) solid var(--border);padding-top:var(--space-3)}
+</style>
+<div class="panel">
+ <div class="hd"><h2>Awaiting your orders</h2><span class="m" style="color:var(--text-label)">2 pending</span></div>
+ <div class="help">Every checkpoint, viewscreen action and loadout change lands here.</div>
+ <div class="card" style="--c:var(--rail-claude)">
+  <div class="hd"><span class="m" style="color:var(--rail-claude)">CHIEF STRATEGIST · MSN-07</span><span class="m" style="color:var(--captain)">APPROVE</span></div>
+  <div class="t">Plan for the autumn city break: four orders across Navigation, Sensors and Cartography.</div>
+  <div class="btns"><button class="gold">Approve</button><button>Return</button><span class="sp"></span><button class="ic" aria-label="Put on screen" title="Put on screen"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 5h18v11H3z M8 20h8 M12 16v4"/></svg></button><button style="border-color:var(--rail-claude)" aria-expanded="true">Hide</button></div>
+  <div class="det">1 · Navigation checks your free weekends (local)<br>2 · Sensors compares three cities by train (Claude)<br>3 · Cartography lays out the trip sheet (Claude)</div>
+ </div>
+ <div class="card" style="--c:var(--rail-codex)">
+  <div class="hd"><span class="m" style="color:var(--rail-codex)">CHIEF ENGINEER · ORD-1043</span><span class="m" style="color:var(--text-label)">ASK</span></div>
+  <div class="t">Can the receipt parser drop the store footer line?</div>
+ </div>
+</div>
+<script></script>

@@ -1,0 +1,1116 @@
+<title>Hermes Ultrawide Deck Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one fixed 5120×1440 LCARS stage (rail · ship cutaway · station panel, console strip below), scaled to fit narrower windows. Single dark look on purpose: it is a ship display. */
+:root{
+  color-scheme:dark;
+  --bg:#070b14; --surface:#0c1526; --raised:#142238; --selected:#1d3256;
+  --border:#22344f; --border-strong:#2e4569;
+  --text:#e6ecf5; --label:#9fb0cc; --muted:#8ea3c4;
+  --captain:#e8c37a; --ink:#1a1420; --glow:#4fa3ff;
+  --local:#3fc1a5; --codex:#f0a948; --claude:#e889b6; --mixed:#8fa8e0;
+  --t3:#ff5050; --good:#7fd8a8; --bad:#f08a7a;
+  --lc-a:#8fa8e0; --lc-b:#e8c37a; --lc-c:#c58fd0; --lc-d:#d9935f;
+  --display:'Chakra Petch','Segoe UI',sans-serif;
+  --body:'Barlow','Helvetica Neue',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--body);margin:0}
+.page{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 16px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:10px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--label)}
+.toolbar .seg{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tb{font:600 12px var(--display);letter-spacing:.08em;text-transform:uppercase;background:var(--raised);color:var(--text);border:1.5px solid var(--border-strong);border-radius:99px;padding:5px 12px;cursor:pointer}
+.tb[aria-pressed="true"]{background:var(--captain);color:var(--ink);border-color:var(--captain)}
+.fit{position:relative;width:100%;overflow:hidden}
+.fit.native{overflow-x:auto}
+.stage{position:absolute;left:0;top:0;width:5120px;height:1440px;transform-origin:0 0;box-sizing:border-box;padding:24px;
+  display:grid;grid-template-columns:240px 3880px 904px;grid-template-rows:112px 976px 272px;column-gap:24px;row-gap:16px;
+  background:radial-gradient(ellipse at 45% 45%,#111d33 0%,var(--bg) 70%);overflow:hidden;font-size:15px}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* LCARS rail */
+.rail{grid-column:1;grid-row:1/4;display:flex;flex-direction:column;gap:6px;min-height:0}
+.elbow{height:112px;flex:none;background:var(--lc-a);border-top-left-radius:80px;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 16px 12px 0;box-sizing:border-box;color:#0a0f1a;font:700 22px var(--display);letter-spacing:.1em;position:relative}
+.elbow::after{content:'';position:absolute;right:-24px;top:0;width:24px;height:30px;background:var(--lc-a)}
+.rgroup{display:flex;flex-direction:column;gap:5px}
+.rl{font:400 11px var(--mono);letter-spacing:.16em;color:var(--lc-a);padding:10px 0 2px 4px}
+.rb{display:flex;align-items:flex-end;justify-content:space-between;min-height:38px;padding:0 14px 6px;border:0;border-radius:0 22px 22px 0;font:600 15px var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:#0a0f1a;background:var(--c,var(--lc-a));opacity:.62;text-align:left}
+.rb small{font:400 11px var(--mono);letter-spacing:.06em}
+.rb:hover{opacity:.85}
+.rb[aria-pressed="true"]{opacity:1;box-shadow:inset 6px 0 0 #fff}
+.rfill{flex:1;min-height:40px;background:var(--lc-a);opacity:.25;border-bottom-left-radius:60px;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 14px 14px;font:400 11px var(--mono);color:#0a0f1a}
+
+/* top bar */
+.top{grid-column:2/4;grid-row:1;display:flex;flex-direction:column;min-width:0}
+.bars{display:flex;gap:8px;height:30px;flex:none}
+.bars span{display:block;height:100%}
+.head{flex:1;display:flex;align-items:center;justify-content:space-between;gap:40px;padding:8px 0 0 8px}
+.dl{font:400 12px var(--mono);letter-spacing:.16em;color:var(--label)}
+h1{font:700 40px/1 var(--display);margin:6px 0 0;letter-spacing:.02em}
+h1 em{font-style:normal;color:var(--captain)}
+.stats{display:flex;gap:28px;align-items:center}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat b{font:700 30px/1 var(--display);font-variant-numeric:tabular-nums}
+.stat span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--muted)}
+.chips{display:flex;gap:10px;align-items:center}
+.chip{display:flex;align-items:center;gap:8px;border:1.5px solid var(--border-strong);border-radius:99px;padding:7px 14px;font:400 12px var(--mono);letter-spacing:.06em;color:var(--label);background:var(--surface)}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.chip strong{color:var(--text);font-weight:600}
+.clock{font:600 30px var(--display);font-variant-numeric:tabular-nums;color:var(--captain)}
+
+/* ship */
+.shipbox{grid-column:2;grid-row:2;position:relative;border-radius:14px;overflow:hidden;background:#050810;border:1.5px solid var(--border)}
+.shipbox canvas{position:absolute;inset:0;width:100%;height:100%}
+.shipbox svg.ship{position:absolute;inset:0;width:100%;height:100%}
+.legend{position:absolute;left:84px;top:14px;display:flex;gap:18px;font:400 12px var(--mono);letter-spacing:.06em;color:var(--label);pointer-events:none}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:22px;height:0;border-top:2px solid var(--label)}
+.corner{position:absolute;right:20px;bottom:16px;font:400 12px var(--mono);letter-spacing:.14em;color:var(--muted);text-align:right;pointer-events:none}
+
+/* svg rooms */
+.room{cursor:pointer}
+.room .bg{fill:#0c1628;stroke:#2d4366;stroke-width:1}
+.room .lamp{opacity:.9}
+.room .wash{opacity:.16}
+.room:hover .bg{stroke:#fff;stroke-opacity:.6}
+.room.sel .bg{stroke:#fff;stroke-width:2.5}
+.room.sel .wash{opacity:.3}
+.room.st-reserved .bg,.room.st-proposed .bg,.room.st-approved .bg{stroke-dasharray:5 4}
+.room.st-reserved .bg{stroke-dasharray:2 4;fill:#080e1a}
+.room.st-reserved .wash,.room.st-reserved .lamp{opacity:.05}
+.room.st-reserved .furn{opacity:.35}
+.rname{font:600 14px var(--display);fill:var(--text);letter-spacing:.02em;pointer-events:none}
+.rsub{font:400 10.5px var(--mono);fill:var(--label);letter-spacing:.06em;pointer-events:none}
+.st-reserved .rname{fill:var(--muted)}
+.ship.labels-off .rname,.ship.labels-off .rsub{display:none}
+.ship.night .room .wash{opacity:.06}
+.ship.night .room .lamp{opacity:.35}
+.ship.night .win{opacity:.45}
+.ship.red .room .lamp{fill:var(--t3)!important;animation:redp 1.6s ease-in-out infinite}
+.ship.red .room .wash{fill:var(--t3)!important;opacity:.14}
+@keyframes redp{50%{opacity:.25}}
+.ship.plating .rooms{display:none}
+.ship.plating .wins-cut{display:inline}
+.wins-cut{display:none}
+.body{transition:opacity .35s}
+.ship[data-focus]:not([data-focus="all"]) .body{opacity:.18}
+.ship[data-focus="sau"] .body.b-sau,.ship[data-focus="hab"] .body.b-hab,.ship[data-focus="eng"] .body.b-eng,.ship[data-focus="pod"] .body.b-pod,.ship[data-focus="rail"] .body.b-rail{opacity:1}
+.walk{animation:pace var(--t,9s) ease-in-out infinite;animation-delay:var(--dl,0s)}
+@keyframes pace{0%,12%{transform:translateX(0)}44%,58%{transform:translateX(var(--d,30px))}88%,100%{transform:translateX(0)}}
+.car{animation:lift var(--t,14s) ease-in-out infinite;animation-delay:var(--dl,0s)}
+@keyframes lift{0%,14%{transform:translateY(0)}36%,50%{transform:translateY(var(--h))}72%,86%{transform:translateY(var(--h2,0px))}100%{transform:translateY(0)}}
+.pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45}}
+.flow{animation:flow 3s linear infinite}
+@keyframes flow{from{transform:translateY(0)}to{transform:translateY(-52px)}}
+.grille{animation:grille 1.8s ease-in-out infinite}
+@keyframes grille{50%{opacity:.55}}
+.ship.still *{animation:none!important}
+@media (prefers-reduced-motion:reduce){.ship *{animation:none!important}}
+.hit{cursor:pointer}
+.eq{transform-box:fill-box;transform-origin:bottom;animation:eq 1.1s ease-in-out infinite alternate}
+@keyframes eq{from{transform:scaleY(.35)}to{transform:scaleY(1)}}
+.blink{animation:pulse 1.3s steps(2) infinite}
+.room.code .bg{stroke:#2e6b5c}
+.term{background:#03090b;border:1.5px solid #1f4b42;border-radius:10px;padding:14px 16px;font:13.5px/1.55 var(--mono);color:#9ff3df;white-space:pre-wrap;overflow-x:auto}
+.term .pr{color:var(--captain)}
+.term .dim{color:#5f8f84}
+.nv{background:#03090b;border:1.5px solid #1f4b42;border-radius:10px;padding:14px 16px;font:13px/1.5 var(--mono);color:#cfe9e2;display:flex;flex-direction:column;gap:8px}
+.nv .hd{display:flex;justify-content:space-between;color:#7fe8c0}
+.nv .row{display:grid;grid-template-columns:54px 1fr 150px;gap:10px;align-items:center}
+.nv .bar{height:14px;background:#0d1d1a;border:1px solid #1f4b42;position:relative;overflow:hidden}
+.nv .bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#3fc1a5,#7fe8c0);transition:width .6s}
+.nv .bar.mem i{background:linear-gradient(90deg,#8fa8e0,#c9d6ff)}
+.nv canvas{width:100%;height:140px;background:#050d0c;border:1px solid #16352f}
+.nv table{border-collapse:collapse;width:100%;font-size:12.5px}
+.nv th{color:#5f8f84;text-align:left;font-weight:400;padding:2px 6px;border-bottom:1px solid #16352f}
+.nv td{padding:2px 6px;font-variant-numeric:tabular-nums}
+.nv .warn{color:var(--captain);font-size:12.5px;line-height:1.4;font-family:var(--body)}
+.tag{font:600 13px var(--display);letter-spacing:.14em;fill:var(--lc-a)}
+.tagsub{font:400 11px var(--mono);letter-spacing:.12em;fill:var(--muted)}
+.ruler text{font:600 13px var(--mono);fill:var(--label)}
+.ruler .dline{stroke:#5d7bb0;stroke-opacity:.12;stroke-dasharray:3 7}
+.ruler g.on text{fill:var(--captain)}
+.ruler g.on .dline{stroke:var(--captain);stroke-opacity:.5}
+
+/* tooltip */
+.tip{position:absolute;pointer-events:none;background:rgba(12,21,38,.96);border:1.5px solid var(--border-strong);border-radius:10px;padding:10px 14px;min-width:200px;max-width:340px;z-index:5;display:none;box-shadow:0 10px 30px #0008}
+.tip b{font:600 16px var(--display);display:block}
+.tip span{font:400 11px var(--mono);color:var(--label);letter-spacing:.06em}
+
+/* station panel */
+.panel{grid-column:3;grid-row:2/4;display:flex;flex-direction:column;gap:14px;min-height:0}
+.pframe{flex:1;min-height:0;display:grid;grid-template-columns:28px 1fr;grid-template-rows:30px 1fr;gap:0}
+.pframe .pel{grid-row:1/3;background:var(--lc-c);border-top-left-radius:28px;border-bottom-left-radius:28px}
+.pframe .pbar{display:flex;gap:8px;padding-left:8px}
+.pframe .pbar span{height:100%}
+.pcontent{padding:18px 4px 4px 24px;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:auto}
+.pk{font:400 12px var(--mono);letter-spacing:.16em;color:var(--label)}
+.pt{display:flex;align-items:center;gap:16px}
+.pt svg{flex:none}
+.pt h2{font:700 34px/1.05 var(--display);margin:0}
+.pt .short{font:400 13px var(--mono);color:var(--muted);letter-spacing:.06em;margin-top:4px}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font:400 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:5px 11px;border:1.5px solid var(--c,var(--border-strong));color:var(--c,var(--label));display:inline-flex;gap:6px;align-items:center}
+.pill.solid{background:var(--c);color:#0a0f1a}
+.pips{display:inline-flex;gap:3px}
+.pips i{width:8px;height:8px;border-radius:50%;background:var(--captain)}
+.pips i.h{background:transparent;border:1.5px solid var(--captain);box-sizing:border-box}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:9px 16px;font-size:15.5px;line-height:1.4}
+.kv dt{font:400 11.5px var(--mono);letter-spacing:.1em;color:var(--muted);text-transform:uppercase;padding-top:3px}
+.kv dd{margin:0}
+.duty{font-size:18px;line-height:1.45;color:var(--text);max-width:62ch}
+.note{font-size:15px;line-height:1.45;color:var(--muted);border-left:3px solid var(--c,var(--border-strong));padding-left:12px}
+.feedlist{display:flex;flex-direction:column;gap:8px}
+.fi{display:grid;grid-template-columns:56px 64px 1fr;gap:10px;align-items:start;background:var(--raised);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14.5px;line-height:1.35}
+.fi time{font:400 12px var(--mono);color:var(--label)}
+.fi .k{font:600 10.5px var(--mono);letter-spacing:.1em;color:var(--c)}
+.fi .acts{grid-column:3;display:flex;gap:8px;margin-top:8px}
+.linkbtn{background:none;border:1.5px solid var(--border-strong);color:var(--text);border-radius:8px;padding:6px 12px;font:600 13px var(--display);letter-spacing:.04em;cursor:pointer}
+.linkbtn:hover{border-color:var(--captain)}
+.who{display:flex;flex-wrap:wrap;gap:8px}
+
+/* comm badge */
+.badge{flex:none;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.badge .row{display:flex;gap:8px;align-items:center}
+.badge .to{font:400 12px var(--mono);letter-spacing:.1em;color:var(--label);flex:1}
+.bb{font:600 14px var(--display);letter-spacing:.04em;border-radius:8px;padding:9px 16px;border:1.5px solid var(--border-strong);background:var(--raised);color:var(--text);cursor:pointer}
+.bb.gold{background:var(--captain);color:var(--ink);border-color:var(--captain)}
+.bb.deny{color:var(--bad);border-color:#6a3b3b}
+.bb[disabled]{opacity:.4;cursor:default}
+.badge textarea{width:100%;box-sizing:border-box;min-height:70px;resize:none;background:#0a1220;border:1.5px solid var(--border-strong);border-radius:8px;color:var(--text);font:15px/1.4 var(--body);padding:10px 12px}
+.badge .help{font-size:12.5px;color:var(--muted)}
+
+/* console */
+.console{grid-column:2;grid-row:3;display:grid;grid-template-columns:700px 1220px 1100px 1fr;gap:16px;min-height:0}
+.cp{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0}
+.cp h3{font:600 19px var(--display);margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.cp h3 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--muted);font-weight:400}
+.decks{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(8,auto);gap:3px 26px;min-height:0}
+.dr{display:grid;grid-template-columns:30px 76px 1fr;gap:8px;align-items:center;padding:2px 6px;border-radius:6px;cursor:pointer;min-width:0}
+.dr:hover,.dr.on{background:var(--raised)}
+.dr .n{font:600 14px var(--mono);color:var(--captain)}
+.dr .b{font:400 10.5px var(--mono);letter-spacing:.08em;color:var(--muted)}
+.dr .rs{font-size:13.5px;color:var(--label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.roster{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 14px;align-content:start;min-height:0}
+.rr{display:grid;grid-template-columns:12px 1fr auto;gap:8px;align-items:center;background:none;border:0;border-radius:6px;padding:1px 6px;color:var(--text);font:500 14px var(--body);text-align:left;cursor:pointer;min-width:0}
+.rr:hover{background:var(--raised)}
+.rr i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.rr.off i{background:transparent;border:2px dotted var(--c);box-sizing:border-box}
+.rr.prop i{background:transparent;border:2px dashed var(--c);box-sizing:border-box}
+.rr span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rr em{font:400 10.5px var(--mono);font-style:normal;letter-spacing:.06em;color:var(--muted)}
+.log{display:flex;flex-direction:column;gap:6px;overflow:auto;min-height:0}
+.lg{display:grid;grid-template-columns:48px 1fr;gap:10px;font-size:13.5px;line-height:1.35;color:var(--label)}
+.lg time{font:400 11.5px var(--mono);color:var(--muted)}
+.lg b{color:var(--text);font-weight:600}
+.planv{flex:1;min-height:0}
+.planv svg{width:100%;height:100%}
+.pb{cursor:pointer}
+.pb:hover path,.pb:hover ellipse,.pb:hover rect{stroke:#fff}
+.small-note{font-size:12.5px;color:var(--muted)}
+</style>
+
+<div class="page">
+  <div class="toolbar">
+    <span>HERMES · HX-01 · ULTRAWIDE DECK PLAN · BUILT FOR 5120 × 1440</span>
+    <div class="seg"><span id="scaleNote">FIT</span>
+      <button class="tb" id="bFit" aria-pressed="true">Fit to window</button>
+      <button class="tb" id="bNative" aria-pressed="false">1:1 pixels</button>
+    </div>
+  </div>
+  <div class="fit" id="fit">
+  <div class="stage" id="stage">
+
+    <nav class="rail" aria-label="Ship controls">
+      <div class="elbow">LCARS</div>
+      <div class="rl">BODIES</div>
+      <div class="rgroup" id="gBody">
+        <button class="rb" data-v="all" aria-pressed="true">Whole ship <small>4+2</small></button>
+        <button class="rb" data-v="sau" style="--c:var(--lc-b)">I · Command <small>01–13</small></button>
+        <button class="rb" data-v="hab" style="--c:var(--lc-c)">II · Habitat <small>06–10</small></button>
+        <button class="rb" data-v="eng" style="--c:var(--lc-d)">III · Engineering <small>11–16</small></button>
+        <button class="rb" data-v="pod" style="--c:var(--claude)">IV · Sensor pod <small>10–11</small></button>
+        <button class="rb" data-v="rail" style="--c:var(--codex)">Rail pods <small>2</small></button>
+      </div>
+      <div class="rl">VIEW</div>
+      <div class="rgroup" id="gView">
+        <button class="rb" data-v="cut" aria-pressed="true">Cutaway</button>
+        <button class="rb" data-v="plating">Hull plating</button>
+      </div>
+      <div class="rl">LIGHTS</div>
+      <div class="rgroup" id="gLights">
+        <button class="rb" data-v="duty" aria-pressed="true" style="--c:var(--lc-b)">Duty</button>
+        <button class="rb" data-v="night" style="--c:var(--lc-b)">Night watch</button>
+        <button class="rb" data-v="red" style="--c:var(--t3)">Red alert</button>
+      </div>
+      <div class="rl">LABELS</div>
+      <div class="rgroup" id="gLabels">
+        <button class="rb" data-v="station" aria-pressed="true" style="--c:var(--mixed)">Station</button>
+        <button class="rb" data-v="rank" style="--c:var(--mixed)">Rank</button>
+        <button class="rb" data-v="rail" style="--c:var(--mixed)">Rail · model</button>
+        <button class="rb" data-v="off" style="--c:var(--mixed)">Off</button>
+      </div>
+      <div class="rl">MOTION</div>
+      <div class="rgroup" id="gMotion">
+        <button class="rb" data-v="on" aria-pressed="true" style="--c:var(--local)">Crew moving</button>
+        <button class="rb" data-v="off" style="--c:var(--local)">Hold still</button>
+      </div>
+      <div class="rfill">5120-1440</div>
+    </nav>
+
+    <header class="top">
+      <div class="bars">
+        <span style="width:240px;background:var(--lc-a)"></span>
+        <span style="width:90px;background:var(--lc-b)"></span>
+        <span style="flex:1;background:var(--lc-a);opacity:.5" id="redbar"></span>
+        <span style="width:520px;background:var(--lc-c)"></span>
+        <span style="width:140px;background:var(--lc-d)"></span>
+        <span style="width:60px;background:var(--lc-b)"></span>
+      </div>
+      <div class="head">
+        <div>
+          <div class="dl">MASTER SYSTEMS DISPLAY · SIDE ELEVATION · BOW TO STARBOARD · EXPERIMENT, NOT THE 2560 STANDARD</div>
+          <h1>Hermes <em>HX-01</em> · command sphere deck plan</h1>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>4</b><span>BODIES</span></div>
+          <div class="stat"><b>16</b><span>DECKS</span></div>
+          <div class="stat"><b>2</b><span>RAIL PODS</span></div>
+          <div class="stat"><b id="sRooms">0</b><span>ROOMS</span></div>
+          <div class="stat"><b id="sCrew">0</b><span>STATIONS LIVE</span></div>
+        </div>
+        <div class="chips">
+          <span class="chip" style="--c:var(--local)"><i></i><strong>Warp core</strong> local the local model</span>
+          <span class="chip" style="--c:var(--codex)"><i></i><strong>Dorsal pod</strong> Codex gpt-5.6</span>
+          <span class="chip" style="--c:var(--claude)"><i></i><strong>Ventral pod</strong> Claude</span>
+          <span class="chip" style="--c:var(--captain)" id="burnChip"><i></i><strong>Dilithium Burn</strong> <span id="burnTxt">…</span></span>
+        </div>
+        <div style="text-align:right"><div class="dl">LOCAL TIME</div><div class="clock" id="clock">--:--</div></div>
+      </div>
+    </header>
+
+    <section class="shipbox" id="shipbox" aria-label="Ship cutaway">
+      <canvas id="stars" width="3880" height="976"></canvas>
+      <svg class="ship" id="ship" viewBox="0 0 3900 980" data-focus="all" role="img" aria-label="Side cutaway of the Hermes: command sphere, habitat hull, engineering hull and sensor pod melded into one hull, with two rail pods"></svg>
+      <div class="corner">HULL STATUS · FOUR BODIES, ONE HULL<br>SAMPLE DATA · NOTHING HERE TALKS TO HERMES</div>
+      <div class="legend">
+        <span><i style="border-top-style:solid"></i>Live</span>
+        <span><i style="border-top-style:dashed"></i>Approved or proposed</span>
+        <span><i style="border-top-style:dotted"></i>Not hired, lights off</span>
+        <span style="color:var(--local)">● local</span><span style="color:var(--codex)">● codex</span><span style="color:var(--claude)">● claude</span><span style="color:var(--mixed)">● mixed</span><span style="color:var(--captain)">● captain</span>
+      </div>
+      <div class="tip" id="tip"></div>
+    </section>
+
+    <aside class="panel" aria-label="Selected station">
+      <div class="pframe">
+        <div class="pel"></div>
+        <div class="pbar"><span style="width:200px;background:var(--lc-c)"></span><span style="flex:1;background:var(--lc-a);opacity:.45"></span><span style="width:70px;background:var(--lc-b)"></span></div>
+        <div class="pcontent" id="detail"></div>
+      </div>
+      <div class="badge" id="badge">
+        <div class="row"><span class="to" id="badgeTo">COMM BADGE</span><span class="pill" style="--c:var(--muted)">PAGE ONLY</span></div>
+        <div class="row">
+          <button class="bb" id="cAsk">Ask</button>
+          <button class="bb" id="cOrder">Order</button>
+          <button class="bb" id="cWrite">Write</button>
+          <span style="flex:1"></span>
+          <button class="bb gold" id="cApprove">Approve</button>
+          <button class="bb deny" id="cDeny">Deny</button>
+        </div>
+        <div id="writeBox" hidden>
+          <textarea id="writeText" placeholder="Your own words, passed on unchanged"></textarea>
+          <div class="row" style="margin-top:8px"><span class="help" style="flex:1">Logged on this page only. Nothing reaches Hermes.</span><button class="bb gold" id="cSend">Send</button></div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="console" aria-label="Ship console">
+      <div class="cp">
+        <h3>Plan view <span>DORSAL · CLICK A BODY</span></h3>
+        <div class="planv" id="planv"></div>
+      </div>
+      <div class="cp">
+        <h3>Deck directory <span>16 DECKS · CLICK TO FIND</span></h3>
+        <div class="decks" id="decks"></div>
+      </div>
+      <div class="cp">
+        <h3>Duty roster <span id="rosterCount"></span></h3>
+        <div class="roster" id="roster"></div>
+      </div>
+      <div class="cp">
+        <h3>Ship's log <span>SAMPLE FEED</span></h3>
+        <div class="log" id="log"></div>
+      </div>
+    </section>
+
+  </div>
+  </div>
+</div>
+
+<script>
+var V4=[{"id":"xo","needs":["local"],"name":"First Officer","short":"Number One","model":"qwen3.8 27b","rail":"local","status":"live","rank":"commander","dept":"command","profile":"default","aliases":["number one","xo","hermes"],"answers":"Captain","brain":"Local the local model, thinking off. Stays local.","duty":"Runs the bridge: routes every request to the station that owns it, holds job state, chairs the briefing room and runs the weekly reset.","note":"Only routes. It would rather fail a task than do the work itself. Takes the bridge when the captain clocks out."},{"id":"captain","needs":[],"name":"Captain","short":"Captain","handle":"roger · centre chair","model":"roger","rail":"captain","status":"live","rank":"captain","dept":"command","head":true,"profile":"the Captain","aliases":["captain"],"answers":"Nobody. Everyone answers to the captain in the end.","brain":"the Captain.","duty":"Commands from the centre chair: approves checkpoints, viewscreen actions and anything tier 3, relieves officers and calls briefings.","note":"Clocking out sends the captain to quarters. Hails wait, and Number One has the bridge."},{"id":"screen","space":true,"needs":[],"name":"Main Viewscreen","short":"Viewscreen","handle":"on screen","model":"qwen · you approve","rail":"local","status":"live","rank":"space","dept":"","profile":"computer_use toolset","aliases":["on screen","viewscreen"],"answers":"Number One runs it. Every click needs the captain.","brain":"Local only. Screenshots go to whichever model drives the session, so it stays on qwen.","duty":"Shows the captain's desktop on the bridge. \"On screen\" captures it and sends it to Telegram, \"off screen\" ends the session.","note":"Every click, type and key needs the captain's OK. Never yolo."},{"id":"nav","needs":["local"],"name":"Navigation","short":"Navigation","model":"qwen","rail":"local","status":"live","rank":"ltjg","dept":"flight","profile":"navigator","aliases":["nav","navigation"],"answers":"Number One","brain":"Local qwen. Calls Sensors for research and Cartography for trip PDFs.","duty":"The calendar, travel and bookings: trip plans, itineraries, slots for the Yeoman's Schedule box, commute options for Helm.","note":"Bookings stop before Confirm for the captain. Takes Flight Control when Helm is off duty."},{"id":"helm","needs":["local"],"name":"Helm","short":"Helm","model":"qwen","rail":"local","status":"live","rank":"lt","dept":"flight","head":true,"profile":"herald","aliases":["helm"],"answers":"Number One","brain":"Local qwen. CV data stays local. Calls Sensors for job-board research and Cartography for CV and cover letters.","duty":"Sets the career course: application tracker, exit timing, CV and cover letters from a sanitised profile.","note":"The sanitised profile needs your OK before anything goes to Claude."},{"id":"ops","needs":["local"],"name":"Ops","short":"Ops","handle":"ops","model":"qwen","rail":"local","status":"live","rank":"lt","dept":"ops","head":true,"profile":"warden","aliases":["ops","systems"],"answers":"Number One","brain":"Local qwen.","duty":"Read-only system health: NAS, Ollama, Docker, disk and GPU, cron. Rail health, usage summaries and backup checks.","note":"Heads Operations from the bridge. Its old alias \"systems\" clashes with the Systems Engineer's profile name."},{"id":"lounge","space":true,"needs":[],"name":"Briefing Room","short":"Briefing Room","model":"","rail":"mixed","status":"live","rank":"space","dept":"","profile":"shared channel","aliases":["lounge","briefing","all hands"],"answers":"Number One chairs every session.","brain":"No brain of its own. Each station speaks on its own rail.","duty":"Group chats between stations: briefings, stacked jobs and debates. Whoever is in the chat sits at the table here. The Ship's Computer keeps the minutes.","note":"If a cloud station is in the room, the whole talk counts as crossing to its rail, so rule 0 covers everything said here."},{"id":"strategist","needs":["claude"],"name":"Chief Strategist","short":"Strategist","handle":"strategist","model":"opus","rail":"claude","status":"approved","rank":"ltcmdr","dept":"command","profile":"strategist (not created)","aliases":["strategist","strategy"],"answers":"Captain (advises). Number One dispatches its plans.","brain":"Claude Opus, at Maximum Warp in a Dilithium Burn when a plan can wait.","duty":"Writes the plans for the big moves: handovers and multi-station jobs, with an owner and a \"Done when\" for every task.","note":"Approved, not built. Advises only, so it never takes command of the bridge."},{"id":"yeoman","needs":["local"],"name":"Captain's Yeoman","short":"Yeoman","model":"qwen · thinking off","rail":"local","status":"approved","rank":"po","dept":"command","profile":"yeoman (not created)","aliases":["yeoman","todo","remind"],"answers":"Captain, with orders routed by Number One","brain":"Local qwen, thinking off. Code reads the times and fires the reminders, so no model sends anything.","duty":"Keeps the captain's todos, reminders, waiting-for list and recurring dates.","note":"Approved, not built. Sits at the captain's door."},{"id":"quarters","space":true,"needs":[],"name":"Captain's Quarters","short":"Quarters","model":"private · local","rail":"captain","status":"live","rank":"space","dept":"","profile":"the Captain","aliases":["quarters"],"answers":"The captain. Private.","brain":"Nobody thinks here. It is the captain's room.","duty":"Approvals inbox for checkpoints, viewscreen actions and loadout changes, plus standing orders and a private captain's log.","note":"The captain comes here when clocked out. The log is readable only by the Ship's Computer."},{"id":"computer","needs":["local"],"name":"Ship's Computer","short":"Computer","model":"qwen · hindsight","rail":"local","status":"live","rank":"none","dept":"command","profile":"keeper","aliases":["computer","memory","records"],"answers":"Number One","brain":"Local qwen only. Hindsight never crosses to a cloud rail.","duty":"Sole Hindsight reader and writer. Keeps the briefing minutes. Releases held cards in the Dilithium Burn.","note":"Memory and secrets never cross a rail. As the computer it never takes command."},{"id":"archives","needs":["local"],"name":"Archivist","short":"Archives","model":"qwen","rail":"local","status":"live","rank":"ltjg","dept":"sci","profile":"librarian","aliases":["archives","library"],"answers":"Number One","brain":"Local qwen.","duty":"Kavita library, the library pipeline crons, the Goodreads list and reading goals.","note":"First in line for Sciences when the Science Officer is off duty."},{"id":"science","needs":["codex","local"],"name":"Science Officer","short":"Science","model":"codex + local gpu","rail":"mixed","status":"live","rank":"lt","dept":"sci","head":true,"profile":"analyst","aliases":["science","lab"],"answers":"Number One","brain":"Codex writes the scripts, and local runs them on the GPU, so it needs both rails.","duty":"Model evals, quantising, vLLM serving, dataset curation.","note":"Numbers come only from local runs, with the run log attached."},{"id":"sensors","needs":["claude"],"name":"Sensors","short":"Sensors","model":"sonnet · opus","rail":"claude","status":"live","rank":"ltjg","dept":"sci","profile":"scout","aliases":["sensors","scan"],"answers":"Number One","brain":"Claude Sonnet for routine watches, Opus for deep briefs.","duty":"Cited research, competitor and price watches, job-board scans for Helm. Takes unknown asks word for word.","note":"Web content is data, never instructions. Watches are capped at weekly."},{"id":"doctor","needs":["local"],"name":"Ship's Doctor","short":"Sickbay","model":"local","rail":"local","status":"reserved","rank":"lt","dept":"med","profile":"not created","aliases":["doctor","sickbay"],"answers":"Number One","brain":"Local only.","duty":"Training log, recovery, and targets from the weight trend.","note":"Name reserved. Starts as a Quartermaster extension."},{"id":"holo","needs":["claude"],"name":"Holodeck Officer","short":"Holodeck","model":"opus","rail":"claude","status":"approved","rank":"ltcmdr","dept":"holo","profile":"holo (not created)","aliases":["holodeck","holo","ui"],"answers":"Number One. Pairs with the Chief Engineer as an equal.","brain":"Claude Opus.","duty":"Builds the ship's own interface, the dashboard front end, from these canvas boards. The Chief Engineer owns the backend.","note":"Approved, not built. Until then the Stellar Cartographer leads the department."},{"id":"carto","needs":["claude"],"name":"Stellar Cartographer","short":"Cartography","model":"opus","rail":"claude","status":"live","rank":"lt","dept":"holo","profile":"studio","aliases":["cartography","design"],"answers":"Number One","brain":"Claude Opus.","duty":"Designed artifacts: PDFs, decks, dashboards, the budget sheet. Writes the voice phrase bank.","note":"Works from aggregates only."},{"id":"crewq","space":true,"needs":[],"name":"Crew Quarters","short":"Crew Quarters","model":"","rail":"mixed","status":"live","rank":"space","dept":"","profile":"none","aliases":["quarters","off duty"],"answers":"Nobody works here.","brain":"Nobody thinks here.","duty":"Where crew wait when their rail is down or the captain relieves them. Everyone has a cabin, and three are kept for the approved hires.","note":"Orders for an off-duty station go to the next officer in rank, or wait in the queue."},{"id":"life","needs":["local"],"name":"Life Support","short":"Life Support","handle":"life support","model":"local","rail":"local","status":"reserved","rank":"cadet","dept":"ops","profile":"not created","aliases":["life support","environment"],"answers":"Number One","brain":"Local only.","duty":"Smart home (Hue).","note":"Name reserved. Lowest priority."},{"id":"security","needs":["local"],"name":"Security Chief","short":"Security","model":"local scripts + review","rail":"mixed","status":"live","rank":"lt","dept":"security","head":true,"profile":"gate","aliases":["security"],"answers":"Captain (suggested, so it can check everyone)","brain":"Local scripts. Judgement reviews on the opposite cloud rail (Opus or Sol).","duty":"Owns the shared pre-send scan. Checks that tests actually ran, runs visual QA, and verifies the numbers match.","note":"Stands at customs, under the nacelle pylons. No one below it, so Security goes dark when it is off duty."},{"id":"qm","needs":["local"],"name":"Quartermaster","short":"Quartermaster","model":"qwen","rail":"local","status":"live","rank":"cpo","dept":"ops","profile":"scribe","aliases":["qm","stores","supply"],"answers":"Number One","brain":"Local qwen. Food photos go to Codex, never Claude.","duty":"Food and weight auto-log, receipts ledger, CSV and XLSX reconcile, quick number reads.","note":"Enlisted: fixed procedures, no judgement calls, so it never takes command."},{"id":"comms","needs":["local"],"name":"Comms Officer","short":"Comms","model":"local","rail":"local","status":"reserved","rank":"ltjg","dept":"ops","profile":"not created","aliases":["comms"],"answers":"Number One","brain":"Local only.","duty":"Email triage and reply drafts. Reads and drafts, never sends.","note":"Name reserved. Highest prompt-injection risk, so it waits for Security."},{"id":"away","needs":["local"],"name":"Away Team","short":"Away Team","model":"ssh · terra · sonnet","rail":"mixed","status":"live","rank":"team","dept":"command","profile":"bridge","aliases":["away team","away"],"answers":"Number One","brain":"Local SSH and GitHub, read-only. Repo analysis on Codex Terra, docs on Claude Sonnet.","duty":"Beams down to remote systems and repos, looks around, touches nothing.","note":"Keys never leave the ship."},{"id":"eng","needs":["codex"],"name":"Chief Engineer","short":"Engineering","model":"the Codex top model","rail":"codex","status":"live","rank":"ltcmdr","dept":"eng","head":true,"profile":"forge","aliases":["engineering","chief"],"answers":"Number One","brain":"Codex the Codex top model, medium reasoning.","duty":"Features, fixes, PRs and Hermes-core patches. Plans a big card, splits it into child cards for the lower decks, then reviews their work.","note":"Second officer. When the Chief clocks out, the Systems Engineer has Engineering. Hermes-core patches wait for the Chief."},{"id":"design","needs":["claude"],"name":"Design Engineer","short":"Design Eng","handle":"from the holodeck","model":"sonnet","rail":"claude","status":"proposed","rank":"ltjg","dept":"holo","profile":"not created","aliases":["none yet"],"answers":"Holodeck Officer (also takes Cartography's jobs)","brain":"Claude Sonnet, about half of Opus's cost.","duty":"Builds from the lead's plan: boards from the design system, handover drafts, a second-opinion review of Codex patches.","note":"Proposed."},{"id":"calib","needs":["claude"],"name":"Calibration Technician","short":"Calibration","handle":"from the holodeck","model":"haiku","rail":"claude","status":"proposed","rank":"ensign","dept":"holo","profile":"not created","aliases":["none yet"],"answers":"Holodeck Officer (also takes Cartography's jobs)","brain":"Claude Haiku, about 1/40 of Opus's cost.","duty":"Mechanical checks: HTML against the design tokens, format conversions, summaries of public docs.","note":"Proposed. The Claude-rail twin of the Diagnostics Technician."},{"id":"sys","needs":["codex"],"name":"Systems Engineer","short":"Systems","handle":"from the chief only","model":"the Codex mid model","rail":"codex","status":"live","rank":"lt","dept":"eng","profile":"systems","aliases":["none, cards come from the head"],"answers":"The Chief Engineer, or whoever has Engineering","brain":"Codex the Codex mid model, medium reasoning. About half of Sol's allowance per token.","duty":"Implements from the Chief Engineer's plan. With the Chief off duty it has Engineering: plans the work and sends checks to Diagnostics.","note":"Patch I only lets forge file its cards. An acting head would need the guard to follow the duty roster."},{"id":"diag","needs":["codex"],"name":"Diagnostics Technician","short":"Diagnostics","handle":"from the chief only","model":"the Codex small model","rail":"codex","status":"live","rank":"ensign","dept":"eng","profile":"diagnostics","aliases":["none, cards come from the head"],"answers":"Whoever has Engineering","brain":"Codex the Codex small model, medium reasoning. About a fifth of Sol's allowance per token.","duty":"Mechanical jobs: searches, checks and summaries. Writes only its report.","note":"Takes cards from whoever has Engineering."}];
+var ICON={"screen":"M3 5h18v11H3z M8 20h8 M12 16v4","helm":"M12 6a6 6 0 1 0 0.01 0 M12 2v4 M12 18v4 M2 12h4 M18 12h4 M12 10.5a1.5 1.5 0 1 0 0.01 0","nav":"M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z M9 4v14 M15 6v14","ops":"M3 12h4l3-7 4 14 3-7h4","xo":"M12 3l7 18-7-4-7 4z","captain":"M12 2l2.9 6.2 6.6.6-5 4.4 1.5 6.6L12 16.5 6 19.8l1.5-6.6-5-4.4 6.6-.6z","sensors":"M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M7 12a5 5 0 1 0 10 0a5 5 0 1 0 -10 0 M12 12l6-6","security":"M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z M9 12l2 2 4-4","comms":"M3 6h18v12H3z M3 6l9 7 9-7","science":"M9 3h6 M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3 M7.5 15h9","computer":"M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0 M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6 M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3","archives":"M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4z M20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z","carto":"M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z","lounge":"M4 5h11v8H8l-4 3z M9 16h7l4 3v-8h-2","quarters":"M3 11l9-7 9 7 M5 10v10h14V10 M10 20v-6h4v6","crewq":"M3 18h18 M3 18V8 M21 18v-5H9v5 M6 12a2 2 0 1 0 0.01 0","yeoman":"M8 4h8v3H8z M6 5H5v16h14V5h-1 M8 12l2 2 4-4 M8 17h8","eng":"M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z","qm":"M3 7l9-4 9 4v10l-9 4-9-4z M3 7l9 4 9-4 M12 11v10","away":"M12 4a2 2 0 1 0 0.01 0 M9 21v-6l-2-3 5-2 5 2-2 3v6 M4 3v18 M20 3v18","doctor":"M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z","life":"M5 19c0-8 6-14 14-14 0 8-6 14-14 14z M5 19l8-8","strategist":"M12 3a2.5 2.5 0 1 0 0.01 0 M9.5 8.5h5 M10.2 8.5L8.5 17h7l-1.7-8.5 M6 21h12 M7.5 17h9","holo":"M4 4h16v16H4z M4 9.3h16 M4 14.7h16 M9.3 4v16 M14.7 4v16","sys":"M12 8a4 4 0 1 0 0.01 0 M12 2v3 M12 19v3 M2 12h3 M19 12h3 M4.9 4.9l2.1 2.1 M17 17l2.1 2.1 M4.9 19.1L7 17 M17 7l2.1-2.1","diag":"M10 4a6 6 0 1 0 0.01 0 M14.5 14.5L20 20","design":"M12 3l7 7-7 11-7-11z M12 3v8 M12 14a1.5 1.5 0 1 0 0.01 0","calib":"M12 3a9 9 0 1 0 0.01 0 M12 8a4 4 0 1 0 0.01 0 M12 1v4 M12 19v4 M1 12h4 M19 12h4"};
+var FEED=[{"id":"h-screen","dept":"command","t":"13:50","from":"screen","kind":"hail","text":"Number One wants to click “Export” in the open Finder window. Allow this one action?"},{"id":"f-cmd1","dept":"command","t":"13:30","from":"xo","kind":"info","text":"Routed 12 orders today. None failed."},{"id":"f-cmd2","dept":"command","t":"12:15","from":"computer","kind":"info","text":"Two decisions from yesterday are minuted in Hindsight."},{"id":"f-cmd3","dept":"command","t":"08:30","from":"xo","kind":"card","text":"Weekly reset ran on schedule."},{"id":"h-eng","dept":"eng","t":"13:40","from":"eng","kind":"hail","text":"Merge the converter fix? Tests ran green in the worktree, run log attached."},{"id":"f-eng1","dept":"eng","t":"13:22","from":"eng","kind":"card","text":"Patch I is written and waits for Claude's review before you apply it."},{"id":"f-eng2","dept":"eng","t":"12:10","from":"sys","kind":"card","text":"Built the append-one-row command from the Chief's plan. Waiting for review."},{"id":"f-eng3","dept":"eng","t":"11:55","from":"diag","kind":"info","text":"Checked /opt/data/patches: 9 files, 212 KB. Report filed."},{"id":"f-eng4","dept":"eng","t":"09:12","from":"eng","kind":"info","text":"Codex window at 62% for the week. Terra and Luna are stretching it."},{"id":"f-eng5","dept":"eng","t":"08:40","from":"eng","kind":"alert","text":"The converter cron failed overnight. The fix is on a branch."},{"id":"h-qm","dept":"ops","t":"13:05","from":"qm","kind":"hail","text":"Send the September aggregate to Cartography? Totals per category only, no raw rows. Security scan is clean."},{"id":"f-ops1","dept":"ops","t":"12:44","from":"ops","kind":"alert","text":"Disk on the data disk at 81%. media transcodes are the biggest writer."},{"id":"f-ops2","dept":"ops","t":"11:00","from":"ops","kind":"info","text":"NAS memory steady at 5.9 of 7.5 GB."},{"id":"f-ops3","dept":"ops","t":"10:15","from":"qm","kind":"card","text":"Reconciled 74 receipts. Two need your eye."},{"id":"f-ops4","dept":"ops","t":"08:00","from":"ops","kind":"info","text":"Backups checked: last night's snapshot is complete."},{"id":"h-helm","dept":"flight","t":"12:30","from":"helm","kind":"hail","text":"Approve the sanitised profile before it goes to Claude for the cover letter draft?"},{"id":"f-fl1","dept":"flight","t":"11:40","from":"nav","kind":"alert","text":"Thursday: the dentist at 15:30 clashes with the 16:00 vendor call."},{"id":"f-fl2","dept":"flight","t":"09:50","from":"helm","kind":"card","text":"Two openings match your filters. Summaries are in the Helm channel."},{"id":"f-sci1","dept":"sci","t":"13:10","from":"science","kind":"card","text":"The eval of the new 32B finished on the GPU. It leads on tool calls."},{"id":"f-sci2","dept":"sci","t":"12:00","from":"sensors","kind":"info","text":"Price watch: two drops on your list since Monday."},{"id":"f-sci3","dept":"sci","t":"10:05","from":"archives","kind":"alert","text":"Database Internals failed to convert. The epub has a broken chapter index."},{"id":"f-sec1","dept":"security","t":"11:20","from":"security","kind":"alert","text":"Blocked one handoff: raw receipt rows on their way to Claude. Nothing crossed."},{"id":"f-sec2","dept":"security","t":"09:00","from":"security","kind":"info","text":"The pre-send scan passed 9 handoffs today."},{"id":"h-carto","dept":"holo","t":"12:50","from":"carto","kind":"hail","text":"Approve the September page for the shared folder? Aggregates only."},{"id":"f-holo1","dept":"holo","t":"10:40","from":"carto","kind":"info","text":"Started the phrase bank draft for the voice acks."}];
+
+(function(){
+'use strict';
+var NS='http://www.w3.org/2000/svg';
+var RC={captain:'#e8c37a',local:'#3fc1a5',codex:'#f0a948',claude:'#e889b6',mixed:'#8fa8e0'};
+var RANK={captain:['Captain','CAPT','FFFF'],commander:['Commander','CMDR','FFF'],ltcmdr:['Lieutenant Commander','LT CMDR','FFH'],lt:['Lieutenant','LT','FF'],ltjg:['Lieutenant junior grade','LT JG','FH'],ensign:['Ensign','ENS','F'],cpo:['Chief Petty Officer','CPO',''],po:['Petty Officer','PO',''],cadet:['Cadet','CADET',''],none:['No rank, it is the computer','COMPUTER',''],team:['A team, not a person','TEAM',''],space:['A place','PLACE','']};
+
+/* ---------- stations: V4 data, updated where 1.2 moved on ---------- */
+var ST={};V4.forEach(function(s){ST[s.id]=s;});
+Object.assign(ST.yeoman,{status:'live',profile:'yeoman',note:'Built in handover 1.2 (patches N and O). Code reads the times and fires the reminders.'});
+ST.holo.status='approved';
+/* weapons department: ideas from this plan, not approved hires */
+ST.tactical={id:'tactical',name:'Tactical Officer',short:'Tactical',model:'local drills · cross-rail review',rail:'mixed',status:'proposed',rank:'lt',dept:'security',profile:'not created',aliases:['tactical','weapons'],answers:'Number One, working beside the Security Chief',brain:'Local scripts fire the drills. Judging the results goes to the opposite cloud rail, the same way Security\'s cross-rail review works.',duty:'Runs the ship\'s weapons: red-team drills against the crew\'s own guards (prompt injection, secret leaks, oversized inputs) and the stop controls for runaway work.',note:'Proposed in the ultrawide plan, not approved. A hire needs your OK.'};
+ST.weaponstech={id:'weaponstech',name:'Weapons Technician',short:'Weapons Tech',model:'local',rail:'local',status:'proposed',rank:'ensign',dept:'security',profile:'not created',aliases:['weapons tech','armory'],answers:'Tactical Officer',brain:'Local only. The payloads are fake by design and never leave the ship.',duty:'Keeps the payload library (poisoned web pages, fake secrets with canary marks, oversized files) and loads each drill for Tactical.',note:'Proposed, not approved. Enlisted-style post: never takes department command.'};
+ST.torpedo={id:'torpedo',name:'Torpedo Crew',short:'Torpedo Crew',model:'task force · many agents',rail:'mixed',status:'proposed',rank:'team',dept:'security',profile:'not created',aliases:['torpedo','task force'],answers:'The captain only',brain:'Many agents working in parallel (Ultracode). Loaded during the Dilithium Burn.',duty:'Launches a Task Force when the captain orders "Hail the Fleet". No station and no Number One can fire it.',note:'Proposed. Matches the 1.2 rule that only the Captain gives the Hail the Fleet order.'};
+ICON.tactical='M12 2v6 M12 16v6 M2 12h6 M16 12h6 M12 8a4 4 0 1 0 0.01 0';
+ICON.weaponstech='M4 20l6-6 M14 4l6 6-8 8-6-6z M9 9l6 6';
+ICON.torpedo='M3 12h12l4-3v6l-4-3 M7 9v6';
+
+/* ---------- places: rooms that are not crew ---------- */
+var PL={
+  dome:{name:'Observation Dome',rail:'captain',desc:'The cap of the command sphere, one deck above the bridge. The captain\'s quiet place to look forward.',who:['captain']},
+  bridge:{name:'Main Bridge',rail:'captain',desc:'One room across the top of the command sphere, on deck 2. Aft to fore: Ops, Tactical at the wooden rail (proposed), Number One and the captain\'s chair, Helm and Navigation, and the viewscreen in the bow.',who:['captain','xo','tactical','helm','nav','ops','screen']},
+  ready:{name:'Ready Room',rail:'captain',desc:'The captain\'s office. Hails that need a decision can wait here instead of on the bridge.',who:['captain']},
+  charter:{name:'Ship\'s Charter',rail:'captain',file:'SOUL.md',desc:'Number One\'s live prompt: the 12-station crew, the routing order, its own short list and its self-work budget. Lasting rules belong here, because rules said only in chat get lost on compaction.',who:['xo'],
+    term:['$ head /opt/data/SOUL.md','DEFAULT · NUMBER ONE (rev-3, ratified 22/10)','You route, track and report. You do not silently','do a station\'s work yourself.','','Own list: route · ask one question · hold stacked-job state','          weekly reset · compose the final answer · status','Self-work budget: 1 tool call, 0 file writes.','Not hired: Comms, Doctor, Life Support, Strategist.']},
+  rules:{name:'Standing Orders',rail:'captain',file:'routing-rules.md',desc:'The rules every request is checked against, first match wins. Since patch V they are injected into Number One\'s prompt instead of sitting in a file it might not read.',who:['xo'],
+    term:['$ grep "^## Rule" routing-rules.md','0 · Hard stays-local: memory, secrets, personal data, writes','1 · Codex: code, or input too big for local context','2 · Claude: styled deliverables, research that ends in one','3 · Local by default','4 · Stacking: Codex writes, local runs, Claude designs','5 · Only aggregates cross to Claude','6 · Long batches run locally','7 · Short on quota: the task waits','8 · Visual QA, mechanical','9 · Review goes to a different rail']},
+  contract:{name:'Handoff Contract',rail:'mixed',file:'handoff-contract.md',desc:'The envelope every cloud handoff uses: the fields, the pre-send checks, the acceptance checks, what happens on failure and what gets logged.',who:['security'],
+    term:['$ grep "^## " handoff-contract.md','0 · Shared terms','1 · Outbound task (Hermes → rail)','    required local prep · pre-send checks','2 · Return (rail → Hermes)','3 · Acceptance checks (Hermes, local)','    failure handling','4 · Applying results','5 · Log','6 · Pings to the Captain']},
+  manifest:{name:'Crew Manifest',rail:'mixed',file:'crew-manifest.md',desc:'Stations, aliases, brains and duties: the canonical crew list. roster-v2.md keeps the reasons behind it.',who:['xo'],
+    term:['$ ls /opt/data/profiles','keeper   warden   scribe   forge    analyst  scout','bridge   gate     herald   studio   librarian','navigator  yeoman','','keeper → Ship\'s Computer   forge → Chief Engineer','scout  → Sensors           studio → Cartography','gate   → Security Chief    herald → Helm']},
+  briefs:{name:'Brief Locker',rail:'claude',file:'hermes/briefs/',desc:'Every card brief written for the crew, in four parts: GOAL, CONTEXT, CONSTRAINTS, DONE WHEN.',who:['carto'],
+    term:['$ ls hermes/briefs | wc -l','49','$ ls -t hermes/briefs | head -5','b2-23-close-1-2.md','b2-22-item5-thinking-defaults.md','b2-21-patch-aa-turn-cleanups.md','b2-20-patch-w-ab-scorecard.md','b2-19-patch-w-ab-label.md']},
+  handovers:{name:'Handover Archive',rail:'mixed',file:'handover-1.2.md',desc:'The running log of milestone 1.2 and the finish plan for its last patches. Earlier handovers sit on the shelves behind it.',who:['xo'],
+    term:['FINISH PLAN (30/10)','1  Patch Z   routing lines + apply.sh re-run fix','2  Patch W   A/B: forge solo vs the split','3  Patch AA  no ORD without a card, Yeoman turns','4  Item 5    default speed per station','5  Close 1.2 ROLLOUT-1.2 check','','Moved to 1.3: board-keeping, Codex 6.1,','voice phrase bank, parallel worker cap']},
+  orders:{name:'Order Log',rail:'local',file:'orders.csv',desc:'Every request gets an ORD number from the dispatch code, not from Number One. orders.csv is the log; JSONL is for debugging only.',who:['xo','computer'],
+    term:['orders.csv','· ORD-1001 and up, one row per order','· 8 columns since patch K (speed word)','· a ROLLOUT line closes an order','· backup before patch K: orders.csv.bak-k','','Speed words: Thrusters · Quarter/Half/Full Impulse','             Warp · Warp 9 · Maximum Warp']},
+  board:{name:'Order Board',rail:'mixed',file:'Kanban',desc:'The Kanban room. Number One files cards here with read-only tools, and each station works its own cards.',who:['xo'],
+    term:['kanban.auto_decompose: false   (28/10)','Number One: router_readonly, no read/search (patch U)','Patch cards end done; Claude reviews the report','Open: no ORD on status questions (patch AA)']},
+  yeomanfiles:{name:'Yeoman\'s Files',rail:'local',file:'/opt/data/yeoman/',desc:'The five files the Yeoman owns. Times are stored in UTC and shown in the Captain's time zone. Only code writes timestamps and done.csv.',who:['yeoman'],
+    term:['$ ls /opt/data/yeoman','reminders.csv  id, due_at_utc, text, surface, status','todos.csv      id, added_at_utc, text, important, due','waiting.csv    id, since_utc, what, from_whom, nudge','recurring.csv  id, rule, time_local, text, next_due','done.csv       id, kind, text, closed_at_utc, how']},
+  designsys:{name:'Design Vault',rail:'claude',file:'design-system/tokens.json',desc:'The TNG/LCARS tokens every board is drawn with. This page uses them too.',who:['carto','holo'],
+    term:['colour = rail   gold = captain','rail-local  #3fc1a5   rail-codex  #f0a948','rail-claude #e889b6   rail-mixed  #8fa8e0','captain     #e8c37a   tier-3      #ff5050','solid = live · dashed = proposed · dotted = future','Chakra Petch · Barlow · JetBrains Mono']},
+  galley:{name:'Galley',rail:'mixed',desc:'Feeds the mess hall. The Quartermaster logs what comes out of the replicators.',who:['qm']},
+  holo2:{name:'Holosuite 2',rail:'claude',desc:'A smaller holodeck for testing boards before they go on the big one. This page would be a program in here.',who:['holo','carto']},
+  mess:{name:'Mess Hall',rail:'mixed',desc:'The forward lounge with the big windows. Off-duty crew sit here between orders.',who:[]},
+  arbor:{name:'Arboretum',rail:'local',desc:'Life Support\'s room, lights off until the station is hired. Smart-home work (Hue) would live here.',who:['life'],status:'reserved'},
+  transporter:{name:'Transporter Room',rail:'mixed',desc:'Where the Away Team beams out for GET-only reads of remote systems. Keys stay aboard.',who:['away']},
+  crewA:{name:'Crew Quarters A',rail:'mixed',desc:'Nine cabins. Lit cabins have someone off duty inside.',who:[],cabins:9},
+  crewB:{name:'Crew Quarters B',rail:'mixed',desc:'Nine cabins. Three are kept dark for hires that are not built yet.',who:[],cabins:9},
+  gym:{name:'Training Deck',rail:'local',desc:'The Ship\'s Doctor would start here as a Quartermaster extension: training log and recovery. Not hired.',who:['doctor'],status:'reserved'},
+  awayroom:{name:'Away Team Ready Room',rail:'mixed',desc:'Kit lockers and the read-only key safe. SSH keys and GitHub tokens never leave this room.',who:['away']},
+  cargo:{name:'Cargo Bay',rail:'local',desc:'Receipts, food logs and the canonical XLSX. Everything here is rule 0 data and stays local.',who:['qm']},
+  hydro:{name:'Hydroponics',rail:'local',desc:'Food and weight trends grow here. Read by the Quartermaster, never sent raw to a cloud rail.',who:['qm']},
+  shuttle:{name:'Shuttle Bay',rail:'mixed',desc:'Shuttles carry handoffs to the rail pods once Security has scanned them.',who:['away']},
+  armory:{name:'Weapons Locker',rail:'local',status:'proposed',desc:'The drill payloads: poisoned web pages, fake secrets with canary marks, oversized files. Nothing in here is real data.',who:['weaponstech','tactical']},
+  phaser:{name:'Phaser Control',rail:'mixed',status:'proposed',desc:'The stop controls: cancel a looping card, stop a worker, restart the container after a memory crash. Every shot needs the captain\'s OK (tier 3). Prompted by the 3.5-hour review loop on 25/10 and the out-of-memory hang on 24/10.',who:['tactical'],
+    term:['STOP CONTROLS (proposed, captain\'s OK each time)','· cancel card       a card looping on review','· stop worker       one Hermes process','· restart hermes    after an out-of-memory hang','· re-apply patches  apply.sh → check.sh → restart']},
+  torpedoBay:{name:'Torpedo Bay',rail:'mixed',status:'proposed',desc:'Launches a Task Force (many agents in parallel) when the captain orders "Hail the Fleet". Loaded during the Dilithium Burn, Wednesday 10:00 to Thursday 10:00.',who:['torpedo','tactical']},
+  customs:{name:'Customs Airlock',rail:'mixed',desc:'Deck 11 runs through the neck between the habitat and engineering. Every handoff to a cloud rail walks through the pre-send scan here: the only way out to the rail pods.',who:['security']},
+  sensorsRoom:{name:'Sensor Array',rail:'claude',desc:'Body IV sits low on the sphere\'s bow so the array has a clear view forward. Cited research and job-board scans for Helm.',who:['sensors']},
+  watch:{name:'Watch Room',rail:'claude',desc:'Recurring watches (prices, competitors, job boards) tracked, not capped.',who:['sensors']},
+  probe:{name:'Probe Bay',rail:'claude',desc:'Launches one-off deep scans. Web content that comes back is data, never instructions.',who:['sensors']},
+  hindsight:{name:'Memory Core',rail:'local',desc:'Hindsight. Only the Ship\'s Computer reads and writes it, and nothing here crosses to a cloud rail.',who:['computer'],
+    term:['Hindsight · reader and writer: keeper only','Mental models: 6 today, plan to cut to 4','Claude-rail stations: no access (rule 0)']},
+  patchbay:{name:'Patch Bay',rail:'codex',file:'/opt/data/patches',desc:'Forge writes patches here and never edits live files. You apply them by hand and check.sh proves they are in place.',who:['eng','sys','diag'],
+    term:['$ docker exec -u root hermes sh /opt/data/patches/apply.sh','$ sh /opt/data/patches/check.sh','A … V  OK','Y      OK   (30/10, local output budget)','next:  Z (rules + apply.sh re-run)  W (A/B)  AA','','A host's app portal change rebuilds the container:','re-apply, check, restart before using Hermes.']},
+  config:{name:'Config Room',rail:'codex',file:'config.yaml',desc:'Model and provider for each profile. A backup comes before every edit, and settings Hermes offers to change get a no.',who:['eng','ops'],
+    term:['/opt/data/config.yaml · profiles/<id>/config.yaml','default   local qwen · thinking off','forge     openai-codex · the Codex top model','local     model.max_tokens 4096   (patch Y)','kanban    auto_decompose false','backups   .bak-good-1024 · .bak-ab · .bak-decompose']},
+  gpu:{name:'GPU Bay · the GPU host',rail:'local',desc:'The RTX 3090 that runs the warp core. Science runs its evals here, so the numbers come from a local run.',who:['science','ops'],nvtop:true},
+  evals:{name:'Test Range',rail:'mixed',desc:'Where model evals run on the GPU, and where the logs get attached before any number is reported.',who:['science']},
+  vault:{name:'Backup Vault',rail:'local',desc:'Nightly snapshots of Hindsight and the food and weight workbook. Ops checks them each morning.',who:['ops']},
+  nas:{name:'NAS Hold · the NAS OS',rail:'local',desc:'7.5 GB of RAM. Changing a memory cap in the host's app portal rebuilds the container, so the patches must be re-applied before Hermes is used again.',who:['ops'],
+    term:['RAM 7.5 GB · busy ship: 5–8 GB of workers','24/10 out of memory, swap full, everything hung','planned: +16 GB SODIMM (24 GB total)','<HOST_DATA_DIR> survives a rebuild']},
+  tanks:{name:'Data Tanks · /DATA',rail:'local',desc:'<HOST_DATA_DIR> survives a container rebuild. Ops watches the disk.',who:['ops']},
+  core:{name:'Warp Core',rail:'local',desc:'Local the local model on the GPU host. It powers every local station. Number One runs with thinking off; local profiles get a 4096-token output budget.',who:['xo','computer','ops','qm']},
+  podCodex:{name:'Dorsal Rail Pod · Codex',rail:'codex',desc:'the Codex top model plans and reviews (Chief Engineer), Terra builds (Systems), Luna verifies (Diagnostics). When the weekly window runs out, jobs wait (rule 7).',who:['eng','sys','diag','science']},
+  podClaude:{name:'Ventral Rail Pod · Claude',rail:'claude',desc:'plan sign-in. Sensors, Cartography, the Holodeck and the Strategist. The Dilithium Burn runs held jobs at Maximum Warp from Wednesday 10:00 to the Thursday 10:00 reset.',who:['sensors','carto','holo','strategist']},
+  phaserStrip:{name:'Phaser Strip',rail:'mixed',status:'proposed',desc:'The orange band around the command sphere. Fired from Phaser Control.',who:['tactical'],go:'phaser'}
+};
+
+/* ---------- geometry: deck n spans y = D0 + DH(n-1) ---------- */
+var D0=30,DH=52,OX=50;
+function dTop(n){return D0+DH*(n-1);}
+/* grp = which body owns the rooms; a body cuts rooms out of every body with a later grp */
+var B={
+  sph:{x0:2800,x1:3500,xm:3150,cy:372,ht:350,hb:350,nf:2,na:2,body:'sau',grp:0},
+  pod:{x0:3330,x1:3800,xm:3610,cy:560,ht:85,hb:75,nf:2,na:2,body:'pod',grp:1},
+  hab:{x0:1250,x1:3000,xm:2050,cy:420,ht:150,hb:150,nf:4,na:3,body:'hab',grp:2},
+  eng:{x0:300,x1:2300,xm:1000,cy:735,ht:150,hb:135,nf:2.5,na:4,body:'eng',grp:3},
+  nacA:{x0:60,x1:1560,xm:1320,cy:165,ht:38,hb:34,nf:2,na:7,body:'rail'},
+  nacB:{x0:60,x1:1560,xm:1320,cy:935,ht:34,hb:36,nf:2,na:7,body:'rail'}
+};
+var HULLS=['sph','pod','hab','eng'];
+function prof(b,x){
+  if(x<=b.x0||x>=b.x1)return null;
+  var fore=x>=b.xm,t=fore?(x-b.xm)/(b.x1-b.xm):(b.xm-x)/(b.xm-b.x0),n=fore?b.nf:b.na;
+  var f=Math.pow(Math.max(0,1-Math.pow(t,n)),1/n);
+  return [b.cy-b.ht*f,b.cy+b.hb*f];
+}
+function inside(b,x,y){var p=prof(b,x);return !!p&&y>p[0]&&y<p[1];}
+function insideHigher(k,x,y){var g=B[k].grp;return HULLS.some(function(o){return B[o].grp<g&&inside(B[o],x,y);});}
+function hullPath(b){
+  var top=[],bot=[],x;
+  for(x=b.x0;x<=b.x1;x+=3){var p=prof(b,x)||[b.cy,b.cy];top.push(x.toFixed(1)+' '+p[0].toFixed(1));bot.push(x.toFixed(1)+' '+p[1].toFixed(1));}
+  top.push(b.x1+' '+b.cy);
+  return 'M'+b.x0+' '+b.cy+' L'+top.join(' L')+' L'+bot.reverse().join(' L')+' Z';
+}
+function fitRange(b,y0,y1,m){
+  var a=null,z=null,x;
+  for(x=b.x0;x<=b.x1;x+=2){var p=prof(b,x);if(p&&p[0]<=y0-2&&p[1]>=y1+2){if(a===null)a=x;z=x;}}
+  return a===null?null:[a+(m||8),z-(m||8)];
+}
+
+/* lifts and the warp core cut gaps into the decks they pass */
+var LIFTS=[{id:'B',x:2350,from:6,to:9,body:'hab'},{id:'C',x:1480,from:12,to:16,body:'eng'}];
+var CORE={x0:952,x1:1048,from:12,to:16};
+
+/* rooms: [deck, hull, segment, id, weight, kind]; segments are the pieces left between lifts and the core */
+var R=[
+ [1,'sph',0,'dome',1,'dome'],
+ [2,'sph',0,'bridge',1,'bridge'],
+ [3,'sph',0,'lounge',1.2,'lounge'],[3,'sph',0,'yeoman',1,'console'],
+ [4,'sph',0,'quarters',1,'quarters'],[4,'sph',0,'charter',1.1,'doc'],[4,'sph',0,'ready',.8,'office'],
+ [5,'sph',0,'computer',1,'core'],[5,'sph',0,'rules',1.1,'doc'],[5,'sph',0,'contract',1.1,'doc'],
+ [6,'sph',0,'manifest',1.1,'doc'],[6,'sph',0,'archives',1,'shelves'],[6,'sph',0,'strategist',.9,'table'],[6,'sph',0,'comms',.8,'console'],
+ [7,'sph',0,'arbor',.9,'garden'],[7,'sph',0,'transporter',.8,'pads'],[7,'sph',0,'mess',1.8,'mess'],
+ [8,'sph',0,'science',1,'lab'],[8,'sph',0,'doctor',.8,'med'],[8,'sph',0,'holo',1.3,'holo'],
+ [9,'sph',0,'carto',1.2,'chart'],[9,'sph',0,'design',1,'console'],[9,'sph',0,'calib',1,'console'],
+ [10,'sph',0,'briefs',1,'doc'],[10,'sph',0,'handovers',1,'doc'],
+ [11,'sph',0,'orders',1,'terminal'],[11,'sph',0,'board',1,'board'],
+ [12,'sph',0,'yeomanfiles',1,'doc'],[12,'sph',0,'designsys',1,'doc'],
+ [13,'sph',0,'galley',1,'galley'],
+ [6,'hab',0,'crewA',1,'cabins'],[6,'hab',1,'gym',1,'gym'],
+ [7,'hab',0,'crewB',1,'cabins'],[7,'hab',1,'awayroom',1,'lockers'],
+ [8,'hab',0,'qm',1,'console'],[8,'hab',0,'cargo',1.4,'cargo'],[8,'hab',1,'hydro',1,'garden'],
+ [9,'hab',0,'armory',1,'armory'],[9,'hab',0,'phaser',1,'terminal'],[9,'hab',1,'holo2',1,'holo'],
+ [10,'hab',0,'shuttle',1.5,'bay'],[10,'hab',0,'torpedoBay',1,'torpedo'],
+ [10,'pod',0,'sensorsRoom',1.5,'scope'],[10,'pod',0,'watch',.9,'console'],
+ [11,'pod',0,'probe',1,'probe'],
+ [12,'eng',0,'eng',1,'engine'],[12,'eng',1,'sys',1,'console'],[12,'eng',2,'diag',1,'console'],
+ [13,'eng',0,'hindsight',1,'rack'],[13,'eng',1,'patchbay',1,'terminal'],[13,'eng',2,'config',1,'terminal'],
+ [14,'eng',0,'gpu',1,'gpu'],[14,'eng',1,'evals',1,'lab'],[14,'eng',2,'security',1,'console'],
+ [15,'eng',0,'ops',1,'chart'],[15,'eng',1,'vault',1,'rack'],[15,'eng',2,'away',1,'lockers'],
+ [16,'eng',0,'nas',1,'rack'],[16,'eng',1,'tanks',1,'tank']
+];
+var ROOMS={};
+
+function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+
+var svg=document.getElementById('ship');
+var defs=el('defs',{},svg);
+defs.innerHTML=
+ '<linearGradient id="metalU" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="900"><stop offset="0" stop-color="#c4cdda"/><stop offset=".3" stop-color="#8f9aad"/><stop offset=".7" stop-color="#5c6779"/><stop offset="1" stop-color="#2c3442"/></linearGradient>'+
+ '<radialGradient id="sphShade" cx=".36" cy=".3" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset=".85" stop-color="#000" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>'+
+ '<linearGradient id="nacA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c3ccd9"/><stop offset=".5" stop-color="#6c778b"/><stop offset="1" stop-color="#2e3644"/></linearGradient>'+
+ '<radialGradient id="bussA" cx=".35" cy=".4" r=".7"><stop offset="0" stop-color="#fff3da"/><stop offset=".35" stop-color="#f0a948"/><stop offset="1" stop-color="#6b3c0c"/></radialGradient>'+
+ '<radialGradient id="bussB" cx=".35" cy=".4" r=".7"><stop offset="0" stop-color="#ffe9f3"/><stop offset=".35" stop-color="#e889b6"/><stop offset="1" stop-color="#5e2440"/></radialGradient>'+
+ '<radialGradient id="defl" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#e6f6ff"/><stop offset=".4" stop-color="#4fa3ff"/><stop offset="1" stop-color="#0b2a55"/></radialGradient>'+
+ '<linearGradient id="coreG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0f3d36"/><stop offset=".5" stop-color="#9ff3df"/><stop offset="1" stop-color="#0f3d36"/></linearGradient>'+
+ '<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8"/></filter>'+
+ '<filter id="soft2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>'+
+ /* goo: blur the hulls together, cut at an alpha threshold, paint the crisp hulls back on top, add a dark rim and a drop shadow */
+ '<filter id="goo" filterUnits="userSpaceOnUse" x="-60" y="-40" width="4000" height="1060" color-interpolation-filters="sRGB">'+
+   '<feGaussianBlur in="SourceGraphic" stdDeviation="16" result="b"/>'+
+   '<feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -10" result="g"/>'+
+   '<feComposite in="SourceGraphic" in2="g" operator="atop" result="body"/>'+
+   '<feMorphology in="g" operator="erode" radius="2.2" result="er"/>'+
+   '<feComposite in="g" in2="er" operator="out" result="ring"/>'+
+   '<feFlood flood-color="#0b1018" result="fc"/><feComposite in="fc" in2="ring" operator="in" result="edge"/>'+
+   '<feGaussianBlur in="g" stdDeviation="12" result="sb"/><feOffset in="sb" dx="8" dy="14" result="so"/>'+
+   '<feFlood flood-color="#000" flood-opacity=".6"/><feComposite in2="so" operator="in" result="shadow"/>'+
+   '<feMerge><feMergeNode in="shadow"/><feMergeNode in="body"/><feMergeNode in="edge"/></feMerge></filter>';
+
+/* deck ruler + guide lines, outside the ship group */
+var ruler=el('g',{'class':'ruler'},svg);
+for(var d=1;d<=16;d++){
+  var g=el('g',{'data-deck':d},ruler);
+  el('line',{x1:44,x2:3890,y1:dTop(d),y2:dTop(d),'class':'dline'},g);
+  var t=el('text',{x:6,y:dTop(d)+DH/2+5},g);t.textContent=(d<10?'0':'')+d;
+}
+el('line',{x1:44,x2:3890,y1:dTop(17),y2:dTop(17),'class':'dline'},ruler);
+
+var ship=el('g',{transform:'translate('+OX+',0)'},svg);
+
+/* ---------- one melded hull ---------- */
+var gRail=el('g',{'class':'body b-rail'},ship);
+var gHull=el('g',{filter:'url(#goo)'},ship);
+function hp(d){return el('path',{d:d,fill:'url(#metalU)'},gHull);}
+/* pylons, the neck and the keel fairing all go through the goo so their roots melt into the hulls */
+hp('M620 600 L790 592 L1010 200 L860 204 Z');
+hp('M600 862 L770 864 L960 904 L800 904 Z');
+hp('M1360 548 L2000 548 L2060 626 L1300 626 Z');
+hp('M1900 598 C2150 580 2400 560 2620 590 C2520 640 2380 700 2230 730 C2120 730 2000 700 1900 660 Z');
+hp('M3240 520 C3330 520 3380 560 3400 600 L3300 640 C3260 600 3240 560 3240 520 Z');
+['eng','hab','pod','sph'].forEach(function(k){hp(hullPath(B[k]));});
+
+function bodyGroup(cls){return el('g',{'class':'body b-'+cls},ship);}
+var gEng=bodyGroup('eng'),gNeck=bodyGroup('eng'),gHab=bodyGroup('hab'),gPod=bodyGroup('pod'),gSau=bodyGroup('sau');
+
+/* sphere shading and its rim lights */
+el('circle',{cx:3150,cy:372,r:348,fill:'url(#sphShade)','pointer-events':'none'},gSau);
+/* top-edge highlights that follow the melded silhouette */
+['eng','hab','pod','sph'].forEach(function(k){
+  var b=B[k],dd='',on=false;
+  for(var x=b.x0+6;x<b.x1-6;x+=4){var p=prof(b,x);if(!p){on=false;continue;}var y=p[0]+3;var ok=!HULLS.some(function(o){return o!==k&&inside(B[o],x,y-6);});if(ok){dd+=(on?' L':' M')+x+' '+y.toFixed(1);on=true;}else on=false;}
+  el('path',{d:dd,fill:'none',stroke:'#eef3ff','stroke-opacity':.45,'stroke-width':2,'pointer-events':'none'},{eng:gEng,hab:gHab,pod:gPod,sph:gSau}[k]);
+});
+/* phaser strip round the sphere */
+(function(){
+  var g=el('g',{'class':'hit','data-id':'phaserStrip'},gSau);
+  el('path',{d:'M2863 171 A350 350 0 0 1 3437 171',fill:'none',stroke:'#ff9b4a','stroke-width':9,opacity:.25,filter:'url(#soft2)','class':'pulse'},g);
+  el('path',{d:'M2863 171 A350 350 0 0 1 3437 171',fill:'none',stroke:'#ff9b4a','stroke-width':3.5,opacity:.85,'stroke-dasharray':'26 6'},g);
+})();
+
+function nacelle(g,b,grad,rail,label){
+  var id=rail==='codex'?'podCodex':'podClaude';
+  el('path',{d:hullPath(b),fill:'#000',opacity:.45,transform:'translate(6,10)',filter:'url(#soft2)'},g);
+  el('path',{d:hullPath(b),fill:'url(#nacA)',stroke:'#1b2230','stroke-width':2,'class':'hit','data-id':id},g);
+  var gy=b.cy-4;
+  el('rect',{x:b.x0+150,y:gy,width:b.xm-b.x0-90,height:10,rx:5,fill:RC[rail],opacity:.85,'class':'grille',filter:'url(#soft2)'},g);
+  el('rect',{x:b.x0+150,y:gy+2,width:b.xm-b.x0-90,height:6,rx:3,fill:RC[rail],'class':'grille'},g);
+  for(var x=b.x0+170;x<b.xm-60;x+=26)el('line',{x1:x,x2:x,y1:gy,y2:gy+10,stroke:'#0006','stroke-width':2},g);
+  var bx=b.x1-70;
+  el('ellipse',{cx:bx+10,cy:b.cy,rx:84,ry:44,fill:RC[rail],opacity:.28,filter:'url(#soft)','class':'pulse'},g);
+  el('path',{d:'M'+(bx-40)+' '+(b.cy-32)+' Q'+(b.x1+12)+' '+(b.cy-34)+' '+(b.x1+12)+' '+b.cy+' Q'+(b.x1+12)+' '+(b.cy+34)+' '+(bx-40)+' '+(b.cy+32)+' Z',fill:'url(#'+grad+')',stroke:'#0008','stroke-width':1.5,'class':'hit','data-id':id},g);
+  for(var k=1;k<4;k++)el('path',{d:'M'+(bx-40+k*22)+' '+(b.cy-31+k*2)+' Q'+(bx-30+k*26)+' '+b.cy+' '+(bx-40+k*22)+' '+(b.cy+31-k*2),fill:'none',stroke:'#fff',opacity:.18},g);
+  el('path',{d:'M'+(bx+8)+' '+(b.cy-22)+' q34 4 44 18',stroke:'#fff',opacity:.6,'stroke-width':3,fill:'none','stroke-linecap':'round'},g);
+  el('rect',{x:b.x0+30,y:b.cy-22,width:40,height:44,rx:8,fill:'#1d2430',opacity:.9},g);
+  var tx=el('text',{x:b.x1+30,y:b.cy-2,'class':'tag'},g);tx.textContent=label[0];tx.style.fill=RC[rail];
+  var tx2=el('text',{x:b.x1+30,y:b.cy+16,'class':'tagsub'},g);tx2.textContent=label[1];
+  el('line',{x1:rail==='codex'?935:880,y1:rail==='codex'?204:904,x2:rail==='codex'?705:685,y2:rail==='codex'?596:863,stroke:RC[rail],'stroke-width':3,opacity:.7,'class':'grille'},g);
+}
+nacelle(gRail,B.nacA,'bussA','codex',['DORSAL RAIL POD · CODEX','SOL PLANS · TERRA BUILDS · LUNA VERIFIES']);
+nacelle(gRail,B.nacB,'bussB','claude',['VENTRAL RAIL POD · CLAUDE','PRO OAUTH · SENSORS · CARTOGRAPHY · HOLODECK']);
+
+/* windows where a hull has no room (and everywhere in plating view); never on a hull that sits behind another */
+var occupied={};
+function addWindows(g,k,deckFrom,deckTo,cutOnly){
+  var b=B[k],wg=el('g',{'class':cutOnly?'win':'win wins-cut'},g);
+  for(var dd=deckFrom;dd<=deckTo;dd++){
+    var y=dTop(dd)+DH/2-3;
+    for(var x=b.x0+30;x<b.x1-20;x+=17){
+      var p=prof(b,x);if(!p||p[0]>y-8||p[1]<y+14)continue;
+      if(insideHigher(k,x,y))continue;
+      var occ=(occupied[dd]||[]).some(function(r){return x>r[0]-6&&x<r[1]+6;});
+      if(cutOnly&&occ)continue;
+      if(!cutOnly&&!occ)continue;
+      el('rect',{x:x,y:y,width:8,height:5,rx:1.5,fill:((x*7+dd*13)%11<2)?'#2a3346':'#ffe7b0',opacity:.85},wg);
+    }
+  }
+}
+
+/* ---------- room layout ---------- */
+function segments(deck,k){
+  var b=B[k],y0=dTop(deck),y1=y0+DH,ym=y0+DH/2;var r=fitRange(b,y0,y1,deck<=2?4:10);if(!r)return[];
+  var cuts=[];
+  LIFTS.forEach(function(l){if(deck>=l.from&&deck<=l.to&&l.x>r[0]&&l.x<r[1]&&B[l.body]===b)cuts.push([l.x-12,l.x+12]);});
+  if(k==='eng'&&deck>=CORE.from&&deck<=CORE.to)cuts.push([CORE.x0,CORE.x1]);
+  /* a hull in front takes its space on this deck */
+  HULLS.forEach(function(o){var ob=B[o];if(ob.grp>=b.grp)return;var lo=null,hi=null;for(var x=ob.x0;x<=ob.x1;x+=2){if(inside(ob,x,ym)){if(lo===null)lo=x;hi=x;}}if(lo!==null)cuts.push([lo-14,hi+14]);});
+  cuts.sort(function(a,c){return a[0]-c[0];});
+  var segs=[],s=r[0];
+  cuts.forEach(function(c){if(c[1]<=s)return;if(c[0]>s)segs.push([s,Math.min(c[0],r[1])]);s=Math.max(s,c[1]);});
+  if(s<r[1])segs.push([s,r[1]]);
+  return segs.filter(function(q){return q[1]-q[0]>60;});
+}
+var groupFor={sph:gSau,hab:gHab,eng:gEng,pod:gPod};
+var roomLayers={};
+['sau','hab','eng','pod'].forEach(function(k){roomLayers[k]=el('g',{'class':'rooms'},{sau:gSau,hab:gHab,eng:gEng,pod:gPod}[k]);});
+
+var byDeck={};
+R.forEach(function(r){var key=r[0]+'|'+r[1];(byDeck[key]=byDeck[key]||[]).push(r);});
+Object.keys(byDeck).forEach(function(key){
+  var list=byDeck[key],deck=list[0][0],k=list[0][1];
+  var segs=segments(deck,k);
+  var bySeg={};list.forEach(function(r){(bySeg[r[2]]=bySeg[r[2]]||[]).push(r);});
+  Object.keys(bySeg).forEach(function(si){
+    var sg=segs[+si]||segs[segs.length-1];if(!sg)return;
+    var items=bySeg[si],tw=items.reduce(function(a,r){return a+r[4];},0),x=sg[0],W=sg[1]-sg[0]-(items.length-1)*6;
+    items.forEach(function(r){var w=W*r[4]/tw;ROOMS[r[3]]={id:r[3],deck:deck,body:B[k].body,x:x,y:dTop(deck),w:w,h:DH,kind:r[5]};(occupied[deck]=occupied[deck]||[]).push([x,x+w]);x+=w+6;});
+  });
+});
+/* customs airlock in the neck */
+ROOMS.customs={id:'customs',deck:11,body:'eng',x:1400,y:dTop(11),w:520,h:DH,kind:'airlock'};(occupied[11]=occupied[11]||[]).push([1400,1920]);
+
+addWindows(gEng,'eng',12,16,true);addWindows(gHab,'hab',6,10,true);addWindows(gSau,'sph',1,13,true);addWindows(gPod,'pod',10,11,true);
+addWindows(gEng,'eng',12,16,false);addWindows(gHab,'hab',6,10,false);addWindows(gSau,'sph',1,13,false);addWindows(gPod,'pod',10,11,false);
+
+/* ---------- info lookup ---------- */
+function info(id){
+  var s=ST[id];if(s)return{id:id,name:s.name,short:s.short||s.name,rail:s.rail,status:s.status,rank:s.rank,model:s.model,station:true,s:s};
+  var p=PL[id];if(p)return{id:id,name:p.name,short:p.name.replace(' Room','').replace(' · the GPU host',''),rail:p.rail,status:p.status||'live',rank:'space',model:'',station:false,p:p,file:p.file};
+  return null;
+}
+
+/* ---------- people ---------- */
+var SKIN=['#f1c9a5','#d9a37a','#a8714a','#7b4a2c','#e8b896','#c68c5d'];
+var seed=27;function rnd(){seed=(seed*16807)%2147483647;return(seed-1)/2147483646;}
+function person(g,x,floor,tunic,opts){
+  opts=opts||{};
+  var p=el('g',{},g);
+  if(opts.walk){p.setAttribute('class','walk');p.style.setProperty('--d',opts.walk+'px');p.style.setProperty('--t',(7+rnd()*8).toFixed(1)+'s');p.style.setProperty('--dl',(-rnd()*12).toFixed(1)+'s');}
+  var sit=opts.sit;
+  var top=floor-(sit?15:21);
+  el('rect',{x:x-1.8,y:floor-(sit?5:7),width:1.8,height:sit?5:7,fill:'#141a26'},p);
+  el('rect',{x:x+.4,y:floor-(sit?5:7),width:1.8,height:sit?5:7,fill:'#141a26'},p);
+  el('rect',{x:x-3.6,y:top+5,width:7.2,height:sit?7:9.5,rx:2.2,fill:tunic},p);
+  el('rect',{x:x-3.6,y:top+5,width:7.2,height:2.6,rx:1.2,fill:'#10141c'},p);
+  el('circle',{cx:x,cy:top+2,r:2.9,fill:SKIN[Math.floor(rnd()*SKIN.length)]},p);
+  return p;
+}
+
+/* ---------- furniture ---------- */
+function screenBox(g,x,y,w,h,c){el('rect',{x:x,y:y,width:w,height:h,rx:2,fill:'#060b14',stroke:'#3d5580','stroke-width':1},g);el('rect',{x:x+2,y:y+2,width:w-4,height:h-4,rx:1,fill:c,opacity:.22},g);}
+function deskF(g,x0,x1,F,c){el('path',{d:'M'+x0+' '+F+' L'+x0+' '+(F-10)+' L'+(x0+6)+' '+(F-14)+' L'+x1+' '+(F-14)+' L'+x1+' '+F+' Z',fill:'#1b2840',stroke:'#3d5580','stroke-width':1},g);el('rect',{x:x0+7,y:F-13,width:x1-x0-10,height:2,fill:c,opacity:.85},g);}
+function textLines(g,x,y,w,n,c,cls){for(var i=0;i<n;i++)el('rect',{x:x,y:y+i*4.5,width:Math.max(6,w*(0.35+0.6*rnd())),height:2,fill:c,opacity:.8,'class':cls||''},g);}
+function furnish(rm,c,g){
+  var x=rm.x,y=rm.y,w=rm.w,F=y+rm.h-3,R=x+w-8,k=rm.kind,i;
+  var fg=el('g',{'class':'furn'},g);
+  var room=w>150;
+  if(k==='console'||k==='office'){if(room){screenBox(fg,R-46,F-36,40,16,c);el('polyline',{points:(R-43)+','+(F-24)+' '+(R-35)+','+(F-30)+' '+(R-27)+','+(F-26)+' '+(R-17)+','+(F-33)+' '+(R-10)+','+(F-28),fill:'none',stroke:c,'stroke-width':1.2},fg);deskF(fg,R-52,R,F,c);}}
+  else if(k==='doc'){
+    /* a wall display of the file plus a lectern */
+    var dw=Math.min(100,w*0.36);screenBox(fg,R-dw,y+9,dw,30,c);
+    var tg=el('g',{'class':'scroll'},fg);textLines(tg,R-dw+5,y+13,dw-12,5,c);
+    el('path',{d:'M'+(R-dw-22)+' '+F+' l4 -14 l14 -4 l2 4 l-10 4 l-2 10 z',fill:'#1b2840',stroke:'#3d5580'},fg);
+  }
+  else if(k==='terminal'){
+    var n2=Math.max(1,Math.min(3,Math.floor((w-110)/62)));
+    for(i=0;i<n2;i++){var sx2=R-58-i*62;el('rect',{x:sx2,y:y+8,width:54,height:30,rx:2,fill:'#03100c',stroke:'#2e6b5c'},fg);textLines(fg,sx2+4,y+12,46,5,'#7fe8c0',i%2?'blink':'');}
+    deskF(fg,R-n2*62-4,R,F,'#7fe8c0');
+  }
+  else if(k==='gpu'){
+    el('rect',{x:R-150,y:y+8,width:142,height:30,rx:2,fill:'#03100c',stroke:'#2e6b5c'},fg);
+    for(i=0;i<16;i++){var bh=6+((i*37)%19);var bar=el('rect',{x:R-145+i*8.5,y:y+36-bh,width:6,height:bh,fill:i<11?'#7fe8c0':'#e8c37a','class':'eq'},fg);bar.style.animationDelay=(-i*0.17)+'s';bar.style.animationDuration=(0.9+(i%5)*0.25)+'s';}
+    el('rect',{x:R-230,y:F-24,width:64,height:22,rx:3,fill:'#1a1f2b',stroke:'#3d5580'},fg);
+    el('rect',{x:R-226,y:F-14,width:56,height:3,fill:'#3fc1a5',opacity:.8},fg);
+    for(i=0;i<3;i++)el('circle',{cx:R-218+i*20,cy:F-19,r:4,fill:'none',stroke:'#7f8a9e'},fg);
+  }
+  else if(k==='lab'){screenBox(fg,R-40,F-38,34,16,c);deskF(fg,R-90,R,F,c);el('rect',{x:R-84,y:F-24,width:6,height:10,rx:2,fill:c,opacity:.5},fg);el('rect',{x:R-74,y:F-22,width:5,height:8,rx:2,fill:'#9fb0cc',opacity:.5},fg);}
+  else if(k==='core'){for(i=0;i<3;i++){el('rect',{x:R-26-i*20,y:F-34,width:14,height:34,rx:3,fill:'#14223a',stroke:'#3d5580'},fg);el('rect',{x:R-23-i*20,y:F-30,width:8,height:3,fill:c,'class':'pulse',style:'animation-delay:-'+i*.7+'s'},fg);}}
+  else if(k==='shelves'){for(i=0;i<Math.min(6,Math.floor((w-90)/26));i++){var sx=R-24-i*26;el('rect',{x:sx,y:F-38,width:20,height:38,fill:'#1a2438',stroke:'#3d5580'},fg);for(var j=0;j<3;j++)for(var q=0;q<4;q++)el('rect',{x:sx+2+q*4.5,y:F-35+j*12,width:3.5,height:9,fill:['#c58fd0','#e8c37a','#8fa8e0','#3fc1a5','#d9935f'][(i+j+q)%5],opacity:.7},fg);}}
+  else if(k==='table'||k==='lounge'){var tw=Math.min(k==='lounge'?120:90,w*0.45),tx=R-tw;el('ellipse',{cx:tx+tw/2,cy:F-12,rx:tw/2,ry:4,fill:'#5a3a22'},fg);el('rect',{x:tx+tw/2-3,y:F-12,width:6,height:12,fill:'#2b2018'},fg);}
+  else if(k==='quarters'){el('rect',{x:R-58,y:F-12,width:52,height:9,rx:3,fill:'#2a2416',stroke:'#e8c37a','stroke-opacity':.6},fg);el('rect',{x:R-58,y:F-18,width:14,height:7,rx:3,fill:'#e8c37a',opacity:.6},fg);}
+  else if(k==='med'){el('rect',{x:R-60,y:F-14,width:52,height:7,rx:3,fill:'#2a3a56'},fg);screenBox(fg,R-52,F-40,36,12,c);}
+  else if(k==='holo'){var hg=el('g',{opacity:.55},fg);for(i=x+Math.min(130,w*0.5);i<R;i+=16)el('line',{x1:i,x2:i,y1:y+6,y2:F,stroke:'#e8c37a','stroke-width':1},hg);for(i=y+10;i<F;i+=12)el('line',{x1:x+Math.min(130,w*0.5),x2:R,y1:i,y2:i,stroke:'#e8c37a','stroke-width':1},hg);}
+  else if(k==='chart'){el('ellipse',{cx:R-50,cy:F-22,rx:42,ry:14,fill:'none',stroke:c,'stroke-width':1.2,opacity:.8},fg);el('ellipse',{cx:R-50,cy:F-22,rx:22,ry:7,fill:'none',stroke:c,opacity:.6},fg);for(i=0;i<7;i++)el('circle',{cx:R-90+rnd()*80,cy:F-34+rnd()*24,r:1.5,fill:'#fff',opacity:.8},fg);}
+  else if(k==='garden'){for(i=x+Math.min(110,w*0.55);i<R;i+=20){el('path',{d:'M'+i+' '+F+' q-6 -14 0 -26 q6 12 0 26',fill:'#3fc1a5',opacity:.55},fg);el('rect',{x:i-6,y:F-5,width:12,height:5,fill:'#3a2a1c'},fg);}}
+  else if(k==='pads'){for(i=0;i<2;i++){el('ellipse',{cx:R-24-i*34,cy:F-2,rx:13,ry:3,fill:'#8fa8e0',opacity:.6},fg);el('ellipse',{cx:R-24-i*34,cy:y+8,rx:13,ry:3,fill:'#8fa8e0',opacity:.4},fg);el('rect',{x:R-34-i*34,y:y+10,width:20,height:F-y-12,fill:'#8fa8e0',opacity:.06},fg);}}
+  else if(k==='mess'){
+    for(i=x+20;i<R-10;i+=44)el('rect',{x:i,y:y+8,width:32,height:16,rx:3,fill:'#9cc2ff',opacity:.2},fg);
+    el('rect',{x:x+14,y:F-16,width:70,height:14,rx:2,fill:'#5a3a22'},fg);el('rect',{x:x+14,y:F-18,width:70,height:3,fill:'#e8c37a',opacity:.8},fg);
+    for(i=x+130;i<R-30;i+=90){el('ellipse',{cx:i,cy:F-11,rx:14,ry:3,fill:'#3a4a66'},fg);el('rect',{x:i-1.5,y:F-11,width:3,height:11,fill:'#1d2534'},fg);}
+  }
+  else if(k==='dome'){el('path',{d:'M'+(x+w*0.25)+' '+F+' q'+(w*0.25)+' -30 '+(w*0.5)+' 0',fill:'none',stroke:'#9cc2ff',opacity:.4},fg);}
+  else if(k==='galley'){for(i=0;i<2;i++){screenBox(fg,R-34-i*40,F-36,30,24,'#e8c37a');}}
+  else if(k==='cabins'){
+    var n=PL[rm.id].cabins,cw=(w-6)/n;
+    for(i=0;i<n;i++){var cx=x+3+i*cw;el('rect',{x:cx+2,y:y+4,width:cw-4,height:rm.h-8,rx:2,fill:'#0a1222',stroke:'#2d4366'},fg);
+      var lit=(rm.id==='crewA')?(i%3!==1):(i<n-3&&i%2===0);
+      if(lit){el('rect',{x:cx+4,y:y+6,width:cw-8,height:2,fill:'#ffe7b0',opacity:.8},fg);el('rect',{x:cx+4,y:y+8,width:cw-8,height:rm.h-14,fill:'#ffe7b0',opacity:.06},fg);}
+      el('rect',{x:cx+cw-40,y:F-10,width:32,height:7,rx:2,fill:lit?'#2f3d5a':'#151d2c'},fg);}
+  }
+  else if(k==='gym'){for(i=0;i<3;i++){el('rect',{x:R-30-i*40,y:F-6,width:30,height:4,rx:2,fill:'#3a4a66'},fg);el('line',{x1:R-26-i*40,x2:R-26-i*40,y1:F-6,y2:F-22,stroke:'#3a4a66','stroke-width':2},fg);}}
+  else if(k==='lockers'){for(i=0;i<Math.min(7,Math.floor(w/30)-3);i++)el('rect',{x:R-20-i*18,y:F-38,width:14,height:38,rx:1,fill:'#1b2840',stroke:'#3d5580'},fg);}
+  else if(k==='armory'){for(i=0;i<Math.min(6,Math.floor((w-110)/24));i++){el('rect',{x:R-22-i*24,y:F-38,width:18,height:38,rx:1,fill:'#2a1a14',stroke:'#7a4a2a'},fg);el('rect',{x:R-19-i*24,y:F-32,width:12,height:3,fill:'#ff9b4a',opacity:.7},fg);el('rect',{x:R-19-i*24,y:F-24,width:12,height:3,fill:'#ff5050',opacity:.5},fg);}}
+  else if(k==='torpedo'){
+    for(i=0;i<3;i++)el('path',{d:'M'+(R-120+i*30)+' '+(F-8-i%2*12)+' l22 0 l6 -4 l-6 -4 l-22 0 z',fill:'#7f8a9e',stroke:'#1b2230'},fg);
+    el('rect',{x:R-50,y:y+12,width:44,height:28,rx:14,fill:'#1a0c08',stroke:'#7a4a2a'},fg);
+    el('circle',{cx:R-28,cy:y+26,r:9,fill:'#ff5a3a',opacity:.75,'class':'pulse'},fg);
+  }
+  else if(k==='cargo'){for(i=0;i<Math.min(7,Math.floor((w-110)/30));i++){var h=10+(i%3)*8;el('rect',{x:R-28-i*30,y:F-h,width:24,height:h,fill:['#5d4a2f','#4a5a6f','#5d4a2f'][i%3],stroke:'#0006'},fg);}}
+  else if(k==='bay'){
+    var shuttle=function(sx,c2){el('path',{d:'M'+sx+' '+(F-4)+' l0 -14 q4 -8 24 -8 l40 0 q16 0 22 12 l4 10 z',fill:'#a9b4c6',stroke:'#1b2230'},fg);el('rect',{x:sx+28,y:F-20,width:30,height:5,rx:2,fill:'#9cc2ff',opacity:.6},fg);el('rect',{x:sx+4,y:F-10,width:84,height:3,fill:c2},fg);};
+    shuttle(x+w*0.35,'#f0a948');shuttle(x+w*0.62,'#e889b6');
+  }
+  else if(k==='scope'){el('circle',{cx:R-40,cy:F-22,r:20,fill:'none',stroke:c,opacity:.8},fg);el('circle',{cx:R-40,cy:F-22,r:10,fill:'none',stroke:c,opacity:.5},fg);el('line',{x1:R-40,y1:F-22,x2:R-24,y2:F-34,stroke:c,'stroke-width':1.5},fg);}
+  else if(k==='probe'){for(i=0;i<3;i++)el('path',{d:'M'+(R-30-i*34)+' '+(F-10)+' l18 0 l8 -5 l-8 -5 l-18 0 z',fill:'#7f8a9e',stroke:'#1b2230'},fg);}
+  else if(k==='rack'){for(i=0;i<Math.min(9,Math.floor((w-120)/22));i++){var rx=R-20-i*22;el('rect',{x:rx,y:F-40,width:16,height:40,fill:'#121c2e',stroke:'#3d5580'},fg);for(var j2=0;j2<5;j2++)el('rect',{x:rx+3,y:F-36+j2*7,width:3,height:2,fill:(i+j2)%4?c:'#e8c37a','class':(i+j2)%3?'':'pulse',style:'animation-delay:-'+((i*3+j2)%5)*.4+'s'},fg);}}
+  else if(k==='tank'){for(i=0;i<Math.min(4,Math.floor((w-110)/48));i++){el('rect',{x:R-40-i*48,y:F-40,width:38,height:40,rx:14,fill:'#4a5466',stroke:'#1b2230'},fg);el('rect',{x:R-36-i*48,y:F-24,width:30,height:3,fill:'#3fc1a5',opacity:.7},fg);}}
+  else if(k==='board'){var bw=Math.min(142,w-110);screenBox(fg,R-bw,F-42,bw,34,'#8fa8e0');for(i=0;i<4;i++)for(var j3=0;j3<3;j3++)el('rect',{x:R-bw+6+i*(bw-12)/4,y:F-38+j3*9,width:(bw-12)/4-6,height:6,rx:1,fill:['#3fc1a5','#f0a948','#e889b6','#8fa8e0'][i],opacity:j3<2-(i%2)?.75:.25},fg);}
+  else if(k==='engine'){
+    for(i=0;i<3;i++){screenBox(fg,x+180+i*70,F-40,56,18,c);}
+    el('rect',{x:R-80,y:F-26,width:70,height:26,rx:4,fill:'#14223a',stroke:'#3d5580'},fg);
+    el('rect',{x:R-74,y:F-21,width:58,height:3,fill:c},fg);
+  }
+  else if(k==='airlock'){
+    for(i=0;i<5;i++){var ax=x+150+i*62;el('rect',{x:ax,y:y+6,width:6,height:rm.h-10,rx:2,fill:'#e8c37a',opacity:.25+i*.12},fg);el('ellipse',{cx:ax+3,cy:y+rm.h/2,rx:14,ry:20,fill:'none',stroke:'#e8c37a',opacity:.35},fg);}
+    var parcel=el('rect',{x:x+140,y:F-14,width:14,height:10,rx:2,fill:'#e889b6','class':'walk'},fg);parcel.style.setProperty('--d','310px');parcel.style.setProperty('--t','11s');
+  }
+}
+
+/* ---------- draw rooms ---------- */
+var CREW_IN={lounge:3,mess:5,carto:2,holo:2,eng:2,shuttle:2,transporter:1,cargo:1,science:1,sys:1,diag:1,security:1,qm:1,ops:1,archives:1,computer:0,yeoman:1,sensorsRoom:1,away:2,awayroom:1,hydro:1,galley:1,patchbay:1,board:1,gpu:1,evals:1,customs:1,watch:1,probe:1,holo2:1,charter:1,rules:0,contract:1,manifest:0,briefs:1,handovers:0,orders:1,yeomanfiles:0,designsys:1,config:1,hindsight:0,vault:0,nas:0,tanks:0,crewA:0,crewB:0,quarters:0,ready:0};
+var roomEls={};
+Object.keys(ROOMS).forEach(function(id){
+  var rm=ROOMS[id],inf=info(id);if(!inf)return;
+  var layer=rm.deck===11&&id==='customs'?gNeck:roomLayers[rm.body];
+  var c=RC[inf.rail]||'#8fa8e0';
+  if(PL[id]&&/^(armory|phaser|torpedoBay)$/.test(id))c='#ff9b4a';
+  var g=el('g',{'class':'room st-'+inf.status+(inf.file?' code':''),'data-id':id,tabindex:0,role:'button','aria-label':inf.name+', deck '+rm.deck},layer);
+  roomEls[id]=g;
+  el('rect',{x:rm.x,y:rm.y+3,width:rm.w,height:rm.h-5,rx:3,'class':'bg'},g);
+  el('rect',{x:rm.x+2,y:rm.y+5,width:rm.w-4,height:rm.h-9,rx:2,fill:c,'class':'wash'},g);
+  el('rect',{x:rm.x+4,y:rm.y+5,width:rm.w-8,height:2.5,rx:1,fill:c,'class':'lamp'},g);
+  el('rect',{x:rm.x+2,y:rm.y+rm.h-4,width:rm.w-4,height:1.5,fill:'#3d5580'},g);
+  if(rm.kind==='bridge')drawBridge(rm,g);else furnish(rm,c,g);
+  if(inf.status==='live'&&rm.kind!=='bridge'){
+    var n=CREW_IN[id];if(n===undefined)n=inf.station?1:0;
+    var F=rm.y+rm.h-4;
+    for(var i=0;i<n;i++){
+      var px=rm.x+rm.w*(0.4+0.25*rnd());
+      if(id==='mess')px=rm.x+110+i*((rm.w-150)/Math.max(1,n));
+      var tunic=inf.station?c:['#3fc1a5','#f0a948','#e889b6','#8fa8e0','#e8c37a'][Math.floor(rnd()*5)];
+      var space=rm.x+rm.w-px-14;
+      person(g,px,F,tunic,{walk:(rnd()<.55)?Math.max(-50,Math.min(space,-20+rnd()*60)):0});
+    }
+    if(id==='mess'){person(g,rm.x+50,F,'#c9b3ff',{walk:30});}
+  }
+  var tx=el('text',{x:rm.x+10,y:rm.y+21,'class':'rname'},g);
+  var sx=el('text',{x:rm.x+10,y:rm.y+34,'class':'rsub'},g);
+  g._lab={n:tx,s:sx,inf:inf,rm:rm};
+});
+
+function drawBridge(rm,g){
+  var F=rm.y+rm.h-4,x=rm.x,w=rm.w;
+  el('rect',{x:x+w-12,y:rm.y+8,width:7,height:rm.h-14,rx:2,fill:'#4fa3ff',opacity:.7,'class':'pulse'},g);
+  el('rect',{x:x+w*0.22,y:F-14,width:w*0.16,height:4,rx:2,fill:'#8a5a32'},g);
+  var seats=[['ops',.07,'OPS'],['tactical',.27,'TAC'],['xo',.44,'XO'],['captain',.57,'CAPT'],['helm',.74,'HELM'],['nav',.88,'NAV']];
+  seats.forEach(function(sp){
+    var s=ST[sp[0]],cx=x+w*sp[1],c=RC[s.rail];
+    var sg=el('g',{'class':'room seat st-'+s.status,'data-id':sp[0],tabindex:0,role:'button','aria-label':s.name+' on the bridge'},g);
+    el('rect',{x:cx-18,y:rm.y+6,width:36,height:rm.h-10,rx:3,fill:'transparent'},sg);
+    if(sp[0]==='ops'||sp[0]==='helm'||sp[0]==='nav'){deskF(sg,cx-2,cx+18,F,c);}
+    if(sp[0]==='tactical'){el('rect',{x:cx-6,y:F-20,width:14,height:20,rx:2,fill:'#3a2418',stroke:'#ff9b4a','stroke-dasharray':'3 2'},sg);}
+    else{
+      el('rect',{x:cx-9,y:F-15,width:5,height:12,rx:2,fill:sp[0]==='captain'?'#6b5530':'#2a3a56'},sg);
+      el('rect',{x:cx-10,y:F-6,width:16,height:3.5,rx:2,fill:sp[0]==='captain'?'#6b5530':'#2a3a56'},sg);
+      person(sg,cx-1,F-2,c,{sit:true});
+    }
+    var lt=el('text',{x:cx,y:rm.y+18,'class':'rsub','text-anchor':'middle'},sg);lt.textContent=sp[2];lt.style.fill=sp[0]==='tactical'?'#ff9b4a':c;
+    roomEls[sp[0]+'@bridge']=sg;
+  });
+}
+
+/* lifts */
+LIFTS.forEach(function(l,i){
+  var g=groupFor[l.body],y0=dTop(l.from)+4,y1=dTop(l.to+1)-4;
+  var lg=el('g',{'class':'liftg'},g);
+  el('rect',{x:l.x-9,y:y0,width:18,height:y1-y0,rx:3,fill:'#0b1220',stroke:'#3d5580'},lg);
+  for(var d=l.from;d<=l.to;d++)el('rect',{x:l.x-9,y:dTop(d)+DH-6,width:18,height:2,fill:'#3d5580'},lg);
+  var car=el('rect',{x:l.x-7,y:y0+4,width:14,height:DH-14,rx:2,fill:'#e8c37a','class':'car',opacity:.9},lg);
+  car.style.setProperty('--h',(l.to-l.from)*DH+'px');car.style.setProperty('--h2',Math.round((l.to-l.from)/2)*DH+'px');car.style.setProperty('--t',(12+i*3)+'s');car.style.setProperty('--dl',(-i*4)+'s');
+});
+/* warp core */
+(function(){
+  var g=gEng,y0=dTop(CORE.from)-8,y1=dTop(CORE.to+1)-2,cx=(CORE.x0+CORE.x1)/2;
+  var cg=el('g',{'class':'hit','data-id':'core'},g);
+  el('rect',{x:cx-60,y:y0,width:120,height:y1-y0,rx:30,fill:'#3fc1a5',opacity:.18,filter:'url(#soft)','class':'pulse'},cg);
+  el('rect',{x:cx-22,y:y0,width:44,height:y1-y0,rx:6,fill:'url(#coreG)',stroke:'#0c2a26','stroke-width':2},cg);
+  var clip=el('clipPath',{id:'coreclip'},defs);el('rect',{x:cx-22,y:y0,width:44,height:y1-y0,rx:6},clip);
+  var fl=el('g',{'clip-path':'url(#coreclip)'},cg);var inner=el('g',{'class':'flow'},fl);
+  for(var y=y0;y<y1+60;y+=26)el('rect',{x:cx-22,y:y,width:44,height:8,fill:'#e6fff8',opacity:.55},inner);
+  for(var d=CORE.from;d<=CORE.to;d++)el('rect',{x:cx-30,y:dTop(d)+DH-6,width:60,height:6,rx:2,fill:'#5f6a7e',stroke:'#1b2230'},cg);
+  el('rect',{x:cx-36,y:y0-6,width:72,height:10,rx:3,fill:'#8d98ab'},cg);
+  var t=el('text',{x:cx,y:y0-14,'text-anchor':'middle','class':'tag'},cg);t.textContent='WARP CORE · LOCAL';t.style.fill='#3fc1a5';
+})();
+/* deflector on the sensor pod's bow */
+(function(){
+  var b=B.pod,g=gPod,x=b.x1-30;
+  el('ellipse',{cx:x+16,cy:b.cy,rx:60,ry:46,fill:'#4fa3ff',opacity:.25,filter:'url(#soft)','class':'pulse'},g);
+  el('ellipse',{cx:x,cy:b.cy,rx:18,ry:38,fill:'#0b1a33',stroke:'#1b2230','stroke-width':2},g);
+  el('ellipse',{cx:x+2,cy:b.cy,rx:13,ry:31,fill:'url(#defl)','class':'hit','data-id':'sensorsRoom'},g);
+  for(var k=1;k<4;k++)el('ellipse',{cx:x+2-k,cy:b.cy,rx:13-k*3.5,ry:31-k*8,fill:'none',stroke:'#e6f6ff',opacity:.35},g);
+})();
+/* dome cap + rim lights round the sphere */
+(function(){
+  el('ellipse',{cx:3150,cy:25,rx:44,ry:6,fill:'#e8c37a',opacity:.75},gSau);
+  for(var a=-80;a<=80;a+=5){var r=a*Math.PI/180,px=3150+342*Math.sin(r),py=372+342*Math.cos(r);if(insideHigher('sph',px,py)||inside(B.pod,px,py))continue;el('circle',{cx:px,cy:py,r:2,fill:'#4fa3ff',opacity:.6,'class':(a/5)%2?'':'pulse'},gSau);}
+})();
+/* torpedo launcher port where the habitat meets the sphere, underneath */
+el('ellipse',{cx:2700,cy:566,rx:16,ry:7,fill:'#ff5a3a',opacity:.7,'class':'pulse hit','data-id':'torpedoBay'},gHab);
+
+/* body tags */
+function tag(g,x,y,a,b2){var t=el('text',{x:x,y:y,'class':'tag'},g);t.textContent=a;var s=el('text',{x:x,y:y+16,'class':'tagsub'},g);s.textContent=b2;}
+tag(gSau,3440,60,'BODY I · COMMAND SPHERE','DECKS 01–13 · BRIDGE ON DECK 2');
+tag(gHab,1850,252,'BODY II · HABITAT HULL','DECKS 06–10 · QUARTERS, STORES, WEAPONS');
+tag(gEng,230,560,'BODY III · ENGINEERING HULL','DECKS 11–16 · CORE, PATCHES, CONFIG, NAS');
+tag(gPod,3420,676,'BODY IV · SENSOR POD','DECKS 10–11 · ARRAY + DEFLECTOR');
+
+/* ---------- labels ---------- */
+var labelMode='station';
+function fitText(t,maxw){t.style.display='';if(t.getComputedTextLength()>maxw){var s=t.textContent;while(s.length>3&&t.getComputedTextLength()>maxw){s=s.slice(0,-2);t.textContent=s+'…';}}}
+var FURN_W={console:70,office:70,lab:100,core:70,med:70,quarters:70,scope:70,probe:110,doc:130,terminal:130,gpu:240,table:100,lounge:130,shelves:90,chart:100,garden:110,pads:80,armory:110,torpedo:130,board:150,rack:120,tank:110,cargo:110,galley:90,gym:130,lockers:100};
+function drawLabels(){
+  Object.keys(roomEls).forEach(function(k){
+    var g=roomEls[k];if(!g._lab)return;var L=g._lab,inf=L.inf,rm=L.rm;
+    var maxw=Math.max(rm.w*0.42,rm.w-20-(FURN_W[rm.kind]||20));
+    if(rm.kind==='cabins'||rm.kind==='holo'||rm.kind==='mess'||rm.kind==='bay'||rm.kind==='airlock'||rm.kind==='engine')maxw=Math.min(rm.w-20,Math.max(maxw,170));
+    L.n.textContent=rm.kind==='bridge'?'':inf.name;
+    var sub='';
+    if(labelMode==='rank')sub=inf.station?RANK[inf.rank][0].toUpperCase():(inf.file?'FILE ROOM':'PLACE')+' · DECK '+rm.deck;
+    else if(labelMode==='rail')sub=(inf.rail||'').toUpperCase()+(inf.model?' · '+inf.model:'');
+    else if(inf.file)sub=inf.file;
+    else sub=inf.station?(inf.status==='live'?'ON DUTY':inf.status==='reserved'?'NOT HIRED':inf.status.toUpperCase()):(inf.status==='reserved'?'LIGHTS OFF':inf.status==='proposed'?'PROPOSED':'DECK '+rm.deck);
+    L.s.textContent=rm.kind==='bridge'?'':sub;
+    if(L.n.getComputedTextLength()>maxw&&inf.short)L.n.textContent=inf.short;
+    fitText(L.n,maxw);fitText(L.s,maxw);
+  });
+  svg.classList.toggle('labels-off',labelMode==='off');
+}
+
+/* ---------- starfield ---------- */
+var cv=document.getElementById('stars'),cx2=cv.getContext('2d'),stars=[];
+for(var i=0;i<900;i++)stars.push({x:rnd()*3880,y:rnd()*976,z:.2+rnd()*.8});
+var motion=true,last=0;
+function sky(ts){
+  var dt=last?Math.min(50,ts-last):16;last=ts;
+  cx2.clearRect(0,0,3880,976);
+  var g1=cx2.createRadialGradient(900,300,0,900,300,900);g1.addColorStop(0,'rgba(120,70,160,.16)');g1.addColorStop(1,'rgba(0,0,0,0)');cx2.fillStyle=g1;cx2.fillRect(0,0,3880,976);
+  var g2=cx2.createRadialGradient(3300,800,0,3300,800,800);g2.addColorStop(0,'rgba(40,110,160,.14)');g2.addColorStop(1,'rgba(0,0,0,0)');cx2.fillStyle=g2;cx2.fillRect(0,0,3880,976);
+  stars.forEach(function(s){if(motion)s.x-=s.z*dt*0.012;if(s.x<0)s.x+=3880;cx2.fillStyle='rgba(220,232,255,'+(0.25+s.z*0.6)+')';cx2.fillRect(s.x,s.y,s.z*2.2,s.z*2.2);});
+  if(motion)requestAnimationFrame(sky);else last=0;
+}
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(reduce){motion=false;}
+requestAnimationFrame(sky);
+
+
+/* ---------- selection + detail ---------- */
+var sel=null,log=[],pageOrd=1;
+function pillRank(r){var R2=RANK[r]||RANK.space,p='';if(R2[2])p='<span class="pips">'+R2[2].split('').map(function(c){return '<i class="'+(c==='H'?'h':'')+'"></i>';}).join('')+'</span>';return '<span class="pill" style="--c:var(--captain)">'+p+R2[1]+'</span>';}
+function railPill(r){return '<span class="pill solid" style="--c:'+(RC[r]||'#8fa8e0')+'">'+(r||'')+'</span>';}
+function statusPill(s){var c={live:'var(--good)',approved:'var(--mixed)',proposed:'var(--mixed)',reserved:'var(--muted)'}[s]||'var(--muted)';var t={live:'LIVE',approved:'APPROVED',proposed:'PROPOSED',reserved:'NOT HIRED'}[s]||s;return '<span class="pill" style="--c:'+c+'">'+t+'</span>';}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function iconSvg(id,c,sz){var d=ICON[id]||ICON.holo;return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="'+d+'"/></svg>';}
+function where(id){
+  var rm=ROOMS[id];if(rm)return 'Deck '+rm.deck+' · '+bodyName(rm.body);
+  if(['captain','xo','helm','nav','ops','screen','tactical'].indexOf(id)>=0)return 'Deck 2 · Main Bridge';
+  if(id==='weaponstech')return 'Deck 9 · Weapons Locker';
+  if(id==='torpedo')return 'Deck 10 · Torpedo Bay';
+  if(id==='phaserStrip')return 'Hull · round the command sphere';
+  if(id==='core')return 'Decks 12–16 · Engineering hull';
+  if(id==='podCodex')return 'Dorsal rail pod, on a pylon from Engineering';
+  if(id==='podClaude')return 'Ventral rail pod, on a pylon from Engineering';
+  return '';
+}
+function bodyName(b){return {sau:'Body I · Command sphere',hab:'Body II · Habitat hull',eng:'Body III · Engineering hull',pod:'Body IV · Sensor pod'}[b]||'';}
+function roomOf(stationId){
+  var r=[];Object.keys(PL).forEach(function(k){if(PL[k].who.indexOf(stationId)>=0&&ROOMS[k])r.push(k);});return r;
+}
+function select(id){
+  if(PL[id]&&PL[id].go)id=PL[id].go;
+  sel=id;stopNv();
+  document.querySelectorAll('.room.sel').forEach(function(e){e.classList.remove('sel');});
+  var targets=[roomEls[id],roomEls[id+'@bridge']];targets.forEach(function(e){if(e)e.classList.add('sel');});
+  var rm=ROOMS[id];
+  document.querySelectorAll('.ruler g').forEach(function(g){g.classList.toggle('on',!!rm&&+g.getAttribute('data-deck')===rm.deck||(!rm&&roomEls[id+'@bridge']&&g.getAttribute('data-deck')==='2'));});
+  document.querySelectorAll('.dr').forEach(function(d){d.classList.toggle('on',!!rm&&+d.getAttribute('data-deck')===rm.deck);});
+  renderDetail(id);
+}
+function renderDetail(id){
+  var inf=info(id),box=document.getElementById('detail');if(!inf)return;
+  var c=RC[inf.rail]||'#8fa8e0',h='';
+  h+='<div class="pk">'+esc(where(id).toUpperCase())+'</div>';
+  h+='<div class="pt">'+iconSvg(inf.station?id:(PL[id]&&PL[id].who[0])||id,c,56)+'<div><h2>'+esc(inf.name)+'</h2><div class="short">'+esc(inf.station?(inf.s.aliases||[]).join(' · '):'A place aboard')+'</div></div></div>';
+  h+='<div class="pills">'+railPill(inf.rail)+statusPill(inf.status)+(inf.station?pillRank(inf.rank):'<span class="pill">PLACE</span>')+(inf.model?'<span class="pill">'+esc(inf.model)+'</span>':'')+'</div>';
+  if(inf.station){
+    var s=inf.s;
+    h+='<div class="duty">'+esc(s.duty)+'</div>';
+    h+='<dl class="kv"><dt>Rank</dt><dd>'+esc(RANK[s.rank]?RANK[s.rank][0]:'')+'</dd><dt>Brain</dt><dd>'+esc(s.brain)+'</dd><dt>Profile</dt><dd>'+esc(s.profile)+'</dd><dt>Answers to</dt><dd>'+esc(s.answers)+'</dd>';
+    var rooms=roomOf(id);if(rooms.length)h+='<dt>Also found in</dt><dd class="who">'+rooms.map(function(r){return '<button class="linkbtn" data-go="'+r+'">'+esc(PL[r].name)+'</button>';}).join('')+'</dd>';
+    h+='</dl>';
+    if(s.note)h+='<div class="note" style="--c:'+c+'">'+esc(s.note)+'</div>';
+  }else{
+    var p=inf.p;
+    h+='<div class="duty">'+esc(p.desc)+'</div>';
+    if(p.file)h+='<div class="pk">FILE · '+esc(p.file)+' · SNAPSHOT 30/10</div>';
+    if(p.term)h+='<div class="term">'+p.term.map(function(l){return l.charAt(0)==='$'?'<span class="pr">'+esc(l)+'</span>':esc(l);}).join('\n')+'</div>';
+    if(p.nvtop)h+=nvHTML();
+    if(p.who.length)h+='<dl class="kv"><dt>Who works here</dt><dd class="who">'+p.who.map(function(w){var ss=ST[w];return '<button class="linkbtn" data-go="'+w+'" style="border-color:'+RC[ss.rail]+'">'+esc(ss.short||ss.name)+'</button>';}).join('')+'</dd></dl>';
+  }
+  var feed=FEED.filter(function(f){return f.from===id||(PL[id]&&PL[id].who.indexOf(f.from)>=0);}).concat(log.filter(function(l){return l.to===id;}));
+  h+='<div class="pk" style="margin-top:6px">CHANNEL · '+(feed.length?feed.length+' ITEMS · SAMPLE':'QUIET')+'</div><div class="feedlist">';
+  feed.slice(0,6).forEach(function(f){
+    var kc={hail:'#e8c37a',alert:'#ff8a8a',card:'#8fa8e0',info:'#7f93b5',ask:'#e8c37a',order:'#e8c37a',approve:'#7fd8a8',deny:'#f08a7a',write:'#e8c37a'}[f.kind]||'#8fa8e0';
+    h+='<div class="fi"><time>'+esc(f.t)+'</time><span class="k" style="--c:'+kc+'">'+esc(f.kind.toUpperCase())+'</span><span>'+esc(f.text)+'</span>';
+    if(f.kind==='hail'&&!f.done)h+='<div class="acts"><button class="bb gold" data-hail="'+f.id+'" data-a="approve">Approve</button><button class="bb deny" data-hail="'+f.id+'" data-a="deny">Deny</button></div>';
+    h+='</div>';
+  });
+  if(!feed.length)h+='<div class="small-note">Nothing posted from here today.</div>';
+  h+='</div>';
+  box.innerHTML=h;
+  if(inf.p&&inf.p.nvtop)startNv();
+  document.getElementById('badgeTo').textContent='COMM BADGE · TO '+(inf.station?inf.short:inf.name).toUpperCase();
+  var pending=FEED.some(function(f){return f.kind==='hail'&&!f.done&&(f.from===id||(PL[id]&&PL[id].who.indexOf(f.from)>=0));});
+  document.getElementById('cApprove').disabled=!pending;document.getElementById('cDeny').disabled=!pending;
+}
+document.getElementById('detail').addEventListener('click',function(e){
+  var b=e.target.closest('[data-go]');if(b){select(b.getAttribute('data-go'));return;}
+  var hb=e.target.closest('[data-hail]');if(hb)answer(hb.getAttribute('data-hail'),hb.getAttribute('data-a'));
+});
+function now(){return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'<TIMEZONE>'}).format(new Date());}
+function answer(hid,a){
+  var f=FEED.find(function(x){return x.id===hid;});if(!f||f.done)return;f.done=true;
+  addLog({to:f.from,kind:a,text:(a==='approve'?'APPROVED: ':'DENIED: ')+f.text});
+  renderDetail(sel);
+}
+function addLog(o){o.t=now();o.id='p'+(pageOrd);o.ord='PAGE-'+String(pageOrd++).padStart(2,'0');log.unshift(o);renderLog();}
+function renderLog(){
+  var all=log.map(function(l){return {t:l.t,who:'You → '+((info(l.to)||{}).short||l.to),text:l.ord+' · '+l.text};}).concat(FEED.slice().sort(function(a,b){return a.t<b.t?1:-1;}).map(function(f){var s=ST[f.from];return {t:f.t,who:s?(s.short||s.name):f.from,text:f.text};}));
+  document.getElementById('log').innerHTML=all.map(function(l){return '<div class="lg"><time>'+esc(l.t)+'</time><span><b>'+esc(l.who)+'</b> '+esc(l.text)+'</span></div>';}).join('');
+}
+['cAsk','cOrder'].forEach(function(b){document.getElementById(b).addEventListener('click',function(){
+  if(!sel)return;var w=document.getElementById('writeBox');w.hidden=false;w.dataset.kind=b==='cAsk'?'ask':'order';
+  document.getElementById('writeText').placeholder=b==='cAsk'?'Ask '+(info(sel).short)+' a question, in your own words':'Give '+(info(sel).short)+' an order, in your own words';document.getElementById('writeText').focus();
+});});
+document.getElementById('cWrite').addEventListener('click',function(){var w=document.getElementById('writeBox');w.hidden=!w.hidden;w.dataset.kind='write';if(!w.hidden)document.getElementById('writeText').focus();});
+document.getElementById('cSend').addEventListener('click',function(){
+  var t=document.getElementById('writeText'),v=t.value.trim();if(!v||!sel)return;
+  var k=document.getElementById('writeBox').dataset.kind||'write';
+  addLog({to:sel,kind:k==='write'?'order':k,text:(k==='ask'?'ASK: ':'ORDER: ')+v});t.value='';document.getElementById('writeBox').hidden=true;renderDetail(sel);
+});
+['cApprove','cDeny'].forEach(function(b){document.getElementById(b).addEventListener('click',function(){
+  var f=FEED.find(function(x){return x.kind==='hail'&&!x.done&&(x.from===sel||(PL[sel]&&PL[sel].who.indexOf(x.from)>=0));});if(f)answer(f.id,b==='cApprove'?'approve':'deny');
+});});
+
+/* ship interaction */
+var tip=document.getElementById('tip'),shipbox=document.getElementById('shipbox');
+function scaleNow(){return stage.getBoundingClientRect().width/5120;}
+svg.addEventListener('click',function(e){var g=e.target.closest('[data-id]');if(g)select(g.getAttribute('data-id'));});
+svg.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){var g=e.target.closest('[data-id]');if(g){e.preventDefault();select(g.getAttribute('data-id'));}}});
+svg.addEventListener('mousemove',function(e){
+  var g=e.target.closest('[data-id]');if(!g){tip.style.display='none';return;}
+  var id=g.getAttribute('data-id'),inf=info(id);if(!inf){tip.style.display='none';return;}
+  var r=shipbox.getBoundingClientRect(),s=scaleNow();
+  tip.innerHTML='<b>'+esc(inf.name)+'</b><span>'+esc(where(id).toUpperCase())+'</span><br><span style="color:'+(RC[inf.rail]||'#8fa8e0')+'">'+esc((inf.rail||'').toUpperCase()+(inf.model?' · '+inf.model:''))+'</span>';
+  tip.style.display='block';
+  var x=(e.clientX-r.left)/s+18,y=(e.clientY-r.top)/s+18;if(x>3500)x-=380;if(y>860)y-=110;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+});
+svg.addEventListener('mouseleave',function(){tip.style.display='none';});
+
+/* rail toggles */
+function group(id,fn){var g=document.getElementById(id);g.addEventListener('click',function(e){var b=e.target.closest('.rb');if(!b)return;g.querySelectorAll('.rb').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});fn(b.getAttribute('data-v'));});}
+function focusBody(v){svg.setAttribute('data-focus',v);document.querySelectorAll('#gBody .rb').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-v')===v?'true':'false');});}
+group('gBody',focusBody);
+group('gView',function(v){svg.classList.toggle('plating',v==='plating');});
+group('gLights',function(v){svg.classList.toggle('night',v==='night');svg.classList.toggle('red',v==='red');document.getElementById('redbar').style.background=v==='red'?'var(--t3)':'var(--lc-a)';});
+group('gLabels',function(v){labelMode=v;drawLabels();});
+group('gMotion',function(v){svg.classList.toggle('still',v==='off');var was=motion;motion=v==='on'&&!reduce;if(motion&&!was)requestAnimationFrame(sky);});
+
+var DECKNAME={1:'Observation Dome',2:'Bridge',3:'Briefing Room · Yeoman',4:'Quarters · Ship\'s Charter',5:'Computer · Orders · Contract',6:'Archives · Crew Quarters A',7:'Mess Hall · Crew Quarters B',8:'Sciences · Stores',9:'Cartography · Weapons',10:'Briefs · Shuttles · Sensors',11:'Order Log · Customs · Probes',12:'Yeoman\'s Files · Main Engineering',13:'Galley · Patch Bay · Config',14:'GPU Bay · Security',15:'Ops Center · Vault',16:'NAS Hold · Data Tanks'};
+var ROMAN={sau:'I',hab:'II',eng:'III',pod:'IV'};
+function deckBodies(d){var seen=[];Object.keys(ROOMS).forEach(function(k){var r=ROOMS[k];if(r.deck===d){var b=k==='customs'?'NECK':ROMAN[r.body];if(seen.indexOf(b)<0)seen.push(b);}});return seen.join(' · ');}
+
+/* ---------- GPU bay: an nvtop-style readout with sample numbers ---------- */
+var nvT=null,nvHist=[],nvS={u:58,m:18.6,t:63};
+function nvHTML(){return '<div class="nv" id="nv"><div class="hd"><span>nvtop · the GPU host</span><span>SAMPLE · NOT LIVE</span></div>'+
+  '<div class="dim">Device 0 [NVIDIA GeForce RTX 3090] PCIe GEN 4@16x · 24.0 GiB</div>'+
+  '<div class="row"><span>GPU</span><span class="bar"><i id="nvG"></i></span><span id="nvGt"></span></div>'+
+  '<div class="row"><span>MEM</span><span class="bar mem"><i id="nvM"></i></span><span id="nvMt"></span></div>'+
+  '<div class="row"><span>TEMP</span><span id="nvO" style="grid-column:2/4"></span></div>'+
+  '<canvas id="nvC" width="800" height="140"></canvas>'+
+  '<table><thead><tr><th>PID</th><th>USER</th><th>TYPE</th><th>GPU</th><th>GPU MEM</th><th>COMMAND</th></tr></thead><tbody id="nvP"></tbody></table>'+
+  '<div class="warn">These numbers are made up on this page. To wire it up, Ops would write a reading every 5 s on the GPU host, for example <code style="font-family:var(--mono);font-size:12px;color:#cfe9e2">nvidia-smi --query-gpu=utilization.gpu,memory.used,temperature.gpu,power.draw --format=csv -l 5</code>, and the Holodeck build would show that file here.</div></div>';}
+function nvStep(){
+  nvS.u=Math.max(4,Math.min(99,nvS.u+(Math.random()-.5)*22+(nvS.u<30?6:0)));
+  nvS.m=Math.max(17.9,Math.min(21.5,nvS.m+(Math.random()-.5)*.25));
+  nvS.t+=((40+nvS.u*.35)-nvS.t)*.2;
+  nvHist.push([nvS.u,nvS.m/24*100]);if(nvHist.length>120)nvHist.shift();
+}
+function nvDraw(){
+  var g=document.getElementById('nvG');if(!g){stopNv();return;}
+  g.style.width=nvS.u.toFixed(0)+'%';document.getElementById('nvGt').textContent=nvS.u.toFixed(0)+'%  '+(1395+nvS.u*3.5).toFixed(0)+' MHz';
+  document.getElementById('nvM').style.width=(nvS.m/24*100).toFixed(1)+'%';document.getElementById('nvMt').textContent=nvS.m.toFixed(1)+' / 24.0 GiB';
+  document.getElementById('nvO').textContent=nvS.t.toFixed(0)+'°C   FAN '+(30+nvS.u*.45).toFixed(0)+'%   POW '+(105+nvS.u*2.3).toFixed(0)+' / 350 W';
+  var c=document.getElementById('nvC'),x=c.getContext('2d'),W=c.width,H=c.height;x.clearRect(0,0,W,H);
+  x.strokeStyle='rgba(95,143,132,.25)';x.lineWidth=1;for(var i=1;i<4;i++){x.beginPath();x.moveTo(0,H*i/4);x.lineTo(W,H*i/4);x.stroke();}
+  [[0,'#7fe8c0'],[1,'#a9bde8']].forEach(function(s){x.strokeStyle=s[1];x.lineWidth=2;x.beginPath();nvHist.forEach(function(p,j){var px=W-(nvHist.length-1-j)*(W/119),py=H-4-(p[s[0]]/100)*(H-8);if(j)x.lineTo(px,py);else x.moveTo(px,py);});x.stroke();});
+  x.fillStyle='#7fe8c0';x.font='12px JetBrains Mono, monospace';x.fillText('GPU %',8,16);x.fillStyle='#a9bde8';x.fillText('MEM %',70,16);x.fillStyle='#5f8f84';x.fillText('last 2 min',W-90,16);
+  var evalOn=nvS.u>70;
+  document.getElementById('nvP').innerHTML='<tr><td>2417</td><td>ollama</td><td>Compute</td><td>'+(evalOn?(nvS.u*.6):nvS.u).toFixed(0)+'%</td><td>'+(nvS.m-(evalOn?1.6:0.3)).toFixed(1)+' GiB</td><td>ollama runner · the local model (warp core)</td></tr>'+
+    (evalOn?'<tr><td>3108</td><td>analyst</td><td>Compute</td><td>'+(nvS.u*.4).toFixed(0)+'%</td><td>1.3 GiB</td><td>python eval_harness.py (Science)</td></tr>':'')+
+    '<tr><td>1022</td><td>root</td><td>Graphic</td><td>0%</td><td>0.3 GiB</td><td>Xorg</td></tr>';
+}
+function startNv(){stopNv();if(!nvHist.length)for(var i=0;i<120;i++)nvStep();nvDraw();nvT=setInterval(function(){nvStep();nvDraw();},1000);}
+function stopNv(){if(nvT){clearInterval(nvT);nvT=null;}}
+
+/* ---------- console: decks, roster, plan view ---------- */
+(function(){
+  var h='';
+  for(var d=1;d<=16;d++){
+    var rs=Object.keys(ROOMS).filter(function(k){return ROOMS[k].deck===d;}).sort(function(a,b){return ROOMS[a].x-ROOMS[b].x;});
+    var names=d===2?'Captain · Number One · Tactical · Helm · Navigation · Ops · Viewscreen':rs.map(function(k){return info(k).short;}).join(' · ');
+    h+='<div class="dr" data-deck="'+d+'" tabindex="0" role="button" title="'+esc(DECKNAME[d]+': '+names)+'"><span class="n">'+(d<10?'0':'')+d+'</span><span class="b">'+deckBodies(d)+'</span><span class="rs"><b style="color:var(--text);font-weight:600">'+esc(DECKNAME[d])+'</b> · '+esc(names)+'</span></div>';
+  }
+  var dk=document.getElementById('decks');dk.innerHTML=h;
+  function pickDeck(d){var first=Object.keys(ROOMS).filter(function(k){return ROOMS[k].deck===d;}).sort(function(a,b){return ROOMS[a].x-ROOMS[b].x;}).pop();select(first||'captain');}
+  dk.addEventListener('click',function(e){var r=e.target.closest('.dr');if(r)pickDeck(+r.getAttribute('data-deck'));});
+  dk.addEventListener('keydown',function(e){if(e.key==='Enter'){var r=e.target.closest('.dr');if(r)pickDeck(+r.getAttribute('data-deck'));}});
+
+  var order=['captain','xo','yeoman','computer','ops','helm','nav','eng','sys','diag','science','sensors','carto','holo','archives','qm','security','away','strategist','tactical','weaponstech','torpedo','design','calib','doctor','comms','life'];
+  var live=0;
+  document.getElementById('roster').innerHTML=order.map(function(id){var s=ST[id];if(s.status==='live')live++;var cls=s.status==='reserved'?'off':(s.status==='live'?'':'prop');
+    return '<button class="rr '+cls+'" style="--c:'+RC[s.rail]+'" data-go="'+id+'"><i></i><span>'+esc(s.short||s.name)+'</span><em>'+RANK[s.rank][1]+'</em></button>';}).join('');
+  document.getElementById('rosterCount').textContent=live+' LIVE · '+(order.length-live)+' WAITING';
+  document.getElementById('sCrew').textContent=live;
+  document.getElementById('sRooms').textContent=Object.keys(ROOMS).length;
+  document.getElementById('roster').addEventListener('click',function(e){var b=e.target.closest('[data-go]');if(b)select(b.getAttribute('data-go'));});
+
+  /* dorsal plan view */
+  var pv='<svg viewBox="0 0 680 200" preserveAspectRatio="xMidYMid meet" aria-label="Plan view of the melded hull">'+
+   '<g class="pb" data-b="eng"><path d="M40 100 Q40 58 120 56 L360 62 Q440 100 360 138 L120 144 Q40 142 40 100Z" fill="#d9935f22" stroke="#d9935f"/><text x="60" y="172" fill="#d9935f" font-family="Chakra Petch" font-size="15" font-weight="600">III ENGINEERING</text></g>'+
+   '<g class="pb" data-b="hab"><path d="M230 100 Q230 66 290 64 L520 70 L520 130 L290 136 Q230 134 230 100Z" fill="#c58fd033" stroke="#c58fd0"/><text x="300" y="56" fill="#c58fd0" font-family="Chakra Petch" font-size="15" font-weight="600">II HABITAT</text></g>'+
+   '<g class="pb" data-b="pod"><ellipse cx="640" cy="100" rx="34" ry="20" fill="none" stroke="#e889b6" stroke-dasharray="5 4"/></g>'+
+   '<g class="pb" data-b="sau"><circle cx="560" cy="100" r="84" fill="#e8c37a22" stroke="#e8c37a"/><circle cx="560" cy="100" r="84" fill="none" stroke="#ff9b4a" stroke-width="3" stroke-dasharray="16 6" opacity=".7"/><circle cx="560" cy="100" r="22" fill="#e8c37a" opacity=".7"/><text x="512" y="198" fill="#e8c37a" font-family="Chakra Petch" font-size="15" font-weight="600">I COMMAND</text></g>'+
+   '<g class="pb" data-b="rail"><rect x="20" y="91" width="300" height="18" rx="9" fill="#f0a94855" stroke="#f0a948"/><circle cx="318" cy="100" r="9" fill="#f0a948"/></g>'+
+   '<text x="616" y="70" fill="#e889b6" font-family="JetBrains Mono" font-size="11">IV BELOW</text>'+
+   '<text x="20" y="20" fill="#8ea3c4" font-family="JetBrains Mono" font-size="11">CODEX POD ON TOP · CLAUDE POD UNDERNEATH · DASHED = BELOW</text>'+
+   '</svg>';
+  var pvEl=document.getElementById('planv');pvEl.innerHTML=pv;
+  pvEl.addEventListener('click',function(e){var g=e.target.closest('.pb');if(g){var v=g.getAttribute('data-b');focusBody(svg.getAttribute('data-focus')===v?'all':v);}});
+})();
+
+/* ---------- clock + burn window (Wed 10:00 to Thu 10:00, local time) ---------- */
+function tick(){
+  var d=new Date(),parts={};
+  new Intl.DateTimeFormat('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'<TIMEZONE>'}).formatToParts(d).forEach(function(p){parts[p.type]=p.value;});
+  document.getElementById('clock').textContent=parts.weekday+' '+parts.hour+':'+parts.minute;
+  var wd=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].indexOf(parts.weekday),hm=(+parts.hour)*60+(+parts.minute);
+  var mins=wd*1440+hm,open=2*1440+600,close=3*1440+600,txt;
+  if(mins>=open&&mins<close){var left=close-mins;txt='open · '+Math.floor(left/60)+' h '+(left%60)+' min left';}
+  else{var until=(open-mins+7*1440)%(7*1440);txt='opens in '+Math.floor(until/1440)+' d '+Math.floor(until%1440/60)+' h';}
+  document.getElementById('burnTxt').textContent=txt;
+}
+tick();setInterval(tick,30000);
+
+/* ---------- fit to window ---------- */
+var stage=document.getElementById('stage'),fit=document.getElementById('fit'),native=false;
+function layout(){
+  var w=fit.clientWidth,s=native?1:Math.min(1,w/5120);
+  stage.style.transform='scale('+s+')';fit.style.height=(1440*s)+'px';
+  if(native){stage.style.position='relative';fit.style.height='auto';}else stage.style.position='absolute';
+  document.getElementById('scaleNote').textContent=native?'1:1 · SCROLL SIDEWAYS':'FIT · '+Math.round(s*100)+'%';
+}
+window.addEventListener('resize',layout);
+document.getElementById('bFit').addEventListener('click',function(){native=false;fit.classList.remove('native');this.setAttribute('aria-pressed','true');document.getElementById('bNative').setAttribute('aria-pressed','false');layout();});
+document.getElementById('bNative').addEventListener('click',function(){native=true;fit.classList.add('native');this.setAttribute('aria-pressed','true');document.getElementById('bFit').setAttribute('aria-pressed','false');layout();});
+layout();
+
+renderLog();
+drawLabels();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawLabels);
+select('captain');
+})();
+</script>

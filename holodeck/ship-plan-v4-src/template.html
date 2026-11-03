@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hermes ship plan v3</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&amp;family=Barlow:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+body{margin:0;background:#070b14}
+a{color:#7fd8c4}
+button:focus-visible,a:focus-visible{outline:2px solid #ffffff;outline-offset:2px}
+.page{container-type:inline-size;container-name:page;min-height:100vh;background:radial-gradient(ellipse at 58% 42%, #121e36 0%, #070b14 72%);color:#e6ecf5;font-family:'Barlow','Helvetica Neue',sans-serif}
+.shell{display:grid;grid-template-columns:272px minmax(0,1fr);grid-template-rows:auto 1fr auto;grid-template-areas:"elbow top" "rail ship" "foot badge";padding:28px 32px;box-sizing:border-box;min-height:100vh}
+.elbow{grid-area:elbow;background:#8fa8e0;border-top-left-radius:76px;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end;padding:0 18px 14px 0;color:#0a0f1a}
+.top{grid-area:top;position:relative;display:flex;flex-direction:column;min-width:0}
+.bar{display:flex;gap:8px;height:30px}
+.bar span,.fbarrow span{display:block;height:100%}
+.fillet{position:absolute;left:0;top:30px;width:30px;height:30px;background:#8fa8e0}
+.fillet::after{content:'';position:absolute;inset:0;background:#070b14;border-top-left-radius:30px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;padding:16px 0 0 32px}
+.rail{grid-area:rail;display:flex;flex-direction:column;gap:6px;padding-top:6px}
+.rl{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:#8fa8e0;padding:10px 0 2px}
+.rb{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;min-height:40px;width:100%;padding:0 14px 7px;box-sizing:border-box;border:0;font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:15px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:left}
+.rb:hover{filter:brightness(1.2)}
+.rfill{flex-grow:1;min-height:30px;background:#8fa8e0;opacity:.28;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 14px 8px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:11px;color:#0a0f1a}
+.ship-area{grid-area:ship;padding:14px 0 0 32px;min-width:0}
+.shipwrap{position:relative;width:100%;container-type:inline-size}
+.ship{position:relative;width:100%;aspect-ratio:2200/1060}
+.ship .hull,.ship .beamsvg{position:absolute;left:0;top:0;width:100%;height:100%}
+.ship .beamsvg{pointer-events:none;overflow:visible}
+.tile{position:absolute;height:6.038%;box-sizing:border-box;padding:0 0.45cqw 0 2.5cqw;border-radius:0.45cqw;display:flex;flex-direction:column;justify-content:center;text-align:left;cursor:pointer;overflow:hidden;color:#e6ecf5;font-family:'Barlow',sans-serif;transition:filter .15s ease, opacity .4s ease, background .4s ease}
+.tile:hover,.card:hover{filter:brightness(1.3)}
+.tbar{position:absolute;left:0;top:0;width:4px;height:100%}
+.tile .t1,.tile .t2,.tile .t3{text-shadow:0 1px 2px #000,0 0 6px rgba(0,0,0,0.9)}
+.slot{position:absolute;left:0.364cqw;top:50%;width:1.818cqw;height:1.818cqw;transform:translateY(-50%);box-sizing:border-box;border-radius:50%;border-width:1.5px}
+.sicon{position:absolute;left:0.55cqw;top:50%;width:1.2cqw;height:1.2cqw;transform:translateY(-50%);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tcol{display:flex;flex-direction:column;gap:0.06cqw;min-width:0}
+.trow{display:flex;align-items:center;gap:0.3cqw;min-width:0;padding-right:0.9cqw}
+.t1{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:0.78cqw;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t2{font-family:'JetBrains Mono',monospace;font-size:0.54cqw;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t3{display:flex;align-items:center;gap:0.25cqw;font-family:'JetBrains Mono',monospace;font-size:0.5cqw;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdot{width:0.36cqw;height:0.36cqw;border-radius:50%;flex-shrink:0}
+.pips{gap:0.12cqw;flex-shrink:0}
+.pip{width:0.36cqw;height:0.36cqw;box-sizing:border-box;border-radius:50%;border:1.5px solid #e8c37a;flex-shrink:0}
+.live{position:absolute;right:0.32cqw;top:0.32cqw;width:0.28cqw;height:0.28cqw;border-radius:50%}
+.hail{position:absolute;right:0.3cqw;bottom:0.3cqw;min-width:0.82cqw;height:0.82cqw;box-sizing:border-box;padding:0 0.18cqw;border-radius:0.41cqw;background:#e8c37a;color:#1a1408;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.5cqw;display:flex;align-items:center;justify-content:center}
+.tok{position:absolute;width:1.818cqw;height:1.818cqw;transform:translate(-50%,-50%);box-sizing:border-box;border-radius:50%;border:2px solid;background:#0b1528;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:left 1.4s ease-in-out, top 1.4s ease-in-out, opacity .4s ease, box-shadow .4s ease}
+.tok:hover{filter:brightness(1.35)}
+.tok svg{width:58%;height:58%;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.cap{position:absolute;font-size:0.56cqw;line-height:1.35;font-style:italic;color:#8ea3c4}
+.console{--u:1cqw;position:absolute;left:65%;top:59.245%;width:34.636%;height:39.811%;box-sizing:border-box;display:flex;flex-direction:column;gap:calc(var(--u)*0.34);padding:calc(var(--u)*0.5) calc(var(--u)*0.6);border-radius:calc(var(--u)*0.6);background:rgba(9,13,22,0.95);border:1.5px solid;overflow:hidden;font-size:calc(var(--u)*0.62)}
+.chead{display:flex;align-items:center;gap:calc(var(--u)*0.45);min-width:0}
+.cicon{flex-shrink:0;width:calc(var(--u)*1.5);height:calc(var(--u)*1.5);box-sizing:border-box;border-radius:calc(var(--u)*0.35);border:1.5px solid;display:flex;align-items:center;justify-content:center;background:#121d33}
+.cicon svg,.ricon svg{width:62%;height:62%;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ctitles{flex-grow:1;min-width:0;display:flex;flex-direction:column;gap:calc(var(--u)*0.04)}
+.ctitle{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:calc(var(--u)*0.78);letter-spacing:.05em;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.csub{font-family:'JetBrains Mono',monospace;font-size:calc(var(--u)*0.48);color:#8ea3c4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cchip{flex-shrink:0;max-width:45%;padding:calc(var(--u)*0.12) calc(var(--u)*0.4);border-radius:calc(var(--u)*0.3);border:1.5px solid;font-family:'JetBrains Mono',monospace;font-size:calc(var(--u)*0.46);letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctabs{display:flex;gap:calc(var(--u)*0.22);flex-wrap:wrap}
+.ctab{min-height:calc(var(--u)*1.4);padding:0 calc(var(--u)*0.6);border-radius:calc(var(--u)*0.7);border:0;font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:calc(var(--u)*0.56);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.ctab:hover,.cbtn:hover,.cnav:hover{filter:brightness(1.25)}
+.clist{flex-grow:1;min-height:0;display:flex;flex-direction:column;gap:calc(var(--u)*0.18);overflow:hidden}
+.crow{display:flex;align-items:center;gap:calc(var(--u)*0.36);height:calc(var(--u)*2.3);flex-shrink:0;box-sizing:border-box;padding:0 calc(var(--u)*0.4);border-radius:calc(var(--u)*0.35);background:#0f1a2c;transition:opacity .3s ease}
+.ricon{flex-shrink:0;width:calc(var(--u)*1.35);height:calc(var(--u)*1.35);box-sizing:border-box;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;background:#0b1528}
+.rpill{flex-shrink:0;min-width:calc(var(--u)*2.6);box-sizing:border-box;text-align:center;padding:calc(var(--u)*0.06) calc(var(--u)*0.2);border-radius:calc(var(--u)*0.3);border:1px solid;font-family:'JetBrains Mono',monospace;font-size:calc(var(--u)*0.44);letter-spacing:.06em;white-space:nowrap}
+.rbody{flex-grow:1;min-width:0;display:flex;flex-direction:column;gap:calc(var(--u)*0.03)}
+.crow:hover{background:#15233b}
+.rmain{flex-grow:1;min-width:0;align-self:stretch;display:flex;align-items:center;gap:calc(var(--u)*0.36);padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.rmain:focus-visible{outline:2px solid #8fa8e0;outline-offset:2px;border-radius:calc(var(--u)*0.2)}
+.rgo{flex-shrink:0;font-family:'Chakra Petch',sans-serif;font-size:calc(var(--u)*0.8);line-height:1;color:#5f7499}
+.cdet{flex-grow:1;min-height:0;display:flex;flex-direction:column;gap:calc(var(--u)*0.32);overflow:auto;padding:calc(var(--u)*0.2) calc(var(--u)*0.1)}
+.dtop{display:flex;align-items:center;gap:calc(var(--u)*0.4);min-width:0}
+.dtext{font-size:calc(var(--u)*0.72);line-height:1.35;color:#eef2fa}
+.dlines{display:flex;flex-direction:column;gap:calc(var(--u)*0.16)}
+.dacts{display:flex;gap:calc(var(--u)*0.3);flex-wrap:wrap;margin-top:auto}
+.rtop{display:flex;align-items:baseline;gap:calc(var(--u)*0.4);min-width:0}
+.rwho{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:calc(var(--u)*0.56);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtime{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:calc(var(--u)*0.44);color:#6f83a6}
+.rtext{font-size:calc(var(--u)*0.62);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#d6dceb}
+.rsub{font-size:calc(var(--u)*0.52);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#8fbfb2}
+.rtag{flex-shrink:0;padding:calc(var(--u)*0.05) calc(var(--u)*0.22);border-radius:calc(var(--u)*0.25);border:1px solid;font-family:'JetBrains Mono',monospace;font-size:calc(var(--u)*0.42);letter-spacing:.06em;white-space:nowrap}
+.cbtn{flex-shrink:0;min-height:calc(var(--u)*1.2);padding:0 calc(var(--u)*0.5);border-radius:calc(var(--u)*0.6);border:1.5px solid;font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:calc(var(--u)*0.52);white-space:nowrap}
+.cempty{padding:calc(var(--u)*0.6) calc(var(--u)*0.2);font-size:calc(var(--u)*0.62);line-height:1.4;color:#8ea3c4}
+.shead{flex-shrink:0;display:flex;flex-direction:column;gap:calc(var(--u)*0.12);padding:calc(var(--u)*0.35) calc(var(--u)*0.5);border-radius:calc(var(--u)*0.4);background:rgba(143,168,224,0.1);border:1px solid #4a5f8f}
+.stitle{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:calc(var(--u)*0.62);letter-spacing:.04em;color:#c9d6ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ssub{font-size:calc(var(--u)*0.54);line-height:1.25;color:#d6dceb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.snote{font-size:calc(var(--u)*0.5);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfile{flex-grow:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:calc(var(--u)*0.3)}
+.frow{display:grid;grid-template-columns:calc(var(--u)*5) minmax(0,1fr);gap:calc(var(--u)*0.5);font-size:calc(var(--u)*0.6);line-height:1.38}
+.fk{font-family:'JetBrains Mono',monospace;font-size:calc(var(--u)*0.46);letter-spacing:.12em;color:#8ea3c4;padding-top:calc(var(--u)*0.08)}
+.fv{color:#d6dceb}
+.cfoot{flex-shrink:0;display:flex;align-items:center;gap:calc(var(--u)*0.4);min-height:calc(var(--u)*1.3)}
+.clink{display:inline-flex;align-items:center;min-height:calc(var(--u)*1.25);padding:0 calc(var(--u)*0.6);border-radius:calc(var(--u)*0.62);color:#0a0f1a;text-decoration:none;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:calc(var(--u)*0.54);white-space:nowrap}
+.cpage{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:calc(var(--u)*0.46);letter-spacing:.1em;color:#8ea3c4;white-space:nowrap}
+.cnav{min-width:calc(var(--u)*1.5);min-height:calc(var(--u)*1.25);border-radius:calc(var(--u)*0.62);border:1.5px solid #34507a;background:#121d33;color:#d6e0ef;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:calc(var(--u)*0.62)}
+.decklist{display:none;flex-direction:column;gap:20px}
+.dcards{display:flex;flex-wrap:wrap;gap:8px}
+.card{position:relative;width:190px;min-height:66px;box-sizing:border-box;padding:8px 10px 8px 13px;border-radius:8px;display:flex;flex-direction:column;justify-content:center;gap:3px;text-align:left;cursor:pointer;overflow:hidden;color:#e6ecf5;font-family:'Barlow',sans-serif}
+.c1{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:15px;line-height:1.1}
+.c2{font-family:'JetBrains Mono',monospace;font-size:11px;color:#9fb0cc}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;color:#8ea3c4}
+.foot{grid-area:foot;background:#8fa8e0;border-bottom-left-radius:56px;min-height:92px;margin-top:14px}
+.badgewrap{grid-area:badge;position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;min-width:0;min-height:92px;margin-top:14px}
+.badge{position:absolute;left:32px;right:0;bottom:20px;z-index:30;display:flex;flex-direction:column;gap:10px;min-height:72px;padding:10px 16px;box-sizing:border-box;border-radius:14px;background:linear-gradient(180deg, #1a1710, #0e0f14);border:1.5px solid #6b5a33;min-width:0;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
+.brow{display:flex;align-items:center;gap:16px;min-width:0;min-height:52px}
+.bwrite{display:flex;flex-direction:column;gap:6px;animation:bopen .28s ease}
+.btext{box-sizing:border-box;width:100%;height:96px;resize:none;padding:12px 14px;border-radius:10px;border:1.5px solid #6b5a33;background:#0b0d12;color:#fff3da;font-family:'Barlow',sans-serif;font-size:17px;line-height:1.4}
+.btext::placeholder{color:#7d7058}
+.btext:focus{outline:2px solid #e8c37a;outline-offset:1px}
+.bmeta{display:flex;justify-content:space-between;gap:16px;font-size:13px;line-height:1.3;color:#a8987a}
+@keyframes bopen{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fbarrow{display:flex;gap:8px;height:12px}
+.ffillet{position:absolute;left:0;bottom:12px;width:20px;height:20px;background:#8fa8e0}
+.ffillet::after{content:'';position:absolute;inset:0;background:#070b14;border-bottom-left-radius:20px}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes core{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes thrust{0%,100%{opacity:.55}50%{opacity:.95}}
+@keyframes beamflow{to{stroke-dashoffset:-32}}
+%%MESSCSS%%
+.pulse{animation:livepulse 2.4s ease-in-out infinite}
+.core{animation:core 2.2s ease-in-out infinite}
+.thrust{animation:thrust 3s ease-in-out infinite}
+.beam{animation:beamflow 1.2s linear infinite}
+@media (prefers-reduced-motion: reduce){.pulse,.core,.thrust,.beam,.bwrite,.mh{animation:none}.tile,.tok,.crow,.badge{transition:none}}
+@container page (max-width: 1500px){
+  .shell{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto;grid-template-areas:"top" "rail" "ship" "badge";padding:24px}
+  .elbow,.foot,.fillet,.ffillet,.rfill,.fbarrow{display:none}
+  .head,.ship-area{padding-left:0}
+  .rail{flex-direction:row;flex-wrap:wrap;align-items:flex-end;padding-top:16px}
+  .rl{width:100%}
+  .rb{width:auto;min-height:36px;padding:0 12px 6px;font-size:13px}
+  .console{--u:20px;position:static;width:auto;height:auto;margin-top:16px}
+  .clist{min-height:calc(var(--u)*12.6)}
+  .badgewrap{min-height:0}
+  .badge{position:static}
+  .brow{flex-wrap:wrap}
+}
+@container page (max-width: 900px){
+  .ship{display:none}
+  .decklist{display:flex}
+  .head{flex-direction:column;align-items:flex-start}
+  .console{--u:18px}
+}
+</style>
+</helmet>
+<div class="page">
+<div class="shell">
+
+  <div class="elbow" aria-hidden="true">
+    <span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.08em">HERMES</span>
+    <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em">HX-01 · MSD 01</span>
+  </div>
+
+  <div class="top">
+    <div class="bar" aria-hidden="true">
+      <span style="flex-grow: 1; background: #8fa8e0; display: flex; align-items: center; justify-content: flex-end; padding-right: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #0a0f1a">24 CREW · 4 PLACES · 8 DECKS</span>
+      <span style="width: 120px; background: #e8c37a"></span>
+      <span style="width: 56px; background: #3fc1a5"></span>
+      <span style="width: 200px; background: #e889b6"></span>
+      <span style="width: 40px; background: #8fa8e0; border-radius: 0 15px 15px 0"></span>
+    </div>
+    <div class="fillet" aria-hidden="true"></div>
+    <div class="head">
+      <div style="display: flex; flex-direction: column; gap: 5px; min-width: 0">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.16em; color: #8ea3c4">HERMES · MASTER SYSTEMS DISPLAY · SIDE ELEVATION</div>
+        <h1 style="margin: 0; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 36px; line-height: 1.05">All hands · eight decks</h1>
+        <p style="margin: 0; max-width: 1180px; font-size: 16px; line-height: 1.4; color: #b7c4da">{{intro}}</p>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0">
+        <div style="display: flex; gap: 8px">
+          <sc-for list="{{counts}}" as="c" hint-placeholder-count="4">
+            <div style="display: flex; align-items: baseline; gap: 8px; padding: 6px 14px; border-radius: 10px; border: 1.5px {{c.border}} {{c.color}}">
+              <span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 24px; line-height: 1">{{c.n}}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #9fb0cc; white-space: nowrap">{{c.label}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 18px; font-size: 15px; color: #c8d6ec">
+          <sc-for list="{{legend}}" as="l" hint-placeholder-count="5">
+            <span style="display: flex; align-items: center; gap: 7px; white-space: nowrap"><span style="width: 11px; height: 11px; border-radius: 6px; background: {{l.color}}"></span>{{l.label}} · {{l.n}}</span>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="rail" aria-label="Display controls">
+    <div class="rl">LABELS</div>
+    <sc-for list="{{labelOpts}}" as="o" hint-placeholder-count="3">
+      <button type="button" class="rb" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="justify-content: flex-end; background: {{o.bg}}; color: {{o.fg}}">{{o.label}}</button>
+    </sc-for>
+    <div class="rl">COLOUR</div>
+    <sc-for list="{{colourOpts}}" as="o" hint-placeholder-count="2">
+      <button type="button" class="rb" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="justify-content: flex-end; background: {{o.bg}}; color: {{o.fg}}">{{o.label}}</button>
+    </sc-for>
+    <div class="rl">RAIL STATUS</div>
+    <sc-for list="{{railOpts}}" as="o" hint-placeholder-count="3">
+      <button type="button" class="rb" onClick="{{o.pick}}" aria-pressed="{{o.on}}" aria-label="{{o.aria}}" style="background: {{o.bg}}; color: {{o.fg}}; border-left: 12px solid {{o.swatch}}"><span>{{o.label}}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em">{{o.state}}</span></button>
+    </sc-for>
+    <div class="rl">DEPARTMENTS · ON DUTY</div>
+    <sc-for list="{{depts}}" as="d" hint-placeholder-count="8">
+      <button type="button" class="rb" onClick="{{d.pick}}" aria-pressed="{{d.on}}" aria-label="{{d.aria}}" style="background: {{d.bg}}; color: {{d.fg}}; border-left: 12px solid {{d.swatch}}"><span>{{d.name}}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px">{{d.n}}</span></button>
+    </sc-for>
+    <div class="rl">KEPT ORIGINALS</div>
+    <sc-for list="{{originals}}" as="o" hint-placeholder-count="6">
+      <a class="rb" href="{{o.href}}" style="min-height: 32px; justify-content: flex-end; background: #141f35; color: #b7c4da; border-left: 12px solid #8fa8e0; font-size: 13px">{{o.label}}</a>
+    </sc-for>
+    <div class="rfill" aria-hidden="true">47 · 1172</div>
+  </nav>
+
+  <section class="ship-area" aria-label="Ship plan">
+    <div class="shipwrap">
+    <div class="ship">
+      <svg class="hull" viewBox="0 0 2200 1060" aria-hidden="true" font-family="'JetBrains Mono', monospace">
+        <defs>
+          <linearGradient id="v4saucer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f365c"></stop><stop offset="0.5" stop-color="#172a4a"></stop><stop offset="1" stop-color="#0f1d36"></stop></linearGradient>
+          <linearGradient id="v4head" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a4675"></stop><stop offset="1" stop-color="#172a4a"></stop></linearGradient>
+          <linearGradient id="v4hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#19294a"></stop><stop offset="1" stop-color="#0e1a30"></stop></linearGradient>
+          <linearGradient id="v4pylon" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#13223b"></stop><stop offset="0.5" stop-color="#2a4166"></stop><stop offset="1" stop-color="#13223b"></stop></linearGradient>
+          <linearGradient id="v4nac" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b4470"></stop><stop offset="0.5" stop-color="#1a2c4c"></stop><stop offset="1" stop-color="#101d34"></stop></linearGradient>
+          <linearGradient id="v4core" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a4f8a"></stop><stop offset="0.25" stop-color="#4fa3ff"></stop><stop offset="0.5" stop-color="#d8efff"></stop><stop offset="0.75" stop-color="#4fa3ff"></stop><stop offset="1" stop-color="#2a4f8a"></stop></linearGradient>
+          <radialGradient id="v4defl"><stop offset="0" stop-color="#e6f6ff"></stop><stop offset="0.35" stop-color="#6fc0ff"></stop><stop offset="0.75" stop-color="#2f7fe0"></stop><stop offset="1" stop-color="#2f7fe0" stop-opacity="0"></stop></radialGradient>
+          <radialGradient id="v4buss"><stop offset="0" stop-color="#ffe2c8"></stop><stop offset="0.5" stop-color="#ff7a45"></stop><stop offset="1" stop-color="#ff5a2a" stop-opacity="0"></stop></radialGradient>
+          <radialGradient id="v4imp"><stop offset="0" stop-color="#ffd0b0"></stop><stop offset="0.6" stop-color="#ff5050"></stop><stop offset="1" stop-color="#ff5050" stop-opacity="0"></stop></radialGradient>
+          <pattern id="v4holo" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#0b0d08"></rect><path d="M16 0H0V16" fill="none" stroke="#f0c048" stroke-opacity="0.38" stroke-width="1"></path></pattern>
+          <pattern id="v4hatch" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="18" height="18" fill="#080e1a" fill-opacity="0.8"></rect><rect width="9" height="18" fill="#f0a948" fill-opacity="0.05"></rect></pattern>
+          <filter id="v4blur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8"></feGaussianBlur></filter>
+          <filter id="v4soft" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="5"></feGaussianBlur></filter>
+        </defs>
+
+        <g fill="#ffffff">
+          <circle cx="880" cy="70" r="1.6" opacity="0.6"></circle><circle cx="960" cy="150" r="1.2" opacity="0.4"></circle><circle cx="300" cy="40" r="1.4" opacity="0.5"></circle>
+          <circle cx="610" cy="230" r="1.2" opacity="0.35"></circle><circle cx="420" cy="270" r="1.6" opacity="0.5"></circle><circle cx="2120" cy="140" r="1.2" opacity="0.4"></circle>
+          <circle cx="40" cy="520" r="1.4" opacity="0.4"></circle><circle cx="200" cy="600" r="1.2" opacity="0.3"></circle><circle cx="2000" cy="60" r="1.2" opacity="0.4"></circle>
+          <circle cx="760" cy="640" r="1.4" opacity="0.4"></circle><circle cx="1880" cy="120" r="1.2" opacity="0.35"></circle><circle cx="700" cy="480" r="1.3" opacity="0.4"></circle>
+          <circle cx="2150" cy="560" r="1.2" opacity="0.35"></circle><circle cx="1000" cy="1040" r="1.2" opacity="0.3"></circle><circle cx="1400" cy="600" r="1.3" opacity="0.35"></circle>
+        </g>
+        <text x="40" y="44" font-size="12" letter-spacing="2.4" fill="#5f7fae">MSD 01 · SIDE ELEVATION · NOT TO SCALE</text>
+        <text x="2170" y="30" font-size="12" letter-spacing="2.4" fill="#5f7fae" text-anchor="end">◂ STERN · BOW ▸</text>
+
+        <polygon points="226,398 270,398 548,698 506,698" fill="url(#v4pylon)" stroke="#2b3d5c" stroke-width="2" opacity="0.7"></polygon>
+        <path d="M48 376 C48 360 64 352 88 352 L600 352 C620 352 634 360 638 370 L638 382 C634 392 620 400 600 400 L88 400 C64 400 48 392 48 376 Z" fill="url(#v4nac)" stroke="#2b3d5c" stroke-width="2" opacity="0.92"></path>
+        <ellipse cx="50" cy="376" rx="6" ry="18" fill="#0a1526"></ellipse>
+        <g style="opacity: {{ship.claudeGlow}}">
+          <rect x="96" y="362" width="486" height="28" rx="8" fill="#e889b6" opacity="0.55" filter="url(#v4soft)"></rect>
+          <rect x="96" y="362" width="486" height="28" rx="8" fill="#e889b6"></rect>
+          <ellipse class="core" cx="640" cy="376" rx="18" ry="24" fill="url(#v4buss)"></ellipse>
+        </g>
+        <text x="112" y="381" font-size="12" font-weight="600" letter-spacing="1.6" style="fill: {{ship.claudeText}}">{{ship.claudeLabel}}</text>
+
+        <polygon points="384,158 440,158 522,698 468,698" fill="url(#v4pylon)" stroke="#2b3d5c" stroke-width="2"></polygon>
+        <path d="M44 128 C44 108 64 96 96 96 L700 96 C724 96 740 106 744 118 L744 138 C740 150 724 160 700 160 L96 160 C64 160 44 148 44 128 Z" fill="url(#v4nac)" stroke="#2b3d5c" stroke-width="2"></path>
+        <ellipse cx="46" cy="128" rx="7" ry="22" fill="#0a1526"></ellipse>
+        <g style="opacity: {{ship.codexGlow}}">
+          <rect x="100" y="110" width="580" height="36" rx="10" fill="#f0a948" opacity="0.55" filter="url(#v4soft)"></rect>
+          <rect x="100" y="110" width="580" height="36" rx="10" fill="#f0a948"></rect>
+          <ellipse class="core" cx="746" cy="128" rx="22" ry="30" fill="url(#v4buss)"></ellipse>
+        </g>
+        <text x="118" y="133" font-size="14" font-weight="600" letter-spacing="2" style="fill: {{ship.codexText}}">{{ship.codexLabel}}</text>
+
+        <path d="M1080 606 L1400 606 C1330 636 1262 668 1214 700 L884 700 C960 668 1024 636 1080 606 Z" fill="url(#v4hull)" stroke="#2b3d5c" stroke-width="2"></path>
+        <line x1="1236" y1="612" x2="1052" y2="694" stroke="#9fd0ff" stroke-width="2" stroke-dasharray="5 7" opacity="0.5"></line>
+
+        <path d="M150 696 L1190 696 C1290 696 1352 758 1358 832 C1362 914 1300 1030 1176 1034 L250 1034 C140 1034 70 992 62 924 L56 786 C54 731 90 696 150 696 Z" fill="url(#v4hull)" stroke="#2b3d5c" stroke-width="2"></path>
+        <rect x="60" y="800" width="12" height="110" rx="3" fill="#0a1526" stroke="#2c4264" stroke-width="1.5"></rect>
+        <path d="M62 822h8 M62 844h8 M62 866h8 M62 888h8" stroke="#f0c048" stroke-width="1.5" opacity="0.5"></path>
+
+        <path d="M740 410 C746 300 860 206 1050 200 L1910 200 C2100 206 2192 300 2194 410 C2196 520 2108 606 1940 612 L1050 612 C860 606 744 520 740 410 Z" fill="url(#v4saucer)" stroke="#2b3d5c" stroke-width="2"></path>
+        <line x1="746" y1="410" x2="2188" y2="410" stroke="#3a5684" stroke-width="1.5" opacity="0.8"></line>
+        <line x1="990" y1="212" x2="1990" y2="212" stroke="#9fd0ff" stroke-width="3" stroke-dasharray="5 11" stroke-linecap="round" opacity="0.28"></line>
+        <line x1="1070" y1="603" x2="1920" y2="603" stroke="#9fd0ff" stroke-width="3" stroke-dasharray="5 11" stroke-linecap="round" opacity="0.24"></line>
+        <line x1="170" y1="706" x2="1180" y2="706" stroke="#9fd0ff" stroke-width="3" stroke-dasharray="5 11" stroke-linecap="round" opacity="0.24"></line>
+        <line x1="300" y1="1024" x2="1160" y2="1024" stroke="#9fd0ff" stroke-width="3" stroke-dasharray="5 11" stroke-linecap="round" opacity="0.2"></line>
+
+        <path d="M1110 206 C1118 120 1196 34 1330 22 L1650 22 C1784 34 1862 120 1870 206 Z" fill="url(#v4head)" stroke="#3a5684" stroke-width="2"></path>
+        <path d="M1430 22 C1440 10 1464 4 1490 4 C1516 4 1540 10 1550 22 Z" fill="#1b2d4b" stroke="#3a5684" stroke-width="2"></path>
+        <line x1="1104" y1="206" x2="1876" y2="206" stroke="#5b7fb8" stroke-width="3" opacity="0.7"></line>
+        <line x1="1350" y1="31" x2="1630" y2="31" stroke="#9fd0ff" stroke-width="3" stroke-dasharray="5 11" stroke-linecap="round" opacity="0.35"></line>
+        <text x="1490" y="47" font-size="11" letter-spacing="1.8" fill="#8ea3c4" text-anchor="middle"><tspan fill="#c8d6ec">01</tspan><tspan dx="12">BRIDGE</tspan></text>
+
+        <g fill="#0a1222" fill-opacity="0.55" stroke="#46699f" stroke-opacity="0.38" stroke-width="1.5">
+          <rect x="922" y="222" width="1110" height="88" rx="12"></rect>
+          <rect x="792" y="318" width="1370" height="88" rx="12"></rect>
+          <rect x="790" y="414" width="1374" height="88" rx="12"></rect>
+          <rect x="944" y="510" width="1088" height="88" rx="12"></rect>
+          <rect x="100" y="712" width="1150" height="88" rx="12"></rect>
+          <rect x="100" y="808" width="1220" height="88" rx="12"></rect>
+        </g>
+        <rect x="160" y="904" width="1080" height="88" rx="12" fill="url(#v4hatch)" stroke="#f0a948" stroke-opacity="0.35" stroke-width="1.5"></rect>
+        <g font-size="11" letter-spacing="1.8" fill="#8ea3c4">
+          <text x="938" y="237"><tspan fill="#c8d6ec">02</tspan><tspan dx="12">COMMAND DECK</tspan></text>
+          <text x="808" y="333"><tspan fill="#c8d6ec">03</tspan><tspan dx="12">SCIENCES, RECORDS &amp; SICKBAY</tspan></text>
+          <text x="806" y="429"><tspan fill="#c8d6ec">04</tspan><tspan dx="12">HOLODECK &amp; DESIGN</tspan></text>
+          <text x="960" y="525"><tspan fill="#c8d6ec">05</tspan><tspan dx="12">CREW QUARTERS</tspan></text>
+          <text x="116" y="727"><tspan fill="#c8d6ec">06</tspan><tspan dx="12">OPERATIONS &amp; CUSTOMS</tspan></text>
+          <text x="116" y="823"><tspan fill="#c8d6ec">07</tspan><tspan dx="12">MAIN ENGINEERING · TRANSPORTER ROOM</tspan></text>
+        </g>
+        <g font-size="11" letter-spacing="1.8" fill="#c9a77a">
+          <text x="176" y="919"><tspan fill="#f6c98a">08</tspan><tspan dx="12">LOWER DECKS</tspan></text>
+          <text x="600" y="919">ENGINEERING ▸ CARDS FROM THE CHIEF ONLY</text>
+        </g>
+
+        <rect x="1150" y="292" width="316" height="7" rx="3.5" fill="#24375a" style="opacity: {{ship.tableGlow}}"></rect>
+        <g style="opacity: {{ship.tableGlow}}">
+          %%SEATS%%
+        </g>
+
+        <g>
+          %%CABINS%%
+        </g>
+
+        <rect x="1340" y="434" width="780" height="64" rx="8" fill="url(#v4holo)" stroke="#f0c048" stroke-opacity="0.55" stroke-width="1.5"></rect>
+        <rect x="1590" y="456" width="280" height="20" fill="#0b0d08"></rect>
+        <text x="1730" y="470" font-size="11" letter-spacing="1.8" fill="#f0c048" text-anchor="middle">HOLODECK · THE SHIP'S OWN SCREENS</text>
+
+        <rect x="322" y="828" width="200" height="64" rx="8" fill="none" stroke="#8fa8e0" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="5 5"></rect>
+        <text x="422" y="847" font-size="10" letter-spacing="1.8" fill="#8ea3c4" text-anchor="middle">TRANSPORTER</text>
+        <g fill="#9fd0ff"><ellipse cx="362" cy="872" rx="15" ry="5" opacity="0.7"></ellipse><ellipse cx="402" cy="872" rx="15" ry="5" opacity="0.7"></ellipse><ellipse cx="442" cy="872" rx="15" ry="5" opacity="0.7"></ellipse><ellipse cx="482" cy="872" rx="15" ry="5" opacity="0.7"></ellipse></g>
+
+        <line x1="573" y1="900" x2="1300" y2="900" stroke="#4fa3ff" stroke-width="2" opacity="0.3" style="opacity: {{ship.conduit}}"></line>
+        <g style="opacity: {{ship.coreGlow}}">
+          <rect x="543" y="712" width="36" height="280" rx="18" fill="#4fa3ff" opacity="0.35" filter="url(#v4blur)"></rect>
+          <rect class="core" x="549" y="712" width="24" height="280" rx="12" fill="url(#v4core)"></rect>
+        </g>
+        <text x="600" y="823" font-size="11" letter-spacing="1.6" style="fill: {{ship.coreText}}">{{ship.coreLabel}}</text>
+
+        <ellipse cx="1352" cy="852" rx="64" ry="120" fill="#4fa3ff" opacity="0.14" filter="url(#v4blur)"></ellipse>
+        <ellipse cx="1352" cy="852" rx="34" ry="92" fill="#13223b" stroke="#2b3d5c" stroke-width="2"></ellipse>
+        <ellipse class="thrust" cx="1354" cy="852" rx="24" ry="74" fill="url(#v4defl)"></ellipse>
+
+        <ellipse class="thrust" cx="748" cy="410" rx="10" ry="28" fill="url(#v4imp)"></ellipse>
+        <circle class="pulse" cx="2194" cy="410" r="4" fill="#ffffff"></circle>
+
+        <ellipse cx="498" cy="698" rx="68" ry="13" fill="#8fa8e0" opacity="0.3" filter="url(#v4blur)"></ellipse>
+        <ellipse cx="498" cy="698" rx="64" ry="9" fill="#0c1526" stroke="#8fa8e0" stroke-width="3"></ellipse>
+        <text x="420" y="686" font-size="10.5" letter-spacing="1.4" fill="#a9bde8" text-anchor="end">CUSTOMS · SECURITY SCANS CLOUD-BOUND WORK ▸</text>
+      </svg>
+
+      <div class="cap" style="display: {{capShow}}; left: 45.455%; top: 87.358%; width: 10.727%">Design and Calibration take cards from the Holodeck Officer, Systems and Diagnostics from the Chief Engineer.</div>
+
+      <sc-for list="{{tiles}}" as="s" hint-placeholder-count="28">
+        <button type="button" class="tile" onClick="{{s.pick}}" aria-label="{{s.aria}}" aria-pressed="{{s.on}}" style="left: {{s.left}}; top: {{s.top}}; width: {{s.width}}; padding-left: {{s.padLeft}}; border: 1.5px {{s.borderStyle}} {{s.edge}}; background: {{s.bg}}; opacity: {{s.opacity}}; box-shadow: {{s.glow}}">
+          <span aria-hidden="true" class="tbar" style="background: {{s.color}}; opacity: {{s.barOpacity}}"></span>
+          <span aria-hidden="true" class="slot" style="display: {{s.slotDisplay}}; border-style: {{s.slotStyle}}; border-color: {{s.slotColor}}"></span>
+          <sc-if value="{{s.showIcon}}" hint-placeholder-val="{{false}}">
+            <svg class="sicon" viewBox="0 0 24 24" aria-hidden="true" style="stroke: {{s.color}}"><path d="{{s.icon}}"></path></svg>
+          </sc-if>
+          <sc-if value="{{s.liveDot}}" hint-placeholder-val="{{true}}">
+            <span aria-hidden="true" class="live pulse" style="background: {{s.dotColor}}; box-shadow: 0 0 6px {{s.dotColor}}"></span>
+          </sc-if>
+          <sc-if value="{{s.hasHail}}" hint-placeholder-val="{{false}}">
+            <span class="hail pulse" aria-label="{{s.hailAria}}">{{s.hailN}}</span>
+          </sc-if>
+          <span class="tcol" style="width: {{s.textWidth}}; display: {{s.textShow}}">
+            <span class="trow">
+              <span class="pips" aria-hidden="true" style="display: {{s.pipsDisplay}}">
+                <span class="pip" style="display: {{s.pip0.show}}; background: {{s.pip0.bg}}"></span>
+                <span class="pip" style="display: {{s.pip1.show}}; background: {{s.pip1.bg}}"></span>
+                <span class="pip" style="display: {{s.pip2.show}}; background: {{s.pip2.bg}}"></span>
+                <span class="pip" style="display: {{s.pip3.show}}; background: {{s.pip3.bg}}"></span>
+              </span>
+              <span class="t1">{{s.line1}}</span>
+            </span>
+            <span class="t2" style="color: {{s.line2Color}}">{{s.line2}}</span>
+            <span class="t3" style="color: {{s.line3Color}}"><span class="tdot" style="background: {{s.dotColor}}"></span>{{s.line3}}</span>
+          </span>
+        </button>
+      </sc-for>
+
+      <sc-for list="{{beams}}" as="b" hint-placeholder-count="2">
+        <svg class="beamsvg" viewBox="0 0 2200 1060" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="{{b.points}}" fill="none" stroke="{{b.color}}" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" opacity="0.16"></polyline>
+          <polyline class="beam" points="{{b.points}}" fill="none" stroke="{{b.color}}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="8 8" opacity="0.9"></polyline>
+        </svg>
+      </sc-for>
+
+      <sc-for list="{{tokens}}" as="k" hint-placeholder-count="16">
+        <button type="button" class="tok" onClick="{{k.pick}}" aria-label="{{k.aria}}" style="left: {{k.left}}; top: {{k.top}}; border-color: {{k.color}}; opacity: {{k.opacity}}; box-shadow: {{k.ring}}">
+          <svg viewBox="0 0 24 24" aria-hidden="true" style="stroke: {{k.color}}"><path d="{{k.icon}}"></path></svg>
+        </button>
+      </sc-for>
+    </div>
+
+    <div class="console" role="region" aria-label="{{con.aria}}" style="border-color: {{con.color}}; box-shadow: 0 0 28px {{con.halo}}">
+      <div class="chead">
+        <span class="cicon" aria-hidden="true" style="border-color: {{con.color}}"><svg viewBox="0 0 24 24" style="stroke: {{con.color}}"><path d="{{con.icon}}"></path></svg></span>
+        <span class="ctitles"><span class="ctitle">{{con.title}}</span><span class="csub">{{con.sub}}</span></span>
+        <span class="cchip" style="color: {{con.chipColor}}; border-color: {{con.chipColor}}">{{con.chip}}</span>
+      </div>
+      <div class="ctabs" role="tablist" aria-label="Console views">
+        <sc-for list="{{con.tabs}}" as="t" hint-placeholder-count="3">
+          <button type="button" role="tab" class="ctab" onClick="{{t.pick}}" aria-selected="{{t.on}}" style="background: {{t.bg}}; color: {{t.fg}}">{{t.label}}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{con.hasSession}}" hint-placeholder-val="{{false}}">
+        <div class="shead">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0">
+            <span class="stitle">{{con.ses.title}}</span>
+            <button type="button" class="cbtn" onClick="{{con.ses.end}}" style="border-color: #8fa8e0; background: transparent; color: #c9d6ff; cursor: pointer">End session</button>
+          </div>
+          <span class="ssub">{{con.ses.sub}}</span>
+          <span class="snote" style="color: {{con.ses.noteColor}}">{{con.ses.note}}</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{con.isList}}" hint-placeholder-val="{{true}}">
+        <div class="clist" aria-live="polite">
+          <sc-for list="{{con.rows}}" as="r" hint-placeholder-count="5">
+            <div class="crow" style="opacity: {{r.opacity}}">
+              <button type="button" class="rmain" onClick="{{r.open}}" aria-label="{{r.openAria}}">
+                <sc-if value="{{r.showIcon}}" hint-placeholder-val="{{false}}">
+                  <span class="ricon" aria-hidden="true" style="border-color: {{r.iconColor}}"><svg viewBox="0 0 24 24" style="stroke: {{r.iconColor}}"><path d="{{r.icon}}"></path></svg></span>
+                </sc-if>
+                <span class="rpill" style="color: {{r.pillColor}}; border-color: {{r.pillColor}}">{{r.pill}}</span>
+                <span class="rbody">
+                  <span class="rtop"><span class="rwho" style="color: {{r.whoColor}}">{{r.who}}</span><span class="rtime">{{r.time}}</span></span>
+                  <span class="rtext" title="{{r.text}}">{{r.text}}</span>
+                  <sc-if value="{{r.hasSub}}" hint-placeholder-val="{{false}}">
+                    <span class="rsub" title="{{r.sub}}" style="color: {{r.subColor}}">{{r.sub}}</span>
+                  </sc-if>
+                </span>
+                <span class="rgo" aria-hidden="true">›</span>
+              </button>
+              <sc-if value="{{r.hasTag}}" hint-placeholder-val="{{false}}">
+                <span class="rtag" style="color: {{r.tagColor}}; border-color: {{r.tagColor}}">{{r.tag}}</span>
+              </sc-if>
+              <sc-if value="{{r.a.show}}" hint-placeholder-val="{{false}}">
+                <button type="button" class="cbtn" onClick="{{r.a.fn}}" aria-disabled="{{r.a.disabled}}" aria-label="{{r.a.aria}}" style="border-color: {{r.a.border}}; background: {{r.a.bg}}; color: {{r.a.fg}}; cursor: {{r.a.cursor}}">{{r.a.label}}</button>
+              </sc-if>
+              <sc-if value="{{r.b.show}}" hint-placeholder-val="{{false}}">
+                <button type="button" class="cbtn" onClick="{{r.b.fn}}" aria-disabled="{{r.b.disabled}}" aria-label="{{r.b.aria}}" style="border-color: {{r.b.border}}; background: {{r.b.bg}}; color: {{r.b.fg}}; cursor: {{r.b.cursor}}">{{r.b.label}}</button>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{con.noRows}}" hint-placeholder-val="{{false}}">
+            <div class="cempty">{{con.emptyText}}</div>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{con.inDetail}}" hint-placeholder-val="{{false}}">
+        <div class="cdet" aria-live="polite">
+          <div class="dtop">
+            <button type="button" class="cbtn" onClick="{{con.back}}" aria-label="Back to the list" style="border-color: #34507a; background: #121d33; color: #d6e0ef; cursor: pointer">‹ Back</button>
+            <span class="rpill" style="color: {{con.det.pillColor}}; border-color: {{con.det.pillColor}}">{{con.det.pill}}</span>
+            <span class="rwho" style="color: {{con.det.whoColor}}">{{con.det.who}}</span>
+            <span class="rtime">{{con.det.time}}</span>
+            <sc-if value="{{con.det.hasTag}}" hint-placeholder-val="{{false}}">
+              <span class="rtag" style="margin-left: auto; color: {{con.det.tagColor}}; border-color: {{con.det.tagColor}}">{{con.det.tag}}</span>
+            </sc-if>
+          </div>
+          <div class="dtext">{{con.det.text}}</div>
+          <div class="dlines">
+            <sc-for list="{{con.det.lines}}" as="f" hint-placeholder-count="3">
+              <div class="frow"><span class="fk">{{f.k}}</span><span class="fv">{{f.v}}</span></div>
+            </sc-for>
+          </div>
+          <div class="dacts">
+            <sc-if value="{{con.det.a.show}}" hint-placeholder-val="{{false}}">
+              <button type="button" class="cbtn" onClick="{{con.det.a.fn}}" aria-disabled="{{con.det.a.disabled}}" aria-label="{{con.det.a.aria}}" style="border-color: {{con.det.a.border}}; background: {{con.det.a.bg}}; color: {{con.det.a.fg}}; cursor: {{con.det.a.cursor}}">{{con.det.a.label}}</button>
+            </sc-if>
+            <sc-if value="{{con.det.b.show}}" hint-placeholder-val="{{false}}">
+              <button type="button" class="cbtn" onClick="{{con.det.b.fn}}" aria-disabled="{{con.det.b.disabled}}" aria-label="{{con.det.b.aria}}" style="border-color: {{con.det.b.border}}; background: {{con.det.b.bg}}; color: {{con.det.b.fg}}; cursor: {{con.det.b.cursor}}">{{con.det.b.label}}</button>
+            </sc-if>
+            <sc-if value="{{con.det.c.show}}" hint-placeholder-val="{{false}}">
+              <button type="button" class="cbtn" onClick="{{con.det.c.fn}}" aria-disabled="{{con.det.c.disabled}}" aria-label="{{con.det.c.aria}}" style="border-color: {{con.det.c.border}}; background: {{con.det.c.bg}}; color: {{con.det.c.fg}}; cursor: {{con.det.c.cursor}}">{{con.det.c.label}}</button>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{con.isFile}}" hint-placeholder-val="{{false}}">
+        <div class="cfile">
+          <sc-for list="{{con.file}}" as="f" hint-placeholder-count="5">
+            <div class="frow"><span class="fk">{{f.k}}</span><span class="fv">{{f.v}}</span></div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div class="cfoot">
+        <sc-if value="{{con.hasLink}}" hint-placeholder-val="{{false}}">
+          <a class="clink" href="{{con.link}}" style="background: {{con.color}}">{{con.linkLabel}} →</a>
+        </sc-if>
+        <sc-if value="{{con.noLink}}" hint-placeholder-val="{{true}}">
+          <span class="csub">{{con.footNote}}</span>
+        </sc-if>
+        <span class="cpage">{{con.pageLabel}}</span>
+        <button type="button" class="cnav" onClick="{{con.prev}}" aria-label="Previous page" aria-disabled="{{con.prevOff}}" style="opacity: {{con.prevOpacity}}; cursor: {{con.prevCursor}}">‹</button>
+        <button type="button" class="cnav" onClick="{{con.next}}" aria-label="Next page" aria-disabled="{{con.nextOff}}" style="opacity: {{con.nextOpacity}}; cursor: {{con.nextCursor}}">›</button>
+      </div>
+    </div>
+
+    <div class="decklist">
+      <sc-for list="{{deckGroups}}" as="g" hint-placeholder-count="8">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div class="lbl">{{g.title}}</div>
+          <div class="dcards">
+            <sc-for list="{{g.tiles}}" as="s" hint-placeholder-count="4">
+              <button type="button" class="card" onClick="{{s.pick}}" aria-label="{{s.aria}}" aria-pressed="{{s.on}}" style="border: 1.5px {{s.borderStyle}} {{s.color}}; background: {{s.bg}}; opacity: {{s.opacity}}">
+                <span aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 4px; height: 100%; background: {{s.color}}"></span>
+                <span class="c1">{{s.line1}}</span>
+                <span class="c2" style="color: {{s.line2Color}}">{{s.line2}}</span>
+                <span class="c2" style="color: {{s.line3Color}}">{{s.line3}}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    </div>
+  </section>
+
+  <div class="foot" aria-hidden="true"></div>
+  <div class="badgewrap">
+    <div class="badge" role="region" aria-label="Comm badge, give an order" style="transform: {{cmd.lift}}; box-shadow: {{cmd.shadow}}; border-color: {{cmd.edge}}">
+      <div class="brow">
+      <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0">
+        <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="fill: #2a2416; stroke: #e8c37a; stroke-width: 1.6; stroke-linejoin: round"><path d="M12 2l7 18-7-4-7 4z"></path></svg>
+        <span style="display: flex; flex-direction: column; line-height: 1.1"><span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.04em; color: #e8c37a; white-space: nowrap">COMM BADGE</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #a8987a">{{cmd.speaker}}</span></span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #a8987a">TO</span>
+        <span style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; max-width: 300px; padding: 0 14px; border-radius: 8px; border: 1.5px solid {{cmd.toColor}}; background: #142238; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><span style="width: 9px; height: 9px; border-radius: 5px; flex-shrink: 0; background: {{cmd.toColor}}"></span>{{cmd.toName}}</span>
+        <button type="button" onClick="{{cmd.toggleAll}}" aria-pressed="{{cmd.allOn}}" style="min-height: 40px; padding: 0 14px; border-radius: 8px; border: 1.5px solid #3a3424; background: {{cmd.allBg}}; color: {{cmd.allFg}}; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap">All hands</button>
+      </div>
+      <div role="group" aria-label="Kind of order" style="flex-shrink: 0; display: flex; border-radius: 8px; border: 1.5px solid #3a3424; overflow: hidden">
+        <sc-for list="{{cmd.types}}" as="k" hint-placeholder-count="4">
+          <button type="button" onClick="{{k.pick}}" aria-pressed="{{k.on}}" style="min-height: 40px; padding: 0 16px; border: 0; background: {{k.bg}}; color: {{k.color}}; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">{{k.label}}</button>
+        </sc-for>
+      </div>
+      <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px">
+        <div style="display: flex; gap: 8px; min-width: 0; overflow: hidden">
+          <sc-if value="{{cmd.hasPresets}}" hint-placeholder-val="{{true}}">
+            <sc-for list="{{cmd.presets}}" as="o" hint-placeholder-count="2">
+              <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" title="{{o.text}}" style="flex-shrink: 1; min-width: 0; max-width: 560px; min-height: 32px; padding: 0 14px; border-radius: 99px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: #fff3da; font-family: 'Barlow', sans-serif; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer">{{o.text}}</button>
+            </sc-for>
+          </sc-if>
+          <sc-if value="{{cmd.noPresets}}" hint-placeholder-val="{{false}}">
+            <span style="min-height: 32px; display: inline-flex; align-items: center; font-size: 15px; color: #8ea3c4">{{cmd.emptyText}}</span>
+          </sc-if>
+        </div>
+        <span style="font-size: 13px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: {{cmd.railColor}}">{{cmd.railNote}}</span>
+      </div>
+      <span style="flex-shrink: 0; padding: 5px 10px; border-radius: 6px; border: 1.5px solid {{cmd.tierColor}}; color: {{cmd.tierColor}}; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; white-space: nowrap">{{cmd.tierLabel}}</span>
+      <button type="button" onClick="{{cmd.toggleWrite}}" aria-expanded="{{cmd.openStr}}" aria-label="Write your own order" style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border-radius: 10px; border: 1.5px solid #e8c37a; background: {{cmd.writeBg}}; color: {{cmd.writeFg}}; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M4 20h4L19 9l-4-4L4 16z M14 6l4 4"></path></svg>{{cmd.writeLabel}}</button>
+      <button type="button" onClick="{{cmd.send}}" aria-disabled="{{cmd.disabled}}" style="flex-shrink: 0; min-width: 150px; min-height: 48px; padding: 0 18px; border-radius: 10px; border: 1.5px solid {{cmd.sendBorder}}; background: {{cmd.sendBg}}; color: {{cmd.sendColor}}; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 15px; cursor: {{cmd.cursor}}">{{cmd.sendLabel}}</button>
+      </div>
+      <sc-if value="{{cmd.open}}" hint-placeholder-val="{{false}}">
+        <div class="bwrite">
+          <textarea class="btext" rows="3" maxLength="500" value="{{cmd.draft}}" onChange="{{cmd.onDraft}}" onKeyDown="{{cmd.onKey}}" placeholder="{{cmd.placeholder}}" aria-label="{{cmd.placeholder}}" autoFocus="{{cmd.open}}"></textarea>
+          <div class="bmeta"><span style="color: {{cmd.hintColor}}">{{cmd.draftHint}}</span><span style="flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px">{{cmd.count}} · Ctrl+Enter sends · Esc closes</span></div>
+        </div>
+      </sc-if>
+    </div>
+    <div class="ffillet" aria-hidden="true"></div>
+    <div class="fbarrow" aria-hidden="true">
+      <span style="flex-grow: 1; background: #8fa8e0"></span>
+      <span style="width: 160px; background: #f0a948"></span>
+      <span style="width: 64px; background: #3fc1a5"></span>
+      <span style="width: 40px; background: #8fa8e0; border-radius: 0 6px 6px 0"></span>
+    </div>
+  </div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2560,"height":1440}}'>
+%%SCRIPT%%
+</script>
+</body>
+</html>
