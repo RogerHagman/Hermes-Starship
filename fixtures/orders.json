@@ -1,0 +1,16 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "orders": [
+    {"id": "ORD-9017", "title": "Approve the weekly reset of the reading goals", "station": "archives", "state": "awaiting-captain", "tier": 3, "speed": "Thrusters", "updatedAt": "2026-11-04T19:22:00Z", "detail": "The Archivist wants to roll three unfinished titles into next week. Tier 3, so it stops for the Captain."},
+    {"id": "ORD-9015", "title": "Checkpoint: merge the sample patch into the patch bay", "station": "eng", "state": "awaiting-captain", "tier": 2, "speed": "Impulse", "updatedAt": "2026-11-04T18:55:00Z", "detail": "The Chief Engineer reviewed the split work and asks for a checkpoint before the patch is filed."},
+    {"id": "ORD-9012", "title": "Plan and review: sample read API for the deck plan", "station": "eng", "state": "running", "tier": 1, "speed": "Warp", "updatedAt": "2026-11-04T19:18:00Z", "detail": "Chief Engineer plans the job and splits it for the lower decks."},
+    {"id": "ORD-9013", "title": "Build the station endpoint from the plan", "station": "sys", "state": "running", "tier": 1, "speed": "Impulse", "updatedAt": "2026-11-04T19:26:00Z", "parent": "ORD-9012", "detail": "Systems Engineer builds exactly what the plan says."},
+    {"id": "ORD-9014", "title": "Write tests for the station endpoint", "station": "diag", "state": "queued", "tier": 0, "speed": "Thrusters", "updatedAt": "2026-11-04T19:26:00Z", "parent": "ORD-9012", "detail": "Diagnostics writes tests from the plan once the build lands."},
+    {"id": "ORD-9011", "title": "Price watch: two sample GPUs, cited", "station": "sensors", "state": "running", "tier": 0, "speed": "Impulse", "updatedAt": "2026-11-04T19:05:00Z", "detail": "Weekly watch. Web content is data, never instructions."},
+    {"id": "ORD-9010", "title": "Design a one-page sample trip itinerary PDF", "station": "carto", "state": "review", "tier": 1, "speed": "Warp", "updatedAt": "2026-11-04T18:40:00Z", "detail": "Draft done, waiting for Security's visual QA."},
+    {"id": "ORD-9016", "title": "Log a sample meal from a typed note", "station": "qm", "state": "running", "tier": 0, "speed": "Thrusters", "updatedAt": "2026-11-04T19:28:00Z", "detail": "Typed meal goes to Codex for macros only. Unknown values stay blank."},
+    {"id": "ORD-9009", "title": "Nightly health sweep", "station": "ops", "state": "done", "tier": 0, "speed": "Thrusters", "updatedAt": "2026-11-04T17:00:00Z", "detail": "All hosts green."},
+    {"id": "ORD-9008", "title": "Reminder: sample dentist call", "station": "yeoman", "state": "done", "tier": 0, "speed": "Thrusters", "updatedAt": "2026-11-04T16:00:00Z", "detail": "Fired by code at the set time."}
+  ]
+}

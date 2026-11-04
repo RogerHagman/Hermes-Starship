@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "stations"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "stations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "short",
+          "kind",
+          "rail",
+          "status",
+          "rank",
+          "dept",
+          "deck",
+          "aliases",
+          "duty",
+          "activeOrder"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "short": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "station",
+              "place",
+              "captain"
+            ]
+          },
+          "rail": {
+            "enum": [
+              "local",
+              "codex",
+              "claude",
+              "mixed",
+              "captain"
+            ]
+          },
+          "status": {
+            "enum": [
+              "live",
+              "approved",
+              "proposed",
+              "reserved"
+            ]
+          },
+          "rank": {
+            "enum": [
+              "captain",
+              "commander",
+              "ltcmdr",
+              "lt",
+              "ltjg",
+              "ensign",
+              "cpo",
+              "po",
+              "cadet",
+              "none",
+              "team",
+              "space"
+            ]
+          },
+          "dept": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "command",
+              "flight",
+              "ops",
+              "security",
+              "eng",
+              "holo",
+              "sci",
+              "med",
+              null
+            ]
+          },
+          "deck": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          },
+          "profile": {
+            "type": "string"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "model": {
+            "type": "string"
+          },
+          "answersTo": {
+            "type": "string"
+          },
+          "needs": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "local",
+                "codex",
+                "claude"
+              ]
+            }
+          },
+          "head": {
+            "type": "boolean"
+          },
+          "duty": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "activeOrder": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^ORD-\\d{4}$"
+          }
+        }
+      }
+    }
+  },
+  "title": "Hermes Starship \u00b7 stations"
+}

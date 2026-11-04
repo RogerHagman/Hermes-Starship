@@ -1,0 +1,30 @@
+# Checks for the Bridge: fixtures vs schema, the one-rule tests, types, logic tests,
+# and that the committed frontend/dist matches a fresh build.
+name: bridge
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - run: pip install jsonschema==4.26.0
+      - run: python -m unittest discover -s tests -v
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run check
+        working-directory: frontend
+      - name: Committed build is current
+        working-directory: frontend
+        run: |
+          npm run build
+          git diff --exit-code --stat -- dist || { echo "frontend/dist is out of date: run npm run build and commit"; exit 1; }
+          test -z "$(git status --porcelain -- dist)" || { git status --porcelain -- dist; exit 1; }

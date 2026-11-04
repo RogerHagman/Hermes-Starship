@@ -1,0 +1,50 @@
+/* Design tokens from holodeck/design-system/tokens.json (Bridge theme). Use these, never raw hex. */
+@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/ChakraPetch-500.woff2) format('woff2')}
+@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/ChakraPetch-600.woff2) format('woff2')}
+@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:700;font-display:swap;src:url(../fonts/ChakraPetch-700.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/Barlow-400.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/Barlow-500.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/Barlow-600.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 700;font-display:swap;src:url(../fonts/JetBrainsMono-400.woff2) format('woff2')}
+
+:root{
+  --bg:#070b14;
+  --surface:#0c1526;
+  --surface-raised:#142238;
+  --surface-selected:#1d3256;
+  --border:#22344f;
+  --border-strong:#2e4569;
+  --text:#e6ecf5;
+  --text-label:#9fb0cc;
+  --text-muted:#8ea3c4;
+  --captain:#e8c37a;
+  --captain-ink:#1a1420;
+  --hull-glow:#4fa3ff;
+  --rail-local:#3fc1a5;
+  --rail-codex:#f0a948;
+  --rail-claude:#e889b6;
+  --rail-mixed:#8fa8e0;
+  --tier-0:var(--rail-local);
+  --tier-1:var(--rail-mixed);
+  --tier-2:var(--rail-codex);
+  --tier-3:#ff5050;
+  --good:#7fd8a8;
+  --bad:#f08a7a;
+  --focus:#ffffff;
+
+  /* LCARS frame blocks (from the deck plan boards) */
+  --lcars-frame:#8fa8e0;
+  --lcars-dark:#141f35;
+
+  --font-display:'Chakra Petch','Segoe UI',sans-serif;
+  --font-body:'Barlow','Helvetica Neue',sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+
+  --space-1:4px;--space-2:6px;--space-3:8px;--space-4:10px;--space-5:12px;
+  --space-6:14px;--space-7:18px;--space-8:22px;--space-9:28px;
+
+  --radius-xs:4px;--radius-sm:8px;--radius-tile:10px;--radius-card:12px;--radius-panel:14px;--radius-pill:99px;
+
+  --stroke:1.5px;
+  --stroke-tile:2px;
+}

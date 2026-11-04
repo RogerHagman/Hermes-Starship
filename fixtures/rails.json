@@ -1,0 +1,43 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "rails": [
+    {
+      "id": "local",
+      "label": "Local",
+      "engine": "qwen 27B on Ollama",
+      "host": "gpu-host",
+      "state": "up",
+      "meters": [
+        {"id": "gpu", "label": "GPU load", "percent": 38},
+        {"id": "vram", "label": "VRAM", "percent": 71}
+      ],
+      "note": "Warp core. Rule 0 data stays here."
+    },
+    {
+      "id": "codex",
+      "label": "Codex",
+      "engine": "codex top, mid and small models",
+      "host": "cloud",
+      "state": "up",
+      "meters": [
+        {"id": "window", "label": "5 h window", "percent": 22, "resetsAt": "2026-11-04T22:10:00Z"},
+        {"id": "week", "label": "Week", "percent": 41, "resetsAt": "2026-11-09T07:00:00Z"}
+      ],
+      "note": "Port nacelle. Engineering and food scans."
+    },
+    {
+      "id": "claude",
+      "label": "Claude",
+      "engine": "claude top and mid models",
+      "host": "cloud",
+      "state": "up",
+      "meters": [
+        {"id": "window", "label": "5 h window", "percent": 64, "resetsAt": "2026-11-04T21:40:00Z"},
+        {"id": "week", "label": "Week", "percent": 83, "resetsAt": "2026-11-05T09:00:00Z"}
+      ],
+      "burn": {"active": true, "until": "2026-11-05T09:00:00Z"},
+      "note": "Starboard nacelle. Sensors, Cartography, Strategist."
+    }
+  ]
+}
