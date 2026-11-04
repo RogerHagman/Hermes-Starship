@@ -75,10 +75,14 @@
           },
           "detail": {
             "type": "string"
+          },
+          "body": {
+            "type": "string",
+            "description": "The card body as filed, plain text. A line that starts with GOAL:, CONTEXT:, CONSTRAINTS:, DONE WHEN: or START WITH: begins a section; a line that starts with '- ' is a list item."
           }
         }
       }
     }
   },
-  "title": "Hermes Starship \u00b7 orders"
+  "title": "Hermes Starship · orders"
 }
