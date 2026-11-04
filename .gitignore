@@ -1,2 +1,5 @@
-dist/
+/dist/
 __pycache__/
+node_modules/
+frontend/dist-single/
+frontend/tools/.*.tmp.json

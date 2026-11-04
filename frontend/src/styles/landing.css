@@ -112,7 +112,7 @@ button{font:inherit;color:inherit}
 .legend i.line{width:22px;height:0;border-radius:0;border-top:2px var(--ls) var(--text-label);background:none}
 
 .ship{position:relative;width:100%;aspect-ratio:2200 / 1060;container-type:inline-size}
-.ship-art,.ship-art svg{position:absolute;inset:0;width:100%;height:100%}
+.ship-art,.ship-art-svg,.ship-art svg{position:absolute;inset:0;width:100%;height:100%}
 .ship-art svg{overflow:visible}
 .ship-art{
   --codex-glow:1;--claude-glow:1;--core-glow:1;--conduit:.3;--table-glow:1;

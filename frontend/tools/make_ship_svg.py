@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 src = Path(sys.argv[1] if len(sys.argv) > 1 else "holodeck/ship-plan-v4-src")
-out = Path(__file__).resolve().parent.parent / "assets" / "ship.svg"
+out = Path(__file__).resolve().parent.parent / "src" / "assets" / "ship.svg"
 
 svg = (src / "hull.svg").read_text()
 svg = re.sub(r"<metadata>.*?</metadata>", "", svg, flags=re.S)

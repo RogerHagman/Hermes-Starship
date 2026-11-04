@@ -1,6 +1,6 @@
 // Where each station sits on the ship art (ship.svg viewBox 0 0 2200 1060), and its icon.
 // Layout is design data from DeckPlanV4, so it lives with the frontend, not in the fixtures.
-window.SHIP_MAP = {
+export const SHIP_MAP = {
   width: 2200,
   height: 1060,
   tileHeight: 64,
@@ -64,4 +64,4 @@ window.SHIP_MAP = {
     design: 'M12 3l7 7-7 11-7-11z M12 3v8 M12 14a1.5 1.5 0 1 0 0.01 0',
     calib: 'M12 3a9 9 0 1 0 0.01 0 M12 8a4 4 0 1 0 0.01 0 M12 1v4 M12 19v4 M1 12h4 M19 12h4'
   }
-};
+} as const;
