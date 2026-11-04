@@ -65,7 +65,6 @@ export function SideRail({ registry, filter, onFilter, drills, onDrill, onToast 
       </div>
       <p className="rail-help">A drill only changes this screen. Nothing on the ship is touched.</p>
 
-      <div className="siderail-fill" aria-hidden="true"><span className="mono">47 · 2026</span></div>
     </nav>
   );
 }

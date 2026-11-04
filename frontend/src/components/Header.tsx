@@ -24,7 +24,7 @@ export function Header({ ship, error }: { ship: ShipView | null; error: string |
           <span className="lamp" /><span className="mono">CONDITION {level.toUpperCase()}</span>
         </div>
         <Clock />
-        <span className="pill pill-fixture mono" title="Every number on this screen comes from fixtures/">FIXTURES</span>
+        <span className="pill pill-fixture mono" title="Synthetic data from fixtures/. Nothing on this screen calls a model.">FIXTURES · NO MODEL CALLS</span>
       </div>
     </div>
   );

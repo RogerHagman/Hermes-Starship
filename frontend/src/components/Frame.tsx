@@ -1,4 +1,4 @@
-// The LCARS frame around the board: elbows, top bar, bottom bar.
+// The LCARS frame around the board: the top elbow and the top bar. Nothing sits below the comm badge.
 import type { ReactNode } from 'react';
 import type { ShipView } from '../lib/ship';
 import { RAIL_IDS } from '../lib/ship';
@@ -15,13 +15,6 @@ export function Frame({ ship, side, children }: { ship: ShipView | null; side: R
         <span className="seg seg-end" aria-hidden="true" />
       </header>
       {side}
-      <div className="elbow elbow-bottom" aria-hidden="true" />
-      <footer className="bottombar">
-        <span className="mono bottom-note">FIXTURES · SYNTHETIC DATA · NOTHING ON THIS SCREEN CALLS A MODEL</span>
-        <span className="seg seg-codex" aria-hidden="true" />
-        <span className="seg seg-local" aria-hidden="true" />
-        <span className="seg seg-end" aria-hidden="true" />
-      </footer>
       {children}
     </div>
   );

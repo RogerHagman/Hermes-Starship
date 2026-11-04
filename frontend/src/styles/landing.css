@@ -14,8 +14,8 @@ button{font:inherit;color:inherit}
 .frame{
   display:grid;
   grid-template-columns:300px minmax(0,1fr);
-  grid-template-rows:56px minmax(0,1fr) 36px;
-  grid-template-areas:"elbowT top" "rail main" "elbowB bottom";
+  grid-template-rows:56px minmax(0,1fr);
+  grid-template-areas:"elbowT top" "rail main";
   min-height:100vh;
   padding:20px 24px;
   column-gap:0;
@@ -23,13 +23,10 @@ button{font:inherit;color:inherit}
 .elbow{background:var(--lcars-frame);position:relative}
 .elbow-top{grid-area:elbowT;border-radius:56px 0 0 0}
 .elbow-top::after{content:"";position:absolute;right:0;bottom:-28px;width:28px;height:28px;background:radial-gradient(circle at 100% 100%, transparent 27px, var(--lcars-frame) 28px)}
-.elbow-bottom{grid-area:elbowB;border-radius:0 0 0 56px}
-.elbow-bottom::after{content:"";position:absolute;right:0;top:-28px;width:28px;height:28px;background:radial-gradient(circle at 100% 0, transparent 27px, var(--lcars-frame) 28px)}
 
-.topbar,.bottombar{display:flex;align-items:center;gap:8px;min-width:0}
+.topbar{display:flex;align-items:center;gap:8px;min-width:0}
 .topbar{grid-area:top;height:24px;align-self:start}
-.bottombar{grid-area:bottom;height:14px;align-self:end}
-.topbar::before,.bottombar::before{content:"";flex:1;height:100%;background:var(--lcars-frame)}
+.topbar::before{content:"";flex:1;height:100%;background:var(--lcars-frame)}
 .topbar-stats{order:-1;flex:0 0 auto;display:none}
 .topbar .topbar-stats{display:block;order:0;padding:0 14px;font-size:11px;letter-spacing:.14em;color:var(--text-label);white-space:nowrap}
 .seg{height:100%;border-radius:0}
@@ -38,7 +35,6 @@ button{font:inherit;color:inherit}
 .seg-claude{width:200px;background:var(--rail-claude)}
 .seg-codex{width:160px;background:var(--rail-codex)}
 .seg-end{width:40px;background:var(--lcars-frame);border-radius:0 99px 99px 0}
-.bottom-note{order:0;padding:0 14px;font-size:10.5px;letter-spacing:.14em;color:var(--text-muted);white-space:nowrap}
 
 .siderail{grid-area:rail;display:flex;flex-direction:column;padding:0 22px 0 0;min-height:0}
 .brand{background:var(--lcars-frame);color:var(--captain-ink);display:flex;flex-direction:column;align-items:flex-end;padding:0 40px 16px 18px;margin-right:-22px;margin-top:-1px}
@@ -46,7 +42,6 @@ button{font:inherit;color:inherit}
 .brand-reg{font-size:11px;letter-spacing:.14em;margin-top:4px}
 .rail-label{margin:22px 0 8px;font-size:11px;letter-spacing:.16em;color:var(--text-label)}
 .rail-help{margin:8px 0 0;font-size:12.5px;color:var(--text-muted);line-height:1.4}
-.siderail-fill{flex:1;min-height:40px;margin-top:22px;margin-right:-22px;background:var(--lcars-dark);border-left:10px solid var(--lcars-frame);display:flex;align-items:flex-end;justify-content:flex-end;padding:10px 40px 10px 16px;color:var(--text-muted);font-size:10.5px;letter-spacing:.12em}
 
 .boards{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .board-btn{width:100%;min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px 0 16px;border:none;border-radius:0 99px 99px 0;background:var(--lcars-dark);color:var(--text);cursor:pointer;text-align:left;font-family:var(--font-display);font-weight:600;font-size:14px;border-left:12px solid var(--lcars-frame)}
@@ -62,7 +57,7 @@ button{font:inherit;color:inherit}
 .chip.drill[aria-pressed="true"]{background:color-mix(in srgb, var(--tier-3) 22%, transparent);border-color:var(--tier-3)}
 
 /* ---------- main ---------- */
-.main{grid-area:main;min-width:0;padding:22px 0 18px 28px;display:flex;flex-direction:column;gap:18px}
+.main{grid-area:main;min-width:0;padding:22px 0 0 28px;display:flex;flex-direction:column;gap:18px}
 .head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
 .deck-label{margin:0 0 6px;font-size:11px;letter-spacing:.14em;color:var(--text-label)}
 .board-title{margin:0;font-family:var(--font-display);font-weight:700;font-size:32px;line-height:1.05}
@@ -261,26 +256,24 @@ button{font:inherit;color:inherit}
   .grid{grid-template-columns:minmax(0,1fr) 440px 560px}
 }
 @media (max-width: 1950px){
-  .grid{grid-template-columns:minmax(0,1fr) 520px;grid-template-rows:auto auto auto auto;grid-template-areas:"hero side" "badge badge" "roster roster" "log log"}
+  .grid{grid-template-columns:minmax(0,1fr) 520px;grid-template-rows:auto auto auto auto;grid-template-areas:"hero side" "roster roster" "log log" "badge badge"}
   .log{max-height:none}
 }
 @media (max-width: 1700px){
-  .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hero hero" "badge badge" "side side" "roster roster" "log log"}
+  .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hero hero" "side side" "roster roster" "log log" "badge badge"}
   .side{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));align-items:start;height:auto;min-height:0}
   .side > .panel:first-child{grid-column:1 / -1}
   .orders{max-height:420px}
 }
 @media (max-width: 1200px){
-  .frame{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"top" "rail" "main" "bottom";padding:12px 16px}
+  .frame{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"top" "rail" "main";padding:12px 16px}
   .elbow{display:none}
   .siderail{padding:0}
-  .brand,.siderail-fill{margin-right:0}
-  .brand{flex-direction:row;justify-content:space-between;align-items:center;border-radius:28px 0 0 0;padding:12px 18px}
-  .siderail-fill{display:none}
-  .boards{flex-direction:row;flex-wrap:wrap}
+  .brand,  .brand{flex-direction:row;justify-content:space-between;align-items:center;border-radius:28px 0 0 0;padding:12px 18px}
+    .boards{flex-direction:row;flex-wrap:wrap}
   .board-btn{width:auto}
   .main{padding:16px 0}
-  .grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"hero" "badge" "side" "roster" "log"}
+  .grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"hero" "side" "roster" "log" "badge"}
   .side{grid-template-columns:minmax(0,1fr)}
   .roster{grid-template-columns:repeat(2, minmax(0,1fr))}
   .topbar .topbar-stats{display:none}
@@ -292,8 +285,7 @@ button{font:inherit;color:inherit}
   .rail{grid-template-columns:minmax(0,1fr)}
   .head-right{gap:12px;flex-wrap:wrap}
   .seg-claude,.seg-codex{width:60px}
-  .bottom-note{white-space:normal;font-size:9.5px}
-  .order{grid-template-columns:minmax(0,1fr) auto}
+    .order{grid-template-columns:minmax(0,1fr) auto}
   .order .idtag{grid-column:1}
   .order-title,.order-sub{grid-column:1}
   .statepill{grid-row:1 / 4}
@@ -337,8 +329,8 @@ button{font:inherit;color:inherit}
 @media (max-width: 1950px){
   .brow{flex-wrap:wrap}
   .bpresets{flex-basis:100%;order:10;flex-wrap:wrap}
-  .badgewrap{min-height:0}
-  .badge{position:static}
+  .badgewrap{min-height:0;position:sticky;bottom:0;z-index:15;padding:10px 0 12px;background:var(--bg)}
+  .badge{position:static;box-shadow:0 -10px 30px rgba(0,0,0,.55)}
 }
 
 /* Fit the badge row at 2560 x 1440: tighter bottom panels. */
