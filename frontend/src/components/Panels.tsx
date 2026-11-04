@@ -53,7 +53,7 @@ export function RailsPanel({ ship, drills }: { ship: ShipView; drills: Drills })
   );
 }
 
-export function HailsPanel({ ship, onOpen }: { ship: ShipView; onOpen: (station: string, order?: string) => void }) {
+export function HailsPanel({ ship, picked, onOpen }: { ship: ShipView; picked?: string; onOpen: (station: string, order?: string) => void }) {
   const hails = ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort((a, b) => b.tier - a.tier);
   return (
     <section className="panel panel-captain" aria-labelledby="hails-title">
@@ -67,7 +67,7 @@ export function HailsPanel({ ship, onOpen }: { ship: ShipView; onOpen: (station:
         {hails.map((o) => {
           const st = ship.station(o.station);
           return (
-            <div key={o.id} className="hail" role="button" tabIndex={0}
+            <div key={o.id} className="hail" role="button" tabIndex={0} aria-pressed={picked === o.id}
               onClick={() => onOpen(o.station, o.id)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(o.station, o.id); } }}>
               <div className="hail-title">{o.title}</div>
@@ -89,7 +89,7 @@ export function HailsPanel({ ship, onOpen }: { ship: ShipView; onOpen: (station:
   );
 }
 
-export function OrdersPanel({ ship, filter, onOpen }: { ship: ShipView; filter: RailFilter; onOpen: (station: string, order?: string) => void }) {
+export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; filter: RailFilter; picked?: string; onOpen: (station: string, order?: string) => void }) {
   const open = ship.data.orders.orders.filter((o) => o.state !== 'done' && o.state !== 'awaiting-captain');
   // Parents first, each followed by its child cards.
   const parents = open.filter((o) => !o.parent || !open.some((p) => p.id === o.parent));
@@ -108,7 +108,7 @@ export function OrdersPanel({ ship, filter, onOpen }: { ship: ShipView; filter: 
           const off = st ? ship.off(st) : null;
           return (
             <li key={o.id}>
-              <button type="button" className={'order' + (o.parent ? ' child' : '')} style={{ '--c': railColor(st?.rail ?? 'mixed') } as React.CSSProperties}
+              <button type="button" aria-pressed={picked === o.id} className={'order' + (o.parent ? ' child' : '')} style={{ '--c': railColor(st?.rail ?? 'mixed') } as React.CSSProperties}
                 onClick={() => onOpen(o.station, o.id)}>
                 <span className="idtag">{o.id}</span>
                 <span className="order-title">{o.title}</span>

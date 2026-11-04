@@ -10,7 +10,6 @@ import { HailsPanel, OrdersPanel, RailsPanel } from './components/Panels';
 import { LogPanel, RosterPanel } from './components/Roster';
 import { ShipPlan } from './components/ShipPlan';
 import { SideRail, type RailFilter } from './components/SideRail';
-import { StationDrawer } from './components/StationDrawer';
 import { CommBadge } from './components/CommBadge';
 
 export function App() {
@@ -32,7 +31,12 @@ export function App() {
     setDrills({ ...drills, [r]: out });
     showToast(out ? `Drill: ${RAIL[r].legend} out. Its crew go to quarters.` : `Drill over: ${RAIL[r].legend} back up.`);
   };
-  const openStation = (station: string, order?: string) => { setOpen({ station, order }); setTarget(station); };
+  // Picking the same thing again puts the console back on the watch.
+  const openStation = (station: string, order?: string) => {
+    const same = open?.station === station && open?.order === order;
+    setOpen(same ? null : { station, order });
+    setTarget(station);
+  };
   const close = useCallback(() => setOpen(null), []);
 
   return (
@@ -45,20 +49,19 @@ export function App() {
           <Header ship={ship} error={error} />
           {ship && (
             <div className="grid">
-              <ShipPlan ship={ship} filter={filter} selected={open?.station ?? null} onPick={(id) => openStation(id)} />
+              <ShipPlan ship={ship} filter={filter} pick={open} onPick={openStation} onBack={close} />
               <aside className="side">
                 <RailsPanel ship={ship} drills={drills} />
-                <HailsPanel ship={ship} onOpen={openStation} />
-                <OrdersPanel ship={ship} filter={filter} onOpen={openStation} />
+                <HailsPanel ship={ship} picked={open?.order} onOpen={openStation} />
+                <OrdersPanel ship={ship} filter={filter} picked={open?.order} onOpen={openStation} />
               </aside>
-              <RosterPanel ship={ship} filter={filter} onOpen={(id) => openStation(id)} />
+              <RosterPanel ship={ship} filter={filter} picked={open?.station} onOpen={(id) => openStation(id)} />
               <LogPanel ship={ship} />
               <CommBadge ship={ship} target={target} onToast={showToast} />
             </div>
           )}
         </main>
       </Frame>
-      {ship && open && <StationDrawer ship={ship} stationId={open.station} orderId={open.order} onClose={close} />}
       <div className={'toast' + (toast ? ' show' : '')} role="status" aria-live="polite">{toast}</div>
     </>
   );

@@ -4,7 +4,7 @@ import { clockTime } from '../lib/format';
 import type { ShipView } from '../lib/ship';
 import type { RailFilter } from './SideRail';
 
-export function RosterPanel({ ship, filter, onOpen }: { ship: ShipView; filter: RailFilter; onOpen: (id: string) => void }) {
+export function RosterPanel({ ship, filter, picked, onOpen }: { ship: ShipView; filter: RailFilter; picked?: string; onOpen: (id: string) => void }) {
   return (
     <section className="panel roster-panel" aria-labelledby="roster-title">
       <div className="panel-head">
@@ -29,7 +29,7 @@ export function RosterPanel({ ship, filter, onOpen }: { ship: ShipView; filter: 
                   const off = ship.off(s);
                   const cls = 'member' + (s.head ? ' head' : '') + (off ? ' off' : '') + (s.status === 'reserved' ? ' reserved' : '');
                   return (
-                    <button key={s.id} type="button" className={cls} hidden={filter !== 'all' && s.rail !== filter}
+                    <button key={s.id} type="button" className={cls} aria-pressed={picked === s.id} hidden={filter !== 'all' && s.rail !== filter}
                       style={{ '--c': railColor(s.rail), '--ls': STATUS[s.status].line } as React.CSSProperties}
                       title={`${s.name} · ${RANK[s.rank].label}${off ? ` · off duty: ${off}` : ''}`}
                       onClick={() => onOpen(s.id)}>

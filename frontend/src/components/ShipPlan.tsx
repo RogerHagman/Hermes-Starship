@@ -9,12 +9,14 @@ import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import { Icon } from './Icon';
 import type { RailFilter } from './SideRail';
+import { ShipConsole } from './ShipConsole';
 
 interface Props {
   ship: ShipView;
   filter: RailFilter;
-  selected: string | null;
-  onPick: (id: string) => void;
+  pick: { station: string; order?: string } | null;
+  onPick: (station: string, order?: string) => void;
+  onBack: () => void;
 }
 
 const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
@@ -25,7 +27,8 @@ const ShipArt = memo(function ShipArt() {
   return <div className="ship-art-svg" dangerouslySetInnerHTML={{ __html: shipSvg }} />;
 });
 
-export function ShipPlan({ ship, filter, selected, onPick }: Props) {
+export function ShipPlan({ ship, filter, pick, onPick, onBack }: Props) {
+  const selected = pick?.station ?? null;
   const artRef = useRef<HTMLDivElement>(null);
   const codexUp = ship.rail('codex') !== 'out';
   const claudeUp = ship.rail('claude') !== 'out';
@@ -54,6 +57,7 @@ export function ShipPlan({ ship, filter, selected, onPick }: Props) {
         <p className="mono hero-label">MASTER SYSTEMS DISPLAY · SIDE ELEVATION · PICK A ROOM</p>
         <Legend />
       </div>
+      <div className="ship-wrap">
       <div className="ship">
         <div className="ship-art" ref={artRef} style={artStyle} aria-hidden="true"><ShipArt /></div>
         <div className="ship-tiles">
@@ -61,6 +65,8 @@ export function ShipPlan({ ship, filter, selected, onPick }: Props) {
             <Tile key={st.id} st={st} ship={ship} filter={filter} selected={selected === st.id} onPick={onPick} />
           ))}
         </div>
+      </div>
+      <ShipConsole ship={ship} pick={pick} onPick={onPick} onBack={onBack} />
       </div>
     </section>
   );
