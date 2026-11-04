@@ -1,0 +1,14 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "entries": [
+    {"at": "2026-11-04T19:28:00Z", "station": "qm", "kind": "order", "text": "ORD-9016 opened: typed meal to Codex for macros"},
+    {"at": "2026-11-04T19:26:00Z", "station": "eng", "kind": "split", "text": "ORD-9012 split into ORD-9013 (Systems) and ORD-9014 (Diagnostics)"},
+    {"at": "2026-11-04T19:22:00Z", "station": "archives", "kind": "hail", "text": "ORD-9017 waits for the Captain (tier 3)"},
+    {"at": "2026-11-04T19:10:00Z", "station": "security", "kind": "customs", "text": "Customs: 4 payloads to cloud rails, 4 passed the pre-send scan"},
+    {"at": "2026-11-04T18:55:00Z", "station": "eng", "kind": "hail", "text": "ORD-9015 asks for a checkpoint (tier 2)"},
+    {"at": "2026-11-04T18:40:00Z", "station": "carto", "kind": "review", "text": "ORD-9010 draft sent to Security for visual QA"},
+    {"at": "2026-11-04T17:00:00Z", "station": "ops", "kind": "done", "text": "ORD-9009 nightly sweep done, all hosts green"},
+    {"at": "2026-11-04T16:00:00Z", "station": "yeoman", "kind": "done", "text": "ORD-9008 reminder fired by code"}
+  ]
+}

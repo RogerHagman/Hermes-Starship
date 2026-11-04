@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "rails"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "rails": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "state",
+          "meters"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "local",
+              "codex",
+              "claude"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "engine": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "up",
+              "degraded",
+              "out"
+            ]
+          },
+          "meters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "label",
+                "percent"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "percent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "resetsAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+                }
+              }
+            }
+          },
+          "burn": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "active"
+            ],
+            "properties": {
+              "active": {
+                "type": "boolean"
+              },
+              "until": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+              }
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "title": "Hermes Starship \u00b7 rails"
+}

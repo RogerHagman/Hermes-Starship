@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "name",
+    "registry",
+    "condition",
+    "captain"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "name": {
+      "type": "string"
+    },
+    "registry": {
+      "type": "string"
+    },
+    "condition": {
+      "enum": [
+        "green",
+        "yellow",
+        "red"
+      ]
+    },
+    "captain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "onBridge",
+        "conn"
+      ],
+      "properties": {
+        "onBridge": {
+          "type": "boolean"
+        },
+        "conn": {
+          "type": "string"
+        }
+      }
+    },
+    "timezone": {
+      "type": "string"
+    }
+  },
+  "title": "Hermes Starship \u00b7 ship"
+}

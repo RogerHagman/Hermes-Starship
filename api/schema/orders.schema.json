@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "orders"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "orders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "station",
+          "state",
+          "tier",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "station": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "queued",
+              "running",
+              "review",
+              "awaiting-captain",
+              "blocked",
+              "done"
+            ]
+          },
+          "tier": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "speed": {
+            "enum": [
+              "Thrusters",
+              "Impulse",
+              "Warp",
+              "High Warp",
+              "Maximum Warp"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "parent": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "title": "Hermes Starship \u00b7 orders"
+}

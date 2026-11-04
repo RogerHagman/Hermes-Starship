@@ -1,0 +1,9 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "name": "Hermes",
+  "registry": "HX-01",
+  "condition": "green",
+  "captain": {"onBridge": true, "conn": "captain"},
+  "timezone": "Europe/Stockholm"
+}
