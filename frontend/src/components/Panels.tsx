@@ -1,4 +1,5 @@
 // The side panels: rails, hails awaiting the Captain, orders in flight.
+import { useState } from 'react';
 import { SPEEDS_NOTE, railColor } from '../lib/lookups';
 import { age, clockTime, dayAndTime } from '../lib/format';
 import type { Drills, ShipView } from '../lib/ship';
@@ -90,35 +91,81 @@ export function HailsPanel({ ship, picked, onOpen }: { ship: ShipView; picked?: 
 }
 
 export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; filter: RailFilter; picked?: string; onOpen: (station: string, order?: string) => void }) {
+  // Cards opened with their arrow: an open card shows its full text and its sub-orders.
+  const [opened, setOpened] = useState<ReadonlySet<string>>(new Set());
   const open = ship.data.orders.orders.filter((o) => o.state !== 'done' && o.state !== 'awaiting-captain');
-  // Parents first, each followed by its child cards.
+  const kids = (id: string) => open.filter((c) => c.parent === id);
+  // Parents first, each followed by its sub-orders while the parent is open.
+  // A picked sub-order always shows, so the card you clicked elsewhere is never hidden.
   const parents = open.filter((o) => !o.parent || !open.some((p) => p.id === o.parent));
-  const rows: Order[] = parents.flatMap((p) => [p, ...open.filter((c) => c.parent === p.id)])
+  const rows: Order[] = parents.flatMap((p) => [p, ...kids(p.id).filter((c) => opened.has(p.id) || c.id === picked)])
     .filter((o) => filter === 'all' || ship.station(o.station)?.rail === filter);
+  const shown = new Set(rows.map((o) => o.id));
+  const allOpen = rows.length > 0 && open.every((o) => opened.has(o.id));
+
+  const toggle = (id: string) => setOpened((f) => {
+    const next = new Set(f);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const toggleAll = () => setOpened(allOpen ? new Set() : new Set(open.map((o) => o.id)));
+
   return (
     <section className="panel panel-grow" aria-labelledby="flight-title">
       <div className="panel-head">
         <h2 className="panel-title" id="flight-title">In flight</h2>
         <span className="mono panel-meta" title={SPEEDS_NOTE}>{open.length} ORDERS · SPEED WORDS SET THE REASONING LEVEL</span>
+        <button type="button" className="foldall" aria-expanded={allOpen} onClick={toggleAll}>
+          <Chevron />{allOpen ? 'COLLAPSE ALL' : 'EXPAND ALL'}
+        </button>
       </div>
       <ol className="orders">
         {rows.length === 0 && <li className="empty">No orders in flight on this rail.</li>}
-        {rows.map((o) => {
+        {rows.map((o, i) => {
           const st = ship.station(o.station);
           const off = st ? ship.off(st) : null;
+          const isChild = !!o.parent && shown.has(o.parent);
+          const subs = isChild ? [] : kids(o.id);
+          const isOpen = opened.has(o.id);
+          // Keeps the tree line running down to the next sub-order of the same parent.
+          const moreSibs = isChild && rows[i + 1]?.parent === o.parent;
           return (
-            <li key={o.id}>
-              <button type="button" aria-pressed={picked === o.id} className={'order' + (o.parent ? ' child' : '')} style={{ '--c': railColor(st?.rail ?? 'mixed') } as React.CSSProperties}
+            <li key={o.id} className={'order-row' + (isChild ? ' child' : '') + (moreSibs ? ' more-sibs' : '')}>
+              <button type="button" aria-pressed={picked === o.id} className={'order' + (isOpen ? ' is-open' : '')} style={{ '--c': railColor(st?.rail ?? 'mixed') } as React.CSSProperties}
                 onClick={() => onOpen(o.station, o.id)}>
                 <span className="idtag">{o.id}</span>
                 <span className="order-title">{o.title}</span>
                 <span className={`statepill ${off ? 'waiting' : o.state}`}>{off ? `WAITS · ${off.toUpperCase()}` : o.state.toUpperCase()}</span>
-                <span className="order-sub">{st?.short ?? o.station} · {o.speed ?? ''} · {age(ship.data.orders.asOf, o.updatedAt)}</span>
+                <span className="order-sub">
+                  {st?.short ?? o.station} · {o.speed ?? ''} · {age(ship.data.orders.asOf, o.updatedAt)}
+                  {subs.length > 0 && !isOpen && <b className="subcount"> · +{subs.length} SUB-ORDERS</b>}
+                </span>
+                {isOpen && (
+                  <span className="order-more" id={`more-${o.id}`}>
+                    {o.detail && <span className="order-detail">{o.detail}</span>}
+                    <span className="order-facts mono">
+                      {(st?.name ?? o.station).toUpperCase()} · TIER {o.tier}
+                      {o.parent && ` · PART OF ${o.parent}`}
+                      {subs.length > 0 && ` · ${subs.length} SUB-ORDERS BELOW`}
+                    </span>
+                  </span>
+                )}
+              </button>
+              <button type="button" className="fold" aria-expanded={isOpen} aria-controls={isOpen ? `more-${o.id}` : undefined}
+                onClick={() => toggle(o.id)} aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${o.id}`}>
+                <Chevron />
               </button>
             </li>
           );
         })}
       </ol>
     </section>
+  );
+}
+
+// The drop-down arrow: points down when the card is shut, up when it is open (turned by CSS).
+function Chevron() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="chev"><path d="M6 9l6 6 6-6" /></svg>
   );
 }
