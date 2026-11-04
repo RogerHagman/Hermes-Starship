@@ -10,7 +10,8 @@
     "types": "node tools/schema-types.mjs",
     "test": "vitest run",
     "check": "npm run types -- --check && tsc -b && vitest run",
-    "single": "vite build --mode single"
+    "single": "vite build --mode single",
+    "board": "vite build --mode single && node tools/board-viewer.mjs"
   },
   "dependencies": {
     "react": "19.3.1",

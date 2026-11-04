@@ -31,6 +31,7 @@ npm run dev         # http://localhost:8650, with /fixtures/ served from ../fixt
 npm run check       # types up to date + TypeScript + logic tests
 npm run build       # writes dist/ — commit it
 npm run single      # one-file preview in dist-single/ (fixtures baked in)
+npm run board       # that preview as a fixed 2560 × 1440 board (Fit, 1:1, Full screen) in dist-board/
 npm run types       # regenerate src/types/fixtures.ts after a schema change
 ```
 
