@@ -11,6 +11,7 @@ import { LogPanel, RosterPanel } from './components/Roster';
 import { ShipPlan } from './components/ShipPlan';
 import { SideRail, type RailFilter } from './components/SideRail';
 import { StationDrawer } from './components/StationDrawer';
+import { CommBadge } from './components/CommBadge';
 
 export function App() {
   const [data, setData] = useState<Fixtures | null>(null);
@@ -18,6 +19,7 @@ export function App() {
   const [filter, setFilter] = useState<RailFilter>('all');
   const [drills, setDrills] = useState<Drills>({});
   const [open, setOpen] = useState<{ station: string; order?: string } | null>(null);
+  const [target, setTarget] = useState<string | null>(null);   // who the comm badge speaks to
   const [toast, showToast] = useToast();
 
   useEffect(() => { loadFixtures().then(setData, (e: Error) => setError(e.message)); }, []);
@@ -30,7 +32,7 @@ export function App() {
     setDrills({ ...drills, [r]: out });
     showToast(out ? `Drill: ${RAIL[r].legend} out. Its crew go to quarters.` : `Drill over: ${RAIL[r].legend} back up.`);
   };
-  const openStation = (station: string, order?: string) => setOpen({ station, order });
+  const openStation = (station: string, order?: string) => { setOpen({ station, order }); setTarget(station); };
   const close = useCallback(() => setOpen(null), []);
 
   return (
@@ -51,6 +53,7 @@ export function App() {
               </aside>
               <RosterPanel ship={ship} filter={filter} onOpen={(id) => openStation(id)} />
               <LogPanel ship={ship} />
+              <CommBadge ship={ship} target={target} onToast={showToast} />
             </div>
           )}
         </main>

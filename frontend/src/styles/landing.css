@@ -82,8 +82,8 @@ button{font:inherit;color:inherit}
 .grid{
   display:grid;
   grid-template-columns:minmax(0,1fr) 520px 640px;
-  grid-template-rows:auto minmax(0,1fr);
-  grid-template-areas:"hero hero side" "roster log side";
+  grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:"hero hero side" "roster log side" "badge badge badge";
   gap:22px;
   flex:1;
   min-height:0;
@@ -244,11 +244,11 @@ button{font:inherit;color:inherit}
   .grid{grid-template-columns:minmax(0,1fr) 440px 560px}
 }
 @media (max-width: 1950px){
-  .grid{grid-template-columns:minmax(0,1fr) 520px;grid-template-rows:auto auto auto;grid-template-areas:"hero side" "roster roster" "log log"}
+  .grid{grid-template-columns:minmax(0,1fr) 520px;grid-template-rows:auto auto auto auto;grid-template-areas:"hero side" "badge badge" "roster roster" "log log"}
   .log{max-height:none}
 }
 @media (max-width: 1700px){
-  .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hero hero" "side side" "roster roster" "log log"}
+  .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hero hero" "badge badge" "side side" "roster roster" "log log"}
   .side{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));align-items:start;height:auto;min-height:0}
   .side > .panel:first-child{grid-column:1 / -1}
   .orders{max-height:420px}
@@ -263,7 +263,7 @@ button{font:inherit;color:inherit}
   .boards{flex-direction:row;flex-wrap:wrap}
   .board-btn{width:auto}
   .main{padding:16px 0}
-  .grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"hero" "side" "roster" "log"}
+  .grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"hero" "badge" "side" "roster" "log"}
   .side{grid-template-columns:minmax(0,1fr)}
   .roster{grid-template-columns:repeat(2, minmax(0,1fr))}
   .topbar .topbar-stats{display:none}
@@ -283,4 +283,57 @@ button{font:inherit;color:inherit}
 }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---------- comm badge (from the DeckPlanV3/V4 boards) ---------- */
+.badgewrap{grid-area:badge;position:relative;min-height:76px}
+.badge{position:absolute;left:0;right:0;bottom:0;z-index:15;display:flex;flex-direction:column;gap:10px;padding:12px 16px;border-radius:var(--radius-panel);background:linear-gradient(180deg,#1a1710,#0e0f14);border:1.5px solid #6b5a33;transition:box-shadow .28s ease,border-color .28s ease}
+.badge.lifted{border-color:var(--captain);box-shadow:0 -14px 40px rgba(0,0,0,.6)}
+.brow{display:flex;align-items:center;gap:10px;min-width:0}
+.bicon{width:26px;height:26px;flex-shrink:0;fill:none;stroke:var(--captain);stroke-width:2;stroke-linejoin:round}
+.bname{display:flex;flex-direction:column;line-height:1.1;flex-shrink:0}
+.btitle{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:.04em;color:var(--captain);white-space:nowrap}
+.bsub{font-size:10px;letter-spacing:.08em;color:#a8987a;white-space:nowrap}
+.blabel{font-size:11px;letter-spacing:.14em;color:#a8987a;margin-left:6px}
+.bto{display:inline-flex;align-items:center;gap:8px;min-height:40px;max-width:240px;padding:0 14px;border-radius:var(--radius-sm);border:1.5px solid var(--c);background:var(--surface-raised);font-family:var(--font-display);font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.bto .dot{width:9px;height:9px;border-radius:5px;background:var(--c);flex-shrink:0}
+.bchip,.bkind,.bpreset{min-height:40px;padding:0 14px;border-radius:var(--radius-sm);border:1.5px solid #3a3424;background:transparent;color:#d8ccb4;font-family:var(--font-display);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.bchip[aria-pressed="true"],.bpreset[aria-pressed="true"]{background:#2a2416;border-color:var(--captain);color:var(--text)}
+.bkind[aria-pressed="true"]{background:var(--captain);border-color:var(--captain);color:var(--captain-ink)}
+.bkind.bk-deny[aria-pressed="true"]{background:var(--bad);border-color:var(--bad)}
+.bpreset{min-height:34px;font-weight:500;font-family:var(--font-body);font-size:14px}
+.bsep{width:1.5px;height:30px;background:#3a3424;flex-shrink:0}
+.bpresets{flex:1;min-width:0;display:flex;align-items:center;gap:8px;overflow:hidden}
+.bnote{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bempty{font-size:14px;color:var(--text-muted)}
+.btier{flex-shrink:0;padding:5px 10px;border-radius:6px;border:1.5px solid var(--c);color:var(--c);font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;white-space:nowrap}
+.bwritebtn{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 16px;border-radius:10px;border:1.5px solid var(--captain);background:transparent;color:var(--captain);font-family:var(--font-display);font-weight:700;font-size:15px;cursor:pointer}
+.bwritebtn[aria-expanded="true"]{background:var(--captain);color:var(--captain-ink)}
+.bwritebtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bsend{flex-shrink:0;min-width:130px;min-height:48px;padding:0 18px;border-radius:10px;border:1.5px solid var(--captain);background:var(--captain);color:var(--captain-ink);font-family:var(--font-display);font-weight:700;font-size:15px;cursor:pointer}
+.bsend[aria-disabled="true"]{background:transparent;color:#7d7058;border-color:#3a3424;cursor:not-allowed}
+.bwrite{display:flex;flex-direction:column;gap:6px;animation:bopen .28s ease}
+@keyframes bopen{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.btext{width:100%;height:96px;resize:none;padding:12px 14px;border-radius:10px;border:1.5px solid #6b5a33;background:#0b0d12;color:#fff3da;font-family:var(--font-body);font-size:17px;line-height:1.4}
+.btext::placeholder{color:#7d7058}
+.bmeta{display:flex;justify-content:space-between;gap:16px;font-size:11.5px;color:#a8987a}
+@media (max-width: 1950px){
+  .brow{flex-wrap:wrap}
+  .bpresets{flex-basis:100%;order:10;flex-wrap:wrap}
+  .badgewrap{min-height:0}
+  .badge{position:static}
+}
+
+/* Fit the badge row at 2560 x 1440: tighter bottom panels. */
+@media (min-width: 1951px){
+  .main{gap:12px;padding-top:14px;padding-bottom:8px}
+  .grid{gap:16px 20px}
+  .roster-panel,.log-panel{padding:14px 16px}
+  .roster{gap:10px 12px;margin-top:8px}
+  .dept{padding:8px 10px}
+  .dept-name{margin-bottom:4px}
+  .members{gap:5px}
+  .member{min-height:26px;font-size:12.5px}
+  .log{margin-top:6px}
+  .log li{padding:4px 0}
 }
