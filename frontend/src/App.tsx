@@ -1,7 +1,7 @@
 // The boards: loads the fixtures once, keeps what both boards share (the rail filter, drills,
 // who is relieved, who the comm badge speaks to), and shows the Bridge or the Captain's Quarters.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { loadFixtures } from './lib/data';
+import { LIVE_EVERY_MS, loadFixtures, loadLiveRails } from './lib/data';
 import { useBoard } from './lib/board';
 import { DEPTS, RAIL } from './lib/lookups';
 import { makeShipView, type Drills, type Relieved } from './lib/ship';
@@ -26,6 +26,13 @@ export function App() {
   useFullscreenKey();
 
   useEffect(() => { loadFixtures().then(setData, (e: Error) => setError(e.message)); }, []);
+  // Live rails: read the probe's file again every minute while the page is open.
+  useEffect(() => {
+    const t = setInterval(() => {
+      loadLiveRails().then((rails) => { if (rails) setData((d) => (d ? { ...d, rails } : d)); });
+    }, LIVE_EVERY_MS);
+    return () => clearInterval(t);
+  }, []);
 
   // Recompute who is on duty whenever the fixtures, a drill or a relief change.
   const ship = useMemo(() => (data ? makeShipView(data, drills, relieved) : null), [data, drills, relieved]);

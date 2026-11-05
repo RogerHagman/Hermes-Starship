@@ -2,9 +2,16 @@
 import { useState } from 'react';
 import { SPEEDS_NOTE, railColor } from '../lib/lookups';
 import { age, clockTime, dayAndTime } from '../lib/format';
+import { railsSource } from '../lib/data';
 import type { Drills, ShipView } from '../lib/ship';
 import type { Order } from '../types';
 import type { RailFilter } from './SideRail';
+
+const SOURCE_NOTE = {
+  sample: 'Sample numbers: the rails probe is not running yet.',
+  live: 'Live: read by the rails probe on the NAS about once a minute.',
+  stale: 'Stale: the rails probe has not written for over five minutes.',
+};
 
 /** Short meter names for the compact rails on the Quarters board. */
 const SHORT: Record<string, string> = { gpu: 'GPU', vram: 'VRAM', window: '5 H', week: 'WEEK' };
@@ -14,7 +21,9 @@ export function RailsPanel({ ship, drills, compact = false }: { ship: ShipView; 
     <section className={'panel' + (compact ? ' rails-compact' : '')} aria-labelledby="rails-title">
       <div className="panel-head">
         <h2 className="panel-title" id="rails-title">Rails</h2>
-        <span className="mono panel-meta">AS OF {clockTime(ship.data.rails.asOf)}{compact ? ' · RESETS ON THE VIEWPORT' : ''}</span>
+        <span className="mono panel-meta" title={SOURCE_NOTE[railsSource(ship.data.rails)]}>
+          {railsSource(ship.data.rails).toUpperCase()} · AS OF {clockTime(ship.data.rails.asOf)}{compact ? ' · RESETS ON THE VIEWPORT' : ''}
+        </span>
       </div>
       {!compact && <p className="help">Engine, nacelles and how much of each window is spent.</p>}
       <div className="rails">
@@ -33,6 +42,7 @@ export function RailsPanel({ ship, drills, compact = false }: { ship: ShipView; 
                 )}
               </div>
               <div className="meters">
+                {r.meters.length === 0 && <p className="meter-none">{r.note ?? 'No readings yet.'}</p>}
                 {r.meters.map((m) => {
                   const value = drilled && m.id !== 'vram' ? 100 : m.percent;
                   return (
