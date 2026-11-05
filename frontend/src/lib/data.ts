@@ -1,6 +1,6 @@
 // Loads the fixture files, and the live rails and rail log when the NAS probe writes them. Moving around
 // never calls a model: these are local files only, served by the page's own nginx.
-import type { Fixtures, LogEntry, RailId, RailLogFile, RailsFile, Station } from '../types';
+import type { Fixtures, LogEntry, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station } from '../types';
 
 const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science'] as const;
 
@@ -8,16 +8,71 @@ declare global {
   interface Window { FIXTURES?: Fixtures }   // set only in the single-file preview build
 }
 
-export async function loadFixtures(): Promise<Fixtures> {
+/** The sample fixtures as shipped, before any live file replaces a part of them. */
+export async function loadSample(): Promise<Fixtures> {
   if (window.FIXTURES) return window.FIXTURES;
   const parts = await Promise.all(FILES.map(async (name) => {
     const res = await fetch(`fixtures/${name}.json`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`fixtures/${name}.json: ${res.status}`);
     return [name, await res.json()] as const;
   }));
-  const data = Object.fromEntries(parts) as unknown as Fixtures;
-  const [live, raillog] = await Promise.all([loadLiveRails(), loadLiveRailLog()]);
-  return withLiveDuty(live ? { ...data, rails: live } : data, raillog);
+  return Object.fromEntries(parts) as unknown as Fixtures;
+}
+
+/** What the probes on the NAS write into live/. Each part is null when its file is missing. */
+export interface Live {
+  rails: RailsFile | null;
+  raillog: RailLogFile | null;
+  orders: OrdersFile | null;
+  shiplog: ShipLogFile | null;
+}
+
+export async function loadLive(): Promise<Live> {
+  const [rails, raillog, orders, shiplog] = await Promise.all([loadLiveRails(), loadLiveRailLog(), loadLiveOrders(), loadLiveShipLog()]);
+  return { rails, raillog, orders, shiplog };
+}
+
+/** The sample data with each live part in place of its sample. */
+export function withLive(base: Fixtures, live: Live): Fixtures {
+  const data = live.rails ? { ...base, rails: live.rails } : base;
+  return withLiveDuty(withLiveOrders(data, live.orders, live.shiplog), live.raillog);
+}
+
+/** A live file, or null when there is none or it doesn't look like a real reading. */
+async function loadLiveFile<T extends { synthetic: boolean; asOf: string }>(name: string, ok: (file: T) => boolean): Promise<T | null> {
+  if (window.FIXTURES) return null;   // the single-file preview has no live data
+  try {
+    const res = await fetch(`live/${name}.json`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const file = await res.json() as T;
+    return file && file.synthetic === false && typeof file.asOf === 'string' && ok(file) ? file : null;
+  } catch {
+    return null;
+  }
+}
+
+/** live/orders.json from the ship probe: the real orders, from orders.csv and the Kanban cards. */
+export const loadLiveOrders = () => loadLiveFile<OrdersFile>('orders', (f) => Array.isArray(f.orders));
+/** live/shiplog.json from the ship probe: orders opening and closing, and the customs log. */
+export const loadLiveShipLog = () => loadLiveFile<ShipLogFile>('shiplog', (f) => Array.isArray(f.entries));
+
+/**
+ * With live orders, the sample orders go, and each station's active order is the newest one it
+ * is running (or none). With a live log, its lines take the place of the sample ones; the duty
+ * lines come from the rail log (withLiveDuty).
+ */
+export function withLiveOrders(data: Fixtures, orders: OrdersFile | null, shiplog: ShipLogFile | null): Fixtures {
+  let out = data;
+  if (orders) {
+    const running = new Map<string, string>();
+    for (const o of [...orders.orders].sort((a, b) => a.updatedAt.localeCompare(b.updatedAt))) {
+      if (o.state === 'running') running.set(o.station, o.id);
+    }
+    const stations = data.stations.stations.map((s) => (s.kind === 'station' ? { ...s, activeOrder: running.get(s.id) ?? null } : s));
+    out = { ...out, orders, stations: { ...data.stations, stations } };
+  }
+  if (shiplog) out = { ...out, shiplog };
+  return out;
 }
 
 /** How often the page reads live/rails.json again. The probe writes it about once a minute. */
@@ -27,17 +82,7 @@ export const LIVE_EVERY_MS = 60_000;
  * live/rails.json from the rails probe, or null when there is none (the sample rails stay).
  * Only a file that looks like a real reading is used.
  */
-export async function loadLiveRails(): Promise<RailsFile | null> {
-  if (window.FIXTURES) return null;   // the single-file preview has no live data
-  try {
-    const res = await fetch('live/rails.json', { cache: 'no-store' });
-    if (!res.ok) return null;
-    const file = await res.json() as RailsFile;
-    return file && file.synthetic === false && Array.isArray(file.rails) && typeof file.asOf === 'string' ? file : null;
-  } catch {
-    return null;
-  }
-}
+export const loadLiveRails = () => loadLiveFile<RailsFile>('rails', (f) => Array.isArray(f.rails));
 
 /** Live readings older than this count as stale: the probe has probably stopped. */
 export const STALE_AFTER_MS = 5 * 60_000;
@@ -47,17 +92,7 @@ export function railsSource(rails: RailsFile, now = Date.now()): 'sample' | 'liv
 }
 
 /** live/rail-log.json from the rails probe, or null when there is none (the sample duty lines stay). */
-export async function loadLiveRailLog(): Promise<RailLogFile | null> {
-  if (window.FIXTURES) return null;
-  try {
-    const res = await fetch('live/rail-log.json', { cache: 'no-store' });
-    if (!res.ok) return null;
-    const file = await res.json() as RailLogFile;
-    return file && file.synthetic === false && Array.isArray(file.events) ? file : null;
-  } catch {
-    return null;
-  }
-}
+export const loadLiveRailLog = () => loadLiveFile<RailLogFile>('rail-log', (f) => Array.isArray(f.events));
 
 const WHY: Record<RailId, { out: string; up: string }> = {
   local: { out: 'Ollama went down', up: 'Ollama came back' },

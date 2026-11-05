@@ -2,7 +2,7 @@
 // who is relieved, who the comm badge speaks to), and shows the Bridge or one of the deck boards:
 // the Captain's Quarters, the Holodeck, the Sensor array, Main Engineering or the Science lab.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LIVE_EVERY_MS, loadFixtures, loadLiveRailLog, loadLiveRails, withLiveDuty } from './lib/data';
+import { LIVE_EVERY_MS, loadLive, loadSample, withLive } from './lib/data';
 import { useBoard } from './lib/board';
 import { DEPTS, RAIL } from './lib/lookups';
 import { makeShipView, type Drills, type Relieved } from './lib/ship';
@@ -30,12 +30,15 @@ export function App() {
   const fit = useFit();   // scale the 2560 x 1440 board to the window (see lib/fit.ts)
   useFullscreenKey();
 
-  useEffect(() => { loadFixtures().then(setData, (e: Error) => setError(e.message)); }, []);
-  // Live rails: read the probe's file again every minute while the page is open.
+  // The sample fixtures, kept as they were loaded, so each live reading is laid over them afresh.
+  const sample = useRef<Fixtures | null>(null);
+  useEffect(() => {
+    loadSample().then(async (base) => { sample.current = base; setData(withLive(base, await loadLive())); }, (e: Error) => setError(e.message));
+  }, []);
+  // Live data: read the probes' files again every minute while the page is open.
   useEffect(() => {
     const t = setInterval(() => {
-      loadLiveRails().then((rails) => { if (rails) setData((d) => (d ? { ...d, rails } : d)); });
-      loadLiveRailLog().then((log) => { if (log) setData((d) => (d ? withLiveDuty(d, log) : d)); });
+      loadLive().then((live) => { if (sample.current) setData(withLive(sample.current, live)); });
     }, LIVE_EVERY_MS);
     return () => clearInterval(t);
   }, []);

@@ -26,7 +26,6 @@
           "title",
           "station",
           "state",
-          "tier",
           "updatedAt"
         ],
         "properties": {
@@ -53,16 +52,22 @@
           "tier": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 3
+            "maximum": 3,
+            "description": "The risk tier, 0 to 3. Live orders have none until the tier classifier (conn handoff) is built."
           },
           "speed": {
             "enum": [
               "Thrusters",
+              "Quarter Impulse",
+              "Half Impulse",
+              "Full Impulse",
               "Impulse",
               "Warp",
+              "Warp 9",
               "High Warp",
               "Maximum Warp"
-            ]
+            ],
+            "description": "The Captain's speed word (docs/04-speed-scale.md). Impulse and High Warp are the older sample words."
           },
           "updatedAt": {
             "type": "string",

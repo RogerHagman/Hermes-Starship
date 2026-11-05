@@ -29,3 +29,48 @@ Tests: `python -m unittest discover -s probe` (CI runs them).
 This is Engineering's ORD-1215 probe, with the review fixes: the real NAS paths
 (`/DATA/AppData/hermes/...`), only the newest Codex logs opened, the Ollama address out of the
 repo, and whole-number percentages.
+
+# Ship probe
+
+`ship_probe.py` writes `deploy/live/orders.json` and `deploy/live/shiplog.json` about once a
+minute. With them the boards show the real orders in place of the sample ones: the Bridge
+order list, who is working on what (each station's active order is its newest running one),
+and the ship's log. Without them the sample fixtures stay, and the header pill says SAMPLE.
+
+It reads three things in Hermes' data folder, and never changes them:
+
+| File | What it gives |
+|---|---|
+| `handoff/orders.csv` | Every order: its id, when it came in, from which surface (Telegram, desktop, dashboard), its speed and whether it is open or done. Rows of kind `test` are skipped. |
+| `kanban.db` | The cards. A card belongs to the order whose `ORD-` number its title carries. The order takes its title and brief from its first card, its station from that card's assignee (`forge` is the Chief Engineer, and so on, through `fixtures/stations.json`) and its state from all its cards: running if any card runs, done only when every card is done. |
+| `handoff/handoff-log.csv` | The customs lines in the ship's log: each hand-off to Codex or Claude, and whether it came back accepted. |
+
+What drops off the boards: done orders older than `DAYS` (7), and open orders that never got a
+card and are over a day old (Number One answered them in chat). The newest `KEEP` (80) orders
+are kept.
+
+SQLite can't read a live database on a read-only mount, so the probe copies `kanban.db` (and its
+`-wal`) into `deploy/scratch/` when it has changed, and reads the copy read-only. Hermes'
+database is never opened. A test checks that a run leaves it byte for byte the same.
+
+It runs as the `ship-probe` service in `deploy/compose.yaml`: `python:3.12-alpine`, read-only,
+no network at all (`network_mode: none`), no capabilities but reading, 64 MB of RAM. There is no
+model call anywhere in it, and a test checks the code opens no connection. Speed words follow
+`docs/04-speed-scale.md`. Orders have no tier yet: the boards show NO TIER until a classifier
+sets one.
+
+Tests: `python -m unittest discover -s probe` (CI runs them).
+
+## Starting it on the NAS
+
+One line at a time, in the repo folder on the NAS:
+
+```
+git pull
+sudo docker compose -f deploy/compose.yaml up -d ship-probe
+sudo docker logs --tail 20 hermes-starship-ship
+sudo head -c 400 deploy/live/orders.json
+```
+
+The log should say how many orders and log lines it wrote. Reload the Bridge: the pill turns
+green and says LIVE ORDERS.

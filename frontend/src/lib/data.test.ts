@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { loadLiveRails, railsSource } from './data';
+import { loadLiveOrders, loadLiveRails, loadLiveShipLog, railsSource, withLive, withLiveOrders } from './data';
+import type { Fixtures, OrdersFile, ShipLogFile } from '../types';
 
 const live = { asOf: '2026-11-05T09:00:00Z', synthetic: false, rails: [] };
 
@@ -74,5 +75,42 @@ describe('the rail log becomes the duty log', () => {
     const others = (shiplog as { entries: { kind: string }[] }).entries.filter((e) => e.kind !== 'duty').length;
     expect(merged.shiplog.entries.length).toBe(others + 2);
     expect(withLiveDuty(data, null)).toBe(data);
+  });
+});
+
+describe('live orders and log', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const base = async () => {
+    const [stations, orders, shiplog] = await Promise.all(['stations', 'orders', 'shiplog'].map((n) => import(`../../../fixtures/${n}.json`)));
+    return { stations: stations.default, orders: orders.default, shiplog: shiplog.default } as unknown as Fixtures;
+  };
+  const orders = { asOf: '2026-11-05T20:00:00Z', synthetic: false, orders: [
+    { id: 'ORD-1201', title: 'Fix the reminder time', station: 'eng', state: 'running', updatedAt: '2026-11-05T18:01:00Z' },
+    { id: 'ORD-1203', title: 'Message on dashboard', station: 'xo', state: 'queued', updatedAt: '2026-11-05T19:00:00Z' },
+  ] } as OrdersFile;
+  const shiplog = { asOf: '2026-11-05T20:00:00Z', synthetic: false, entries: [
+    { at: '2026-11-05T18:00:00Z', station: 'xo', kind: 'order', text: 'ORD-1201 opened: Fix the reminder time' },
+  ] } as ShipLogFile;
+
+  it('reads the ship probe\'s files, and only real ones', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(orders))));
+    expect(await loadLiveOrders()).toEqual(orders);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ ...orders, synthetic: true }))));
+    expect(await loadLiveOrders()).toBeNull();
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ asOf: orders.asOf, synthetic: false }))));
+    expect(await loadLiveShipLog()).toBeNull();
+  });
+
+  it('live orders replace the samples, and each station works on its newest running order', async () => {
+    const data = withLiveOrders(await base(), orders, null);
+    expect(data.orders.orders.map((o) => o.id)).toEqual(['ORD-1201', 'ORD-1203']);
+    const st = (id: string) => data.stations.stations.find((s) => s.id === id);
+    expect(st('eng')?.activeOrder).toBe('ORD-1201');
+    expect(st('sys')?.activeOrder).toBeNull();   // its sample order is gone
+  });
+
+  it('a live log replaces the sample lines; without a rail log no sample duty lines stay', async () => {
+    const data = withLive(await base(), { rails: null, raillog: null, orders: null, shiplog });
+    expect(data.shiplog.entries).toEqual(shiplog.entries);
   });
 });
