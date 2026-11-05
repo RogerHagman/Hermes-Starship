@@ -1,8 +1,21 @@
 // Duty roster by department (head first) and the ship's log.
-import { DEPTS, RANK, STATUS, railColor } from '../lib/lookups';
+import { DEPTS, PIPS, RANK, STATUS, railColor } from '../lib/lookups';
 import { clockTime } from '../lib/format';
 import type { ShipView } from '../lib/ship';
+import type { Station } from '../types';
 import type { RailFilter } from './SideRail';
+
+/** Collar pips for a rank: full ones, then a hollow one for the half grades. Enlisted crew wear none. */
+export function Pips({ rank }: { rank: Station['rank'] }) {
+  const p = PIPS[rank];
+  if (!p) return null;
+  return (
+    <span className="pips" aria-hidden="true">
+      {Array.from({ length: p.full }, (_, i) => <i key={i} />)}
+      {Array.from({ length: p.hollow }, (_, i) => <i key={'h' + i} className="hollow" />)}
+    </span>
+  );
+}
 
 export function RosterPanel({ ship, filter, picked, onOpen }: { ship: ShipView; filter: RailFilter; picked?: string; onOpen: (id: string) => void }) {
   return (
@@ -33,7 +46,8 @@ export function RosterPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
                       style={{ '--c': railColor(s.rail), '--ls': STATUS[s.status].line } as React.CSSProperties}
                       title={`${s.name} · ${RANK[s.rank].label}${off ? ` · off duty: ${off}` : ''}`}
                       onClick={() => onOpen(s.id)}>
-                      <span className="dot" />{s.short}
+                      {/* Officers wear their pips where the rail dot would be; the chip's border keeps the rail colour. */}
+                      {PIPS[s.rank] ? <Pips rank={s.rank} /> : <span className="dot" />}{s.short}
                       {ship.acting[d.id] === s.id && <span className="acting">ACTING</span>}
                       {s.head && off && <span className="acting" style={{ color: 'var(--text-muted)' }}>OFF</span>}
                     </button>
@@ -57,7 +71,7 @@ export function LogPanel({ ship }: { ship: ShipView }) {
           <li key={e.at + e.text}>
             <time dateTime={e.at}>{clockTime(e.at)}</time>
             <span className="dot" style={{ '--c': railColor(ship.station(e.station)?.rail ?? 'mixed') } as React.CSSProperties} />
-            <span>{e.text}</span>
+            <span><span className="log-who">{(ship.station(e.station)?.short ?? e.station).toUpperCase()}</span>{e.text}</span>
           </li>
         ))}
       </ol>

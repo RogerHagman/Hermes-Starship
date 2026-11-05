@@ -1,0 +1,194 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "campaigns": [
+    {
+      "id": "CMP-901",
+      "name": "Ship upgrade",
+      "objective": "A faster crew that leans on the cloud, so the local model routes and rests.",
+      "measure": "2 of 4 missions",
+      "percent": 50,
+      "target": "2026-12",
+      "status": "active"
+    },
+    {
+      "id": "CMP-902",
+      "name": "Career move",
+      "objective": "A new role by spring. Helm runs the search.",
+      "measure": "4 of 20 applications",
+      "percent": 20,
+      "target": "2027-03",
+      "status": "active"
+    },
+    {
+      "id": "CMP-903",
+      "name": "Fitness",
+      "objective": "Back to the target weight, steadily.",
+      "measure": "6 of 16 weeks",
+      "percent": 38,
+      "target": "2027-02",
+      "status": "active"
+    },
+    {
+      "id": "CMP-904",
+      "name": "Reading",
+      "objective": "Twenty-four books this year.",
+      "measure": "17 of 24 books",
+      "percent": 71,
+      "target": "2026-12",
+      "status": "active"
+    }
+  ],
+  "missions": [
+    {
+      "id": "MSN-906",
+      "name": "Weekend trip",
+      "doneWhen": "a booked weekend and a one-page itinerary",
+      "stations": [
+        "sensors",
+        "nav",
+        "carto"
+      ],
+      "progress": "1 of 5",
+      "status": "awaiting-captain"
+    },
+    {
+      "id": "MSN-902",
+      "name": "Live rails",
+      "campaign": "CMP-901",
+      "doneWhen": "the Rails panel shows real numbers",
+      "stations": [
+        "eng",
+        "sys",
+        "diag"
+      ],
+      "progress": "1 of 3",
+      "status": "in-flight"
+    },
+    {
+      "id": "MSN-904",
+      "name": "Four-week meal baseline",
+      "campaign": "CMP-903",
+      "doneWhen": "four weeks logged and a trend line",
+      "stations": [
+        "qm"
+      ],
+      "progress": "1 of 4",
+      "status": "in-flight"
+    },
+    {
+      "id": "MSN-903",
+      "name": "Job search set-up",
+      "campaign": "CMP-902",
+      "doneWhen": "tracker, scan, ATS check and CV workspace live",
+      "stations": [
+        "helm",
+        "sensors",
+        "carto"
+      ],
+      "progress": "0 of 4",
+      "status": "planning"
+    },
+    {
+      "id": "MSN-905",
+      "name": "Year in books",
+      "campaign": "CMP-904",
+      "doneWhen": "a year-end reading report",
+      "stations": [
+        "archives",
+        "carto"
+      ],
+      "progress": "drafting",
+      "status": "planning"
+    },
+    {
+      "id": "MSN-901",
+      "name": "Holodeck H1 · the Bridge",
+      "campaign": "CMP-901",
+      "doneWhen": "the Bridge live on the NAS on sample data",
+      "stations": [
+        "holo",
+        "carto"
+      ],
+      "progress": "done",
+      "status": "closed"
+    }
+  ],
+  "log": [
+    {
+      "at": "2026-11-04T18:40:00Z",
+      "text": "Sample entry. The Bridge runs on the NAS now. Next: real numbers on the rails."
+    },
+    {
+      "at": "2026-11-03T20:45:00Z",
+      "text": "Sample entry. Engineering keeps the split by default. Re-test it on a fresh window."
+    },
+    {
+      "at": "2026-11-02T08:30:00Z",
+      "text": "Sample entry. The weekly reset went fine. Three titles roll into next week."
+    }
+  ],
+  "standingOrders": [
+    "Number One routes. It never does the work itself.",
+    "My words reach the station unchanged.",
+    "Tier 3 waits for me. Nothing that can't be undone runs without my Approve.",
+    "Changes on the NAS come to me as commands. No station applies them live.",
+    "Overnight, Codex and Claude may use their full windows.",
+    "Recurring jobs are tracked, not capped.",
+    "Unknown values stay blank. No station guesses a number.",
+    "Every report is a handoff: what was found, where, and what's left."
+  ],
+  "yeoman": [
+    {
+      "id": "Y-901",
+      "text": "Book a check-up with the dentist",
+      "kind": "reminder",
+      "due": "2026-11-05T08:00:00Z"
+    },
+    {
+      "id": "Y-902",
+      "text": "Water the plants",
+      "kind": "todo",
+      "due": "2026-11-05T17:00:00Z"
+    },
+    {
+      "id": "Y-903",
+      "text": "Waiting for the landlord's invoice",
+      "kind": "waiting",
+      "due": "2026-11-06T08:00:00Z"
+    },
+    {
+      "id": "Y-904",
+      "text": "Renew the parking permit",
+      "kind": "todo",
+      "due": "2026-11-07T10:00:00Z"
+    }
+  ],
+  "reading": {
+    "year": 2026,
+    "read": 17,
+    "goal": 24,
+    "current": [
+      {
+        "title": "Lanterns over Kepler",
+        "author": "A. Marsh",
+        "percent": 62
+      },
+      {
+        "title": "The Quiet Engine",
+        "author": "R. Lindqvist",
+        "percent": 18
+      }
+    ],
+    "next": [
+      {
+        "title": "Charts of the Inner Sea",
+        "author": "M. Okafor"
+      },
+      {
+        "title": "A Winter Harbour",
+        "author": "E. Brandt"
+      }
+    ]
+  }
+}

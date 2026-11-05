@@ -43,7 +43,12 @@ function inlineFixtures(): Plugin {
 export default defineConfig(({ mode }) => ({
   plugins: [react(), fixtures(), ...(mode === 'single' ? [inlineFixtures(), viteSingleFile()] : [])],
   base: './',
-  build: mode === 'single' ? { outDir: 'dist-single', assetsInlineLimit: 100_000_000 } : { outDir: 'dist' },
+  // One page on the home network, about 125 kB gzipped. The Quarters room art sits inside the
+  // bundle so CSS can light it, which takes the bundle past Vite's default 500 kB warning.
+  build: {
+    chunkSizeWarningLimit: 700,
+    ...(mode === 'single' ? { outDir: 'dist-single', assetsInlineLimit: 100_000_000 } : { outDir: 'dist' }),
+  },
   server: { port: 8650 },
   test: { environment: 'jsdom' },
 }));

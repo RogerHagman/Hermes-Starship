@@ -13,12 +13,67 @@ export interface OrdersFile {
     speed?: "Thrusters" | "Impulse" | "Warp" | "High Warp" | "Maximum Warp";
     updatedAt: string;
     parent?: string;
+    mission?: string;
     detail?: string;
     /**
      * The card body as filed, plain text. A line that starts with GOAL:, CONTEXT:, CONSTRAINTS:, DONE WHEN: or START WITH: begins a section; a line that starts with '- ' is a list item.
      */
     body?: string;
   }[];
+}
+
+export interface QuartersFile {
+  asOf: string;
+  synthetic: boolean;
+  campaigns: {
+    id: string;
+    name: string;
+    objective: string;
+    measure: string;
+    percent: number;
+    /**
+     * Target month, YYYY-MM.
+     */
+    target: string;
+    status: "active" | "paused" | "done";
+  }[];
+  missions: {
+    id: string;
+    name: string;
+    campaign?: string;
+    doneWhen: string;
+    stations: string[];
+    progress: string;
+    status: "awaiting-captain" | "in-flight" | "planning" | "closed";
+  }[];
+  /**
+   * The captain's log. Stays on the local rail; only the Ship's Computer reads it.
+   */
+  log: {
+    at: string;
+    text: string;
+  }[];
+  standingOrders: string[];
+  yeoman: {
+    id: string;
+    text: string;
+    kind: "todo" | "reminder" | "waiting";
+    due: string;
+  }[];
+  reading: {
+    year: number;
+    read: number;
+    goal: number;
+    current: {
+      title: string;
+      author: string;
+      percent: number;
+    }[];
+    next: {
+      title: string;
+      author: string;
+    }[];
+  };
 }
 
 export interface RailsFile {

@@ -13,7 +13,7 @@ import jsonschema
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
-NAMES = ["stations", "rails", "orders", "shiplog", "ship"]
+NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters"]
 
 
 def load(path):
@@ -76,6 +76,51 @@ class FixturesAgree(unittest.TestCase):
         # Fixture ORDs live in the 9000s so they never look like real orders.
         for oid in self.orders:
             self.assertTrue(oid.startswith("ORD-9"), oid)
+
+
+class QuartersAgree(unittest.TestCase):
+    """The Captain's Quarters board: campaigns, missions and the orders that serve them."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.q = load(FIX / "quarters.json")
+        cls.stations = {s["id"] for s in load(FIX / "stations.json")["stations"]}
+        cls.orders = load(FIX / "orders.json")["orders"]
+        cls.campaigns = {c["id"] for c in cls.q["campaigns"]}
+        cls.missions = {m["id"] for m in cls.q["missions"]}
+
+    def test_ids_unique(self):
+        for key in ("campaigns", "missions", "yeoman"):
+            ids = [x["id"] for x in self.q[key]]
+            with self.subTest(list=key):
+                self.assertEqual(len(ids), len(set(ids)))
+
+    def test_missions_point_at_real_campaigns_and_stations(self):
+        for m in self.q["missions"]:
+            with self.subTest(mission=m["id"]):
+                if "campaign" in m:
+                    self.assertIn(m["campaign"], self.campaigns)
+                for sid in m["stations"]:
+                    self.assertIn(sid, self.stations)
+
+    def test_orders_point_at_real_missions(self):
+        for o in self.orders:
+            if "mission" in o:
+                with self.subTest(order=o["id"]):
+                    self.assertIn(o["mission"], self.missions)
+
+    def test_sample_ids_live_in_the_900s(self):
+        # Like the ORDs, sample campaigns, missions and Yeoman items never look like real ones.
+        for key in ("campaigns", "missions", "yeoman"):
+            for x in self.q[key]:
+                with self.subTest(id=x["id"]):
+                    self.assertRegex(x["id"], r"-9\d\d$")
+
+    def test_reading_adds_up(self):
+        r = self.q["reading"]
+        self.assertLessEqual(r["read"], r["goal"])
+        reading = next(c for c in self.q["campaigns"] if c["name"] == "Reading")
+        self.assertEqual(reading["percent"], round(100 * r["read"] / r["goal"]))
 
 
 class NoRealData(unittest.TestCase):

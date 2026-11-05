@@ -10,6 +10,7 @@
       "tier": 3,
       "speed": "Thrusters",
       "updatedAt": "2026-11-04T19:22:00Z",
+      "mission": "MSN-905",
       "detail": "The Archivist wants to roll three unfinished titles into next week. Tier 3, so it stops for the Captain.",
       "body": "GOAL: Roll three unfinished titles into next week's reading list.\nCONTEXT: The weekly reset runs on the Archivist's own list. Three titles were started and not finished.\nCONSTRAINTS:\n- Tier 3, so nothing changes until the Captain approves.\n- Keep the titles in the order they were started.\nDONE WHEN:\n- The Captain approves or denies.\n- Next week's list shows the result."
     },
@@ -21,8 +22,21 @@
       "tier": 2,
       "speed": "Impulse",
       "updatedAt": "2026-11-04T18:55:00Z",
+      "mission": "MSN-902",
       "detail": "The Chief Engineer reviewed the split work and asks for a checkpoint before the patch is filed.",
       "body": "GOAL: File the reviewed sample patch in the patch bay.\nCONTEXT: The Chief Engineer reviewed the split work from Systems and Diagnostics. Tier 2, so it stops for a checkpoint first.\nCONSTRAINTS:\n- Patch only. The Captain applies it with docker exec.\n- Never edit live files.\nDONE WHEN:\n- The Captain approves.\n- The patch is in the patch bay with its check steps."
+    },
+    {
+      "id": "ORD-9018",
+      "title": "Checkpoint: approve the weekend trip plan",
+      "station": "carto",
+      "state": "awaiting-captain",
+      "tier": 2,
+      "speed": "Impulse",
+      "updatedAt": "2026-11-04T19:12:00Z",
+      "mission": "MSN-906",
+      "detail": "Five steps across Sensors, Navigation and Cartography. Booking stays with you.",
+      "body": "GOAL: A booked sample weekend away and a one-page itinerary.\nCONTEXT: Sensors priced three sample cities within a three-hour train ride. Navigation found two free weekends.\nCONSTRAINTS:\n- Booking stays with the Captain. No station pays for anything.\n- Sample places and prices only.\nDONE WHEN:\n- The Captain approves the plan.\n- The itinerary is in the proof bay."
     },
     {
       "id": "ORD-9012",
@@ -32,6 +46,7 @@
       "tier": 1,
       "speed": "Warp",
       "updatedAt": "2026-11-04T19:18:00Z",
+      "mission": "MSN-902",
       "detail": "Chief Engineer plans the job and splits it for the lower decks.",
       "body": "GOAL: Plan a read-only API that serves the deck plan data, then review what the lower decks build.\nCONTEXT: The Bridge reads fixtures today. Holodeck H2 needs the same shapes from a live service on the NAS.\nCONSTRAINTS:\n- GET only, using the same schemas as the fixtures.\n- Split the build to Systems and the tests to Diagnostics. Don't build it yourself.\n- Don't wait or poll for the child cards. File a review card and finish.\nDONE WHEN:\n- The plan is filed with each endpoint and the schema it returns.\n- Child cards ORD-9013 and ORD-9014 are filed.\n- A review card is filed for when both land."
     },
@@ -43,6 +58,7 @@
       "tier": 1,
       "speed": "Impulse",
       "updatedAt": "2026-11-04T19:26:00Z",
+      "mission": "MSN-902",
       "parent": "ORD-9012",
       "detail": "Systems Engineer builds exactly what the plan says.",
       "body": "GOAL: Build the station endpoint from the ORD-9012 plan.\nCONTEXT: The plan lists the fields. The stations fixture is the reference answer.\nCONSTRAINTS:\n- Build exactly what the plan says. Questions go back to the Chief Engineer.\n- Write the patch only, never edit live files.\nSTART WITH: The plan on ORD-9012, then the stations schema.\nDONE WHEN:\n- The endpoint returns the same data as the stations fixture.\n- The patch is filed for review."
@@ -55,6 +71,7 @@
       "tier": 0,
       "speed": "Thrusters",
       "updatedAt": "2026-11-04T19:26:00Z",
+      "mission": "MSN-902",
       "parent": "ORD-9012",
       "detail": "Diagnostics writes tests from the plan once the build lands.",
       "body": "GOAL: Write tests that prove the station endpoint matches its schema.\nCONTEXT: Starts once ORD-9013 lands. The stations schema is the contract.\nCONSTRAINTS:\n- Tests only. Report failures, don't fix the build.\nDONE WHEN:\n- Every station is checked against the schema.\n- One failing case is shown failing on purpose, then removed."
@@ -78,6 +95,7 @@
       "tier": 1,
       "speed": "Warp",
       "updatedAt": "2026-11-04T18:40:00Z",
+      "mission": "MSN-906",
       "detail": "Draft done, waiting for Security's visual QA.",
       "body": "GOAL: One printable page for a sample weekend trip.\nCONTEXT: The draft is done. Security runs visual QA before it goes to the Captain.\nCONSTRAINTS:\n- Sample places and times only.\n- The Captain's words stay unchanged.\nDONE WHEN:\n- Security's QA passes.\n- The PDF is in the proof bay, waiting for approval."
     },
@@ -89,6 +107,7 @@
       "tier": 0,
       "speed": "Thrusters",
       "updatedAt": "2026-11-04T19:28:00Z",
+      "mission": "MSN-904",
       "detail": "Typed meal goes to Codex for macros only. Unknown values stay blank.",
       "body": "GOAL: Log a sample meal from a typed note, with its macros.\nCONTEXT: The note was typed, so it goes to Codex for the macros only.\nCONSTRAINTS:\n- Unknown values stay blank. Never guess a number.\nDONE WHEN:\n- The meal is in the food log, with each value sourced or left blank."
     },
