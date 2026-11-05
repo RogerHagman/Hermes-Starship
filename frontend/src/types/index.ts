@@ -1,7 +1,7 @@
 // Friendly names for the generated fixture types.
-import type { OrdersFile, QuartersFile, RailLogFile, RailsFile, SensorsFile, ShipFile, ShipLogFile, StationsFile } from './fixtures';
+import type { EngineeringFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile } from './fixtures';
 
-export type { OrdersFile, QuartersFile, RailLogFile, RailsFile, SensorsFile, ShipFile, ShipLogFile, StationsFile };
+export type { EngineeringFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile };
 export type Station = StationsFile['stations'][number];
 export type Rail = RailsFile['rails'][number];
 export type RailId = Rail['id'];
@@ -14,6 +14,14 @@ export type YeomanItem = QuartersFile['yeoman'][number];
 export type Watch = SensorsFile['watches'][number];
 export type Finding = SensorsFile['findings'][number];
 export type Ask = SensorsFile['asks'][number];
+export type Patch = EngineeringFile['patches'][number];
+export type PatchStage = Patch['stage'];
+export type Model = ScienceFile['models'][number];
+export type Eval = ScienceFile['evals'][number];
+export type Run = ScienceFile['runs'][number];
+export type Serve = ScienceFile['serving'][number];
+export type Dataset = ScienceFile['datasets'][number];
+export type StudyTrack = ScienceFile['study'][number];
 
 /** Everything the boards read, one object per fixture file. */
 export interface Fixtures {
@@ -24,6 +32,8 @@ export interface Fixtures {
   shiplog: ShipLogFile;
   quarters: QuartersFile;
   sensors: SensorsFile;
+  engineering: EngineeringFile;
+  science: ScienceFile;
   /** live/rail-log.json from the rails probe, when there is one. Its duty lines replace the samples. */
   raillog?: RailLogFile;
 }

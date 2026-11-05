@@ -42,7 +42,7 @@ export function SensorScreen({ ship, now, screen, onScreen }: {
     case 'quarantine': body = <QuarantineView ship={ship} onScreen={onScreen} onBack={back} />; break;
     case 'station': {
       const st = ship.station(screen.id);
-      if (st) { colour = railColor(st.rail); body = <StationDetail ship={ship} st={st} back="‹ Watching" onBack={back} />; }
+      if (st) { colour = railColor(st.rail); body = <StationDetail ship={ship} st={st} back="‹ Watching" onBack={back} here="sensors" />; }
       break;
     }
   }

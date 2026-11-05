@@ -117,7 +117,7 @@ export function ArrayLog({ ship }: { ship: ShipView }) {
       </div>
       <ol className="alog">
         {lines.map((l) => (
-          <li key={l.at + l.tag + l.text} className={l.tag.toLowerCase()}>
+          <li key={l.at + l.tag + l.text} className={l.tag === 'HELD' ? 'alog-held' : l.tag === 'DUTY' ? 'alog-duty' : undefined}>
             <time className="mono" dateTime={l.at}>{dayAndTime(l.at).split(' ')[0] === today ? clockTime(l.at) : dayAndTime(l.at)}</time>
             <span className="alog-tag mono">{l.tag}</span>
             <span>{l.text}</span>

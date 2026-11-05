@@ -125,8 +125,8 @@ html:has(.board-sensors) body{background-color:#060a12;background-image:var(--st
 .alog li{display:grid;grid-template-columns:96px 48px minmax(0,1fr);gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;line-height:1.4}
 .alog time{font-size:10.5px;color:var(--text-label);padding-top:2px}
 .alog-tag{font-size:9.5px;letter-spacing:.08em;color:var(--sci);padding-top:3px}
-.alog li.held .alog-tag{color:var(--bad)}
-.alog li.duty .alog-tag{color:var(--text-muted)}
+.alog li.alog-held .alog-tag{color:var(--bad)}
+.alog li.alog-duty .alog-tag{color:var(--text-muted)}
 
 /* ---------- smaller boards ---------- */
 @container board (max-width: 760px){

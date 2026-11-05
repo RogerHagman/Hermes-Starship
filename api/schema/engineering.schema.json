@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship · engineering",
+  "description": "Main Engineering (Deck 7): the patch line from brief to live, the last check of the patch bay, the manual NAS commands, and the split-or-solo experiment.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "patches",
+    "check",
+    "commands",
+    "experiment"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "patches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "stage",
+          "updatedAt",
+          "why"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^PT-\\d{3}$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "stage": {
+            "description": "Where it is on the line. The Chief plans and reviews, Systems builds, Diagnostics verifies, the Captain applies.",
+            "enum": [
+              "brief",
+              "plan",
+              "build",
+              "verify",
+              "review",
+              "apply",
+              "live"
+            ]
+          },
+          "failed": {
+            "type": "boolean",
+            "description": "Its last check failed, so it went back a stage."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "why": {
+            "type": "string"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^ORD-\\d{4}$"
+            }
+          },
+          "checks": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "passed",
+              "total"
+            ],
+            "properties": {
+              "passed": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "files": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "at",
+        "present",
+        "total",
+        "note"
+      ],
+      "properties": {
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+        },
+        "present": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "cmd",
+          "when"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "cmd": {
+            "type": "string"
+          },
+          "when": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "experiment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "question",
+        "arms",
+        "verdict"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "question": {
+          "type": "string"
+        },
+        "arms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "label",
+              "runs",
+              "minutes",
+              "rework"
+            ],
+            "properties": {
+              "id": {
+                "enum": [
+                  "solo",
+                  "split"
+                ]
+              },
+              "label": {
+                "type": "string"
+              },
+              "runs": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "minutes": {
+                "type": "number",
+                "minimum": 0
+              },
+              "rework": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "verdict": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

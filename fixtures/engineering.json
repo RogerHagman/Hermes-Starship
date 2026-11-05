@@ -1,0 +1,150 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "patches": [
+    {
+      "id": "PT-901",
+      "title": "Sample read API for the deck plan",
+      "stage": "build",
+      "updatedAt": "2026-11-04T18:40:00Z",
+      "why": "The Holodeck needs the ship's rooms from a real endpoint, not fixtures.",
+      "orders": [
+        "ORD-9012",
+        "ORD-9013",
+        "ORD-9014"
+      ],
+      "files": 4,
+      "checks": {
+        "passed": 3,
+        "total": 7
+      }
+    },
+    {
+      "id": "PT-902",
+      "title": "Sample patch for the patch bay",
+      "stage": "review",
+      "updatedAt": "2026-11-04T17:55:00Z",
+      "why": "A small patch to rehearse the whole line before a real one.",
+      "orders": [
+        "ORD-9015"
+      ],
+      "files": 1,
+      "checks": {
+        "passed": 5,
+        "total": 5
+      }
+    },
+    {
+      "id": "PT-903",
+      "title": "apply.sh can run twice",
+      "stage": "verify",
+      "updatedAt": "2026-11-04T16:20:00Z",
+      "why": "Running the apply script again should change nothing, not stack a patch twice.",
+      "failed": true,
+      "files": 1,
+      "checks": {
+        "passed": 2,
+        "total": 4
+      }
+    },
+    {
+      "id": "PT-904",
+      "title": "Split or solo, measured",
+      "stage": "plan",
+      "updatedAt": "2026-11-04T12:10:00Z",
+      "why": "Find out whether splitting a card across the three engineers beats one engineer doing it all."
+    },
+    {
+      "id": "PT-905",
+      "title": "Thinking defaults per station",
+      "stage": "brief",
+      "updatedAt": "2026-11-03T21:00:00Z",
+      "why": "Each station gets the reasoning level its work needs, written down once."
+    },
+    {
+      "id": "PT-906",
+      "title": "Routing rules in the default prompt",
+      "stage": "live",
+      "updatedAt": "2026-10-30T15:00:00Z",
+      "why": "Number One reads the routing rules on every turn.",
+      "files": 2,
+      "checks": {
+        "passed": 6,
+        "total": 6
+      }
+    },
+    {
+      "id": "PT-907",
+      "title": "Token cap on local profiles",
+      "stage": "live",
+      "updatedAt": "2026-10-30T14:30:00Z",
+      "why": "Local answers stop at a sane length instead of running on.",
+      "files": 1,
+      "checks": {
+        "passed": 4,
+        "total": 4
+      }
+    },
+    {
+      "id": "PT-908",
+      "title": "Reminder send time fix",
+      "stage": "live",
+      "updatedAt": "2026-10-28T11:00:00Z",
+      "why": "Reminders fire at the time asked, from code, not from the model.",
+      "files": 2,
+      "checks": {
+        "passed": 5,
+        "total": 5
+      }
+    }
+  ],
+  "check": {
+    "at": "2026-11-04T08:00:00Z",
+    "present": 25,
+    "total": 25,
+    "note": "Every applied patch is still in place after the last Hermes update."
+  },
+  "commands": [
+    {
+      "label": "Back up first",
+      "cmd": "sudo docker exec hermes tar czf /opt/data/backups/before-patch.tgz -C /opt/data config.yaml patches",
+      "when": "Before every apply."
+    },
+    {
+      "label": "Apply the patches",
+      "cmd": "sudo docker exec -u root hermes sh /opt/data/patches/apply.sh",
+      "when": "After you approve a patch at review."
+    },
+    {
+      "label": "Check them",
+      "cmd": "sudo docker exec -u root hermes sh /opt/data/patches/check.sh",
+      "when": "After an apply, and after every Hermes update."
+    },
+    {
+      "label": "Restart Hermes",
+      "cmd": "sudo docker restart hermes",
+      "when": "When check.sh says all patches are present."
+    }
+  ],
+  "experiment": {
+    "name": "Split or solo",
+    "question": "Is a card done faster and with less rework when the Chief splits it for Systems and Diagnostics, or when one engineer does it all?",
+    "arms": [
+      {
+        "id": "solo",
+        "label": "One engineer",
+        "runs": 3,
+        "minutes": 41,
+        "rework": 2
+      },
+      {
+        "id": "split",
+        "label": "Split three ways",
+        "runs": 2,
+        "minutes": 33,
+        "rework": 1
+      }
+    ],
+    "verdict": null
+  }
+}

@@ -1,6 +1,57 @@
 // Generated from api/schema by `npm run types`. Do not edit by hand.
 /* eslint-disable */
 
+/**
+ * Main Engineering (Deck 7): the patch line from brief to live, the last check of the patch bay, the manual NAS commands, and the split-or-solo experiment.
+ */
+export interface EngineeringFile {
+  asOf: string;
+  synthetic: boolean;
+  patches: {
+    id: string;
+    title: string;
+    /**
+     * Where it is on the line. The Chief plans and reviews, Systems builds, Diagnostics verifies, the Captain applies.
+     */
+    stage: "brief" | "plan" | "build" | "verify" | "review" | "apply" | "live";
+    /**
+     * Its last check failed, so it went back a stage.
+     */
+    failed?: boolean;
+    updatedAt: string;
+    why: string;
+    orders?: string[];
+    checks?: {
+      passed: number;
+      total: number;
+    };
+    files?: number;
+  }[];
+  check: {
+    at: string;
+    present: number;
+    total: number;
+    note: string;
+  };
+  commands: {
+    label: string;
+    cmd: string;
+    when: string;
+  }[];
+  experiment: {
+    name: string;
+    question: string;
+    arms: {
+      id: "solo" | "split";
+      label: string;
+      runs: number;
+      minutes: number;
+      rework: number;
+    }[];
+    verdict: string | null;
+  };
+}
+
 export interface OrdersFile {
   asOf: string;
   synthetic: boolean;
@@ -112,6 +163,110 @@ export interface RailsFile {
       until?: string;
     };
     note?: string;
+  }[];
+}
+
+/**
+ * The Science lab (Deck 3): the local models, their evals, serving, datasets and quantising runs, every number with the run that measured it, and the study bench (tracks of lessons).
+ */
+export interface ScienceFile {
+  asOf: string;
+  /**
+   * true for sample data.
+   */
+  synthetic: boolean;
+  models: {
+    id: string;
+    name: string;
+    quant: "fp16" | "q8" | "q6" | "q5" | "q4" | "q3";
+    sizeGb: number;
+    role: string;
+    /**
+     * The run that made this file.
+     */
+    run: string;
+  }[];
+  suites: {
+    id: string;
+    label: string;
+    what: string;
+    dataset: string;
+  }[];
+  evals: {
+    id: string;
+    model: string;
+    suite: string;
+    /**
+     * Percent right.
+     */
+    score: number;
+    /**
+     * Every number comes with the run that measured it.
+     */
+    run: string;
+  }[];
+  serving: {
+    id: string;
+    engine: string;
+    model: string;
+    state: "live" | "trial" | "failed";
+    contextK: number;
+    tokensPerSec?: number;
+    /**
+     * Percent of the GPU's memory in use.
+     */
+    vram?: number;
+    run: string;
+  }[];
+  datasets: {
+    id: string;
+    name: string;
+    rows: number;
+    state: "draft" | "curated" | "frozen";
+    purpose: string;
+    run?: string;
+  }[];
+  runs: {
+    id: string;
+    kind: "eval" | "quantise" | "serve" | "dataset";
+    title: string;
+    at: string;
+    minutes: number;
+    ok: boolean;
+    model?: string;
+    dataset?: string;
+    /**
+     * The run log's own lines.
+     *
+     * @minItems 1
+     */
+    log: [string, ...string[]];
+  }[];
+  study: {
+    id: string;
+    name: string;
+    why: string;
+    /**
+     * @minItems 1
+     */
+    lessons: [
+      {
+        title: string;
+        done: boolean;
+        /**
+         * A run of ours the lesson reads.
+         */
+        run?: string;
+      },
+      ...{
+        title: string;
+        done: boolean;
+        /**
+         * A run of ours the lesson reads.
+         */
+        run?: string;
+      }[]
+    ];
   }[];
 }
 

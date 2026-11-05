@@ -152,16 +152,12 @@ export function OrderBox({ ship, st, orderId }: { ship: ShipView; st: Station; o
  * (when `onBoard` is given). Every other one waits until that station's board exists.
  * With `relief`, a Relieve button sends the crew member to quarters, and Recall brings them back.
  */
-export function ConsoleFoot({ st, onBoard, relief }: { st: Station; onBoard?: (b: BoardId) => void; relief?: Relief }) {
+export function ConsoleFoot({ st, onBoard, relief, here }: { st: Station; onBoard?: (b: BoardId) => void; relief?: Relief; here?: BoardId }) {
   const own = OWN_BOARD[st.id];
+  if (own && own === here) return relief ? <div className="con-foot"><RelieveButton relief={relief} /></div> : null;
   return (
     <div className="con-foot">
-      {relief && (
-        <button type="button" className="btn btn-ghost relieve" aria-pressed={relief.on} onClick={relief.toggle}
-          title={relief.on ? 'Bring them back to their post. Screen only.' : 'Send them to quarters. Screen only.'}>
-          {relief.on ? 'Recall to post' : 'Relieve'}
-        </button>
-      )}
+      {relief && <RelieveButton relief={relief} />}
       {own && onBoard
         ? <button type="button" className="btn btn-gold" onClick={() => onBoard(own)}>
             {st.id === 'captain' ? 'To your Quarters' : `${st.short} console`}
@@ -175,10 +171,19 @@ export function ConsoleFoot({ st, onBoard, relief }: { st: Station; onBoard?: (b
   );
 }
 
+function RelieveButton({ relief }: { relief: Relief }) {
+  return (
+    <button type="button" className="btn btn-ghost relieve" aria-pressed={relief.on} onClick={relief.toggle}
+      title={relief.on ? 'Bring them back to their post. Screen only.' : 'Send them to quarters. Screen only.'}>
+      {relief.on ? 'Recall to post' : 'Relieve'}
+    </button>
+  );
+}
+
 /** One station's card: who it is, its order, its duty. `actions` adds buttons to the title row. */
-export function StationDetail({ ship, st, orderId, back, onBack, actions, onBoard, relief }: {
+export function StationDetail({ ship, st, orderId, back, onBack, actions, onBoard, relief, here }: {
   ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; actions?: ReactNode; onBoard?: (b: BoardId) => void;
-  relief?: Relief;
+  relief?: Relief; here?: BoardId;
 }) {
   return (
     <>
@@ -196,7 +201,7 @@ export function StationDetail({ ship, st, orderId, back, onBack, actions, onBoar
           {st.answersTo && <><dt>ANSWERS TO</dt><dd>{st.answersTo}</dd></>}
         </dl>
       </div>
-      <ConsoleFoot st={st} onBoard={onBoard} relief={relief} />
+      <ConsoleFoot st={st} onBoard={onBoard} relief={relief} here={here} />
     </>
   );
 }

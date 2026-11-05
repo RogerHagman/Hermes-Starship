@@ -1,0 +1,420 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "models": [
+    {
+      "id": "MD-901",
+      "name": "Crew 27B",
+      "quant": "q4",
+      "sizeGb": 16.5,
+      "role": "Number One and the local crew.",
+      "run": "RUN-911"
+    },
+    {
+      "id": "MD-902",
+      "name": "Crew 27B",
+      "quant": "q8",
+      "sizeGb": 28.7,
+      "role": "Candidate: better routing, if it fits the card.",
+      "run": "RUN-905"
+    },
+    {
+      "id": "MD-903",
+      "name": "Helper 7B",
+      "quant": "q4",
+      "sizeGb": 4.4,
+      "role": "Candidate for quick summaries.",
+      "run": "RUN-912"
+    },
+    {
+      "id": "MD-904",
+      "name": "Coder 14B",
+      "quant": "q4",
+      "sizeGb": 8.9,
+      "role": "Local fallback for small Engineering checks.",
+      "run": "RUN-913"
+    }
+  ],
+  "suites": [
+    {
+      "id": "routing",
+      "label": "Routing",
+      "what": "Does the ask go to the right station, word for word?",
+      "dataset": "DS-901"
+    },
+    {
+      "id": "tools",
+      "label": "Tool calls",
+      "what": "Is the right tool called with the right fields?",
+      "dataset": "DS-902"
+    },
+    {
+      "id": "checks",
+      "label": "Patch checks",
+      "what": "Does it spot the failing check in a patch report?",
+      "dataset": "DS-903"
+    }
+  ],
+  "evals": [
+    {
+      "id": "EV-901",
+      "model": "MD-901",
+      "suite": "routing",
+      "score": 86,
+      "run": "RUN-901"
+    },
+    {
+      "id": "EV-902",
+      "model": "MD-901",
+      "suite": "tools",
+      "score": 78,
+      "run": "RUN-901"
+    },
+    {
+      "id": "EV-903",
+      "model": "MD-902",
+      "suite": "routing",
+      "score": 91,
+      "run": "RUN-902"
+    },
+    {
+      "id": "EV-904",
+      "model": "MD-902",
+      "suite": "tools",
+      "score": 84,
+      "run": "RUN-902"
+    },
+    {
+      "id": "EV-905",
+      "model": "MD-903",
+      "suite": "routing",
+      "score": 61,
+      "run": "RUN-903"
+    },
+    {
+      "id": "EV-906",
+      "model": "MD-904",
+      "suite": "checks",
+      "score": 72,
+      "run": "RUN-904"
+    }
+  ],
+  "serving": [
+    {
+      "id": "SV-901",
+      "engine": "Ollama",
+      "model": "MD-901",
+      "state": "live",
+      "contextK": 16,
+      "tokensPerSec": 34,
+      "vram": 71,
+      "run": "RUN-906"
+    },
+    {
+      "id": "SV-902",
+      "engine": "vLLM",
+      "model": "MD-901",
+      "state": "trial",
+      "contextK": 32,
+      "tokensPerSec": 52,
+      "vram": 88,
+      "run": "RUN-907"
+    },
+    {
+      "id": "SV-903",
+      "engine": "vLLM",
+      "model": "MD-902",
+      "state": "failed",
+      "contextK": 32,
+      "run": "RUN-910"
+    }
+  ],
+  "datasets": [
+    {
+      "id": "DS-901",
+      "name": "Routing asks",
+      "rows": 240,
+      "state": "frozen",
+      "purpose": "Asks with the station each one should reach. Scrubbed, kept on the local rail.",
+      "run": "RUN-908"
+    },
+    {
+      "id": "DS-902",
+      "name": "Tool call cases",
+      "rows": 120,
+      "state": "curated",
+      "purpose": "One tool call per row, with the fields it needs.",
+      "run": "RUN-909"
+    },
+    {
+      "id": "DS-903",
+      "name": "Patch check cases",
+      "rows": 60,
+      "state": "draft",
+      "purpose": "Patch reports with one failing check hidden in each."
+    }
+  ],
+  "runs": [
+    {
+      "id": "RUN-901",
+      "kind": "eval",
+      "title": "Crew 27B q4 on routing and tool calls",
+      "at": "2026-11-03T21:10:00Z",
+      "minutes": 38,
+      "ok": true,
+      "model": "MD-901",
+      "log": [
+        "load Crew 27B q4 (16.5 GB) on the local GPU",
+        "routing: 240 asks, 206 to the right station (86%)",
+        "tools: 120 cases, 94 right (78%)",
+        "done in 38 min, log kept with the run"
+      ]
+    },
+    {
+      "id": "RUN-902",
+      "kind": "eval",
+      "title": "Crew 27B q8 on routing and tool calls",
+      "at": "2026-11-04T02:40:00Z",
+      "minutes": 52,
+      "ok": true,
+      "model": "MD-902",
+      "log": [
+        "load Crew 27B q8 (28.7 GB), context 16k",
+        "routing: 240 asks, 218 to the right station (91%)",
+        "tools: 120 cases, 101 right (84%)",
+        "slower than q4: 21 tokens a second",
+        "done in 52 min"
+      ]
+    },
+    {
+      "id": "RUN-903",
+      "kind": "eval",
+      "title": "Helper 7B q4 on routing",
+      "at": "2026-11-04T03:40:00Z",
+      "minutes": 14,
+      "ok": true,
+      "model": "MD-903",
+      "log": [
+        "load Helper 7B q4 (4.4 GB)",
+        "routing: 240 asks, 146 to the right station (61%)",
+        "too low for routing; fine for summaries, not measured yet"
+      ]
+    },
+    {
+      "id": "RUN-904",
+      "kind": "eval",
+      "title": "Coder 14B q4 on patch checks",
+      "at": "2026-11-04T04:10:00Z",
+      "minutes": 22,
+      "ok": true,
+      "model": "MD-904",
+      "dataset": "DS-903",
+      "log": [
+        "load Coder 14B q4 (8.9 GB)",
+        "checks: 60 reports, 43 failing checks found (72%)",
+        "dataset still a draft: score is a first look only"
+      ]
+    },
+    {
+      "id": "RUN-905",
+      "kind": "quantise",
+      "title": "Crew 27B to q8",
+      "at": "2026-11-03T23:00:00Z",
+      "minutes": 64,
+      "ok": true,
+      "model": "MD-902",
+      "log": [
+        "from the full model, 54 GB",
+        "quantise to q8: 28.7 GB",
+        "quick check on 20 routing asks: same answers as the full model"
+      ]
+    },
+    {
+      "id": "RUN-906",
+      "kind": "serve",
+      "title": "Ollama speed, Crew 27B q4",
+      "at": "2026-11-04T09:00:00Z",
+      "minutes": 10,
+      "ok": true,
+      "model": "MD-901",
+      "log": [
+        "Ollama, context 16k, one user",
+        "34 tokens a second, first token after 0.9 s",
+        "VRAM 71%"
+      ]
+    },
+    {
+      "id": "RUN-907",
+      "kind": "serve",
+      "title": "vLLM trial, Crew 27B q4",
+      "at": "2026-11-04T10:00:00Z",
+      "minutes": 18,
+      "ok": true,
+      "model": "MD-901",
+      "log": [
+        "vLLM, context 32k, one user",
+        "52 tokens a second, first token after 0.6 s",
+        "VRAM 88%: little room left for a second model",
+        "trial only: Number One still runs on Ollama"
+      ]
+    },
+    {
+      "id": "RUN-908",
+      "kind": "dataset",
+      "title": "Freeze the routing asks",
+      "at": "2026-11-02T20:00:00Z",
+      "minutes": 6,
+      "ok": true,
+      "dataset": "DS-901",
+      "log": [
+        "240 asks, names and places scrubbed",
+        "each ask has the station it should reach",
+        "frozen: evals compare on the same rows"
+      ]
+    },
+    {
+      "id": "RUN-909",
+      "kind": "dataset",
+      "title": "Curate the tool call cases",
+      "at": "2026-11-03T19:00:00Z",
+      "minutes": 9,
+      "ok": true,
+      "dataset": "DS-902",
+      "log": [
+        "150 cases read, 30 dropped as duplicates",
+        "120 kept, each with the fields its tool needs"
+      ]
+    },
+    {
+      "id": "RUN-910",
+      "kind": "serve",
+      "title": "vLLM trial, Crew 27B q8",
+      "at": "2026-11-04T11:00:00Z",
+      "minutes": 4,
+      "ok": false,
+      "model": "MD-902",
+      "log": [
+        "vLLM, context 32k",
+        "out of GPU memory while loading",
+        "stopped: q8 does not fit with a 32k context on this card"
+      ]
+    },
+    {
+      "id": "RUN-911",
+      "kind": "quantise",
+      "title": "Crew 27B to q4",
+      "at": "2026-10-20T20:00:00Z",
+      "minutes": 41,
+      "ok": true,
+      "model": "MD-901",
+      "log": [
+        "from the full model, 54 GB",
+        "quantise to q4: 16.5 GB",
+        "the model Number One runs today"
+      ]
+    },
+    {
+      "id": "RUN-912",
+      "kind": "quantise",
+      "title": "Helper 7B to q4",
+      "at": "2026-11-03T22:30:00Z",
+      "minutes": 12,
+      "ok": true,
+      "model": "MD-903",
+      "log": [
+        "from the full model, 15 GB",
+        "quantise to q4: 4.4 GB"
+      ]
+    },
+    {
+      "id": "RUN-913",
+      "kind": "quantise",
+      "title": "Coder 14B to q4",
+      "at": "2026-11-03T22:45:00Z",
+      "minutes": 21,
+      "ok": true,
+      "model": "MD-904",
+      "log": [
+        "from the full model, 29 GB",
+        "quantise to q4: 8.9 GB"
+      ]
+    }
+  ],
+  "study": [
+    {
+      "id": "ST-901",
+      "name": "How quantising works",
+      "why": "Know what q4 and q8 cost before choosing one for the crew.",
+      "lessons": [
+        {
+          "title": "What a weight is, and why it can be rounded",
+          "done": true
+        },
+        {
+          "title": "q4 and q8: size against answers",
+          "done": true,
+          "run": "RUN-905"
+        },
+        {
+          "title": "Measuring the loss on our own evals",
+          "done": true,
+          "run": "RUN-902"
+        },
+        {
+          "title": "Why the context needs memory too",
+          "done": false,
+          "run": "RUN-910"
+        },
+        {
+          "title": "Choosing for the card we have",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "ST-902",
+      "name": "Serving with vLLM",
+      "why": "Faster answers for Number One, if the move is worth it.",
+      "lessons": [
+        {
+          "title": "What a serving engine does",
+          "done": true
+        },
+        {
+          "title": "Reading tokens a second and first token time",
+          "done": false,
+          "run": "RUN-907"
+        },
+        {
+          "title": "Batching: when two stations ask at once",
+          "done": false
+        },
+        {
+          "title": "A safe switch, and the way back",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "ST-903",
+      "name": "Reading an eval honestly",
+      "why": "A score means little without its dataset and its run log.",
+      "lessons": [
+        {
+          "title": "A frozen dataset, so scores compare",
+          "done": true,
+          "run": "RUN-908"
+        },
+        {
+          "title": "Small samples and how far to trust them",
+          "done": true
+        },
+        {
+          "title": "A draft dataset gives a first look only",
+          "done": true,
+          "run": "RUN-904"
+        }
+      ]
+    }
+  ]
+}

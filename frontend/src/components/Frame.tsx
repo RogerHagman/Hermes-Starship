@@ -11,7 +11,7 @@ export function Frame({ ship, board, side, children }: { ship: ShipView | null; 
     <div className="frame">
       <div className="elbow elbow-top" aria-hidden="true" />
       <header className="topbar">
-        <div className="topbar-stats mono">{ship ? (board === 'quarters' ? quartersStats(ship) : board === 'holodeck' ? holodeckStats(ship) : board === 'sensors' ? sensorsStats(ship) : bridgeStats(ship)) : '—'}</div>
+        <div className="topbar-stats mono">{ship ? (board === 'quarters' ? quartersStats(ship) : board === 'holodeck' ? holodeckStats(ship) : board === 'sensors' ? sensorsStats(ship) : board === 'engineering' ? engineeringStats(ship) : board === 'science' ? scienceStats(ship) : bridgeStats(ship)) : '—'}</div>
         <span className="seg seg-gold" aria-hidden="true" />
         <span className="seg seg-local" aria-hidden="true" />
         <span className="seg seg-claude" aria-hidden="true" />
@@ -46,6 +46,20 @@ function sensorsStats(ship: ShipView): string {
   const active = s.watches.filter((w) => w.state === 'active').length;
   const unread = s.findings.filter((f) => !f.seen).length;
   return `${active} WATCHES ACTIVE · ${unread} NEW FINDINGS · ${s.asks.length} ASKS · ${s.quarantine.length} HELD`;
+}
+
+function engineeringStats(ship: ShipView): string {
+  const e = ship.data.engineering;
+  const flying = e.patches.filter((p) => p.stage !== 'live').length;
+  const failed = e.patches.filter((p) => p.failed).length;
+  return `${flying} PATCHES IN FLIGHT · ${failed} FAILED A CHECK · ${e.check.present}/${e.check.total} IN PLACE · WARP CORE ${ship.rail('local').toUpperCase()}`;
+}
+
+function scienceStats(ship: ShipView): string {
+  const s = ship.data.science;
+  const live = s.serving.filter((v) => v.state === 'live').length;
+  const lessons = s.study.flatMap((t) => t.lessons);
+  return `${s.models.length} MODELS · ${s.evals.length} EVALS · ${live} SERVING · ${s.runs.length} RUNS LOGGED · ${lessons.filter((l) => l.done).length}/${lessons.length} LESSONS`;
 }
 
 function quartersStats(ship: ShipView): string {
