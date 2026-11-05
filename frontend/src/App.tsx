@@ -1,7 +1,7 @@
 // The boards: loads the fixtures once, keeps what both boards share (the rail filter, drills,
 // who is relieved, who the comm badge speaks to), and shows the Bridge or the Captain's Quarters.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LIVE_EVERY_MS, loadFixtures, loadLiveRails } from './lib/data';
+import { LIVE_EVERY_MS, loadFixtures, loadLiveRailLog, loadLiveRails, withLiveDuty } from './lib/data';
 import { useBoard } from './lib/board';
 import { DEPTS, RAIL } from './lib/lookups';
 import { makeShipView, type Drills, type Relieved } from './lib/ship';
@@ -30,6 +30,7 @@ export function App() {
   useEffect(() => {
     const t = setInterval(() => {
       loadLiveRails().then((rails) => { if (rails) setData((d) => (d ? { ...d, rails } : d)); });
+      loadLiveRailLog().then((log) => { if (log) setData((d) => (d ? withLiveDuty(d, log) : d)); });
     }, LIVE_EVERY_MS);
     return () => clearInterval(t);
   }, []);

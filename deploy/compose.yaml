@@ -1,4 +1,5 @@
-# Hermes Starship · the Bridge landing page, plus the rails probe that keeps live/rails.json fresh.
+# Hermes Starship · the Bridge landing page, plus the rails probe that keeps live/rails.json fresh
+# (and live/rail-log.json, when each rail went out or came back).
 # nginx serves static files (about 10 MB of RAM). The probe is read-only towards Hermes and
 # writes only deploy/live/. No model runs: its one Ollama call is GET /api/ps, and its one
 # Anthropic call asks for the Claude usage (at most every 5 minutes).

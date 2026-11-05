@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "live/rail-log.json from the rails probe: a line each time a rail went out or came back, newest first. The page works out which crew went to quarters (Crew Quarters duty log).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "events"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "at",
+          "rail",
+          "state"
+        ],
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "rail": {
+            "enum": [
+              "local",
+              "codex",
+              "claude"
+            ]
+          },
+          "state": {
+            "description": "out: the rail went out. up: it came back.",
+            "enum": [
+              "out",
+              "up"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "title": "Hermes Starship \u00b7 rail log"
+}

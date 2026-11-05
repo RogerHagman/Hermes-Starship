@@ -36,7 +36,9 @@ export function DutyLog({ ship }: { ship: ShipView }) {
           ))}
         </ul>
       )}
-      <span className="cchair-count mono">CHECK-INS AND CHECK-OUTS · {lines.length || 'NONE YET'}</span>
+      <span className="cchair-count mono">
+        CHECK-INS AND CHECK-OUTS · {lines.length || 'NONE YET'} · {ship.data.raillog ? 'FROM THE RAILS PROBE' : 'SAMPLE'}
+      </span>
       {lines.length > 0 && (
         <ol className="svc-log place-log">
           {lines.map((e) => (

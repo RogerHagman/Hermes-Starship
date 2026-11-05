@@ -1,0 +1,10 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "events": [
+    {"at": "2026-11-04T15:00:00Z", "rail": "claude", "state": "up"},
+    {"at": "2026-11-04T13:05:00Z", "rail": "claude", "state": "out"},
+    {"at": "2026-11-04T08:00:00Z", "rail": "codex", "state": "up"},
+    {"at": "2026-11-04T06:40:00Z", "rail": "codex", "state": "out"}
+  ]
+}
