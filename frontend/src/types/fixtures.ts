@@ -85,6 +85,21 @@ export interface OrdersFile {
      * The card body as filed, plain text. A line that starts with GOAL:, CONTEXT:, CONSTRAINTS:, DONE WHEN: or START WITH: begins a section; a line that starts with '- ' is a list item.
      */
     body?: string;
+    /**
+     * What came back on the order, oldest first: the answer the Captain was sent, a card's result, a run's summary or error, and comments. The newest few only.
+     */
+    replies?: {
+      at: string;
+      /**
+       * A station id, or the name of whoever wrote it.
+       */
+      by: string;
+      kind: "answer" | "result" | "run" | "error" | "comment";
+      /**
+       * Plain text, as written.
+       */
+      text: string;
+    }[];
   }[];
 }
 

@@ -88,6 +88,44 @@
           "body": {
             "type": "string",
             "description": "The card body as filed, plain text. A line that starts with GOAL:, CONTEXT:, CONSTRAINTS:, DONE WHEN: or START WITH: begins a section; a line that starts with '- ' is a list item."
+          },
+          "replies": {
+            "type": "array",
+            "description": "What came back on the order, oldest first: the answer the Captain was sent, a card's result, a run's summary or error, and comments. The newest few only.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "at",
+                "by",
+                "kind",
+                "text"
+              ],
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+                },
+                "by": {
+                  "type": "string",
+                  "description": "A station id, or the name of whoever wrote it."
+                },
+                "kind": {
+                  "enum": [
+                    "answer",
+                    "result",
+                    "run",
+                    "error",
+                    "comment"
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "description": "Plain text, as written."
+                }
+              }
+            }
           }
         }
       }

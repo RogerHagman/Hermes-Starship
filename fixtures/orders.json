@@ -48,7 +48,21 @@
       "updatedAt": "2026-11-04T19:18:00Z",
       "mission": "MSN-902",
       "detail": "Chief Engineer plans the job and splits it for the lower decks.",
-      "body": "GOAL: Plan a read-only API that serves the deck plan data, then review what the lower decks build.\nCONTEXT: The Bridge reads fixtures today. Holodeck H2 needs the same shapes from a live service on the NAS.\nCONSTRAINTS:\n- GET only, using the same schemas as the fixtures.\n- Split the build to Systems and the tests to Diagnostics. Don't build it yourself.\n- Don't wait or poll for the child cards. File a review card and finish.\nDONE WHEN:\n- The plan is filed with each endpoint and the schema it returns.\n- Child cards ORD-9013 and ORD-9014 are filed.\n- A review card is filed for when both land."
+      "body": "GOAL: Plan a read-only API that serves the deck plan data, then review what the lower decks build.\nCONTEXT: The Bridge reads fixtures today. Holodeck H2 needs the same shapes from a live service on the NAS.\nCONSTRAINTS:\n- GET only, using the same schemas as the fixtures.\n- Split the build to Systems and the tests to Diagnostics. Don't build it yourself.\n- Don't wait or poll for the child cards. File a review card and finish.\nDONE WHEN:\n- The plan is filed with each endpoint and the schema it returns.\n- Child cards ORD-9013 and ORD-9014 are filed.\n- A review card is filed for when both land.",
+      "replies": [
+        {
+          "at": "2026-11-04T18:40:00Z",
+          "by": "eng",
+          "kind": "error",
+          "text": "timed_out: the first run stopped at the 30 minute limit."
+        },
+        {
+          "at": "2026-11-04T19:18:00Z",
+          "by": "eng",
+          "kind": "comment",
+          "text": "Plan written to plans/ORD-9012-plan.md. Build card filed for Systems."
+        }
+      ]
     },
     {
       "id": "ORD-9013",
@@ -120,7 +134,21 @@
       "speed": "Thrusters",
       "updatedAt": "2026-11-04T17:00:00Z",
       "detail": "All hosts green.",
-      "body": "GOAL: Check that every host is up and has room.\nCONTEXT: Runs every night while the Captain sleeps.\nDONE WHEN:\n- All hosts are green, or a red host is reported with what was found and where."
+      "body": "GOAL: Check that every host is up and has room.\nCONTEXT: Runs every night while the Captain sleeps.\nDONE WHEN:\n- All hosts are green, or a red host is reported with what was found and where.",
+      "replies": [
+        {
+          "at": "2026-11-04T16:58:00Z",
+          "by": "ops",
+          "kind": "run",
+          "text": "Sweep done: 11 containers up, disk 61 %, no errors in the last 24 h."
+        },
+        {
+          "at": "2026-11-04T17:00:00Z",
+          "by": "ops",
+          "kind": "result",
+          "text": "All green. One note: the sample backup folder is 4 days old.\nNext sweep tomorrow 04:00."
+        }
+      ]
     },
     {
       "id": "ORD-9008",
@@ -131,7 +159,15 @@
       "speed": "Thrusters",
       "updatedAt": "2026-11-04T16:00:00Z",
       "detail": "Fired by code at the set time.",
-      "body": "GOAL: Remind the Captain to make a sample call.\nCONTEXT: Set by the Yeoman for a fixed time.\nCONSTRAINTS:\n- Fired by code at the set time, never by the model.\nDONE WHEN:\n- The reminder arrives at the set time."
+      "body": "GOAL: Remind the Captain to make a sample call.\nCONTEXT: Set by the Yeoman for a fixed time.\nCONSTRAINTS:\n- Fired by code at the set time, never by the model.\nDONE WHEN:\n- The reminder arrives at the set time.",
+      "replies": [
+        {
+          "at": "2026-11-04T16:00:00Z",
+          "by": "yeoman",
+          "kind": "answer",
+          "text": "Set for Thursday 09:30: \"Call the sample dentist\". I'll ping you on Telegram then."
+        }
+      ]
     },
     {
       "id": "ORD-9001",

@@ -8,7 +8,7 @@ import { DECKS, DEPTS, RAIL, railColor, RANK, STATUS, tierText, tierVar } from '
 import { age } from '../lib/format';
 import { SHIP_MAP } from '../lib/shipmap';
 import { canRelieve, type ShipView } from '../lib/ship';
-import type { Station } from '../types';
+import type { Order, Station } from '../types';
 import { CaptainsChair } from './CaptainsChair';
 import { ChainOfCommand } from './ChainOfCommand';
 import { Icon } from './Icon';
@@ -120,8 +120,11 @@ export function StationPills({ ship, st }: { ship: ShipView; st: Station }) {
   );
 }
 
-/** The order a station is working on (or the one picked), if there is one. */
-export function OrderBox({ ship, st, orderId }: { ship: ShipView; st: Station; orderId?: string }) {
+/**
+ * The order a station is working on (or the one picked), if there is one. With `withReply`, the
+ * newest thing that came back on it too (where the console has room for it).
+ */
+export function OrderBox({ ship, st, orderId, withReply }: { ship: ShipView; st: Station; orderId?: string; withReply?: boolean }) {
   const off = ship.off(st);
   const oid = orderId ?? st.activeOrder;
   const o = oid ? ship.data.orders.orders.find((x) => x.id === oid) : undefined;
@@ -134,6 +137,7 @@ export function OrderBox({ ship, st, orderId }: { ship: ShipView; st: Station; o
       </span>
       <span className="con-order-title">{o.title}</span>
       {o.detail && <span className="con-text">{o.detail}</span>}
+      {withReply && o.replies && <LatestReply reply={o.replies[o.replies.length - 1]} count={o.replies.length} ship={ship} />}
       {o.state === 'awaiting-captain' && (
         <span className="con-actions">
           <button type="button" className="btn btn-ghost" disabled>Deny</button>
@@ -145,6 +149,18 @@ export function OrderBox({ ship, st, orderId }: { ship: ShipView; st: Station; o
   );
 }
 
+
+/** The newest thing that came back on an order, cut to a few lines; the order card has them all. */
+function LatestReply({ ship, reply, count }: { ship: ShipView; reply: NonNullable<Order['replies']>[number]; count: number }) {
+  return (
+    <span className="con-reply">
+      <span className="reply-meta mono">
+        {count > 1 ? `NEWEST OF ${count} REPLIES` : 'REPLY'} · {(ship.station(reply.by)?.short ?? reply.by).toUpperCase()} · {age(ship.data.orders.asOf, reply.at).toUpperCase()}
+      </span>
+      <span className="reply-text clamped">{reply.text}</span>
+    </span>
+  );
+}
 
 /**
  * The button to a station's own console, at the foot of its card. The Captain's and the
@@ -192,7 +208,7 @@ export function StationDetail({ ship, st, orderId, back, onBack, actions, onBoar
       </ConHead>
       <StationPills ship={ship} st={st} />
       <div className="con-body">
-        <OrderBox ship={ship} st={st} orderId={orderId} />
+        <OrderBox ship={ship} st={st} orderId={orderId} withReply />
         <dl className="con-facts">
           <dt>DUTY</dt><dd>{st.duty}</dd>
           {st.note && <><dt>NOTE</dt><dd>{st.note}</dd></>}

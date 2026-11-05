@@ -5,8 +5,11 @@ Read-only, like the rails probe. It reads four of Hermes' own records and change
 - orders.csv: every ORD, minted by code (order_id, received_at, from_surface, station, kind,
   status, closed_at, speed).
 - The Kanban cards: each card's title, body, state and worker. The card title carries the ORD,
-  so this is where an order gets its words. The database is copied to a scratch folder first and
-  read from the copy, so Hermes' own file is never opened, locked or written.
+  so this is where an order gets its words. What came back comes from here too: each card's
+  result, its runs' summaries (or errors) and its comments, as the order's replies. The database
+  is copied to a scratch folder first and read from the copy, so Hermes' own file is never
+  opened, locked or written.
+- answers.jsonl (once patch AF is in): every answer the Captain was sent, chat or card.
 - handoff-log.csv: what crossed to a cloud rail, and whether it came back clean (the customs log).
 - The station roster (fixtures/stations.json): which Hermes profile is which station.
 
@@ -15,7 +18,7 @@ The files have the shapes of api/schema/orders.schema.json and shiplog.schema.js
 or unreadable source never stops the probe: it writes what it can and logs one line. No model
 runs, and nothing leaves the NAS.
 
-Settings come from the environment: ORDERS_CSV, KANBAN_DB, HANDOFF_LOG, ROSTER, OUT_DIR, SCRATCH
+Settings come from the environment: ORDERS_CSV, KANBAN_DB, HANDOFF_LOG, ANSWERS, ROSTER, OUT_DIR, SCRATCH
 (where the database copy goes; never inside OUT_DIR, which nginx serves), INTERVAL (seconds; 0 runs
 once), DAYS (how far back done orders are kept) and KEEP (the most orders the file holds).
 Standard library only.
@@ -40,6 +43,8 @@ SPEEDS = {"none": "Thrusters", "minimal": "Quarter Impulse", "low": "Half Impuls
 OPEN_HOURS = 24   # an order with no card that is still open after this was answered without one
 LOG_KEEP = 200
 BODY_KEEP = 4000   # characters of a card body the board shows
+REPLY_KEEP = 12    # the newest replies an order carries (results, runs, comments)
+REPLY_TEXT = 4000  # characters of one reply
 
 
 def log(message):
@@ -169,6 +174,7 @@ CARD_COLUMNS = {
     "state": ("status", "state", "column", "lane"),
     "worker": ("assignee", "profile", "assigned_to", "worker", "agent", "owner"),
     "created": ("created_at", "created", "inserted_at"),
+    "result": ("result", "output", "answer"),
 }
 # Every time column a card may have; the newest of them is when the card last moved.
 TIME_COLUMNS = ("updated_at", "modified_at", "completed_at", "started_at", "last_heartbeat_at", "created_at")
@@ -233,11 +239,92 @@ def read_cards(db_path, scratch):
                 match = ORD.search(str(card["title"] or ""))
                 if match:
                     cards.setdefault(f"ORD-{match.group(1)}", []).append(card)
+            said = read_replies(con)
+            for theirs in cards.values():
+                for card in theirs:
+                    card["replies"] = said.get(str(card.get("id")), [])
         finally:
             con.close()
     except (OSError, sqlite3.Error) as error:
         log(f"kanban: {error}")
     return cards
+
+
+def columns_of(con, table):
+    return {row[1] for row in con.execute(f'pragma table_info("{table}")')}
+
+
+def read_replies(con):
+    """{card id: [reply, ...]}: what came back on each card, from its runs and its comments.
+
+    A run gives its summary (or its error, when it failed); a comment gives its author and words.
+    Tables or columns this Hermes doesn't have are skipped.
+    """
+    said = {}
+    tables = {name for (name,) in con.execute("select name from sqlite_master where type = 'table'")}
+    if "task_runs" in tables and {"task_id", "summary"} <= columns_of(con, "task_runs"):
+        cols = columns_of(con, "task_runs")
+        pick = [c for c in ("task_id", "profile", "outcome", "summary", "error", "ended_at", "started_at") if c in cols]
+        for values in con.execute(f'select {", ".join(pick)} from task_runs order by id'):
+            run = dict(zip(pick, values))
+            at = parse_time(run.get("ended_at")) or parse_time(run.get("started_at"))
+            if run.get("summary"):
+                said.setdefault(str(run["task_id"]), []).append({"at": at, "by": run.get("profile"), "kind": "run", "text": run["summary"]})
+            elif run.get("error"):
+                said.setdefault(str(run["task_id"]), []).append({"at": at, "by": run.get("profile"), "kind": "error",
+                                                                 "text": f"{run.get('outcome') or 'failed'}: {run['error']}"})
+    if "task_comments" in tables and {"task_id", "body"} <= columns_of(con, "task_comments"):
+        cols = columns_of(con, "task_comments")
+        pick = [c for c in ("task_id", "author", "body", "created_at") if c in cols]
+        for values in con.execute(f'select {", ".join(pick)} from task_comments order by rowid'):
+            note = dict(zip(pick, values))
+            if note.get("body"):
+                said.setdefault(str(note["task_id"]), []).append({"at": parse_time(note.get("created_at")), "by": note.get("author"),
+                                                                  "kind": "comment", "text": note["body"]})
+    return said
+
+
+def read_answers(path):
+    """{ORD: [reply, ...]} from answers.jsonl (patch AF): each answer the Captain was sent, chat or card.
+
+    The file doesn't exist until patch AF is applied; then every answer is one JSON line.
+    """
+    answers = {}
+    try:
+        with open(path, encoding="utf-8") as handle:
+            for line in handle:
+                try:
+                    item = json.loads(line)
+                except ValueError:
+                    continue
+                match = ORD.search(str(item.get("order_id", ""))) if isinstance(item, dict) else None
+                if match and item.get("text"):
+                    answers.setdefault(f"ORD-{match.group(1)}", []).append(
+                        {"at": parse_time(item.get("at")), "by": item.get("by"), "kind": "answer", "text": item["text"]})
+    except FileNotFoundError:
+        pass
+    except OSError as error:
+        log(f"answers: {error}")
+    return answers
+
+
+def replies_of(theirs, names, now, answers=()):
+    """The order's replies, oldest first: its answers, and each card's runs, comments and result,
+    the newest REPLY_KEEP."""
+    out = [{"at": a["at"] or now, "by": station_of(names, a["by"]), "kind": "answer", "text": str(a["text"]).strip()[:REPLY_TEXT]}
+           for a in answers]
+    for card in theirs:
+        mine = list(card.get("replies") or [])
+        result = str(card.get("result") or "").strip()
+        if result and not any(str(r["text"]).strip() == result for r in mine):
+            mine.append({"at": card.get("updated"), "by": card.get("worker"), "kind": "result", "text": result})
+        elif result:   # the result repeats a run's summary: show it once, as the result
+            next(r for r in reversed(mine) if str(r["text"]).strip() == result)["kind"] = "result"
+        for r in mine:
+            out.append({"at": r["at"] or card.get("updated") or now, "by": station_of(names, r["by"] or card.get("worker")),
+                        "kind": r["kind"], "text": str(r["text"]).strip()[:REPLY_TEXT]})
+    out.sort(key=lambda r: r["at"])
+    return [{**r, "at": utc_stamp(r["at"])} for r in out[-REPLY_KEEP:]]
 
 
 def clean_title(title):
@@ -248,7 +335,7 @@ def clean_title(title):
 
 # ---------- the orders file ----------
 
-def build_orders(rows, cards, names, now, days=7, keep=80):
+def build_orders(rows, cards, names, now, days=7, keep=80, answers=None):
     """Orders for the boards: everything not done, plus what closed in the last `days` days."""
     since = now - timedelta(days=days)
     orders = []
@@ -262,7 +349,8 @@ def build_orders(rows, cards, names, now, days=7, keep=80):
                                 *(c.get("updated") for c in theirs)) if t] or [now])
         if state == "done" and when < since:
             continue
-        if not theirs and state == "queued" and when < now - timedelta(hours=OPEN_HOURS):
+        said = (answers or {}).get(oid, [])
+        if not theirs and not said and state == "queued" and when < now - timedelta(hours=OPEN_HOURS):
             continue   # still open in the log, but no card was ever filed for it
         worker = card.get("worker") or row.get("station") or "xo"
         order = {
@@ -276,6 +364,9 @@ def build_orders(rows, cards, names, now, days=7, keep=80):
             order["speed"] = speed_of(row.get("speed"))
         if head.get("body"):
             order["body"] = str(head["body"]).strip()[:BODY_KEEP]
+        replies = replies_of(theirs, names, now, said)
+        if replies:
+            order["replies"] = replies
         if len(theirs) > 1:
             order["detail"] = f"{len(theirs)} cards: " + ", ".join(station_of(names, c.get("worker")) for c in theirs)
         orders.append(order)
@@ -350,7 +441,8 @@ def run_once(env, scratch, now=None):
     if rows is None:   # no order log: write nothing, so the boards keep the last file (or the samples)
         return None
     cards = read_cards(env["KANBAN_DB"], scratch) if env.get("KANBAN_DB") else {}
-    orders = build_orders(rows, cards, names, now, int(env.get("DAYS", "7")), int(env.get("KEEP", "80")))
+    answers = read_answers(env.get("ANSWERS", "/data/handoff/answers.jsonl"))
+    orders = build_orders(rows, cards, names, now, int(env.get("DAYS", "7")), int(env.get("KEEP", "80")), answers)
     entries = build_log(rows, orders, read_customs(env.get("HANDOFF_LOG", "/data/handoff/handoff-log.csv")), names)
     stamp = utc_stamp(now)
     out = env.get("OUT_DIR", ".")
