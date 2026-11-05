@@ -17,7 +17,13 @@ export function Pips({ rank }: { rank: Station['rank'] }) {
   );
 }
 
-export function RosterPanel({ ship, filter, picked, onOpen }: { ship: ShipView; filter: RailFilter; picked?: string; onOpen: (id: string) => void }) {
+/**
+ * The duty roster. A name opens that station in the console; anywhere else on a department's
+ * card (or its title, for the keyboard) opens the department's chain of command.
+ */
+export function RosterPanel({ ship, filter, picked, pickedDept, onOpen, onDept }: {
+  ship: ShipView; filter: RailFilter; picked?: string; pickedDept?: string; onOpen: (id: string) => void; onDept: (dept: string) => void;
+}) {
   return (
     <section className="panel roster-panel" aria-labelledby="roster-title">
       <div className="panel-head">
@@ -32,11 +38,12 @@ export function RosterPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
           const onDuty = members.filter((s) => s.status === 'live' && !ship.off(s)).length;
           const dark = ship.acting[d.id] === 'dark';
           return (
-            <div key={d.id} className="dept" style={{ '--u': d.uniform } as React.CSSProperties}>
-              <div className="dept-name">
+            <div key={d.id} className="dept" style={{ '--u': d.uniform } as React.CSSProperties} aria-current={pickedDept === d.id}
+              onClick={(e) => { if (!(e.target as HTMLElement).closest('.member, .dept-name')) onDept(d.id); }}>
+              <button type="button" className="dept-name" onClick={() => onDept(d.id)} title={`${d.name}: chain of command`}>
                 {d.name}
                 <span className={'mono' + (dark ? ' dark' : '')}>{dark ? 'DARK · NO ONE TO ACT' : `${onDuty} OF ${members.length} ON DUTY`}</span>
-              </div>
+              </button>
               <div className="members">
                 {members.map((s) => {
                   const off = ship.off(s);

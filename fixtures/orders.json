@@ -132,6 +132,83 @@
       "updatedAt": "2026-11-04T16:00:00Z",
       "detail": "Fired by code at the set time.",
       "body": "GOAL: Remind the Captain to make a sample call.\nCONTEXT: Set by the Yeoman for a fixed time.\nCONSTRAINTS:\n- Fired by code at the set time, never by the model.\nDONE WHEN:\n- The reminder arrives at the set time."
+    },
+    {
+      "id": "ORD-9001",
+      "title": "Route the morning asks",
+      "station": "xo",
+      "state": "done",
+      "tier": 0,
+      "speed": "Thrusters",
+      "updatedAt": "2026-11-04T07:40:00Z",
+      "detail": "Seven asks routed: three to the Yeoman, two to Engineering, one each to Sensors and the Quartermaster.",
+      "body": "GOAL: Send each morning ask to the station that owns it.\nCONSTRAINTS:\n- Number One routes only. It never does the work itself.\nDONE WHEN:\n- Every ask has an order at its station."
+    },
+    {
+      "id": "ORD-9002",
+      "title": "Run the weekly reset",
+      "station": "xo",
+      "state": "done",
+      "tier": 1,
+      "speed": "Impulse",
+      "updatedAt": "2026-11-03T09:05:00Z",
+      "detail": "Lists rolled over, the week's orders archived, the burn window set for Wednesday.",
+      "body": "GOAL: Start the new week clean.\nDONE WHEN:\n- Weekly lists are reset and last week's orders are archived."
+    },
+    {
+      "id": "ORD-9003",
+      "title": "Shortlist three job ads for the career course",
+      "station": "helm",
+      "state": "done",
+      "tier": 1,
+      "speed": "Impulse",
+      "updatedAt": "2026-11-04T11:20:00Z",
+      "detail": "Three ads scored against the sanitised profile, the best at 78%.",
+      "body": "GOAL: Find the three best matching ads this week.\nCONSTRAINTS:\n- Only the sanitised profile leaves the ship.\nDONE WHEN:\n- Three ads are in the tracker with a match score."
+    },
+    {
+      "id": "ORD-9004",
+      "title": "Plan the commute options for Thursday",
+      "station": "nav",
+      "state": "done",
+      "tier": 0,
+      "speed": "Thrusters",
+      "updatedAt": "2026-11-04T06:15:00Z",
+      "detail": "Two train options and one by car, with times.",
+      "body": "GOAL: Give Helm the ways to get to Thursday's interview.\nDONE WHEN:\n- At least two options with door-to-door times."
+    },
+    {
+      "id": "ORD-9005",
+      "title": "Find a slot for the dentist",
+      "station": "nav",
+      "state": "done",
+      "tier": 0,
+      "speed": "Thrusters",
+      "updatedAt": "2026-11-03T15:30:00Z",
+      "detail": "Tuesday 14:00 is free on the calendar, passed to the Yeoman's Schedule box.",
+      "body": "GOAL: Find a free hour next week.\nDONE WHEN:\n- One free slot is in the Yeoman's Schedule box."
+    },
+    {
+      "id": "ORD-9006",
+      "title": "Check the disk after the backup",
+      "station": "ops",
+      "state": "done",
+      "tier": 0,
+      "speed": "Thrusters",
+      "updatedAt": "2026-11-03T03:10:00Z",
+      "detail": "The backup disk is 86% full. Flagged for the Captain, nothing deleted.",
+      "body": "GOAL: Check the backup disk has room.\nCONSTRAINTS:\n- Read-only. Report, never delete.\nDONE WHEN:\n- The disk use is reported."
+    },
+    {
+      "id": "ORD-9007",
+      "title": "On screen: the job tracker",
+      "station": "screen",
+      "state": "done",
+      "tier": 1,
+      "speed": "Thrusters",
+      "updatedAt": "2026-11-04T12:02:00Z",
+      "detail": "Captured once and sent to Telegram, then off screen.",
+      "body": "GOAL: Show the Captain's job tracker on the viewscreen.\nCONSTRAINTS:\n- Every click needs the Captain's OK.\nDONE WHEN:\n- The capture is on Telegram and the session is closed."
     }
   ]
 }

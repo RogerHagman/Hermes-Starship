@@ -9,14 +9,24 @@ import { SHIP_MAP } from '../lib/shipmap';
 import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import { CaptainsChair } from './CaptainsChair';
+import { ChainOfCommand } from './ChainOfCommand';
 import { Icon } from './Icon';
-import { StationScene, hasArt } from './StationArt';
+import { hasArt } from './StationArt';
+import { StationScene } from './StationScene';
+
+/**
+ * What the console shows: a station (and maybe one of its orders), or a department's chain
+ * of command. `from` says where a station was opened from, so Back returns there: a station
+ * id (the Captain's chair) or "dept:<id>" (a chain of command).
+ */
+export interface ConsolePick { station?: string; order?: string; from?: string; dept?: string }
 
 interface Props {
   ship: ShipView;
-  /** `from` names the station a card was opened from, so Back returns there (the Captain's chair). */
-  pick: { station: string; order?: string; from?: string } | null;
+  pick: ConsolePick | null;
   onPick: (station: string, order?: string, from?: string) => void;
+  /** Opens a department's chain of command. */
+  onDept?: (dept: string) => void;
   onBack: () => void;
   /** Opens the Captain's Quarters (from the Captain's chair). */
   onQuarters?: () => void;
@@ -35,15 +45,22 @@ export function useEscape(active: boolean, onBack: () => void) {
   }, [active, onBack]);
 }
 
-export function ShipConsole({ ship, pick, onPick, onBack, onQuarters }: Props) {
-  // A hail opened from the Captain's chair goes back to the chair, not to the watch.
-  const from = pick?.from ? ship.station(pick.from) : undefined;
-  const back = useCallback(() => (from ? onPick(from.id) : onBack()), [from, onPick, onBack]);
+export function ShipConsole({ ship, pick, onPick, onDept, onBack, onQuarters }: Props) {
+  // A hail opened from the Captain's chair goes back to the chair, and a name picked in a
+  // chain of command goes back to that chain, not to the watch.
+  const fromDept = pick?.from?.startsWith('dept:') ? pick.from.slice(5) : undefined;
+  const from = pick?.from && !fromDept ? ship.station(pick.from) : undefined;
+  const back = useCallback(() => {
+    if (fromDept && onDept) onDept(fromDept);
+    else if (from) onPick(from.id);
+    else onBack();
+  }, [fromDept, from, onDept, onPick, onBack]);
   useEscape(!!pick, back);
-  const st = pick ? ship.station(pick.station) : undefined;
+  if (pick?.dept) return <ChainOfCommand ship={ship} dept={pick.dept} onBack={onBack} onPick={(id) => onPick(id, undefined, `dept:${pick.dept}`)} />;
+  const st = pick?.station ? ship.station(pick.station) : undefined;
   if (!st) return <Watch ship={ship} onPick={onPick} />;
   if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />;
-  const backLabel = from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch';
+  const backLabel = fromDept ? '‹ Chain' : from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch';
   // A Bridge station with a picture gets two pages, like the Captain's chair. Keyed by
   // station, so picking another one starts again on page 1.
   if (hasArt(st.id)) return <StationScene key={st.id} ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} />;

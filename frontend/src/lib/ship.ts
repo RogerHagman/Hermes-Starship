@@ -37,6 +37,16 @@ export function offDuty(data: Fixtures, drills: Drills, st: Station, relieved: R
 }
 
 /**
+ * Who takes a department when its head is off duty: the next officer by rank who is on duty.
+ * Enlisted crew, the computer, teams and advisers never command. Undefined means nobody can.
+ */
+export function nextInLine(members: Station[], off: (s: Station) => string | null): Station | undefined {
+  return members
+    .filter((s) => !s.head && s.status === 'live' && !off(s) && RANK[s.rank].officer && !NEVER_COMMANDS.has(s.id))
+    .sort((a, b) => RANK[a.rank].order - RANK[b.rank].order)[0];
+}
+
+/**
  * For each department whose head is off duty: the id of the officer acting as head,
  * or 'dark' when nobody can. Next officer by rank who is on duty; enlisted crew,
  * the computer, teams and advisers never command. Command answers to the Captain.
@@ -49,9 +59,7 @@ export function actingHeads(data: Fixtures, drills: Drills, relieved: Relieved =
     const members = data.stations.stations.filter((s) => s.dept === d.id && s.status === 'live');
     const head = members.find((s) => s.head);
     if (!head || !off(head)) continue;
-    const next = members
-      .filter((s) => !s.head && !off(s) && RANK[s.rank].officer && !NEVER_COMMANDS.has(s.id))
-      .sort((a, b) => RANK[a.rank].order - RANK[b.rank].order)[0];
+    const next = nextInLine(members, off);
     acting[d.id] = next ? next.id : 'dark';
   }
   return acting;
