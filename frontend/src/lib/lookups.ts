@@ -56,9 +56,9 @@ export const BOARDS: { id: string; label: string; deck?: number; phase?: string;
   { id: 'bridge',      label: 'Bridge',             deck: 1, built: true },
   { id: 'quarters',    label: "Captain's Quarters", deck: 2, built: true },
   { id: 'holodeck',    label: 'Holodeck',           deck: 4, built: true },
-  { id: 'science',     label: 'Science lab',        phase: 'H3' },
+  { id: 'science',     label: 'Science lab',        deck: 3, built: true },
   { id: 'sensors',     label: 'Sensor array',       deck: 3, built: true },
-  { id: 'engineering', label: 'Main Engineering',   phase: 'H3' },
+  { id: 'engineering', label: 'Main Engineering',   deck: 7, built: true },
   { id: 'conn',        label: 'Conn handoff',       phase: 'H4' },
 ];
 

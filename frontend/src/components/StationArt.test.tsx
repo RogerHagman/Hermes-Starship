@@ -1,6 +1,6 @@
 // The station pictures and the console button every station card has.
 import { describe, expect, it } from 'vitest';
-import { fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import ship from '../../../fixtures/ship.json';
 import stations from '../../../fixtures/stations.json';
 import rails from '../../../fixtures/rails.json';
@@ -70,6 +70,15 @@ describe('station art', () => {
     const c = render(<ShipConsole ship={makeShipView(data, {}, new Set())} pick={{ station: 'holo' }} onPick={noop} onBack={noop} onBoard={(b) => went.push(b)} />).container;
     fireEvent.click([...c.querySelectorAll('button')].find((b) => b.textContent === 'Holodeck console')!);
     expect(went).toEqual(['holodeck']);
+  });
+  it('the engineers\' console buttons open Main Engineering, the Science Officer\'s the Science lab', () => {
+    const went: string[] = [];
+    for (const [id, label] of [['eng', 'Engineering console'], ['diag', 'Diagnostics console'], ['science', 'Science console']]) {
+      const c = render(<ShipConsole ship={makeShipView(data, {}, new Set())} pick={{ station: id }} onPick={noop} onBack={noop} onBoard={(b) => went.push(b)} />).container;
+      fireEvent.click([...c.querySelectorAll('button')].find((b) => b.textContent === label)!);
+      cleanup();
+    }
+    expect(went).toEqual(['engineering', 'engineering', 'science']);
   });
   it('every station card has a console button, disabled until its board exists', () => {
     for (const s of data.stations.stations.filter((x) => x.id !== 'captain' && x.id !== 'quarters' && x.id !== 'holo')) {

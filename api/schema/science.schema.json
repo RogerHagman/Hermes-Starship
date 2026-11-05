@@ -1,0 +1,347 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship · science",
+  "description": "The Science lab (Deck 3): the local models, their evals, serving, datasets and quantising runs, every number with the run that measured it, and the study bench (tracks of lessons).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "models",
+    "suites",
+    "evals",
+    "serving",
+    "datasets",
+    "runs",
+    "study"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean",
+      "description": "true for sample data."
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "quant",
+          "sizeGb",
+          "role",
+          "run"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^MD-\\d{3}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "quant": {
+            "enum": [
+              "fp16",
+              "q8",
+              "q6",
+              "q5",
+              "q4",
+              "q3"
+            ]
+          },
+          "sizeGb": {
+            "type": "number",
+            "minimum": 0
+          },
+          "role": {
+            "type": "string"
+          },
+          "run": {
+            "type": "string",
+            "pattern": "^RUN-\\d{3}$",
+            "description": "The run that made this file."
+          }
+        }
+      }
+    },
+    "suites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "what",
+          "dataset"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z]+$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "what": {
+            "type": "string"
+          },
+          "dataset": {
+            "type": "string",
+            "pattern": "^DS-\\d{3}$"
+          }
+        }
+      }
+    },
+    "evals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "model",
+          "suite",
+          "score",
+          "run"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^EV-\\d{3}$"
+          },
+          "model": {
+            "type": "string",
+            "pattern": "^MD-\\d{3}$"
+          },
+          "suite": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Percent right."
+          },
+          "run": {
+            "type": "string",
+            "pattern": "^RUN-\\d{3}$",
+            "description": "Every number comes with the run that measured it."
+          }
+        }
+      }
+    },
+    "serving": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "engine",
+          "model",
+          "state",
+          "contextK",
+          "run"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^SV-\\d{3}$"
+          },
+          "engine": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string",
+            "pattern": "^MD-\\d{3}$"
+          },
+          "state": {
+            "enum": [
+              "live",
+              "trial",
+              "failed"
+            ]
+          },
+          "contextK": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "tokensPerSec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "vram": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Percent of the GPU's memory in use."
+          },
+          "run": {
+            "type": "string",
+            "pattern": "^RUN-\\d{3}$"
+          }
+        }
+      }
+    },
+    "datasets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "rows",
+          "state",
+          "purpose"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^DS-\\d{3}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "state": {
+            "enum": [
+              "draft",
+              "curated",
+              "frozen"
+            ]
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "run": {
+            "type": "string",
+            "pattern": "^RUN-\\d{3}$"
+          }
+        }
+      }
+    },
+    "runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "at",
+          "minutes",
+          "ok",
+          "log"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RUN-\\d{3}$"
+          },
+          "kind": {
+            "enum": [
+              "eval",
+              "quantise",
+              "serve",
+              "dataset"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "minutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "model": {
+            "type": "string",
+            "pattern": "^MD-\\d{3}$"
+          },
+          "dataset": {
+            "type": "string",
+            "pattern": "^DS-\\d{3}$"
+          },
+          "log": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "The run log's own lines."
+          }
+        }
+      }
+    },
+    "study": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "why",
+          "lessons"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^ST-\\d{3}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          },
+          "lessons": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "done"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "done": {
+                  "type": "boolean"
+                },
+                "run": {
+                  "type": "string",
+                  "pattern": "^RUN-\\d{3}$",
+                  "description": "A run of ours the lesson reads."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -13,7 +13,7 @@ import jsonschema
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
-NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors"]
+NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science"]
 
 
 def load(path):
@@ -166,6 +166,75 @@ class SensorsAgree(unittest.TestCase):
                 self.assertIn(a["order"], self.orders)
             # A changed ask shows what was passed on instead.
             self.assertEqual(a["unchanged"], "passed" not in a, a["id"])
+
+
+class EngineeringAgree(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.e = load(FIX / "engineering.json")
+        cls.orders = {o["id"]: o for o in load(FIX / "orders.json")["orders"]}
+
+    def test_patch_ids_unique_and_samples_in_the_900s(self):
+        ids = [p["id"] for p in self.e["patches"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        for i in ids:
+            self.assertRegex(i, r"-9\d\d$")
+
+    def test_patches_point_at_engineering_orders(self):
+        for p in self.e["patches"]:
+            for o in p.get("orders", []):
+                self.assertIn(o, self.orders)
+                self.assertIn(self.orders[o]["station"], {"eng", "sys", "diag"}, o)
+            if "checks" in p:
+                self.assertLessEqual(p["checks"]["passed"], p["checks"]["total"])
+        self.assertLessEqual(self.e["check"]["present"], self.e["check"]["total"])
+
+    def test_commands_are_docker_commands_on_the_nas(self):
+        # Manual steps are given as docker commands the Captain runs; nothing is applied live.
+        for c in self.e["commands"]:
+            self.assertRegex(c["cmd"], r"^sudo docker (exec|restart) ")
+
+
+class ScienceAgree(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.s = load(FIX / "science.json")
+        cls.runs = {r["id"]: r for r in cls.s["runs"]}
+        cls.models = {m["id"] for m in cls.s["models"]}
+        cls.sets = {d["id"] for d in cls.s["datasets"]}
+
+    def test_ids_unique_and_samples_in_the_900s(self):
+        for key in ("models", "evals", "serving", "datasets", "runs", "study"):
+            ids = [x["id"] for x in self.s[key]]
+            self.assertEqual(len(ids), len(set(ids)), key)
+            for i in ids:
+                self.assertRegex(i, r"-9\d\d$")
+
+    def test_every_number_has_its_run(self):
+        suites = {x["id"] for x in self.s["suites"]}
+        for x in self.s["suites"]:
+            self.assertIn(x["dataset"], self.sets)
+        for e in self.s["evals"]:
+            self.assertIn(e["run"], self.runs, e["id"])
+            self.assertEqual(self.runs[e["run"]].get("model"), e["model"], e["id"])
+            self.assertIn(e["model"], self.models)
+            self.assertIn(e["suite"], suites)
+        for x in self.s["models"] + self.s["serving"] + [d for d in self.s["datasets"] if "run" in d]:
+            self.assertIn(x["run"], self.runs, x["id"])
+        for v in self.s["serving"]:
+            self.assertIn(v["model"], self.models)
+            # A failed serve has no speed to show; the others do.
+            self.assertEqual("tokensPerSec" in v, v["state"] != "failed", v["id"])
+            self.assertEqual(self.runs[v["run"]]["ok"], v["state"] != "failed", v["id"])
+        for r in self.s["runs"]:
+            if "model" in r:
+                self.assertIn(r["model"], self.models)
+            if "dataset" in r:
+                self.assertIn(r["dataset"], self.sets)
+        for t in self.s["study"]:
+            for lesson in t["lessons"]:
+                if "run" in lesson:
+                    self.assertIn(lesson["run"], self.runs)
 
 
 class NoRealData(unittest.TestCase):

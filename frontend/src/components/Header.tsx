@@ -26,6 +26,16 @@ const BOARD_TEXT: Record<BoardId, { deck: string; title: string; intro: string }
     title: 'Sensor array',
     intro: 'Every watch Sensors keeps, what it found and where from, and the asks that came in word for word.',
   },
+  engineering: {
+    deck: 'DECK 7 · MAIN ENGINEERING',
+    title: 'Main Engineering',
+    intro: 'The warp core, every patch from brief to live, the patch bay and the commands you run on the NAS.',
+  },
+  science: {
+    deck: 'DECK 3 · SCIENCES · SCIENCE LAB',
+    title: 'Science lab',
+    intro: 'The local models, how they score and serve, every number with its run log, and the study bench.',
+  },
 };
 
 export function Header({ ship, board, error }: { ship: ShipView | null; board: BoardId; error: string | null }) {
