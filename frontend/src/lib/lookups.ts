@@ -50,17 +50,27 @@ export const DECKS = ['Bridge', 'Command deck', 'Sciences, records & sickbay', '
 /** Stations that never take command, whatever their rank. */
 export const NEVER_COMMANDS = new Set(['strategist']);
 
-/** The other boards. Only the bridge exists in Milestone 0. */
-export const BOARDS: { id: string; label: string; phase?: string; built?: boolean }[] = [
-  { id: 'bridge',      label: 'Bridge', built: true },
+/** The boards. Built ones open from the side rail; the rest say when they arrive. */
+export const BOARDS: { id: string; label: string; deck?: number; phase?: string; built?: boolean }[] = [
+  { id: 'bridge',      label: 'Bridge',             deck: 1, built: true },
+  { id: 'quarters',    label: "Captain's Quarters", deck: 2, built: true },
   { id: 'deckplan',    label: 'Deck plan',          phase: 'H2' },
   { id: 'sector',      label: 'Sector chart',       phase: 'H2' },
   { id: 'science',     label: 'Science lab',        phase: 'H3' },
   { id: 'sensors',     label: 'Sensor array',       phase: 'H3' },
   { id: 'engineering', label: 'Main Engineering',   phase: 'H3' },
-  { id: 'quarters',    label: "Captain's Quarters", phase: 'H4' },
   { id: 'conn',        label: 'Conn handoff',       phase: 'H4' },
 ];
+
+/** Rank pips on the collar: full pips, then a hollow half pip (Lieutenant Commander, junior grade). */
+export const PIPS: Partial<Record<Station['rank'], { full: number; hollow: number }>> = {
+  captain:   { full: 4, hollow: 0 },
+  commander: { full: 3, hollow: 0 },
+  ltcmdr:    { full: 2, hollow: 1 },
+  lt:        { full: 2, hollow: 0 },
+  ltjg:      { full: 1, hollow: 1 },
+  ensign:    { full: 1, hollow: 0 },
+};
 
 export const SPEEDS_NOTE = 'Speed words set the reasoning level: Thrusters, Impulse, Warp, High Warp, Maximum Warp.';
 

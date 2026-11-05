@@ -6,14 +6,17 @@ import type { Drills, ShipView } from '../lib/ship';
 import type { Order } from '../types';
 import type { RailFilter } from './SideRail';
 
-export function RailsPanel({ ship, drills }: { ship: ShipView; drills: Drills }) {
+/** Short meter names for the compact rails on the Quarters board. */
+const SHORT: Record<string, string> = { gpu: 'GPU', vram: 'VRAM', window: '5 H', week: 'WEEK' };
+
+export function RailsPanel({ ship, drills, compact = false }: { ship: ShipView; drills: Drills; compact?: boolean }) {
   return (
-    <section className="panel" aria-labelledby="rails-title">
+    <section className={'panel' + (compact ? ' rails-compact' : '')} aria-labelledby="rails-title">
       <div className="panel-head">
         <h2 className="panel-title" id="rails-title">Rails</h2>
-        <span className="mono panel-meta">AS OF {clockTime(ship.data.rails.asOf)}</span>
+        <span className="mono panel-meta">AS OF {clockTime(ship.data.rails.asOf)}{compact ? ' · RESETS ON THE VIEWPORT' : ''}</span>
       </div>
-      <p className="help">Engine, nacelles and how much of each window is spent.</p>
+      {!compact && <p className="help">Engine, nacelles and how much of each window is spent.</p>}
       <div className="rails">
         {ship.data.rails.rails.map((r) => {
           const state = ship.rail(r.id);
@@ -24,7 +27,7 @@ export function RailsPanel({ ship, drills }: { ship: ShipView; drills: Drills })
                 <div className="rail-name">{r.label}<span className={`state ${state}`}>{drilled ? 'DRILL · OUT' : state.toUpperCase()}</span></div>
                 <div className="rail-sub">{r.engine}</div>
                 {r.burn?.active && r.burn.until && !drilled && (
-                  <div style={{ marginTop: 6 }}>
+                  <div className="rail-burn">
                     <span className="state burn" title="Dilithium Burn: full windows overnight until the weekly reset">BURN TO {dayAndTime(r.burn.until).toUpperCase()}</span>
                   </div>
                 )}
@@ -35,13 +38,11 @@ export function RailsPanel({ ship, drills }: { ship: ShipView; drills: Drills })
                   return (
                     <div key={m.id}>
                       <div className="meter">
-                        <span className="meter-label">{m.label.toUpperCase()}</span>
-                        <div className={'bar' + (value >= 80 ? ' hot' : '')} role="meter" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100} aria-label={`${r.label} ${m.label}`}>
-                          <b style={{ width: `${value}%` }} />
-                        </div>
+                        <span className="meter-label">{compact ? SHORT[m.id] ?? m.label.toUpperCase() : m.label.toUpperCase()}</span>
+                        <SegMeter value={value} label={`${r.label} ${m.label}`} />
                         <span className="meter-val">{value}%</span>
                       </div>
-                      {m.resetsAt && <div className="meter" aria-hidden="true"><span /><span className="meter-reset">resets {dayAndTime(m.resetsAt)}</span></div>}
+                      {m.resetsAt && !compact && <div className="meter" aria-hidden="true"><span /><span className="meter-reset">resets {dayAndTime(m.resetsAt)}</span></div>}
                     </div>
                   );
                 })}
@@ -54,7 +55,22 @@ export function RailsPanel({ ship, drills }: { ship: ShipView; drills: Drills })
   );
 }
 
-export function HailsPanel({ ship, picked, onOpen }: { ship: ShipView; picked?: string; onOpen: (station: string, order?: string) => void }) {
+/**
+ * An LCARS meter: twenty segments, one per 5 %. Lit segments glow in the rail colour; from
+ * 80 % up they turn red. The number beside it carries the exact value.
+ */
+export function SegMeter({ value, label }: { value: number; label: string }) {
+  const lit = Math.round(Math.min(100, Math.max(0, value)) / 5);
+  return (
+    <div className="segbar" role="meter" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100} aria-label={label}>
+      {Array.from({ length: 20 }, (_, i) => <i key={i} className={(i < lit ? 'on' : '') + (i >= 16 ? ' hot' : '')} />)}
+    </div>
+  );
+}
+
+export function HailsPanel({ ship, picked, onOpen, help = "Approve and Deny open in H4, in the Captain's Quarters." }: {
+  ship: ShipView; picked?: string; onOpen: (station: string, order?: string) => void; help?: string;
+}) {
   const hails = ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort((a, b) => b.tier - a.tier);
   return (
     <section className="panel panel-captain" aria-labelledby="hails-title">
@@ -62,13 +78,14 @@ export function HailsPanel({ ship, picked, onOpen }: { ship: ShipView; picked?: 
         <h2 className="panel-title" id="hails-title">Awaiting your orders</h2>
         <span className={'count' + (hails.length ? '' : ' zero')}>{hails.length}</span>
       </div>
-      <p className="help">Approve and Deny arrive with the Captain's Quarters board (H4).</p>
+      <p className="help">{help}</p>
       <div className="hails">
         {hails.length === 0 && <p className="empty">Nothing waits for you.</p>}
         {hails.map((o) => {
           const st = ship.station(o.station);
           return (
             <div key={o.id} className="hail" role="button" tabIndex={0} aria-pressed={picked === o.id}
+              style={{ '--tc': `var(--tier-${o.tier})` } as React.CSSProperties}
               onClick={() => onOpen(o.station, o.id)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(o.station, o.id); } }}>
               <div className="hail-title">{o.title}</div>
@@ -115,7 +132,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
     <section className="panel panel-grow" aria-labelledby="flight-title">
       <div className="panel-head">
         <h2 className="panel-title" id="flight-title">In flight</h2>
-        <span className="mono panel-meta" title={SPEEDS_NOTE}>{open.length} ORDERS · SPEED WORDS SET THE REASONING LEVEL</span>
+        <span className="mono panel-meta" title={SPEEDS_NOTE}>{open.length} ORDERS · SPEED SETS THE REASONING</span>
         <button type="button" className="foldall" aria-expanded={allRead}
           onClick={() => setRead(allRead ? new Set() : new Set(rows.map((o) => o.id)))}>
           <Chevron />{allRead ? 'CLOSE ALL CARDS' : 'OPEN ALL CARDS'}
@@ -177,7 +194,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
 // The card body as filed. "GOAL:", "CONTEXT:", "CONSTRAINTS:", "DONE WHEN:" and "START WITH:"
 // start a section, and lines that start with "- " are list items.
 const HEADS = /^(GOAL|CONTEXT|CONSTRAINTS|DONE WHEN|START WITH):\s*(.*)$/;
-function CardBody({ text }: { text: string }) {
+export function CardBody({ text }: { text: string }) {
   const sections: { head?: string; lines: string[] }[] = [];
   for (const line of text.split('\n')) {
     const m = HEADS.exec(line);

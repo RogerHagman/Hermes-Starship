@@ -1,4 +1,5 @@
 // The left LCARS rail: boards, the rail filter and the rail-out drill.
+import type { BoardId } from '../lib/board';
 import { BOARDS, RAIL } from '../lib/lookups';
 import type { Drills } from '../lib/ship';
 import { RAIL_IDS } from '../lib/ship';
@@ -8,6 +9,8 @@ export type RailFilter = 'all' | Exclude<RailColour, 'captain'>;
 
 interface Props {
   registry: string;
+  board: BoardId;
+  onBoard: (b: BoardId) => void;
   filter: RailFilter;
   onFilter: (f: RailFilter) => void;
   drills: Drills;
@@ -15,30 +18,37 @@ interface Props {
   onToast: (text: string) => void;
 }
 
-export function SideRail({ registry, filter, onFilter, drills, onDrill, onToast }: Props) {
+export function SideRail({ registry, board, onBoard, filter, onFilter, drills, onDrill, onToast }: Props) {
   const filters: RailFilter[] = ['all', 'local', 'codex', 'claude', 'mixed'];
+  const here = BOARDS.find((b) => b.id === board);
   return (
     <nav className="siderail" aria-label="Boards">
       <div className="brand">
         <span className="brand-name">HERMES</span>
-        <span className="brand-reg mono">{registry} · BRIDGE</span>
+        <span className="brand-reg mono">{registry} · {board === 'quarters' ? 'QUARTERS' : 'BRIDGE'}</span>
       </div>
 
       <p className="rail-label mono">BOARDS</p>
       <ul className="boards">
-        {BOARDS.map((b) => (
-          <li key={b.id}>
-            <button
-              type="button"
-              className={'board-btn' + (b.built ? '' : ' not-built')}
-              aria-current={b.built ? 'page' : undefined}
-              onClick={() => { if (!b.built) onToast(`${b.label} isn't built yet. It arrives in ${b.phase}.`); }}
-            >
-              <span>{b.label}</span>
-              <span className="tag">{b.built ? 'HERE' : b.phase}</span>
-            </button>
-          </li>
-        ))}
+        {BOARDS.map((b) => {
+          const current = b.id === here?.id;
+          return (
+            <li key={b.id}>
+              <button
+                type="button"
+                className={'board-btn' + (b.built ? '' : ' not-built') + (b.id === 'quarters' ? ' quarters' : '')}
+                aria-current={current ? 'page' : undefined}
+                onClick={() => {
+                  if (!b.built) onToast(`${b.label} isn't built yet. It arrives in ${b.phase}.`);
+                  else if (!current) onBoard(b.id as BoardId);
+                }}
+              >
+                <span>{b.label}</span>
+                <span className="tag">{current ? 'HERE' : b.built ? `DECK ${b.deck}` : b.phase}</span>
+              </button>
+            </li>
+          );
+        })}
       </ul>
 
       <p className="rail-label mono">SHOW RAIL</p>

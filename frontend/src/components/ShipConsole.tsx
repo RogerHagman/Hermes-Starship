@@ -1,51 +1,90 @@
 // The console under the saucer. It shows whatever you picked, in place on the ship:
 // a room on the plan, a card on the right, a name in the roster. With nothing picked
 // it shows the watch: who is working right now. Esc or Back returns to the watch.
-import { useEffect } from 'react';
+// StationDetail is shared with the wall screen in the Captain's Quarters.
+import { useCallback, useEffect, type ReactNode } from 'react';
 import { DECKS, DEPTS, RAIL, RANK, STATUS, railColor } from '../lib/lookups';
 import { age } from '../lib/format';
 import { SHIP_MAP } from '../lib/shipmap';
 import type { ShipView } from '../lib/ship';
+import type { Station } from '../types';
+import { CaptainsChair } from './CaptainsChair';
 import { Icon } from './Icon';
 
 interface Props {
   ship: ShipView;
-  pick: { station: string; order?: string } | null;
-  onPick: (station: string, order?: string) => void;
+  /** `from` names the station a card was opened from, so Back returns there (the Captain's chair). */
+  pick: { station: string; order?: string; from?: string } | null;
+  onPick: (station: string, order?: string, from?: string) => void;
   onBack: () => void;
+  /** Opens the Captain's Quarters (from the Captain's chair). */
+  onQuarters?: () => void;
 }
 
 const css = (vars: Record<string, string>) => vars as React.CSSProperties;
+const ICONS = SHIP_MAP.icons as Record<string, string>;
 
-export function ShipConsole({ ship, pick, onPick, onBack }: Props) {
+/** Esc runs onBack while something is open. */
+export function useEscape(active: boolean, onBack: () => void) {
   useEffect(() => {
-    if (!pick) return;
+    if (!active) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onBack(); };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [pick, onBack]);
+  }, [active, onBack]);
+}
 
+export function ShipConsole({ ship, pick, onPick, onBack, onQuarters }: Props) {
+  // A hail opened from the Captain's chair goes back to the chair, not to the watch.
+  const from = pick?.from ? ship.station(pick.from) : undefined;
+  const back = useCallback(() => (from ? onPick(from.id) : onBack()), [from, onPick, onBack]);
+  useEscape(!!pick, back);
   const st = pick ? ship.station(pick.station) : undefined;
   if (!st) return <Watch ship={ship} onPick={onPick} />;
+  if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />;
+  return (
+    <section className="console" role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
+      <StationDetail ship={ship} st={st} orderId={pick?.order} back={from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch'} onBack={back} />
+    </section>
+  );
+}
 
+export function stationColour(st: Station): string {
+  return st.kind === 'place' ? 'var(--border-strong)' : railColor(st.rail);
+}
+
+/** The title row of a console: icon, title, a small line under it, then any buttons. */
+export function ConHead({ icon, title, sub, back, onBack, children }: {
+  icon?: string; title: string; sub: string; back?: string; onBack?: () => void; children?: ReactNode;
+}) {
+  return (
+    <div className="con-head">
+      <span className="con-icon"><Icon path={icon} /></span>
+      <span className="con-titles">
+        <span className="con-title">{title}</span>
+        <span className="con-sub mono">{sub}</span>
+      </span>
+      {children}
+      {onBack && <button type="button" className="con-back" onClick={onBack} title="Back (Esc)">{back}</button>}
+    </div>
+  );
+}
+
+/** One station: who it is, its order, its duty. `actions` adds buttons to the title row. */
+export function StationDetail({ ship, st, orderId, back, onBack, actions }: {
+  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; actions?: ReactNode;
+}) {
   const off = ship.off(st);
   const acting = ship.actingFor(st.id);
   const dept = DEPTS.find((d) => d.id === st.dept);
-  const oid = pick?.order ?? st.activeOrder;
+  const oid = orderId ?? st.activeOrder;
   const o = oid ? ship.data.orders.orders.find((x) => x.id === oid) : undefined;
-  const colour = st.kind === 'place' ? 'var(--border-strong)' : railColor(st.rail);
-  const icons = SHIP_MAP.icons as Record<string, string>;
-
   return (
-    <section className="console" role="region" aria-label={`${st.name} console`} style={css({ '--c': colour })}>
-      <div className="con-head">
-        <span className="con-icon"><Icon path={icons[st.id]} /></span>
-        <span className="con-titles">
-          <span className="con-title">{st.name}</span>
-          <span className="con-sub mono">DECK {st.deck} · {DECKS[st.deck - 1].toUpperCase()}{dept ? ` · ${dept.name.toUpperCase()}` : ''}</span>
-        </span>
-        <button type="button" className="con-back" onClick={onBack} title="Back to the watch (Esc)">‹ Watch</button>
-      </div>
+    <>
+      <ConHead icon={ICONS[st.id]} title={st.name} back={back} onBack={onBack}
+        sub={`DECK ${st.deck} · ${DECKS[st.deck - 1].toUpperCase()}${dept ? ` · ${dept.name.toUpperCase()}` : ''}`}>
+        {actions}
+      </ConHead>
       <div className="con-pills">
         <span className="railpill" style={css({ '--c': railColor(st.rail) })}>{RAIL[st.rail].label}</span>
         <span className="railpill" style={css({ '--c': 'var(--text-label)', borderStyle: STATUS[st.status].line })}>{STATUS[st.status].label}</span>
@@ -79,7 +118,7 @@ export function ShipConsole({ ship, pick, onPick, onBack }: Props) {
           {st.answersTo && <><dt>ANSWERS TO</dt><dd>{st.answersTo}</dd></>}
         </dl>
       </div>
-    </section>
+    </>
   );
 }
 
@@ -89,13 +128,8 @@ function Watch({ ship, onPick }: { ship: ShipView; onPick: (station: string, ord
   const offDuty = ship.data.stations.stations.filter((s) => ship.off(s));
   return (
     <section className="console" role="region" aria-label="The watch" style={css({ '--c': 'var(--captain)' })}>
-      <div className="con-head">
-        <span className="con-icon"><Icon path={(SHIP_MAP.icons as Record<string, string>).captain} /></span>
-        <span className="con-titles">
-          <span className="con-title">The watch</span>
-          <span className="con-sub mono">{working.length} AT WORK · {offDuty.length} OFF DUTY · PICK A ROOM OR A CARD</span>
-        </span>
-      </div>
+      <ConHead icon={ICONS.captain} title="The watch"
+        sub={`${working.length} AT WORK · ${offDuty.length} OFF DUTY · PICK A ROOM OR A CARD`} />
       <div className="con-body">
         <ul className="con-rows">
           {working.map((s) => {

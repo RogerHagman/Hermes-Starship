@@ -5,10 +5,11 @@ import stations from '../../../fixtures/stations.json';
 import rails from '../../../fixtures/rails.json';
 import orders from '../../../fixtures/orders.json';
 import shiplog from '../../../fixtures/shiplog.json';
+import quarters from '../../../fixtures/quarters.json';
 import type { Fixtures } from '../types';
-import { actingHeads, offDuty, railState } from './ship';
+import { actingHeads, canRelieve, makeShipView, offDuty, railState } from './ship';
 
-const data = { ship, stations, rails, orders, shiplog } as unknown as Fixtures;
+const data = { ship, stations, rails, orders, shiplog, quarters } as unknown as Fixtures;
 const st = (id: string) => data.stations.stations.find((s) => s.id === id)!;
 
 describe('rails', () => {
@@ -49,6 +50,35 @@ describe('acting heads', () => {
   });
   it('never hands command to enlisted crew', () => {
     const acting = actingHeads(data, { local: true });
+    for (const id of Object.values(acting)) {
+      if (id !== 'dark') expect(['cpo', 'po', 'cadet', 'none', 'team']).not.toContain(st(id).rank);
+    }
+  });
+});
+
+describe('relieve and recall (Captain\'s Quarters)', () => {
+  it('relieving the Chief Engineer hands Engineering to Systems, the next officer by rank', () => {
+    const relieved = new Set(['eng']);
+    expect(offDuty(data, {}, st('eng'), relieved)).toBe('relieved');
+    expect(actingHeads(data, {}, relieved)).toEqual({ eng: 'sys' });
+  });
+  it('relieving Systems too leaves Diagnostics, an ensign, in charge', () => {
+    expect(actingHeads(data, {}, new Set(['eng', 'sys'])).eng).toBe('diag');
+  });
+  it('recall is just leaving the set: everyone is back at their post', () => {
+    const view = makeShipView(data, {}, new Set());
+    expect(view.acting).toEqual({});
+    expect(data.stations.stations.filter((s) => view.off(s))).toHaveLength(0);
+  });
+  it('the Captain, the Ship\'s Computer, places and unbuilt stations cannot be relieved', () => {
+    const everyone = new Set(data.stations.stations.map((s) => s.id));
+    for (const id of ['captain', 'computer', 'quarters', 'holo', 'doctor']) {
+      expect(canRelieve(st(id))).toBe(false);
+      expect(offDuty(data, {}, st(id), everyone)).toBeNull();
+    }
+  });
+  it('a relieved head plus a rail drill: enlisted crew still never take command', () => {
+    const acting = actingHeads(data, { local: true }, new Set(['security', 'science']));
     for (const id of Object.values(acting)) {
       if (id !== 'dark') expect(['cpo', 'po', 'cadet', 'none', 'team']).not.toContain(st(id).rank);
     }
