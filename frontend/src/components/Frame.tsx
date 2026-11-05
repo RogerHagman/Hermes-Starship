@@ -11,7 +11,7 @@ export function Frame({ ship, board, side, children }: { ship: ShipView | null; 
     <div className="frame">
       <div className="elbow elbow-top" aria-hidden="true" />
       <header className="topbar">
-        <div className="topbar-stats mono">{ship ? (board === 'quarters' ? quartersStats(ship) : board === 'holodeck' ? holodeckStats(ship) : bridgeStats(ship)) : '—'}</div>
+        <div className="topbar-stats mono">{ship ? (board === 'quarters' ? quartersStats(ship) : board === 'holodeck' ? holodeckStats(ship) : board === 'sensors' ? sensorsStats(ship) : bridgeStats(ship)) : '—'}</div>
         <span className="seg seg-gold" aria-hidden="true" />
         <span className="seg seg-local" aria-hidden="true" />
         <span className="seg seg-claude" aria-hidden="true" />
@@ -39,6 +39,13 @@ function holodeckStats(ship: ShipView): string {
   const waiting = rooms.filter((s) => s.kind === 'station' && s.status !== 'live').length;
   const places = rooms.filter((s) => s.kind === 'place').length;
   return `${rooms.length - places} STATIONS · ${places} PLACES · ${waiting} WAITING FOR CREW · ${ASSETS.length} ASSETS`;
+}
+
+function sensorsStats(ship: ShipView): string {
+  const s = ship.data.sensors;
+  const active = s.watches.filter((w) => w.state === 'active').length;
+  const unread = s.findings.filter((f) => !f.seen).length;
+  return `${active} WATCHES ACTIVE · ${unread} NEW FINDINGS · ${s.asks.length} ASKS · ${s.quarantine.length} HELD`;
 }
 
 function quartersStats(ship: ShipView): string {

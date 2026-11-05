@@ -1,5 +1,6 @@
 // The panels around the Holodeck: its crew, the build queue (rooms waiting for their crew,
 // and the drafts spun up here), the register of every room on the ship, and the deck's orders.
+import { OWN_BOARD } from '../../lib/board';
 import { BOARDS, DEPTS, RANK, RAIL, STATUS, railColor } from '../../lib/lookups';
 import { clockTime, dayAndTime } from '../../lib/format';
 import type { Asset, Draft } from '../../lib/holodeck';
@@ -12,7 +13,6 @@ import { leadOf } from './HoloScreen';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const PLACES = SHIP_MAP.places as Record<string, { x: number; y: number; w: number }>;
-const OWN_BOARD: Record<string, string> = { quarters: 'quarters', captain: 'quarters', holo: 'holodeck' };
 
 // ---------- the Holodeck crew ----------
 

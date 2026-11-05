@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import pkg from '../../../package.json';
 import { BOARDS, DECKS, DEPTS, RAIL, RANK, STATUS, railColor } from '../../lib/lookups';
-import type { BoardId } from '../../lib/board';
+import { OWN_BOARD, type BoardId } from '../../lib/board';
 import { dayAndTime } from '../../lib/format';
 import {
   ASSET_TEXT, HOLO_ICONS, PIPELINE, PROGRAMS, PROTOCOLS, draftBrief, type Asset, type Draft, type DraftRail,
@@ -47,8 +47,6 @@ const PLACES = SHIP_MAP.places as Record<string, { x: number; y: number; w: numb
 const ICONS = SHIP_MAP.icons as Record<string, string>;
 const HOLO = 'var(--holo)';
 
-/** A room's own board, when it has one built. */
-const OWN_BOARD: Partial<Record<string, BoardId>> = { quarters: 'quarters', captain: 'quarters', holo: 'holodeck' };
 
 export function HoloScreen(p: Props) {
   const { ship, screen, onScreen } = p;

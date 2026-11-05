@@ -36,7 +36,7 @@ export function SideRail({ registry, board, onBoard, filter, onFilter, drills, o
             <li key={b.id}>
               <button
                 type="button"
-                className={'board-btn' + (b.built ? '' : ' not-built') + (b.id === 'quarters' || b.id === 'holodeck' ? ` ${b.id}` : '')}
+                className={'board-btn' + (b.built ? '' : ' not-built') + (b.built && b.id !== 'bridge' ? ` ${b.id}` : '')}
                 aria-current={current ? 'page' : undefined}
                 onClick={() => {
                   if (!b.built) onToast(`${b.label} isn't built yet. It arrives in ${b.phase}.`);

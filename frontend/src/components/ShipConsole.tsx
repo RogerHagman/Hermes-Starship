@@ -2,7 +2,7 @@
 // a room on the plan, a card on the right, a name in the roster. With nothing picked
 // it shows the watch: who is working right now. Esc or Back returns to the watch.
 // StationDetail is shared with the wall screen in the Captain's Quarters.
-import type { BoardId } from '../lib/board';
+import { OWN_BOARD, type BoardId } from '../lib/board';
 import { useCallback, useEffect, type ReactNode } from 'react';
 import { DECKS, DEPTS, RAIL, RANK, STATUS, railColor } from '../lib/lookups';
 import { age } from '../lib/format';
@@ -145,8 +145,6 @@ export function OrderBox({ ship, st, orderId }: { ship: ShipView; st: Station; o
   );
 }
 
-/** The stations whose own board is built: their console button opens it. */
-const OWN_BOARD: Partial<Record<string, BoardId>> = { captain: 'quarters', quarters: 'quarters', holo: 'holodeck' };
 
 /**
  * The button to a station's own console, at the foot of its card. The Captain's and the

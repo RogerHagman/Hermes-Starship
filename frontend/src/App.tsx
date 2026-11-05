@@ -1,6 +1,6 @@
 // The boards: loads the fixtures once, keeps what both boards share (the rail filter, drills,
 // who is relieved, who the comm badge speaks to), and shows the Bridge, the Captain's Quarters
-// or the Holodeck.
+// the Holodeck or the Sensor array.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LIVE_EVERY_MS, loadFixtures, loadLiveRailLog, loadLiveRails, withLiveDuty } from './lib/data';
 import { useBoard } from './lib/board';
@@ -12,6 +12,7 @@ import { Frame } from './components/Frame';
 import { Header } from './components/Header';
 import { QuartersBoard } from './components/quarters/QuartersBoard';
 import { HolodeckBoard } from './components/holodeck/HolodeckBoard';
+import { SensorsBoard } from './components/sensors/SensorsBoard';
 import { SideRail, type RailFilter } from './components/SideRail';
 import { useFit, useFullscreenKey } from './lib/fit';
 
@@ -83,6 +84,10 @@ export function App() {
             )}
             {ship && board === 'holodeck' && (
               <HolodeckBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
+                onBoard={goBoard} onToast={showToast} />
+            )}
+            {ship && board === 'sensors' && (
+              <SensorsBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
                 onBoard={goBoard} onToast={showToast} />
             )}
           </main>

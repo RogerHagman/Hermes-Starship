@@ -1,0 +1,250 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "watches": [
+    {
+      "id": "W-901",
+      "name": "Two sample GPUs",
+      "sector": "market",
+      "kind": "price",
+      "cadence": "weekly",
+      "target": "Price of two sample 24 GB cards at three shops, cited.",
+      "forStation": "captain",
+      "lastScan": "2026-11-04T18:10:00Z",
+      "nextScan": "2026-11-11T18:10:00Z",
+      "state": "active",
+      "order": "ORD-9011"
+    },
+    {
+      "id": "W-902",
+      "name": "NAS memory",
+      "sector": "market",
+      "kind": "price",
+      "cadence": "weekly",
+      "target": "32 GB SO-DIMM kit that fits the NAS, new and used.",
+      "forStation": "eng",
+      "lastScan": "2026-11-02T08:00:00Z",
+      "nextScan": "2026-11-09T08:00:00Z",
+      "state": "active"
+    },
+    {
+      "id": "W-903",
+      "name": "Frontend jobs nearby",
+      "sector": "jobs",
+      "kind": "jobs",
+      "cadence": "daily",
+      "target": "New frontend and React roles within an hour of home, from the public job board.",
+      "forStation": "helm",
+      "lastScan": "2026-11-04T07:00:00Z",
+      "nextScan": "2026-11-05T07:00:00Z",
+      "state": "active"
+    },
+    {
+      "id": "W-904",
+      "name": "Remote React roles",
+      "sector": "jobs",
+      "kind": "jobs",
+      "cadence": "weekly",
+      "target": "Remote roles in Europe that ask for React and TypeScript.",
+      "forStation": "helm",
+      "lastScan": "2026-11-01T07:00:00Z",
+      "nextScan": "2026-11-08T07:00:00Z",
+      "state": "active"
+    },
+    {
+      "id": "W-905",
+      "name": "Agent framework releases",
+      "sector": "tech",
+      "kind": "release",
+      "cadence": "weekly",
+      "target": "New releases of the agent framework the ship runs on, with what changed.",
+      "forStation": "eng",
+      "lastScan": "2026-11-03T06:00:00Z",
+      "nextScan": "2026-11-10T06:00:00Z",
+      "state": "active"
+    },
+    {
+      "id": "W-906",
+      "name": "Local model releases",
+      "sector": "tech",
+      "kind": "release",
+      "cadence": "weekly",
+      "target": "New open models that fit one 24 GB card, with published evals.",
+      "forStation": "science",
+      "lastScan": "2026-11-03T06:30:00Z",
+      "nextScan": "2026-11-10T06:30:00Z",
+      "state": "active"
+    },
+    {
+      "id": "W-907",
+      "name": "Series on the reading list",
+      "sector": "home",
+      "kind": "release",
+      "cadence": "monthly",
+      "target": "New books in the series the Captain is reading.",
+      "forStation": "archives",
+      "lastScan": "2026-10-15T09:00:00Z",
+      "nextScan": "2026-11-15T09:00:00Z",
+      "state": "active"
+    },
+    {
+      "id": "W-908",
+      "name": "Weekend trip fares",
+      "sector": "home",
+      "kind": "price",
+      "cadence": "daily",
+      "target": "Train and ferry fares for the weekend trip.",
+      "forStation": "carto",
+      "lastScan": "2026-11-03T17:00:00Z",
+      "nextScan": "2026-11-06T17:00:00Z",
+      "state": "paused"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-901",
+      "watch": "W-901",
+      "at": "2026-11-04T18:10:00Z",
+      "title": "Both sample cards down about 6% this week",
+      "summary": "The cheaper card dropped at two of three shops. The other card is out of stock at one.",
+      "sources": [
+        {
+          "title": "Shop A, product page",
+          "site": "shop-a.example"
+        },
+        {
+          "title": "Shop B, product page",
+          "site": "shop-b.example"
+        },
+        {
+          "title": "Price history",
+          "site": "prices.example"
+        }
+      ],
+      "seen": false
+    },
+    {
+      "id": "F-902",
+      "watch": "W-903",
+      "at": "2026-11-04T07:00:00Z",
+      "title": "Three new frontend roles",
+      "summary": "Two ask for React and TypeScript, one for Vue. One is hybrid, two days in the office.",
+      "sources": [
+        {
+          "title": "Public job board, search results",
+          "site": "jobs.example"
+        }
+      ],
+      "seen": true
+    },
+    {
+      "id": "F-903",
+      "watch": "W-905",
+      "at": "2026-11-03T06:00:00Z",
+      "title": "Framework point release",
+      "summary": "Fixes to the Kanban tools and the cron runner. Nothing in it touches the patches on the NAS.",
+      "sources": [
+        {
+          "title": "Release notes",
+          "site": "releases.example"
+        },
+        {
+          "title": "Changelog diff",
+          "site": "code.example"
+        }
+      ],
+      "seen": true
+    },
+    {
+      "id": "F-904",
+      "watch": "W-906",
+      "at": "2026-11-03T06:30:00Z",
+      "title": "A new 32B model with 4-bit weights",
+      "summary": "Published evals put it near the current local model. Science should run its own numbers before anything changes.",
+      "sources": [
+        {
+          "title": "Model card",
+          "site": "models.example"
+        },
+        {
+          "title": "Eval table",
+          "site": "evals.example"
+        }
+      ],
+      "seen": false
+    },
+    {
+      "id": "F-905",
+      "watch": "W-902",
+      "at": "2026-11-02T08:00:00Z",
+      "title": "Memory kit unchanged",
+      "summary": "Same price as last week. One used kit listed, seller unrated.",
+      "sources": [
+        {
+          "title": "Shop A, product page",
+          "site": "shop-a.example"
+        },
+        {
+          "title": "Used listings",
+          "site": "market.example"
+        }
+      ],
+      "seen": true
+    },
+    {
+      "id": "F-906",
+      "watch": "W-907",
+      "at": "2026-10-15T09:00:00Z",
+      "title": "Book 4 of the series announced",
+      "summary": "Out in March. Archives added it to the want-to-read shelf.",
+      "sources": [
+        {
+          "title": "Publisher catalogue",
+          "site": "books.example"
+        }
+      ],
+      "seen": true
+    }
+  ],
+  "asks": [
+    {
+      "id": "A-901",
+      "at": "2026-11-04T18:02:00Z",
+      "words": "what do those two GPUs cost now, and where",
+      "unchanged": true,
+      "state": "running",
+      "order": "ORD-9011"
+    },
+    {
+      "id": "A-902",
+      "at": "2026-11-03T21:40:00Z",
+      "words": "is there anything new for running models locally that I should know about",
+      "unchanged": true,
+      "state": "answered"
+    },
+    {
+      "id": "A-903",
+      "at": "2026-11-02T10:15:00Z",
+      "words": "how fast is my old C64 compared to the NAS",
+      "passed": "Benchmark Fortran and C64 BASIC on the NAS and write a report",
+      "unchanged": false,
+      "state": "answered"
+    }
+  ],
+  "quarantine": [
+    {
+      "id": "Q-901",
+      "at": "2026-11-04T07:00:00Z",
+      "watch": "W-903",
+      "site": "jobs.example",
+      "what": "A listing's hidden text was written as orders to an assistant. Held; the listing itself was kept as data."
+    },
+    {
+      "id": "Q-902",
+      "at": "2026-11-03T06:30:00Z",
+      "watch": "W-906",
+      "site": "models.example",
+      "what": "A model card linked a script to run. Sensors never runs anything it reads; the link was noted, not followed."
+    }
+  ]
+}

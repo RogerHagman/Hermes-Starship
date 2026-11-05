@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship · sensors",
+  "description": "The Sensor array (Deck 3): the watches Sensors keeps, what they found (cited), the asks that reached Sensors word for word, and web content held in quarantine.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "watches",
+    "findings",
+    "asks",
+    "quarantine"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "watches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "sector",
+          "kind",
+          "cadence",
+          "target",
+          "forStation",
+          "lastScan",
+          "nextScan",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^W-\\d{3}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sector": {
+            "description": "Where it sits on the scope.",
+            "enum": [
+              "jobs",
+              "market",
+              "tech",
+              "home"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "price",
+              "jobs",
+              "release",
+              "research"
+            ]
+          },
+          "cadence": {
+            "description": "How often it is scanned. Tracked, never capped.",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "description": "What is watched, in plain words."
+          },
+          "forStation": {
+            "type": "string",
+            "description": "The station the findings go to."
+          },
+          "lastScan": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "nextScan": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "paused"
+            ]
+          },
+          "order": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$"
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "watch",
+          "at",
+          "title",
+          "summary",
+          "sources",
+          "seen"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^F-\\d{3}$"
+          },
+          "watch": {
+            "type": "string",
+            "pattern": "^W-\\d{3}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "sources": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "site"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "site": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "seen": {
+            "type": "boolean",
+            "description": "The station it went to has read it."
+          }
+        }
+      }
+    },
+    "asks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "at",
+          "words",
+          "unchanged",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^A-\\d{3}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "words": {
+            "type": "string",
+            "description": "The Captain's words, exactly as they were sent."
+          },
+          "passed": {
+            "type": "string",
+            "description": "What Number One passed on, when it was not word for word."
+          },
+          "unchanged": {
+            "type": "boolean",
+            "description": "True when Sensors got the words unchanged."
+          },
+          "state": {
+            "enum": [
+              "answered",
+              "running",
+              "queued"
+            ]
+          },
+          "order": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$"
+          }
+        }
+      }
+    },
+    "quarantine": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "at",
+          "watch",
+          "site",
+          "what"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^Q-\\d{3}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "watch": {
+            "type": "string",
+            "pattern": "^W-\\d{3}$"
+          },
+          "site": {
+            "type": "string"
+          },
+          "what": {
+            "type": "string",
+            "description": "Why it was held, described. Never the held text itself."
+          }
+        }
+      }
+    }
+  }
+}

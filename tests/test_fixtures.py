@@ -13,7 +13,7 @@ import jsonschema
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
-NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog"]
+NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors"]
 
 
 def load(path):
@@ -136,6 +136,36 @@ class QuartersAgree(unittest.TestCase):
         self.assertLessEqual(r["read"], r["goal"])
         reading = next(c for c in self.q["campaigns"] if c["name"] == "Reading")
         self.assertEqual(reading["percent"], round(100 * r["read"] / r["goal"]))
+
+
+class SensorsAgree(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.s = load(FIX / "sensors.json")
+        cls.stations = {s["id"] for s in load(FIX / "stations.json")["stations"]}
+        cls.orders = {o["id"] for o in load(FIX / "orders.json")["orders"]}
+
+    def test_ids_unique_and_samples_in_the_900s(self):
+        for key in ("watches", "findings", "asks", "quarantine"):
+            ids = [x["id"] for x in self.s[key]]
+            self.assertEqual(len(ids), len(set(ids)), key)
+            for i in ids:
+                self.assertRegex(i, r"-9\d\d$")
+
+    def test_everything_points_at_real_watches_stations_and_orders(self):
+        watches = {w["id"] for w in self.s["watches"]}
+        for w in self.s["watches"]:
+            self.assertIn(w["forStation"], self.stations)
+            self.assertLess(w["lastScan"], w["nextScan"])
+            if "order" in w:
+                self.assertIn(w["order"], self.orders)
+        for x in self.s["findings"] + self.s["quarantine"]:
+            self.assertIn(x["watch"], watches)
+        for a in self.s["asks"]:
+            if "order" in a:
+                self.assertIn(a["order"], self.orders)
+            # A changed ask shows what was passed on instead.
+            self.assertEqual(a["unchanged"], "passed" not in a, a["id"])
 
 
 class NoRealData(unittest.TestCase):

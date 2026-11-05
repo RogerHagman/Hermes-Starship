@@ -79,9 +79,8 @@ export const PROGRAMS: { id: string; what: string }[] = [
   { id: 'bridge', what: 'The ship plan, rails, hails, orders in flight, the duty roster and the ship\'s log.' },
   { id: 'quarters', what: 'Your hails in full, campaigns and missions, the order log, your own log and the Yeoman.' },
   { id: 'holodeck', what: 'This room: the ship as a hologram, its rooms and assets, and drafts of new sections.' },
-  { id: 'sector', what: 'Ops chart: what would happen if a rail went out, and the recurring jobs register.' },
   { id: 'science', what: 'Model evals, quantising runs and their logs.' },
-  { id: 'sensors', what: 'Watches and scans on a sensor scope, unknown asks word for word.' },
+  { id: 'sensors', what: 'Every watch on a long-range scope, findings with their sources, asks word for word, the quarantine.' },
   { id: 'engineering', what: 'Sol, Terra and Luna, the warp core shares, patches from brief to live.' },
   { id: 'conn', what: 'Handing the conn to Number One and back, with what is owed.' },
 ];
