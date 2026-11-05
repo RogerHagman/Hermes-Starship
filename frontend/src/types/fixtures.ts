@@ -60,8 +60,23 @@ export interface OrdersFile {
     title: string;
     station: string;
     state: "queued" | "running" | "review" | "awaiting-captain" | "blocked" | "done";
-    tier: number;
-    speed?: "Thrusters" | "Impulse" | "Warp" | "High Warp" | "Maximum Warp";
+    /**
+     * The risk tier, 0 to 3. Live orders have none until the tier classifier (conn handoff) is built.
+     */
+    tier?: number;
+    /**
+     * The Captain's speed word (docs/04-speed-scale.md). Impulse and High Warp are the older sample words.
+     */
+    speed?:
+      | "Thrusters"
+      | "Quarter Impulse"
+      | "Half Impulse"
+      | "Full Impulse"
+      | "Impulse"
+      | "Warp"
+      | "Warp 9"
+      | "High Warp"
+      | "Maximum Warp";
     updatedAt: string;
     parent?: string;
     mission?: string;

@@ -4,7 +4,7 @@
 // (standing orders), the shelf (the reading year), or a station picked from the duty roster.
 // Nothing here sends anything: Approve, Deny and Write open with orders in H4.
 import { useEffect, useMemo, useState } from 'react';
-import { RAIL, railColor } from '../../lib/lookups';
+import { byTier, RAIL, railColor, tierText, tierVar } from '../../lib/lookups';
 import { age, clockTime, dateLine, dayAndTime } from '../../lib/format';
 import { ROOM_ICONS, greeting, localHM, nights, stardate } from '../../lib/quarters';
 import { canRelieve, type ShipView } from '../../lib/ship';
@@ -42,7 +42,7 @@ const css = (vars: Record<string, string | number>) => vars as React.CSSProperti
 
 /** The hails, highest tier first: the order the chair shows them in. */
 export function hailsOf(ship: ShipView): Order[] {
-  return ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort((a, b) => b.tier - a.tier);
+  return ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort(byTier);
 }
 
 export function WallScreen({ ship, screen, desk, onScreen, onLog, onTick, onRelieve }: Props) {
@@ -106,7 +106,7 @@ function AtEase({ ship, desk, onScreen }: { ship: ShipView; desk: Desk; onScreen
       <div className="con-body">
         <div className="ease">
           <EaseTile icon="chair" label="THE CHAIR · HAILS" figure={String(hails.length)} onClick={() => onScreen({ view: 'chair' })}
-            text={hails[0]?.title ?? 'Nothing waits for you.'} foot={hails[0] ? `TIER ${hails[0].tier} FIRST · ${hails[0].id}` : 'ALL QUIET'} />
+            text={hails[0]?.title ?? 'Nothing waits for you.'} foot={hails[0] ? `${tierText(hails[0].tier)} FIRST · ${hails[0].id}` : 'ALL QUIET'} />
           <EaseTile icon="viewport" label="VIEWPORT · WINDOWS" figure={burn ? 'Burn' : resets[0] ? clockTime(resets[0].at) : '—'}
             onClick={() => onScreen({ view: 'viewport' })}
             text={burn ? `Dilithium Burn until ${dayAndTime(burn.until)}.` : 'No burn window open.'}
@@ -171,11 +171,11 @@ function ChairView({ ship, hail, onScreen, onBack }: { ship: ShipView; hail?: st
         )}
       </ConHead>
       <div className="con-body">
-        <article className="hailcard" style={css({ '--c': `var(--tier-${o.tier})` })}>
+        <article className="hailcard" style={css({ '--c': tierVar(o.tier) })}>
           <div className="hailcard-meta">
             <span className="idtag">{o.id}</span>
             <span className="railpill" style={css({ '--c': railColor(st?.rail ?? 'mixed') })}>{(st?.short ?? o.station).toUpperCase()}</span>
-            <span className="tierpill" style={css({ '--c': `var(--tier-${o.tier})` })}>TIER {o.tier}</span>
+            <span className="tierpill" style={css({ '--c': tierVar(o.tier) })}>{tierText(o.tier)}</span>
             {o.speed && <span className="idtag">{o.speed.toUpperCase()}</span>}
             {mission && <span className="idtag">{mission.id} · {mission.name.toUpperCase()}</span>}
             <span className="idtag">{age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}</span>

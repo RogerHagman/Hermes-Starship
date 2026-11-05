@@ -77,3 +77,9 @@ export const SPEEDS_NOTE = 'Speed words set the reasoning level: Thrusters, Impu
 export function railColor(rail: RailColour | string): string {
   return (RAIL as Record<string, { color: string }>)[rail]?.color ?? RAIL.mixed.color;
 }
+
+/** An order's tier colour and label. Live orders have no tier until the tier classifier exists. */
+export const tierVar = (tier?: number) => (tier === undefined ? 'var(--text-label)' : `var(--tier-${tier})`);
+export const tierText = (tier?: number) => (tier === undefined ? 'NO TIER' : `TIER ${tier}`);
+/** Highest tier first; orders with no tier last. */
+export const byTier = (a: { tier?: number }, b: { tier?: number }) => (b.tier ?? -1) - (a.tier ?? -1);

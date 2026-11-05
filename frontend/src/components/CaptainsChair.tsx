@@ -4,6 +4,7 @@
 // open in H4, in the Quarters. Page 2 is the Captain's station card, the same card every
 // other station has.
 import type { BoardId } from '../lib/board';
+import { byTier, tierText, tierVar } from '../lib/lookups';
 import { useMemo, useState } from 'react';
 import art from '../assets/bridge-chair.svg?raw';
 import { SHIP_MAP } from '../lib/shipmap';
@@ -25,7 +26,7 @@ export function CaptainsChair({ ship, onPick, onBack, onBoard }: {
 }) {
   const [page, setPage] = useState(0);
   const captain = ship.station('captain');
-  const hails = ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort((a, b) => b.tier - a.tier);
+  const hails = ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort(byTier);
   const burn = burning(ship);
   // Same lights as the chair in the Quarters: a rail that is out dims its armrest light,
   // and warp streaks cross the viewscreen while the burn is on.
@@ -60,9 +61,9 @@ export function CaptainsChair({ ship, onPick, onBack, onBoard }: {
           <ul className="cchair-hails">
             {hails.map((o) => (
               <li key={o.id}>
-                <button type="button" className="cchair-hail" style={css({ '--c': `var(--tier-${o.tier})` })}
+                <button type="button" className="cchair-hail" style={css({ '--c': tierVar(o.tier) })}
                   onClick={() => onPick(o.station, o.id, 'captain')} title={`${o.id} · ${o.title}`}>
-                  <span className="tierpill">TIER {o.tier}</span>
+                  <span className="tierpill">{tierText(o.tier)}</span>
                   <span className="cchair-hail-title">{o.title}</span>
                 </button>
               </li>

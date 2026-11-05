@@ -1,0 +1,165 @@
+"""Tests for the ship probe. Run: python -m unittest discover -s probe"""
+import json
+import sqlite3
+import sys
+import tempfile
+import unittest
+from datetime import datetime, timezone
+from pathlib import Path
+
+import jsonschema
+
+sys.path.insert(0, str(Path(__file__).parent))
+import ship_probe  # noqa: E402
+
+ROOT = Path(__file__).resolve().parent.parent
+NOW = datetime(2026, 11, 5, 20, 0, tzinfo=timezone.utc)
+HEAD = "order_id,received_at,from_surface,station,kind,status,closed_at,speed\n"
+
+
+def schema(name):
+    return json.loads((ROOT / "api" / "schema" / f"{name}.schema.json").read_text())
+
+
+def at(text):
+    """Seconds since 1970, the way Hermes' Kanban keeps its times."""
+    return int(datetime.fromisoformat(text.replace("Z", "+00:00")).timestamp())
+
+
+def kanban(path, rows, table="tasks"):
+    """A Kanban database with the columns of Hermes' own tasks table that the probe reads."""
+    con = sqlite3.connect(path)
+    con.execute(f"create table {table} (id text primary key, title text not null, body text, assignee text, status text not null,"
+                " priority integer default 0, created_at integer not null, started_at integer, completed_at integer, last_heartbeat_at integer)")
+    con.execute("create table task_links (parent_id text not null, child_id text not null, primary key (parent_id, child_id))")
+    con.executemany(f"insert into {table} (id, title, body, status, assignee, created_at, started_at, completed_at) values (?,?,?,?,?,?,?,?)", rows)
+    con.commit()
+    con.close()
+
+
+class Files(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.dir.name)
+        (self.d / "orders.csv").write_text(HEAD
+            + "ORD-1201,2026-11-05T18:00:00Z,telegram,Number One (router),inbound-message,open,,high\n"
+            + "ORD-1202,2026-11-05T18:10:00Z,desktop,Number One (router),inbound-message,done,2026-11-05T18:20:00Z,none\n"
+            + "ORD-1203,2026-11-05T19:00:00Z,dashboard,Number One (router),inbound-message,open,,\n"
+            + "ORD-1150,2026-11-01T09:00:00Z,desktop,Number One (router),inbound-message,open,,\n"
+            + "ORD-1100,2026-10-20T10:00:00Z,telegram,Number One (router),inbound-message,done,2026-10-20T11:00:00Z,\n"
+            + "ORD-1099,2026-11-05T17:00:00Z,done-when,Sensors,test,closed,2026-11-05T17:01:00Z,\n")
+        (self.d / "handoff-log.csv").write_text(
+            "task_id,rail,kind,sent_at,returned_at,status,failure_class,checks_passed,retries,usage_tokens,usage_cost,wall_time_s,notes\n"
+            "t1,codex,code,2026-11-05T18:01:00Z,2026-11-05T18:30:00Z,accepted,,3,0,,,1740,\n")
+        kanban(self.d / "kanban.db", [
+            ("t_aa", "ORD-1201 · Fix the reminder time", "GOAL: Fire on time.\nDONE WHEN:\n- It fires.", "running", "forge", at("2026-11-05T18:00:05Z"), at("2026-11-05T18:01:00Z"), None),
+            ("t_bb", "ORD-1201 tests for the reminder", "", "ready", "diagnostics", at("2026-11-05T18:00:06Z"), None, None),
+            ("t_cc", "ORD-1202 log the meal", "", "done", "scribe", at("2026-11-05T18:10:02Z"), at("2026-11-05T18:10:05Z"), at("2026-11-05T18:20:00Z")),
+        ])
+        self.env = {"ORDERS_CSV": str(self.d / "orders.csv"), "KANBAN_DB": str(self.d / "kanban.db"),
+                    "HANDOFF_LOG": str(self.d / "handoff-log.csv"), "ROSTER": str(ROOT / "fixtures" / "stations.json"),
+                    "OUT_DIR": str(self.d / "live")}
+
+    def tearDown(self):
+        self.dir.cleanup()
+
+    def run_probe(self, **over):
+        with tempfile.TemporaryDirectory() as scratch:
+            return ship_probe.run_once({**self.env, **over}, scratch, NOW)
+
+    def test_writes_files_the_schemas_accept(self):
+        self.run_probe()
+        for name in ("orders", "shiplog"):
+            data = json.loads((self.d / "live" / f"{name}.json").read_text())
+            self.assertIs(data["synthetic"], False)
+            jsonschema.validate(data, schema(name))
+
+    def test_an_order_takes_its_words_from_its_first_card_and_its_state_from_the_newest(self):
+        orders, _ = self.run_probe()
+        o = next(x for x in orders if x["id"] == "ORD-1201")
+        self.assertEqual("Fix the reminder time", o["title"])
+        self.assertTrue(o["body"].startswith("GOAL:"))
+        self.assertEqual("eng", o["station"])        # forge is the Chief Engineer's profile
+        self.assertEqual("Warp", o["speed"])          # high reasoning is the word Warp
+        self.assertEqual("running", o["state"])        # one card running, one ready: running
+        self.assertIn("2 cards: eng, diag", o["detail"])
+        self.assertEqual("2026-11-05T18:01:00Z", o["updatedAt"])
+
+    def test_old_done_orders_stale_open_ones_and_test_rows_drop_off(self):
+        orders, _ = self.run_probe()
+        # ORD-1100 closed weeks ago, ORD-1150 is open with no card since days, ORD-1099 is a test row.
+        self.assertEqual(["ORD-1201", "ORD-1202", "ORD-1203"], sorted(o["id"] for o in orders))
+        o = next(x for x in orders if x["id"] == "ORD-1203")
+        self.assertEqual(("queued", "xo", "Message on dashboard"), (o["state"], o["station"], o["title"]))
+
+    def test_without_the_kanban_the_order_log_still_gives_every_order(self):
+        orders, _ = self.run_probe(KANBAN_DB=str(self.d / "missing.db"))
+        o = next(x for x in orders if x["id"] == "ORD-1201")
+        self.assertEqual("queued", o["state"])
+        self.assertEqual("Message on telegram", o["title"])
+        self.assertEqual("xo", o["station"])             # Number One (router) is Number One
+
+    def test_the_log_has_openings_closings_and_customs(self):
+        _, entries = self.run_probe()
+        kinds = [(e["kind"], e["text"]) for e in entries]
+        self.assertIn(("customs", "Customs: code to codex, accepted"), kinds)
+        self.assertIn(("done", "ORD-1202 done: log the meal"), kinds)
+        self.assertEqual(entries, sorted(entries, key=lambda e: e["at"], reverse=True))
+
+    def test_without_the_order_log_nothing_is_written(self):
+        self.assertIsNone(self.run_probe(ORDERS_CSV=str(self.d / "missing.csv")))
+        self.assertFalse((self.d / "live" / "orders.json").exists())
+
+    def test_the_database_is_read_from_a_copy_and_never_changed(self):
+        before = (self.d / "kanban.db").read_bytes()
+        self.run_probe()
+        self.assertEqual(before, (self.d / "kanban.db").read_bytes())
+
+    def test_a_change_to_a_card_shows_on_the_next_run(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            ship_probe.run_once(self.env, scratch, NOW)
+            con = sqlite3.connect(self.d / "kanban.db")
+            con.execute("update tasks set status = 'done', completed_at = ? where id = 't_aa'", (at("2026-11-05T19:30:00Z"),))
+            con.execute("update tasks set status = 'done' where id = 't_bb'")
+            con.commit()
+            con.close()
+            orders, _ = ship_probe.run_once(self.env, scratch, NOW)
+        self.assertEqual("done", next(x for x in orders if x["id"] == "ORD-1201")["state"])
+
+    def test_finds_the_card_table_whatever_it_is_called(self):
+        (self.d / "kanban.db").unlink()
+        kanban(self.d / "kanban.db", [("t_aa", "ORD-1201 Fix it", "", "blocked", "forge", at("2026-11-05T18:40:00Z"), None, None)], table="kanban_cards")
+        orders, _ = self.run_probe()
+        self.assertEqual("blocked", next(x for x in orders if x["id"] == "ORD-1201")["state"])
+
+
+class States(unittest.TestCase):
+    def test_words_map_to_the_boards_states(self):
+        s = ship_probe.order_state
+        self.assertEqual("running", s("running"))
+        self.assertEqual("running", s("in_progress"))
+        self.assertEqual("queued", s("ready"))
+        self.assertEqual("done", s("done"))
+        self.assertEqual("blocked", s("failed"))
+        self.assertEqual("review", s("in review"))
+        self.assertEqual("awaiting-captain", s("awaiting-captain"))
+        self.assertEqual("queued", s("open"))          # orders.csv
+        self.assertEqual("done", s("closed"))
+        self.assertEqual("running", s("", "running"))   # the card first, then the order log
+        self.assertEqual("queued", s(None, None))
+
+    def test_times_in_text_or_seconds(self):
+        self.assertEqual(datetime(2026, 11, 5, 18, 0, tzinfo=timezone.utc), ship_probe.parse_time("2026-11-05T18:00:00Z"))
+        self.assertEqual(datetime(2026, 11, 5, 18, 0, tzinfo=timezone.utc), ship_probe.parse_time(str(int(datetime(2026, 11, 5, 18, 0, tzinfo=timezone.utc).timestamp()))))
+        self.assertIsNone(ship_probe.parse_time("soon"))
+
+
+class NoModelNoNetwork(unittest.TestCase):
+    def test_the_probe_opens_no_connection(self):
+        text = (Path(__file__).parent / "ship_probe.py").read_text()
+        for word in ("urlopen", "socket", "http", "requests"):
+            self.assertNotIn(word, text.replace("https://", ""), word)
+
+
+if __name__ == "__main__":
+    unittest.main()

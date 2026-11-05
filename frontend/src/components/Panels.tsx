@@ -1,6 +1,6 @@
 // The side panels: rails, hails awaiting the Captain, orders in flight.
 import { useState } from 'react';
-import { SPEEDS_NOTE, railColor } from '../lib/lookups';
+import { byTier, railColor, SPEEDS_NOTE, tierText, tierVar } from '../lib/lookups';
 import { age, clockTime, dayAndTime } from '../lib/format';
 import { railsSource } from '../lib/data';
 import type { Drills, ShipView } from '../lib/ship';
@@ -81,7 +81,7 @@ export function SegMeter({ value, label }: { value: number; label: string }) {
 export function HailsPanel({ ship, picked, onOpen, help = "Approve and Deny open in H4, in the Captain's Quarters." }: {
   ship: ShipView; picked?: string; onOpen: (station: string, order?: string) => void; help?: string;
 }) {
-  const hails = ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort((a, b) => b.tier - a.tier);
+  const hails = ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort(byTier);
   return (
     <section className="panel panel-captain" aria-labelledby="hails-title">
       <div className="panel-head">
@@ -95,14 +95,14 @@ export function HailsPanel({ ship, picked, onOpen, help = "Approve and Deny open
           const st = ship.station(o.station);
           return (
             <div key={o.id} className="hail" role="button" tabIndex={0} aria-pressed={picked === o.id}
-              style={{ '--tc': `var(--tier-${o.tier})` } as React.CSSProperties}
+              style={{ '--tc': tierVar(o.tier) } as React.CSSProperties}
               onClick={() => onOpen(o.station, o.id)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(o.station, o.id); } }}>
               <div className="hail-title">{o.title}</div>
               <div className="hail-meta">
                 <span className="idtag">{o.id}</span>
                 <span className="railpill" style={{ '--c': railColor(st?.rail ?? 'mixed') } as React.CSSProperties}>{(st?.short ?? o.station).toUpperCase()}</span>
-                <span className="tierpill" style={{ '--c': `var(--tier-${o.tier})` } as React.CSSProperties}>TIER {o.tier}</span>
+                <span className="tierpill" style={{ '--c': tierVar(o.tier) } as React.CSSProperties}>{tierText(o.tier)}</span>
                 <span className="idtag">{age(ship.data.orders.asOf, o.updatedAt)}</span>
               </div>
               <div className="hail-actions">
@@ -187,7 +187,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
                 <div className="ocard-body" id={`body-${o.id}`}>
                   {o.body ? <CardBody text={o.body} /> : o.detail && <p className="cb-text">{o.detail}</p>}
                   <p className="cb-facts mono">
-                    {(st?.name ?? o.station).toUpperCase()} · TIER {o.tier}
+                    {(st?.name ?? o.station).toUpperCase()} · {tierText(o.tier)}
                     {o.parent && ` · PART OF ${o.parent}`}
                     {subs.length > 0 && ` · ${subs.length} SUB-ORDERS`}
                   </p>

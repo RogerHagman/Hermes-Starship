@@ -1,7 +1,7 @@
 // The panels around the Holodeck: its crew, the build queue (rooms waiting for their crew,
 // and the drafts spun up here), the register of every room on the ship, and the deck's orders.
 import { OWN_BOARD } from '../../lib/board';
-import { BOARDS, DEPTS, RANK, RAIL, STATUS, railColor } from '../../lib/lookups';
+import { BOARDS, DEPTS, RAIL, railColor, RANK, STATUS, tierText, tierVar } from '../../lib/lookups';
 import { clockTime, dayAndTime } from '../../lib/format';
 import type { Asset, Draft } from '../../lib/holodeck';
 import { SHIP_MAP } from '../../lib/shipmap';
@@ -159,10 +159,10 @@ export function DeckOrders({ ship, picked, onOpen }: { ship: ShipView; picked?: 
           return (
             <li key={o.id}>
               <button type="button" className="hq-order" aria-pressed={picked === o.station} onClick={() => onOpen(o.station)}
-                style={css({ '--c': `var(--tier-${o.tier})` })}>
+                style={css({ '--c': tierVar(o.tier) })}>
                 <span className="idtag">{o.id} · {sameDay(o.updatedAt) ? clockTime(o.updatedAt) : dayAndTime(o.updatedAt).toUpperCase()}</span>
                 <span className="hq-order-title">{o.title}</span>
-                <span className="hq-order-meta mono"><span className="dot" style={css({ '--c': railColor(st?.rail ?? 'mixed') })} />{st?.short} · TIER {o.tier} · {state}</span>
+                <span className="hq-order-meta mono"><span className="dot" style={css({ '--c': railColor(st?.rail ?? 'mixed') })} />{st?.short} · {tierText(o.tier)} · {state}</span>
               </button>
             </li>
           );

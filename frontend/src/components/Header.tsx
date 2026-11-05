@@ -65,7 +65,9 @@ export function Header({ ship, board, error }: { ship: ShipView | null; board: B
           <span className="lamp" /><span className="mono">CONDITION {level.toUpperCase()}</span>
         </div>
         <Clock />
-        <span className="pill pill-fixture mono" title="Synthetic data from fixtures/. Nothing on this screen calls a model.">FIXTURES · NO MODEL CALLS</span>
+        {ship && !ship.data.orders.synthetic
+          ? <span className="pill pill-fixture live mono" title="Orders and the log are read from Hermes by the ship probe on the NAS. Nothing on this screen calls a model.">LIVE ORDERS · NO MODEL CALLS</span>
+          : <span className="pill pill-fixture mono" title="Synthetic data from fixtures/. Nothing on this screen calls a model.">FIXTURES · NO MODEL CALLS</span>}
       </div>
     </div>
   );

@@ -92,6 +92,7 @@ html:has(.stage.fit){overflow:hidden}
 .clock-sub{font-size:10.5px;letter-spacing:.12em;color:var(--text-label);margin-top:4px}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:10.5px;letter-spacing:.08em;white-space:nowrap}
 .pill-fixture{border:1.5px dashed var(--rail-mixed);color:var(--rail-mixed);padding:6px 12px}
+.pill-fixture.live{border-style:solid;border-color:var(--good);color:var(--good)}
 
 .grid{
   display:grid;

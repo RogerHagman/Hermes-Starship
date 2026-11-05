@@ -30,7 +30,7 @@ export function CommBadge({ ship, target, onToast }: Props) {
   const presets: string[] = kind === 'ask' ? ['Status report', "What's in flight?", 'Anything for me?']
     : kind === 'order' ? (dest?.activeOrder ? [`Follow up ${dest.activeOrder}`, 'Run the next card'] : ['Run the next card'])
     : hails.map((h) => h.id);
-  const tier = kind === 'ask' ? 0 : kind === 'order' ? 1 : Math.max(0, ...hails.map((h) => h.tier));
+  const tier = kind === 'ask' ? 0 : kind === 'order' ? 1 : Math.max(0, ...hails.map((h) => h.tier ?? 0));
   const words = draft.trim() || preset;
 
   useEffect(() => { setPreset(null); }, [kind]);
