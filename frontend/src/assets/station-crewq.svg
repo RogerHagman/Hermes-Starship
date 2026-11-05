@@ -1,0 +1,43 @@
+<svg class="station-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 440" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs>
+<linearGradient id="cq-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070b14"/><stop offset="1" stop-color="#0c1526"/></linearGradient>
+<linearGradient id="cq-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#131c2e"/><stop offset="1" stop-color="#060a12"/></linearGradient>
+<linearGradient id="cq-space" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#050815"/><stop offset=".6" stop-color="#0a0f22"/><stop offset="1" stop-color="#10091a"/></linearGradient>
+<radialGradient id="cq-neb-plum"><stop offset="0" stop-color="#7a3d8c" stop-opacity=".42"/><stop offset=".6" stop-color="#4a2560" stop-opacity=".16"/><stop offset="1" stop-color="#2a1538" stop-opacity="0"/></radialGradient>
+<radialGradient id="cq-neb-teal"><stop offset="0" stop-color="#2f8a96" stop-opacity=".34"/><stop offset=".6" stop-color="#1f5a6a" stop-opacity=".12"/><stop offset="1" stop-color="#0f2a33" stop-opacity="0"/></radialGradient>
+<radialGradient id="cq-starglow"><stop offset="0" stop-color="#ffffff" stop-opacity=".9"/><stop offset=".25" stop-color="#dfe8ff" stop-opacity=".35"/><stop offset="1" stop-color="#dfe8ff" stop-opacity="0"/></radialGradient>
+<linearGradient id="cq-streak" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset="1" stop-color="#b9c8ff" stop-opacity="0"/></linearGradient>
+<radialGradient id="cq-screenlight"><stop offset="0" stop-color="#9fc4ff" stop-opacity=".14"/><stop offset="1" stop-color="#9fc4ff" stop-opacity="0"/></radialGradient>
+<linearGradient id="cq-console" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2840"/><stop offset="1" stop-color="#0c1322"/></linearGradient>
+<linearGradient id="cq-seat" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0c111c"/><stop offset=".35" stop-color="#25304a"/><stop offset="1" stop-color="#0a0e18"/></linearGradient>
+<linearGradient id="cq-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe0ff" stop-opacity=".65"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/></linearGradient>
+<linearGradient id="cq-metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4a4048"/><stop offset=".5" stop-color="#8a7a7e"/><stop offset="1" stop-color="#3a3238"/></linearGradient>
+<radialGradient id="cq-shadow"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<radialGradient id="cq-teal-glow"><stop offset="0" stop-color="#3fc1a5" stop-opacity=".35"/><stop offset="1" stop-color="#3fc1a5" stop-opacity="0"/></radialGradient>
+<radialGradient id="cq-vignette" cx=".5" cy=".42" r=".78"><stop offset=".62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></radialGradient>
+<radialGradient id="cq-trim-glow"><stop offset="0" stop-color="#8fa8e0" stop-opacity=".32"/><stop offset="1" stop-color="#8fa8e0" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="520" height="440" fill="url(#cq-wall)"/><path d="M0 60 Q260 30 520 60 L520 300 Q260 330 0 300 Z" fill="#0d1526"/>
+<rect x="20" y="69.6" width="64" height="230.2" rx="8" fill="#141f34" stroke="#2e4569" stroke-width="1.4"/>
+<line x1="52.0" y1="75.6" x2="52.0" y2="293.8" stroke="#2e4569"/>
+<rect x="40" y="53.6" width="24" height="7" rx="3.5" fill="#3fc1a5" opacity="0.8" style="opacity:var(--sa-glow,1)"/>
+<rect x="92" y="67.6" width="54" height="233.7" rx="8" fill="#141f34" stroke="#2e4569" stroke-width="1.4"/>
+<line x1="119.0" y1="73.6" x2="119.0" y2="295.3" stroke="#2e4569"/>
+<rect x="107" y="51.6" width="24" height="7" rx="3.5" fill="#f0a948" opacity="0.8" style="opacity:var(--sa-glow,1)"/>
+<rect x="172" y="66" width="48" height="236.5" rx="8" fill="#141f34" stroke="#2e4569" stroke-width="1.4"/>
+<line x1="196.0" y1="72" x2="196.0" y2="296.5" stroke="#2e4569"/>
+<rect x="184" y="50" width="24" height="7" rx="3.5" fill="#2a3550" opacity="0.5" style=""/>
+<rect x="260" y="64.8" width="46" height="238.6" rx="8" fill="#141f34" stroke="#2e4569" stroke-width="1.4"/>
+<line x1="283.0" y1="70.8" x2="283.0" y2="297.4" stroke="#2e4569"/>
+<rect x="271" y="48.8" width="24" height="7" rx="3.5" fill="#e889b6" opacity="0.8" style="opacity:var(--sa-glow,1)"/>
+<rect x="350" y="66" width="48" height="236.5" rx="8" fill="#141f34" stroke="#2e4569" stroke-width="1.4"/>
+<line x1="374.0" y1="72" x2="374.0" y2="296.5" stroke="#2e4569"/>
+<rect x="362" y="50" width="24" height="7" rx="3.5" fill="#2a3550" opacity="0.5" style=""/>
+<rect x="432" y="67.6" width="54" height="233.7" rx="8" fill="#141f34" stroke="#2e4569" stroke-width="1.4"/>
+<line x1="459.0" y1="73.6" x2="459.0" y2="295.3" stroke="#2e4569"/>
+<rect x="447" y="51.6" width="24" height="7" rx="3.5" fill="#8fa8e0" opacity="0.8" style="opacity:var(--sa-glow,1)"/>
+<path d="M0 300 Q260 330 520 300 L520 440 L0 440 Z" fill="url(#cq-floor)"/>
+<path d="M0 330 Q260 362 520 330" fill="none" stroke="#8fa8e0" stroke-opacity=".35" stroke-width="2" style="opacity:var(--sa-glow,1)"/>
+<path d="M0 44 Q260 16 520 44" fill="none" stroke="#8fa8e0" stroke-opacity=".3" stroke-width="3"/>
+<rect width="520" height="440" fill="url(#cq-vignette)" pointer-events="none"/>
+</svg>

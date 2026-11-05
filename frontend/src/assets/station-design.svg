@@ -1,0 +1,49 @@
+<svg class="station-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 440" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs>
+<linearGradient id="de-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070b14"/><stop offset="1" stop-color="#0c1526"/></linearGradient>
+<linearGradient id="de-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#131c2e"/><stop offset="1" stop-color="#060a12"/></linearGradient>
+<linearGradient id="de-space" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#050815"/><stop offset=".6" stop-color="#0a0f22"/><stop offset="1" stop-color="#10091a"/></linearGradient>
+<radialGradient id="de-neb-plum"><stop offset="0" stop-color="#7a3d8c" stop-opacity=".42"/><stop offset=".6" stop-color="#4a2560" stop-opacity=".16"/><stop offset="1" stop-color="#2a1538" stop-opacity="0"/></radialGradient>
+<radialGradient id="de-neb-teal"><stop offset="0" stop-color="#2f8a96" stop-opacity=".34"/><stop offset=".6" stop-color="#1f5a6a" stop-opacity=".12"/><stop offset="1" stop-color="#0f2a33" stop-opacity="0"/></radialGradient>
+<radialGradient id="de-starglow"><stop offset="0" stop-color="#ffffff" stop-opacity=".9"/><stop offset=".25" stop-color="#dfe8ff" stop-opacity=".35"/><stop offset="1" stop-color="#dfe8ff" stop-opacity="0"/></radialGradient>
+<linearGradient id="de-streak" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset="1" stop-color="#b9c8ff" stop-opacity="0"/></linearGradient>
+<radialGradient id="de-screenlight"><stop offset="0" stop-color="#9fc4ff" stop-opacity=".14"/><stop offset="1" stop-color="#9fc4ff" stop-opacity="0"/></radialGradient>
+<linearGradient id="de-console" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2840"/><stop offset="1" stop-color="#0c1322"/></linearGradient>
+<linearGradient id="de-seat" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0c111c"/><stop offset=".35" stop-color="#25304a"/><stop offset="1" stop-color="#0a0e18"/></linearGradient>
+<linearGradient id="de-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe0ff" stop-opacity=".65"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/></linearGradient>
+<linearGradient id="de-metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4a4048"/><stop offset=".5" stop-color="#8a7a7e"/><stop offset="1" stop-color="#3a3238"/></linearGradient>
+<radialGradient id="de-shadow"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<radialGradient id="de-teal-glow"><stop offset="0" stop-color="#3fc1a5" stop-opacity=".35"/><stop offset="1" stop-color="#3fc1a5" stop-opacity="0"/></radialGradient>
+<radialGradient id="de-vignette" cx=".5" cy=".42" r=".78"><stop offset=".62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></radialGradient>
+<radialGradient id="de-trim-glow"><stop offset="0" stop-color="#e889b6" stop-opacity=".32"/><stop offset="1" stop-color="#e889b6" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="520" height="440" fill="url(#de-wall)"/>
+<path d="M0 250 L520 250 L520 440 L0 440 Z" fill="url(#de-floor)"/>
+<ellipse cx="260" cy="258" rx="250" ry="26" fill="url(#de-screenlight)"/>
+<rect x="54" y="30" width="412" height="162" rx="16" fill="#0b1220" stroke="#2e4569" stroke-width="1.6"/><rect x="60" y="36" width="400" height="150" rx="12" fill="#0b1220"/>
+<rect x="80" y="56" width="40" height="40" rx="8" fill="#3fc1a5" opacity=".75" style="opacity:var(--sa-glow,1)"/>
+<rect x="80" y="104" width="34" height="4" rx="2" fill="#8aa0c4" opacity=".4"/>
+<rect x="132" y="56" width="40" height="40" rx="8" fill="#f0a948" opacity=".75" style="opacity:var(--sa-glow,1)"/>
+<rect x="132" y="104" width="34" height="4" rx="2" fill="#8aa0c4" opacity=".4"/>
+<rect x="184" y="56" width="40" height="40" rx="8" fill="#e889b6" opacity=".75" style="opacity:var(--sa-glow,1)"/>
+<rect x="184" y="104" width="34" height="4" rx="2" fill="#8aa0c4" opacity=".4"/>
+<rect x="236" y="56" width="40" height="40" rx="8" fill="#8fa8e0" opacity=".75" style="opacity:var(--sa-glow,1)"/>
+<rect x="236" y="104" width="34" height="4" rx="2" fill="#8aa0c4" opacity=".4"/>
+<rect x="288" y="56" width="40" height="40" rx="8" fill="#e8c37a" opacity=".75" style="opacity:var(--sa-glow,1)"/>
+<rect x="288" y="104" width="34" height="4" rx="2" fill="#8aa0c4" opacity=".4"/>
+<rect x="340" y="56" width="40" height="40" rx="8" fill="#e8645c" opacity=".75" style="opacity:var(--sa-glow,1)"/>
+<rect x="340" y="104" width="34" height="4" rx="2" fill="#8aa0c4" opacity=".4"/>
+<rect x="392" y="56" width="40" height="40" rx="8" fill="#5aa4ec" opacity=".75" style="opacity:var(--sa-glow,1)"/>
+<rect x="392" y="104" width="34" height="4" rx="2" fill="#8aa0c4" opacity=".4"/>
+<rect x="80" y="126" width="108" height="44" rx="8" fill="none" stroke="#e889b6" stroke-dasharray="4 4" opacity=".6"/>
+<rect x="200" y="126" width="108" height="44" rx="8" fill="none" stroke="#e889b6" stroke-dasharray="4 4" opacity=".6"/>
+<rect x="320" y="126" width="108" height="44" rx="8" fill="none" stroke="#e889b6" stroke-dasharray="4 4" opacity=".6"/>
+<path d="M80 360 L130 230 L390 230 L440 360 Z" fill="url(#de-board)" stroke="#2e4569" stroke-width="1.6"/>
+<path d="M146 244 L250 244 L259.2 290 L132.2 290 Z" fill="#101a2e" stroke="#e889b6" stroke-opacity=".6"/>
+<path d="M262 244 L374 244 L379.2 270 L254.2 270 Z" fill="#101a2e" stroke="#e889b6" stroke-opacity=".6"/>
+<path d="M262 278 L374 278 L382.4 320 L249.4 320 Z" fill="#101a2e" stroke="#e889b6" stroke-opacity=".6"/>
+<path d="M132 300 L250 300 L259.2 346 L118.2 346 Z" fill="#101a2e" stroke="#e889b6" stroke-opacity=".6"/>
+<rect x="146" y="252" width="40" height="5" rx="2.5" fill="#e8c37a" opacity=".7"/>
+<path d="M330 286 l40 -60" stroke="#c9b3e8" stroke-width="3" stroke-linecap="round"/>
+<rect width="520" height="440" fill="url(#de-vignette)" pointer-events="none"/>
+</svg>

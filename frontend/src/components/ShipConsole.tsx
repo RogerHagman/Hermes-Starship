@@ -61,9 +61,9 @@ export function ShipConsole({ ship, pick, onPick, onDept, onBack, onQuarters }: 
   if (!st) return <Watch ship={ship} onPick={onPick} />;
   if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />;
   const backLabel = fromDept ? '‹ Chain' : from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch';
-  // A Bridge station with a picture gets two pages, like the Captain's chair. Keyed by
-  // station, so picking another one starts again on page 1.
-  if (hasArt(st.id)) return <StationScene key={st.id} ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} />;
+  // A station with a picture gets three pages (picture, card, service log), like the Captain's
+  // chair. Keyed by station, so picking another one starts again on page 1.
+  if (hasArt(st.id)) return <StationScene key={st.id} ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} onQuarters={onQuarters} />;
   return (
     <section className="console" role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
       <StationDetail ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} />
@@ -138,14 +138,17 @@ export function OrderBox({ ship, st, orderId }: { ship: ShipView; st: Station; o
 }
 
 /**
- * The button to a station's own console, at the foot of its card. The Captain's opens the
- * Quarters (when `onQuarters` is given). Every other one waits until that station's board exists.
+ * The button to a station's own console, at the foot of its card. The Captain's and the
+ * Quarters station's open the Captain's Quarters board (when `onQuarters` is given). Every
+ * other one waits until that station's board exists.
  */
 export function ConsoleFoot({ st, onQuarters }: { st: Station; onQuarters?: () => void }) {
   return (
     <div className="con-foot">
       {st.id === 'captain'
         ? onQuarters && <button type="button" className="btn btn-gold" onClick={onQuarters}>To your Quarters</button>
+        : st.id === 'quarters' && onQuarters
+        ? <button type="button" className="btn btn-gold" onClick={onQuarters}>{st.short} console</button>
         : <>
             <button type="button" className="btn btn-ghost" disabled>{st.short} console</button>
             <span className="con-hint">Not built yet.</span>

@@ -369,6 +369,19 @@ html:has(.stage.fit){overflow:hidden}
 @keyframes saping{from{transform:scale(1);opacity:.8}to{transform:scale(2.2);opacity:0}}
 .station-art-wrap .sa-holo{animation:saholo 5s ease-in-out infinite alternate}
 @keyframes saholo{to{transform:translateY(-4px)}}
+/* the other decks' art (tools/make_deck_stations_svg.py). These animate stroke/fill opacity or
+   transform, never opacity, so the inline --sa-glow dimming still works. */
+.station-art-wrap .sa-hide{display:none}
+.station-art-wrap .sa-ping-soft{animation:sapingsoft 3.5s ease-in-out infinite}
+@keyframes sapingsoft{50%{stroke-opacity:.25}}
+.station-art-wrap .sa-beam{animation:sabeam 2.8s ease-in-out infinite}
+@keyframes sabeam{50%{fill-opacity:.45}}
+.station-art-wrap .sa-scan{animation:sascan 3.2s ease-in-out infinite alternate}
+@keyframes sascan{to{transform:translateY(200px)}}
+.station-art-wrap .sa-scan2{animation:sascan2 4s steps(4) infinite}
+@keyframes sascan2{to{transform:translateY(96px)}}
+.station-art-wrap .sa-needle{animation:saneedle 3s ease-in-out infinite alternate}
+@keyframes saneedle{from{transform:rotate(-6deg)}to{transform:rotate(5deg)}}
 /* a department's chain of command (ChainOfCommand.tsx), opened from a duty roster card */
 .chain{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
 .chain li{position:relative;padding-left:calc(var(--lvl) * 22px)}
@@ -418,7 +431,7 @@ html:has(.stage.fit){overflow:hidden}
   .frame{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"top" "rail" "main";padding:12px 16px}
   .elbow{display:none}
   .siderail{padding:0}
-  .brand,  .brand{flex-direction:row;justify-content:space-between;align-items:center;border-radius:28px 0 0 0;padding:12px 18px}
+  .brand{margin-right:0;flex-direction:row;justify-content:space-between;align-items:center;border-radius:28px 0 0 0;padding:12px 18px}
     .boards{flex-direction:row;flex-wrap:wrap}
   .board-btn{width:auto}
   .main{padding:16px 0}

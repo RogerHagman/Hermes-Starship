@@ -1,4 +1,4 @@
-// The Bridge station pictures and the console button every station card has.
+// The station pictures and the console button every station card has.
 import { describe, expect, it } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
 import ship from '../../../fixtures/ship.json';
@@ -18,13 +18,21 @@ const open = (id: string, drills = {}) => render(
   <ShipConsole ship={makeShipView(data, drills, new Set())} pick={{ station: id }} onPick={noop} onBack={noop} />).container;
 
 describe('station art', () => {
-  it('every Bridge station has a picture (the Captain has the chair)', () => {
-    const bridge = data.stations.stations.filter((s) => s.deck === 1 && s.id !== 'captain');
-    expect(bridge.filter((s) => !hasArt(s.id)).map((s) => s.id)).toEqual([]);
+  it("the Quarters station's console button opens the Captain's Quarters board", () => {
+    let went = 0;
+    const c = render(<ShipConsole ship={makeShipView(data, {}, new Set())} pick={{ station: 'quarters' }} onPick={noop} onBack={noop} onQuarters={() => went++} />).container;
+    fireEvent.click([...c.querySelectorAll('button')].find((b) => b.textContent === 'Quarters console')!);
+    expect(went).toBe(1);
   });
-  it('a Bridge card shows its picture, other decks do not', () => {
-    expect(open('helm').querySelector('.station-art-wrap svg')).not.toBeNull();
-    expect(open('doctor').querySelector('.station-art-wrap')).toBeNull();
+  it('every station on every deck has a picture (the Captain has the chair)', () => {
+    const all = data.stations.stations.filter((s) => s.id !== 'captain');
+    expect(all.filter((s) => !hasArt(s.id)).map((s) => s.id)).toEqual([]);
+    expect(hasArt('captain')).toBe(false);
+  });
+  it('a card on any deck shows its picture', () => {
+    for (const id of ['helm', 'lounge', 'computer', 'eng', 'diag']) {
+      expect(open(id).querySelector('.station-art-wrap svg'), id).not.toBeNull();
+    }
   });
   it('a Bridge station has two pages: the picture, then its full card', () => {
     const c = open('helm');
@@ -39,8 +47,14 @@ describe('station art', () => {
     expect(lit(open('helm'))).toBe('1');
     expect(lit(open('helm', { local: true }))).toBe('0.25');
   });
+  it('a station that is not built yet is drawn dimmed', () => {
+    const lit = (c: HTMLElement) => (c.querySelector('.station-art-wrap') as HTMLElement).style.getPropertyValue('--sa-glow');
+    expect(lit(open('doctor'))).toBe('0.45');
+    expect(lit(open('design'))).toBe('0.45');
+    expect(lit(open('sensors'))).toBe('1');
+  });
   it('every station card has a console button, disabled until its board exists', () => {
-    for (const s of data.stations.stations.filter((x) => x.id !== 'captain')) {
+    for (const s of data.stations.stations.filter((x) => x.id !== 'captain' && x.id !== 'quarters')) {
       const button = [...open(s.id).querySelectorAll('button')].find((b) => b.textContent === `${s.short} console`);
       expect(button, s.id).toBeDefined();
       expect(button!.disabled).toBe(true);
