@@ -11,6 +11,7 @@ import { LogPanel, RosterPanel } from './components/Roster';
 import { ShipPlan } from './components/ShipPlan';
 import { SideRail, type RailFilter } from './components/SideRail';
 import { CommBadge } from './components/CommBadge';
+import { useFit, useFullscreenKey } from './lib/fit';
 
 export function App() {
   const [data, setData] = useState<Fixtures | null>(null);
@@ -20,6 +21,8 @@ export function App() {
   const [open, setOpen] = useState<{ station: string; order?: string } | null>(null);
   const [target, setTarget] = useState<string | null>(null);   // who the comm badge speaks to
   const [toast, showToast] = useToast();
+  const fit = useFit();   // scale the 2560 x 1440 board to the window (see lib/fit.ts)
+  useFullscreenKey();
 
   useEffect(() => { loadFixtures().then(setData, (e: Error) => setError(e.message)); }, []);
 
@@ -41,6 +44,8 @@ export function App() {
 
   return (
     <>
+      <div className={'stage' + (fit.fit ? ' fit' : '')}
+        style={fit.fit ? { transform: `scale(${fit.scale})`, left: fit.left, top: fit.top } : undefined}>
       <Frame ship={ship} side={
         <SideRail registry={data?.ship.registry ?? 'HX-01'} filter={filter} onFilter={setFilter}
           drills={drills} onDrill={drill} onToast={showToast} />
@@ -62,6 +67,7 @@ export function App() {
           )}
         </main>
       </Frame>
+      </div>
       <div className={'toast' + (toast ? ' show' : '')} role="status" aria-live="polite">{toast}</div>
     </>
   );
