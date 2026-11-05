@@ -4,6 +4,11 @@ export const SHIP_MAP = {
   width: 2200,
   height: 1060,
   tileHeight: 64,
+  // Crew Quarters (deck 5) has 18 cabin doors in ship.svg, centred at x = 1180 + 48 * n, y = 562.
+  // An off-duty crew member's token walks to their own cabin. Order from DeckPlanV4.
+  cabins: { x: 1180, y: 562, step: 48 },
+  cabinOrder: ['xo', 'ops', 'helm', 'nav', 'computer', 'archives', 'science', 'sensors', 'carto', 'security',
+    'qm', 'away', 'eng', 'sys', 'diag', 'strategist', 'yeoman', 'holo'],
   places: {
     xo: { x: 1228, y: 58, w: 166 },
     captain: { x: 1407, y: 58, w: 166 },

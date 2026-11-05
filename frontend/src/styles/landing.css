@@ -171,6 +171,32 @@ html:has(.stage.fit){overflow:hidden}
 .tile.dim{opacity:.12;pointer-events:none}
 .tile.space-wide{background:transparent;backdrop-filter:none;border-color:transparent}
 .tile.space-wide:hover{border-color:var(--border-strong)}
+.tile .t2.rank{display:flex;align-items:center;gap:6px}
+.tile .t2.rank .pips i{width:.3cqw;height:.3cqw;min-width:4px;min-height:4px}
+/* Labels: Off. No text or card fill, so the rooms show clean. The cards stay clickable. */
+.ship-tiles.bare .tile{background:transparent;backdrop-filter:none;border-color:color-mix(in srgb, var(--c) 35%, transparent)}
+.ship-tiles.bare .tile.space-wide{border-color:transparent}
+.ship-tiles.bare .tile .t1,.ship-tiles.bare .tile .t2,.ship-tiles.bare .tile .ticon{visibility:hidden}
+.ship-tiles.bare .tile:hover,.ship-tiles.bare .tile[aria-pressed="true"]{background:rgba(143,168,224,.1)}
+.hero-tools{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.labels-ctl{display:flex;align-items:center;gap:6px}
+.labels-ctl .mono{font-size:11px;letter-spacing:.14em;color:var(--text-label);margin-right:4px}
+.labels-ctl .chip{min-height:28px;padding:0 12px}
+/* The crew (CrewTokens.tsx): a ring at every post, and a token that walks to its cabin when off duty. */
+.crew-layer{position:absolute;inset:0;pointer-events:none}
+.slot,.tok{position:absolute;width:1.818%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;box-sizing:border-box}
+.slot{border:1.5px dashed #4a6797}
+.slot.unbuilt{border-style:dotted;border-color:#34507a}
+.slot.quarters{border-color:rgba(232,195,122,.6)}
+.slot.dim{opacity:.12}
+.tok{border:2px solid var(--c);background:#0b1528;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;
+  transition:left 1.4s ease-in-out, top 1.4s ease-in-out, opacity .4s ease, box-shadow .4s ease, border-color .4s ease}
+.tok svg{width:58%;height:58%;fill:none;stroke:var(--c);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .4s ease}
+.tok:hover{filter:brightness(1.35)}
+.tok.off{--c:#7d8aa3;opacity:.85}
+.tok.acting{box-shadow:0 0 0 2px var(--captain)}
+.tok[aria-pressed="true"]{box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 45%, transparent),0 0 16px var(--c)}
+.tok.dim{opacity:.12;pointer-events:none}
 
 /* ---------- rails ---------- */
 .rails{display:flex;flex-direction:column;gap:10px}
@@ -441,7 +467,7 @@ html:has(.stage.fit){overflow:hidden}
   .topbar .topbar-stats{display:none}
 }
 @container board (max-width: 760px){
-  .ship-tiles .tile{display:none}
+  .ship-tiles .tile,.crew-layer,.labels-ctl{display:none}
   .hero-label::after{content:" · USE THE ROSTER BELOW"}
   .roster{grid-template-columns:minmax(0,1fr)}
   .rail{grid-template-columns:minmax(0,1fr)}
