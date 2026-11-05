@@ -44,10 +44,37 @@
               "customs",
               "review",
               "done",
-              "rail"
+              "rail",
+              "duty",
+              "briefing"
             ]
           },
           "text": {
+            "type": "string"
+          },
+          "dir": {
+            "description": "duty: out = the crew member went to quarters, in = back at the post",
+            "enum": [
+              "out",
+              "in"
+            ]
+          },
+          "attendees": {
+            "description": "briefing: the stations at the table",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "ends": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$",
+            "description": "briefing: when it ended"
+          },
+          "outcome": {
+            "description": "briefing: what the room agreed, from the minutes",
             "type": "string"
           }
         }

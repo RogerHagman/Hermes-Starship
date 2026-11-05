@@ -373,6 +373,19 @@ html:has(.stage.fit){overflow:hidden}
 .svc-row .statepill.awaiting-captain{color:var(--captain)}
 .svc-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .svc-log li{display:grid;grid-template-columns:86px minmax(0,1fr);gap:10px;align-items:baseline;line-height:1.35}
+/* Crew Quarters' duty log and the Briefing Room's meetings (PlaceLogs.tsx) */
+.place-log li{grid-template-columns:96px minmax(0,1fr)}
+.place-who{display:inline-flex;align-items:center;gap:5px;margin-right:8px;font-family:var(--font-display);font-weight:600;color:var(--text);white-space:nowrap}
+.place-who i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.place-dir{display:inline-block;min-width:62px;margin-right:8px;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--text-label)}
+.place-dir.out{color:#ffb08a}
+.meet-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.meet{padding:8px 10px;border-radius:7px;background:var(--surface-raised);display:flex;flex-direction:column;gap:5px}
+.meet-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.meet-head .svc-title{font-family:var(--font-display);font-weight:600}
+.meet-head .idtag{white-space:nowrap}
+.meet-who{display:flex;flex-wrap:wrap;gap:2px 0;font-size:13px}
+.meet-outcome{margin:0;color:var(--text-label);line-height:1.35}
 .con-foot{flex-shrink:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .con-foot .btn{min-height:30px;font-size:13px}
 .con-foot .relieve{order:2;margin-left:auto;color:var(--text)}

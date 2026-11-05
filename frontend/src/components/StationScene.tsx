@@ -2,6 +2,8 @@
 //   1. The station: its picture, status, what it is working on and its console button.
 //   2. Station card: the full card (StationDetail).
 //   3. Service log: the orders it has handled and its lines in the ship's log, newest first.
+//      Crew Quarters and the Briefing Room have their own page 3 instead (PlaceLogs.tsx):
+//      the duty log of check-ins and check-outs, and the meetings with who attended.
 // Picking an order on page 3 shows it on page 1.
 import { useState } from 'react';
 import { dayAndTime } from '../lib/format';
@@ -9,24 +11,29 @@ import { SHIP_MAP } from '../lib/shipmap';
 import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import { Pager } from './Pager';
+import { DutyLog, MeetingLog } from './PlaceLogs';
 import { ConHead, ConsoleFoot, OrderBox, StationDetail, StationPills, stationColour, stationSub, type Relief } from './ShipConsole';
 import { StationArt } from './StationArt';
 
 const ICONS = SHIP_MAP.icons as Record<string, string>;
-const PAGES = ['The station', 'Station card', 'Service log'];
+/** The third page's name: the shared places keep a log of their own. */
+const THIRD: Record<string, string> = { crewq: 'Duty log', lounge: 'Meetings' };
 
 export function StationScene({ ship, st, orderId, back, onBack, onQuarters, relief }: {
   ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; onQuarters?: () => void; relief?: Relief;
 }) {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState(orderId);
-  const pager = <Pager pages={PAGES} page={page} onPage={setPage} />;
+  const pages = ['The station', 'Station card', THIRD[st.id] ?? 'Service log'];
+  const pager = <Pager pages={pages} page={page} onPage={setPage} />;
   const head = <ConHead icon={ICONS[st.id]} title={st.name} sub={stationSub(st)} back={back} onBack={onBack}>{pager}</ConHead>;
   const showOrder = (id: string) => { setOrder(id); setPage(0); };
   return (
     <section className="console scene" role="region" aria-label={`${st.name} console`} style={{ '--c': stationColour(st) } as React.CSSProperties}>
       {page === 1 && <StationDetail ship={ship} st={st} orderId={order} back={back} onBack={onBack} actions={pager} onQuarters={onQuarters} relief={relief} />}
-      {page === 2 && <>{head}<ServiceLog ship={ship} st={st} picked={order} onOrder={showOrder} /></>}
+      {page === 2 && <>{head}{st.id === 'crewq' ? <DutyLog ship={ship} />
+        : st.id === 'lounge' ? <MeetingLog ship={ship} />
+        : <ServiceLog ship={ship} st={st} picked={order} onOrder={showOrder} />}</>}
       {page === 0 && <>
         {head}
         <div className="cchair-body">
@@ -48,7 +55,8 @@ export function StationScene({ ship, st, orderId, back, onBack, onQuarters, reli
 /** Page 3: the station's orders (any state) and its ship's log lines, newest first. */
 function ServiceLog({ ship, st, picked, onOrder }: { ship: ShipView; st: Station; picked?: string; onOrder: (id: string) => void }) {
   const orders = ship.data.orders.orders.filter((o) => o.station === st.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  const lines = ship.data.shiplog.entries.filter((e) => e.station === st.id);
+  // Its own lines, plus the briefings it sat in.
+  const lines = ship.data.shiplog.entries.filter((e) => e.station === st.id || e.attendees?.includes(st.id));
   return (
     <div className="con-body svc">
       <span className="cchair-count mono">ORDERS · {orders.length || 'NONE YET'}</span>
