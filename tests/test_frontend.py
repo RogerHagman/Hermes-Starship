@@ -1,6 +1,6 @@
 """The Bridge keeps the one rule: moving around never calls a model.
 
-The source may only load its own files and the fixtures. No external hosts,
+The source may only load its own files, the fixtures and live/ (the rails probe's file). No external hosts,
 no model endpoints, no write requests. The built page must be committed and current.
 """
 import re
@@ -26,11 +26,11 @@ class OneRule(unittest.TestCase):
                 with self.subTest(file=path.name, url=url):
                     self.assertIn(url, allowed)
 
-    def test_fetches_only_fixtures(self):
+    def test_fetches_only_fixtures_and_live(self):
         for path in CODE:
             for target in re.findall(r"fetch\(\s*([^),]+)", path.read_text(encoding="utf-8")):
                 with self.subTest(file=path.name, target=target):
-                    self.assertRegex(target.strip(), r"^['\"`]fixtures/")
+                    self.assertRegex(target.strip(), r"^['\"`](fixtures|live)/")
 
     def test_no_writes_or_model_calls(self):
         banned = [r"method\s*:\s*['\"](POST|PUT|PATCH|DELETE)", r"XMLHttpRequest", r"WebSocket",

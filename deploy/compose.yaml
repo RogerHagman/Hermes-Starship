@@ -1,5 +1,7 @@
-# Hermes Starship · the bridge landing page (Milestone 0, fixtures only).
-# About 10 MB of RAM. Serves static files; no model, no backend, no writes.
+# Hermes Starship · the Bridge landing page, plus the rails probe that keeps live/rails.json fresh.
+# nginx serves static files (about 10 MB of RAM). The probe is read-only towards Hermes and
+# writes only deploy/live/. No model runs: its one Ollama call is GET /api/ps.
+# Settings for this NAS go in deploy/.env (git ignores it), see deploy/env.example.
 services:
   starship:
     image: nginx:1.27-alpine
@@ -16,5 +18,29 @@ services:
     volumes:
       - ../frontend/dist:/usr/share/nginx/html:ro
       - ../fixtures:/srv/fixtures:ro
+      - ./live:/srv/live:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./starship.htpasswd:/etc/nginx/starship.htpasswd:ro
+
+  rails-probe:
+    image: python:3.12-alpine
+    container_name: hermes-starship-rails
+    restart: unless-stopped
+    mem_limit: 32m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      OLLAMA_URL: ${OLLAMA_URL:?set OLLAMA_URL in deploy/.env}
+      VRAM_GB: ${VRAM_GB:-24}
+      CODEX_SESSIONS: /data/codex-sessions
+      BURN_FILE: /data/burn.json
+      OUT_DIR: /out
+      INTERVAL: "60"
+    volumes:
+      # Hermes keeps its data in /DATA/AppData/hermes (/opt/data inside Hermes). Read-only.
+      - ${CODEX_SESSIONS_HOST:-/DATA/AppData/hermes/home/.codex/sessions}:/data/codex-sessions:ro
+      - ${BURN_FILE_HOST:-/DATA/AppData/hermes/handoff/burn.json}:/data/burn.json:ro
+      - ./live:/out
+      - ../probe/rails_probe.py:/app/rails_probe.py:ro
+    command: python -u /app/rails_probe.py

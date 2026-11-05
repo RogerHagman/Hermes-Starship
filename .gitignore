@@ -4,3 +4,5 @@ node_modules/
 frontend/dist-single/
 frontend/tools/.*.tmp.json
 frontend/dist-board/
+deploy/live/
+deploy/.env

@@ -183,6 +183,7 @@ html:has(.stage.fit){overflow:hidden}
 .segbar i.on{background:var(--c);box-shadow:0 0 6px color-mix(in srgb, var(--c) 45%, transparent)}
 .segbar i.on.hot{background:var(--tier-3);box-shadow:0 0 6px color-mix(in srgb, var(--tier-3) 55%, transparent)}
 .rail.out .segbar i.on{opacity:.55}
+.meter-none{margin:0;font-size:12.5px;color:var(--text-muted)}
 .rail-burn{margin-top:6px}
 .meter-val{text-align:right;font-family:var(--font-display);font-weight:600}
 .meter-reset{grid-column:2 / 4;margin-top:0;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:.04em}
