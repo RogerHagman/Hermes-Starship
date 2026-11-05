@@ -10,6 +10,7 @@ import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import { CaptainsChair } from './CaptainsChair';
 import { Icon } from './Icon';
+import { StationArt, hasArt } from './StationArt';
 
 interface Props {
   ship: ShipView;
@@ -42,9 +43,11 @@ export function ShipConsole({ ship, pick, onPick, onBack, onQuarters }: Props) {
   const st = pick ? ship.station(pick.station) : undefined;
   if (!st) return <Watch ship={ship} onPick={onPick} />;
   if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />;
+  const art = hasArt(st.id);
   return (
-    <section className="console" role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
-      <StationDetail ship={ship} st={st} orderId={pick?.order} back={from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch'} onBack={back} />
+    <section className={'console' + (art ? ' scene' : '')} role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
+      <StationDetail ship={ship} st={st} orderId={pick?.order} back={from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch'} onBack={back}
+        art={art && <StationArt ship={ship} st={st} />} />
     </section>
   );
 }
@@ -70,21 +73,22 @@ export function ConHead({ icon, title, sub, back, onBack, children }: {
   );
 }
 
-/** One station: who it is, its order, its duty. `actions` adds buttons to the title row. */
-export function StationDetail({ ship, st, orderId, back, onBack, actions }: {
+/**
+ * One station: who it is, its order, its duty. `actions` adds buttons to the title row, `art`
+ * puts a picture beside the card (Bridge stations), and `onQuarters` makes the Captain's
+ * console button open the Quarters. Every other station's console button waits for its board.
+ */
+export function StationDetail({ ship, st, orderId, back, onBack, actions, art, onQuarters }: {
   ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; actions?: ReactNode;
+  art?: ReactNode; onQuarters?: () => void;
 }) {
   const off = ship.off(st);
   const acting = ship.actingFor(st.id);
   const dept = DEPTS.find((d) => d.id === st.dept);
   const oid = orderId ?? st.activeOrder;
   const o = oid ? ship.data.orders.orders.find((x) => x.id === oid) : undefined;
-  return (
+  const card = (
     <>
-      <ConHead icon={ICONS[st.id]} title={st.name} back={back} onBack={onBack}
-        sub={`DECK ${st.deck} · ${DECKS[st.deck - 1].toUpperCase()}${dept ? ` · ${dept.name.toUpperCase()}` : ''}`}>
-        {actions}
-      </ConHead>
       <div className="con-pills">
         <span className="railpill" style={css({ '--c': railColor(st.rail) })}>{RAIL[st.rail].label}</span>
         <span className="railpill" style={css({ '--c': 'var(--text-label)', borderStyle: STATUS[st.status].line })}>{STATUS[st.status].label}</span>
@@ -118,6 +122,23 @@ export function StationDetail({ ship, st, orderId, back, onBack, actions }: {
           {st.answersTo && <><dt>ANSWERS TO</dt><dd>{st.answersTo}</dd></>}
         </dl>
       </div>
+      <div className="con-foot">
+        {st.id === 'captain'
+          ? onQuarters && <button type="button" className="btn btn-gold" onClick={onQuarters}>To your Quarters</button>
+          : <>
+              <button type="button" className="btn btn-ghost" disabled>{st.short} console</button>
+              <span className="con-hint">Not built yet.</span>
+            </>}
+      </div>
+    </>
+  );
+  return (
+    <>
+      <ConHead icon={ICONS[st.id]} title={st.name} back={back} onBack={onBack}
+        sub={`DECK ${st.deck} · ${DECKS[st.deck - 1].toUpperCase()}${dept ? ` · ${dept.name.toUpperCase()}` : ''}`}>
+        {actions}
+      </ConHead>
+      {art ? <div className="cchair-body">{art}<div className="station-side">{card}</div></div> : card}
     </>
   );
 }

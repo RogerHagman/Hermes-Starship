@@ -324,6 +324,32 @@ html:has(.stage.fit){overflow:hidden}
 @keyframes bcstreak{from{transform:translateX(520px)}to{transform:translateX(-100px)}}
 .cchair-art .bc-armlight{animation:bcarm 3.2s ease-in-out infinite}
 @keyframes bcarm{0%,100%{opacity:1}50%{opacity:.55}}
+/* a station card with its picture (StationArt.tsx): the picture left, the card right */
+.station-side{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+.station-side .con-facts{grid-template-columns:minmax(0,1fr);gap:0}
+.station-side .con-facts dd{margin-bottom:6px}
+.con-foot{flex-shrink:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.con-foot .btn{min-height:30px;font-size:13px}
+.station-art-wrap .sa-tw{animation:bctw 4.5s ease-in-out infinite}
+.station-art-wrap .sa-streaks{transition:opacity 1.2s ease}
+.station-art-wrap .sa-streak{animation-name:bcstreak;animation-timing-function:linear;animation-iteration-count:infinite}
+.station-art-wrap .sa-flow{animation:saflow 1.6s linear infinite}
+@keyframes saflow{to{stroke-dashoffset:-24}}
+.station-art-wrap .sa-route{animation:saroute 2.6s linear infinite}
+@keyframes saroute{from{stroke-dashoffset:4}to{stroke-dashoffset:-92}}
+.station-art-wrap .sa-trace{stroke-dasharray:72 28;animation:satrace 3s linear infinite}
+@keyframes satrace{to{stroke-dashoffset:-100}}
+.station-art-wrap .sa-bar{animation:sabar 3.6s ease-in-out infinite alternate}
+@keyframes sabar{from{transform:scaleY(1)}to{transform:scaleY(.88)}}
+.station-art-wrap .sa-blink{animation:sablink 1.4s ease-in-out infinite}
+@keyframes sablink{50%{opacity:.15}}
+.station-art-wrap .sa-key,.station-art-wrap .sa-onair{animation:bcarm 2.6s ease-in-out infinite}
+.station-art-wrap .sa-spin{animation:saspin 24s linear infinite}
+@keyframes saspin{to{transform:rotate(360deg)}}
+.station-art-wrap .sa-ping{animation:saping 2.6s ease-out infinite}
+@keyframes saping{from{transform:scale(1);opacity:.8}to{transform:scale(2.2);opacity:0}}
+.station-art-wrap .sa-holo{animation:saholo 5s ease-in-out infinite alternate}
+@keyframes saholo{to{transform:translateY(-4px)}}
 .hail[aria-pressed="true"]{border-color:var(--captain);background:var(--surface-selected)}
 .member[aria-pressed="true"]{background:var(--surface-selected);box-shadow:0 0 0 1.5px var(--focus)}
 @container board (max-width: 1950px){
@@ -331,7 +357,7 @@ html:has(.stage.fit){overflow:hidden}
   .cchair-art{min-height:230px}
 }
 @container board (max-width: 760px){
-  .console.cchair{max-height:none}
+  .console.cchair,.console.scene{max-height:none}
   .cchair-body{grid-template-columns:minmax(0,1fr)}
   .cchair-art{min-height:200px}
 }

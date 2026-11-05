@@ -8,6 +8,7 @@ import art from '../assets/bridge-chair.svg?raw';
 import { SHIP_MAP } from '../lib/shipmap';
 import type { ShipView } from '../lib/ship';
 import { ConHead, StationDetail } from './ShipConsole';
+import { burning } from './StationArt';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const ICONS = SHIP_MAP.icons as Record<string, string>;
@@ -23,14 +24,14 @@ export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
   const [page, setPage] = useState(0);
   const captain = ship.station('captain');
   const hails = ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort((a, b) => b.tier - a.tier);
-  const burning = ship.data.rails.rails.some((r) => r.burn?.active && ship.rail(r.id) !== 'out');
+  const burn = burning(ship);
   // Same lights as the chair in the Quarters: a rail that is out dims its armrest light,
   // and warp streaks cross the viewscreen while the burn is on.
   const look = css({
     '--q-local': ship.rail('local') === 'out' ? 0.12 : 1,
     '--q-codex': ship.rail('codex') === 'out' ? 0.12 : 1,
     '--q-claude': ship.rail('claude') === 'out' ? 0.12 : 1,
-    '--bc-burn': burning ? 1 : 0,
+    '--bc-burn': burn ? 1 : 0,
   });
 
   // Two pages: the chair, then the station card. Small dots, the current one lit; the name
@@ -47,7 +48,7 @@ export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
   if (page === 1 && captain) {
     return (
       <section className="console cchair" role="region" aria-label="The Captain's station card" style={css({ '--c': 'var(--captain)' })}>
-        <StationDetail ship={ship} st={captain} back="‹ Watch" onBack={onBack} actions={pager} />
+        <StationDetail ship={ship} st={captain} back="‹ Watch" onBack={onBack} actions={pager} onQuarters={onQuarters} />
       </section>
     );
   }
@@ -55,7 +56,7 @@ export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
   return (
     <section className="console cchair" role="region" aria-label="The Captain's chair" style={css({ '--c': 'var(--captain)' })}>
       <ConHead icon={ICONS.captain} title="The Captain's chair" back="‹ Watch" onBack={onBack}
-        sub={`BRIDGE · YOU HAVE THE CONN${burning ? ' · BURN ON' : ''}`}>
+        sub={`BRIDGE · YOU HAVE THE CONN${burn ? ' · BURN ON' : ''}`}>
         {pager}
       </ConHead>
       <div className="cchair-body">
