@@ -5,7 +5,7 @@ import sys
 import tempfile
 import time
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -111,6 +111,129 @@ class Burn(unittest.TestCase):
 
     def test_missing_file_is_shut(self):
         self.assertEqual({"active": False}, rails_probe.claude_burn("/nonexistent/burn.json", NOW))
+
+
+class Claude(unittest.TestCase):
+    TOKEN = "sk-test-token-never-logged"
+
+    def signin(self, d, expires_ms=None):
+        path = Path(d, ".credentials.json")
+        oauth = {"accessToken": self.TOKEN, "refreshToken": "r", "expiresAt": expires_ms or 1893456000000}
+        path.write_text(json.dumps({"claudeAiOauth": oauth}))
+        return path
+
+    def answer(self, payload):
+        class Answer:
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def read(self, *a): return json.dumps(payload).encode()
+        return Answer()
+
+    USAGE = {"five_hour": {"utilization": 37.6, "resets_at": "2026-11-05T03:00:00+00:00"},
+             "seven_day": {"utilization": 81.2, "resets_at": "2026-11-06T09:00:00.512+00:00"}}
+
+    def test_reads_both_windows_and_their_resets(self):
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.ClaudeGauge(self.signin(d))
+            with patch.object(rails_probe, "urlopen", return_value=self.answer(self.USAGE)) as call:
+                rail = rails_probe.claude_rail(gauge, "/nonexistent", NOW)
+        self.assertEqual([38, 81], [m["percent"] for m in rail["meters"]])
+        self.assertEqual(["2026-11-05T03:00:00Z", "2026-11-06T09:00:00Z"], [m["resetsAt"] for m in rail["meters"]])
+        request = call.call_args[0][0]
+        self.assertEqual(("GET", rails_probe.USAGE_URL), (request.get_method(), request.full_url))
+        self.assertEqual("up", rail["state"])
+
+    def test_asks_at_most_every_five_minutes(self):
+        clock = [1000.0]
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.ClaudeGauge(self.signin(d))
+            with patch.object(rails_probe, "urlopen", return_value=self.answer(self.USAGE)) as call:
+                for step in (0, 60, 299, 301):
+                    clock[0] = 1000.0 + step
+                    gauge.read(NOW, clock=lambda: clock[0])
+        self.assertEqual(2, call.call_count)
+
+    def test_a_full_window_is_out_and_a_passed_reset_shows_zero(self):
+        usage = {"five_hour": {"utilization": 100, "resets_at": "2026-11-05T03:00:00Z"},
+                 "seven_day": {"utilization": 90, "resets_at": "2026-11-04T09:00:00Z"}}
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.ClaudeGauge(self.signin(d))
+            with patch.object(rails_probe, "urlopen", return_value=self.answer(usage)):
+                rail = rails_probe.claude_rail(gauge, "/nonexistent", NOW)
+        self.assertEqual([100, 0], [m["percent"] for m in rail["meters"]])
+        self.assertEqual("out", rail["state"])
+
+    def test_an_expired_signin_is_not_used(self):
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.ClaudeGauge(self.signin(d, expires_ms=1000))
+            with patch.object(rails_probe, "urlopen") as call:
+                rail = rails_probe.claude_rail(gauge, "/nonexistent", NOW)
+        call.assert_not_called()
+        self.assertEqual([], rail["meters"])
+        self.assertIn("expired", rail["note"])
+
+    def test_a_refused_ask_logs_the_status_but_never_the_token(self):
+        from urllib.error import HTTPError
+        refused = HTTPError(rails_probe.USAGE_URL, 401, "Unauthorized", {}, None)
+        with tempfile.TemporaryDirectory() as d, patch("sys.stderr") as err:
+            gauge = rails_probe.ClaudeGauge(self.signin(d))
+            with patch.object(rails_probe, "urlopen", side_effect=refused):
+                rail = rails_probe.claude_rail(gauge, "/nonexistent", NOW)
+        logged = "".join(c.args[0] for c in err.write.call_args_list)
+        self.assertIn("401", logged)
+        self.assertNotIn(self.TOKEN, logged)
+        self.assertNotIn(self.TOKEN, json.dumps(rail))
+        self.assertIn("Not measured right now", rail["note"])
+
+    def test_too_many_asks_waits_longer(self):
+        from urllib.error import HTTPError
+        clock = [0.0]
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.ClaudeGauge(self.signin(d))
+            with patch.object(rails_probe, "urlopen", side_effect=HTTPError(rails_probe.USAGE_URL, 429, "Too Many", {}, None)) as call:
+                for step in (0, 300, 600, 900):
+                    clock[0] = step
+                    gauge.read(NOW, clock=lambda: clock[0])
+        self.assertEqual(2, call.call_count)   # at 0, then not again until 900
+
+    def test_an_unknown_answer_shows_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.ClaudeGauge(self.signin(d))
+            with patch.object(rails_probe, "urlopen", return_value=self.answer({"something": "else"})):
+                rail = rails_probe.claude_rail(gauge, "/nonexistent", NOW)
+        self.assertEqual([], rail["meters"])
+
+    def test_the_last_answer_is_kept_for_a_while_then_dropped(self):
+        clock = [0.0]
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.ClaudeGauge(self.signin(d))
+            with patch.object(rails_probe, "urlopen", return_value=self.answer(self.USAGE)):
+                gauge.read(NOW, clock=lambda: clock[0])
+            with patch.object(rails_probe, "urlopen", side_effect=OSError("down")):
+                clock[0] = 600
+                kept, _ = gauge.read(NOW + timedelta(minutes=10), clock=lambda: clock[0])
+                clock[0] = 1200
+                dropped, why = gauge.read(NOW + timedelta(minutes=20), clock=lambda: clock[0])
+        self.assertEqual(2, len(kept))
+        self.assertEqual([], dropped)
+        self.assertIn("did not answer", why)
+
+    def test_the_file_with_claude_meters_matches_the_schema(self):
+        import jsonschema
+        schema = json.loads((ROOT / "api/schema/rails.schema.json").read_text())
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.ClaudeGauge(self.signin(d))
+            with patch.object(rails_probe, "urlopen", return_value=self.answer(self.USAGE)):
+                reading = rails_probe.build_reading("http://localhost:9", 24, d, "/nonexistent", NOW, claude=gauge)
+        jsonschema.validate(reading, schema)
+        self.assertEqual(2, len(reading["rails"][2]["meters"]))
+
+    def test_the_signin_file_is_never_written(self):
+        source = Path(rails_probe.__file__).read_text(encoding="utf-8")
+        start = source.index("# ---------- Claude: the account's usage windows")
+        claude_part = source[start:source.index("# ---------- Claude: the burn window")]
+        for writes in ('"w"', "'w'", "write_text", ".write(", "refresh"):
+            self.assertNotIn(writes, claude_part.replace("refreshed", ""))
 
 
 class TheFile(unittest.TestCase):
