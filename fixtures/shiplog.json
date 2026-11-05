@@ -10,11 +10,26 @@
     {"at": "2026-11-04T18:40:00Z", "station": "carto", "kind": "review", "text": "ORD-9010 draft sent to Security for visual QA"},
     {"at": "2026-11-04T17:00:00Z", "station": "ops", "kind": "done", "text": "ORD-9009 nightly sweep done, all hosts green"},
     {"at": "2026-11-04T16:00:00Z", "station": "yeoman", "kind": "done", "text": "ORD-9008 reminder fired by code"},
+    {"at": "2026-11-04T15:00:00Z", "station": "sensors", "kind": "duty", "dir": "in", "text": "Back at the post: the Claude window reset"},
+    {"at": "2026-11-04T15:00:00Z", "station": "carto", "kind": "duty", "dir": "in", "text": "Back at the post: the Claude window reset"},
+    {"at": "2026-11-04T13:05:00Z", "station": "sensors", "kind": "duty", "dir": "out", "text": "To quarters: the Claude window ran out"},
+    {"at": "2026-11-04T13:05:00Z", "station": "carto", "kind": "duty", "dir": "out", "text": "To quarters: the Claude window ran out"},
     {"at": "2026-11-04T12:02:00Z", "station": "screen", "kind": "done", "text": "ORD-9007 on screen: the job tracker, sent to Telegram, then off screen"},
     {"at": "2026-11-04T11:20:00Z", "station": "helm", "kind": "done", "text": "ORD-9003 three ads shortlisted, the best scores 78%"},
+    {"at": "2026-11-04T10:00:00Z", "station": "lounge", "kind": "briefing", "ends": "2026-11-04T10:25:00Z", "attendees": ["xo", "eng", "archives", "security"], "text": "Briefing: the library converter keeps failing", "outcome": "Engineering files the cards, and book files stay local. Minuted."},
+    {"at": "2026-11-04T08:00:00Z", "station": "eng", "kind": "duty", "dir": "in", "text": "Back at the post: the Codex window reset"},
+    {"at": "2026-11-04T08:00:00Z", "station": "sys", "kind": "duty", "dir": "in", "text": "Back at the post: the Codex window reset"},
+    {"at": "2026-11-04T08:00:00Z", "station": "diag", "kind": "duty", "dir": "in", "text": "Back at the post: the Codex window reset"},
     {"at": "2026-11-04T07:40:00Z", "station": "xo", "kind": "order", "text": "Seven morning asks routed to five stations"},
+    {"at": "2026-11-04T07:30:00Z", "station": "helm", "kind": "duty", "dir": "in", "text": "Back at the post: recalled by the Captain"},
+    {"at": "2026-11-04T06:40:00Z", "station": "eng", "kind": "duty", "dir": "out", "text": "To quarters: the Codex window ran out"},
+    {"at": "2026-11-04T06:40:00Z", "station": "sys", "kind": "duty", "dir": "out", "text": "To quarters: the Codex window ran out"},
+    {"at": "2026-11-04T06:40:00Z", "station": "diag", "kind": "duty", "dir": "out", "text": "To quarters: the Codex window ran out"},
     {"at": "2026-11-04T06:15:00Z", "station": "nav", "kind": "done", "text": "ORD-9004 commute options for Thursday sent to Helm"},
+    {"at": "2026-11-03T22:15:00Z", "station": "helm", "kind": "duty", "dir": "out", "text": "To quarters: relieved by the Captain"},
+    {"at": "2026-11-03T16:00:00Z", "station": "lounge", "kind": "briefing", "ends": "2026-11-03T16:40:00Z", "attendees": ["xo", "science", "sensors", "eng", "computer"], "text": "Briefing: which local model routes next", "outcome": "The 32B routes, and qwen stays for Swedish. One dissent from Sensors, minuted."},
     {"at": "2026-11-03T09:05:00Z", "station": "xo", "kind": "done", "text": "ORD-9002 weekly reset done, burn window set for Wednesday"},
-    {"at": "2026-11-03T03:10:00Z", "station": "ops", "kind": "rail", "text": "ORD-9006 backup disk at 86%, flagged for the Captain"}
+    {"at": "2026-11-03T03:10:00Z", "station": "ops", "kind": "rail", "text": "ORD-9006 backup disk at 86%, flagged for the Captain"},
+    {"at": "2026-11-02T09:30:00Z", "station": "lounge", "kind": "briefing", "ends": "2026-11-02T09:45:00Z", "attendees": ["xo", "ops", "eng", "sensors"], "text": "Briefing: plan for the weekly burn", "outcome": "Burn from Wednesday 10:00 to Thursday 10:00, Engineering first."}
   ]
 }

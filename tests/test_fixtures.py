@@ -67,6 +67,21 @@ class FixturesAgree(unittest.TestCase):
         for entry in load(FIX / "shiplog.json")["entries"]:
             self.assertIn(entry["station"], self.stations)
 
+    def test_duty_and_briefing_lines(self):
+        # Duty lines say which way the crew member went; a briefing names who sat at the table.
+        for entry in load(FIX / "shiplog.json")["entries"]:
+            with self.subTest(entry=entry["at"] + " " + entry["station"]):
+                if entry["kind"] == "duty":
+                    self.assertIn(entry.get("dir"), ("out", "in"))
+                    self.assertEqual(self.stations[entry["station"]]["kind"], "station")
+                if entry["kind"] == "briefing":
+                    self.assertEqual(entry["station"], "lounge")
+                    for sid in entry["attendees"]:
+                        self.assertIn(sid, self.stations)
+                    self.assertGreater(entry["ends"], entry["at"])
+                else:
+                    self.assertNotIn("attendees", entry)
+
     def test_every_department_has_its_head(self):
         heads = {s["dept"] for s in self.stations.values() if s["head"]}
         depts = {s["dept"] for s in self.stations.values() if s["dept"]}

@@ -118,8 +118,26 @@ export interface ShipLogFile {
   entries: {
     at: string;
     station: string;
-    kind: "order" | "split" | "hail" | "customs" | "review" | "done" | "rail";
+    kind: "order" | "split" | "hail" | "customs" | "review" | "done" | "rail" | "duty" | "briefing";
     text: string;
+    /**
+     * duty: out = the crew member went to quarters, in = back at the post
+     */
+    dir?: "out" | "in";
+    /**
+     * briefing: the stations at the table
+     *
+     * @minItems 1
+     */
+    attendees?: [string, ...string[]];
+    /**
+     * briefing: when it ended
+     */
+    ends?: string;
+    /**
+     * briefing: what the room agreed, from the minutes
+     */
+    outcome?: string;
   }[];
 }
 
