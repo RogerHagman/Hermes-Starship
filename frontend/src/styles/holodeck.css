@@ -1,0 +1,208 @@
+/* Hermes Starship · the Holodeck (Deck 4).
+   The room's gold grid on black sets the palette: near-black surfaces, gold trim, and the
+   hologram's blue (--holo) for anything projected. Rail colours keep their meaning.
+   It reuses the Captain's Quarters layout (.qgrid, .room, .spot, .wall-slot, quarters.css). */
+
+.board-holodeck{
+  --bg:#07080a;
+  --surface:#111110;
+  --surface-raised:#191815;
+  --surface-selected:#2a2414;
+  --border:#2a2720;
+  --border-strong:#3d382c;
+  --text:#ece8df;
+  --text-label:#b7ad98;
+  --text-muted:#a39a86;
+  --lcars-frame:#e3b24a;
+  --lcars-dark:#1d1a12;
+  --focus:#ffe9b8;
+  --holo:#7fd8e8;
+}
+html:has(.board-holodeck) body{background-color:#07080a;background-image:var(--stars), radial-gradient(1400px 800px at 30% 20%, rgba(227,178,74,.10), transparent 70%)}
+.board-btn.holodeck:not([aria-current]):not(.not-built){border-left-color:var(--lcars-frame, #e3b24a)}
+
+/* ---------- the room ---------- */
+.holo-pic{background:#050608}
+.holo-pic .spot-label{border-color:rgba(227,178,74,.42)}
+
+/* highlights drawn in the SVG: on for the thing under the pointer, softer for the one on screen */
+.room-art .h-hl{opacity:0;transition:opacity .25s ease}
+.holo-pic[data-on="assets"] #h-hl-assets,.holo-pic[data-on="ship"] #h-hl-ship,.holo-pic[data-on="new"] #h-hl-new,
+.holo-pic[data-on="safety"] #h-hl-safety,.holo-pic[data-on="programs"] #h-hl-programs{opacity:.6}
+.holo-pic[data-hot="assets"] #h-hl-assets,.holo-pic[data-hot="ship"] #h-hl-ship,.holo-pic[data-hot="new"] #h-hl-new,
+.holo-pic[data-hot="safety"] #h-hl-safety,.holo-pic[data-hot="programs"] #h-hl-programs,.holo-pic[data-hot="bridge"] #h-hl-bridge{opacity:1}
+
+/* small life in the room: the grid breathes, the emitter turns, buffer cells blink */
+.room-art .h-grid{animation:hgrid 7s ease-in-out infinite}
+@keyframes hgrid{0%,100%{stroke-opacity:.5}50%{stroke-opacity:.36}}
+.room-art .h-cone{animation:hcone 4.8s ease-in-out infinite}
+@keyframes hcone{0%,100%{fill-opacity:1}50%{fill-opacity:.7}}
+.room-art .h-ring{animation:hring 16s linear infinite}
+@keyframes hring{to{stroke-dashoffset:-190}}
+.room-art .h-cell{animation:hcell 5s ease-in-out infinite}
+@keyframes hcell{0%,100%{fill-opacity:1}50%{fill-opacity:.35}}
+.room-art .h-lamp{animation:qarm 3.2s ease-in-out infinite}
+
+/* ---------- the hologram ---------- */
+.holo-slot{position:absolute}
+.holo-ship{position:absolute;inset:0;border-radius:6px;overflow:hidden}
+.holo-ship.placing{cursor:crosshair;outline:1.5px dashed color-mix(in srgb, var(--holo) 60%, transparent);outline-offset:4px}
+.holo-art,.holo-ship-svg,.holo-art svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* the real ship plan, turned to light: blue, see-through, and a soft flicker */
+.holo-art{--codex-glow:1;--claude-glow:1;--core-glow:1;--conduit:.3;--table-glow:1;--codex-text:#0a1a1e;--claude-text:#0a1a1e;--core-text:#bfefff;
+  filter:grayscale(1) sepia(1) hue-rotate(150deg) saturate(2.4) brightness(1.15) drop-shadow(0 0 6px rgba(127,216,232,.45));
+  opacity:.82;mix-blend-mode:screen;animation:hflicker 9s steps(1) infinite}
+@keyframes hflicker{0%,100%{opacity:.82}46%{opacity:.82}47%{opacity:.64}48%{opacity:.86}49%{opacity:.78}}
+.holo-scan{position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg, rgba(127,216,232,.07) 0 1px, transparent 1px 4px)}
+.holo-scan::after{content:"";position:absolute;left:0;right:0;height:18%;top:-18%;
+  background:linear-gradient(180deg, transparent, rgba(127,216,232,.12), transparent);animation:hsweep 6s linear infinite}
+@keyframes hsweep{to{top:100%}}
+.holo-rooms{position:absolute;inset:0}
+.holo-room{position:absolute;display:flex;align-items:center;justify-content:center;padding:0 3px;border-radius:4px;cursor:pointer;
+  border:1.5px solid transparent;background:transparent;color:transparent;
+  font-family:var(--font-display);font-weight:700;font-size:10px;letter-spacing:.04em;line-height:1;white-space:nowrap;overflow:hidden;
+  transition:border-color .15s ease, background .15s ease, color .15s ease}
+.holo-room span{overflow:hidden;text-overflow:ellipsis}
+.holo-room:hover,.holo-room:focus-visible{border-color:var(--holo);background:rgba(127,216,232,.18);color:#e8fbff;outline:none}
+.holo-room[aria-pressed="true"]{border-color:var(--captain);background:rgba(232,195,122,.26);color:#fff3d6}
+.holo-room.reserved,.holo-room.proposed,.holo-room.approved{border:1.5px dotted rgba(127,216,232,.6)}
+.holo-room.draft{border:1.5px dashed var(--captain);background:rgba(232,195,122,.16);color:#fff3d6}
+.holo-room.ghost{pointer-events:none;border:1.5px dashed var(--holo);background:rgba(127,216,232,.24);color:#e8fbff}
+.holo-room.ghost.taken{border-color:var(--bad);background:rgba(240,138,122,.22);color:#ffd9d2}
+.holo-room:disabled{cursor:crosshair}
+.holo-ship.placing .holo-room:not(.ghost):hover{background:transparent;color:transparent;border-color:transparent}
+.holo-ship.placing .holo-room.draft:hover{background:rgba(232,195,122,.16);color:#fff3d6;border-color:var(--captain)}
+
+/* ---------- the work screen ---------- */
+.holo-screen{background:linear-gradient(180deg, rgba(12,16,18,.97), rgba(6,8,9,.97)) !important}
+.holo-screen .ease-tile{background:linear-gradient(180deg, rgba(127,216,232,.06), transparent 55%), var(--surface-raised)}
+.holo-screen .ease-tile:hover{border-color:var(--holo)}
+.holo-screen .ease-label svg{stroke:var(--holo)}
+.holo-screen .ease-figure{font-size:30px}
+.holo-screen .ease-text{font-size:13px}
+.linkish{padding:0;border:none;background:none;color:var(--holo);font:inherit;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:color-mix(in srgb, var(--holo) 40%, transparent);text-underline-offset:3px}
+.linkish.mono{font-family:var(--font-mono);font-size:12px}
+.linkish:hover{color:#e8fbff}
+
+/* one room: its picture beside its facts */
+.holo-room-body{display:grid !important;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+.holo-room-body .cchair-art{margin:0;aspect-ratio:520 / 440;width:100%}
+.holo-room-body .con-facts{margin:0;grid-template-columns:96px minmax(0,1fr)}
+
+/* the ship, deck by deck */
+.decks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.deck-row{display:grid;grid-template-columns:58px 150px minmax(0,1fr);gap:10px;align-items:center;padding:5px 8px;border-radius:8px;background:var(--surface-raised)}
+.deck-n{font-size:10px;letter-spacing:.08em;color:var(--captain)}
+.deck-name{font-family:var(--font-display);font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deck-rooms{display:flex;flex-wrap:wrap;gap:4px}
+.roomchip{padding:2px 8px;border-radius:99px;border:1.5px solid var(--c);background:transparent;color:var(--text);font-family:var(--font-display);font-weight:600;font-size:11.5px;cursor:pointer}
+.roomchip:hover{background:color-mix(in srgb, var(--c) 18%, transparent)}
+.roomchip.reserved{border-style:dotted}
+.roomchip.proposed,.roomchip.approved{border-style:dashed}
+.roomchip.place{border-color:var(--border-strong);color:var(--text-label)}
+.roomchip.draft{--c:var(--captain);border-style:dashed;color:var(--captain)}
+
+/* the pattern buffer */
+.asset-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5, minmax(0,1fr));gap:8px}
+.asset{width:100%;display:flex;flex-direction:column;gap:3px;padding:6px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface-raised);cursor:pointer;text-align:left}
+.asset:hover{border-color:var(--holo)}
+.asset img{display:block;width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:5px;background:#050608}
+.asset-name{font-size:10px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asset-kb{font-size:9px;color:var(--text-muted)}
+.asset-big{margin:0;display:flex;flex-direction:column;gap:8px;min-height:0;flex:1}
+.asset-big img{display:block;width:100%;flex:1;min-height:0;object-fit:contain;border-radius:8px;background:#050608;border:1px solid var(--border)}
+.asset-big figcaption{font-size:10px;letter-spacing:.06em;color:var(--text-label)}
+
+/* the new-section console */
+.holo-form{display:grid !important;grid-template-columns:repeat(2, minmax(0,1fr));gap:6px 12px;align-content:start}
+.holo-form .wide{grid-column:1 / -1}
+.hf{display:flex;flex-direction:column;gap:4px;min-width:0;margin:0;padding:0;border:none}
+.hf > span.mono,.hf legend{font-size:9.5px;letter-spacing:.1em;color:var(--text-label);padding:0}
+.hf input,.hf select,.hf textarea{width:100%;min-height:30px;padding:4px 10px;border-radius:8px;border:1.5px solid var(--border-strong);background:#0a0b0c;color:var(--text);font-family:var(--font-body);font-size:14px}
+.hf textarea{resize:none;line-height:1.4}
+.hf input:focus,.hf select:focus,.hf textarea:focus{outline:none;border-color:var(--holo)}
+.hf input::placeholder,.hf textarea::placeholder{color:var(--text-muted)}
+.seg-ctl{display:flex;flex-wrap:wrap;gap:5px}
+.seg-ctl .chip{min-height:26px;padding:0 9px;font-size:12px}
+.holo-form .btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.holo-placing{font-size:11px;letter-spacing:.08em;color:var(--holo);animation:qarm 1.6s ease-in-out infinite}
+
+/* one draft: its brief */
+.brief{margin:0;padding:10px 12px;border-radius:8px;border:1px dashed color-mix(in srgb, var(--captain) 45%, transparent);background:#0a0b0c;
+  font-family:var(--font-mono);font-size:11.5px;line-height:1.5;color:#f1ead8;white-space:pre-wrap;overflow:auto;flex:1;min-height:0;user-select:text}
+
+.holo-screen .wall-actions .btn{white-space:nowrap}
+
+/* the programs */
+.programs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.program{display:grid;grid-template-columns:70px 150px minmax(0,1fr) 82px;gap:10px;align-items:center;padding:6px 10px;border-radius:8px;background:var(--surface-raised);opacity:.7}
+.program.built{opacity:1;box-shadow:inset 3px 0 0 var(--captain)}
+.program-tag{font-size:10px;letter-spacing:.08em;color:var(--captain)}
+.program-name{font-family:var(--font-display);font-weight:700;font-size:14px}
+.program-what{font-size:12.5px;line-height:1.35;color:var(--text-label)}
+.program-state{font-size:9.5px;letter-spacing:.08em;color:var(--text-muted);text-align:center}
+.program .btn{min-height:28px;padding:0 12px;font-size:12.5px}
+
+/* the safety panel */
+.protocols li{border-color:rgba(63,193,165,.28);background:linear-gradient(135deg, rgba(63,193,165,.10), rgba(63,193,165,.02))}
+.protocols .standing-n{color:var(--rail-local)}
+.pipeline{margin-top:6px}
+
+/* ---------- panels ---------- */
+.holo-crew{padding:14px 16px}
+.hcrew{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.hcrew-row{width:100%;display:grid;grid-template-columns:10px 130px 86px 96px minmax(0,1fr);gap:10px;align-items:center;padding:7px 10px;border-radius:9px;
+  border:none;border-left:3px var(--ls, solid) var(--c);background:var(--surface-raised);text-align:left;cursor:pointer}
+.hcrew-row:hover{background:color-mix(in srgb, var(--surface-raised) 85%, var(--text))}
+.hcrew-row[aria-pressed="true"]{background:var(--surface-selected)}
+.hcrew-row .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.hcrew-row:not(.live) .dot{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+.hcrew-row.off{opacity:.65}
+.hcrew-name{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:600;font-size:14px;white-space:nowrap}
+.hcrew-state,.hcrew-note{font-size:9.5px;letter-spacing:.06em;color:var(--text-label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hcrew-order{font-size:12.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.holo-queue{flex:1;min-height:0;display:flex;flex-direction:column;padding:14px 16px}
+.hqueue{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:5px 8px;overflow:auto;min-height:0;align-content:start}
+.hq-row{width:100%;display:grid;grid-template-columns:22px minmax(0,1fr) auto 74px;gap:8px;align-items:center;padding:6px 10px;border-radius:8px;border:none;background:var(--surface-raised);text-align:left;cursor:pointer}
+.hq-row:hover{background:color-mix(in srgb, var(--surface-raised) 85%, var(--text))}
+.hq-row[aria-pressed="true"]{background:var(--surface-selected)}
+.hq-tile{width:20px;height:12px;border-radius:3px;border:1.5px var(--ls) var(--c)}
+.hq-name{font-family:var(--font-display);font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hq-deck,.hq-state{font-size:9.5px;letter-spacing:.06em;color:var(--text-label);white-space:nowrap}
+.hq-state{text-align:right}
+.hq-row.draft .hq-state{color:var(--captain)}
+
+.holo-register .olog .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:8px}
+.holo-orders{overflow:hidden}
+.hq-orders{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;overflow:auto;min-height:0}
+.hq-order{width:100%;display:flex;flex-direction:column;gap:3px;padding:8px 12px;border-radius:9px;border:none;border-left:4px solid var(--c);background:var(--surface-raised);text-align:left;cursor:pointer}
+.hq-order:hover{background:color-mix(in srgb, var(--surface-raised) 85%, var(--text))}
+.hq-order[aria-pressed="true"]{background:var(--surface-selected)}
+.hq-order-title{font-family:var(--font-display);font-weight:600;font-size:14px;line-height:1.25}
+.hq-order-meta{display:flex;align-items:center;font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
+.hq-order-meta .dot{width:7px;height:7px;border-radius:50%;background:var(--c);margin-right:6px}
+
+/* ---------- smaller boards ---------- */
+@container board (max-width: 1950px){
+  .asset-grid{grid-template-columns:repeat(4, minmax(0,1fr))}
+  .asset-big img{max-height:360px}
+}
+@container board (max-width: 1200px){
+  .hcrew-row{grid-template-columns:10px minmax(0,1fr) 86px}
+  .hcrew-note,.hcrew-order{display:none}
+  .program{grid-template-columns:60px minmax(0,1fr) auto}
+  .program-what{grid-column:1 / -1;grid-row:2}
+}
+@container board (max-width: 760px){
+  .asset-grid{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .holo-room-body,.holo-form{grid-template-columns:minmax(0,1fr) !important}
+  .hqueue{grid-template-columns:minmax(0,1fr)}
+  .deck-row{grid-template-columns:52px minmax(0,1fr)}
+  .deck-rooms{grid-column:1 / -1}
+  .holo-room{font-size:0}
+}
+@media (prefers-reduced-motion: reduce){
+  .holo-art,.holo-scan::after{animation:none}
+}

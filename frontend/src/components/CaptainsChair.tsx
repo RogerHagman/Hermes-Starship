@@ -3,6 +3,7 @@
 // Picking a hail opens it in the console, and Back returns to the chair. Approve and Deny
 // open in H4, in the Quarters. Page 2 is the Captain's station card, the same card every
 // other station has.
+import type { BoardId } from '../lib/board';
 import { useMemo, useState } from 'react';
 import art from '../assets/bridge-chair.svg?raw';
 import { SHIP_MAP } from '../lib/shipmap';
@@ -19,8 +20,8 @@ function Art() {
   return useMemo(() => <div className="cchair-svg" dangerouslySetInnerHTML={{ __html: art }} />, []);
 }
 
-export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
-  ship: ShipView; onPick: (station: string, order?: string, from?: string) => void; onBack: () => void; onQuarters?: () => void;
+export function CaptainsChair({ ship, onPick, onBack, onBoard }: {
+  ship: ShipView; onPick: (station: string, order?: string, from?: string) => void; onBack: () => void; onBoard?: (b: BoardId) => void;
 }) {
   const [page, setPage] = useState(0);
   const captain = ship.station('captain');
@@ -41,7 +42,7 @@ export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
   if (page === 1 && captain) {
     return (
       <section className="console cchair" role="region" aria-label="The Captain's station card" style={css({ '--c': 'var(--captain)' })}>
-        <StationDetail ship={ship} st={captain} back="‹ Watch" onBack={onBack} actions={pager} onQuarters={onQuarters} />
+        <StationDetail ship={ship} st={captain} back="‹ Watch" onBack={onBack} actions={pager} onBoard={onBoard} />
       </section>
     );
   }
@@ -68,7 +69,7 @@ export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
             ))}
           </ul>
           <div className="cchair-foot">
-            {onQuarters && <button type="button" className="btn btn-gold" onClick={onQuarters}>To your Quarters</button>}
+            {onBoard && <button type="button" className="btn btn-gold" onClick={() => onBoard('quarters')}>To your Quarters</button>}
             <span className="con-hint">Approve and Deny open in H4, in your Quarters.</span>
           </div>
         </div>

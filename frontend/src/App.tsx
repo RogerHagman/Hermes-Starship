@@ -1,5 +1,6 @@
 // The boards: loads the fixtures once, keeps what both boards share (the rail filter, drills,
-// who is relieved, who the comm badge speaks to), and shows the Bridge or the Captain's Quarters.
+// who is relieved, who the comm badge speaks to), and shows the Bridge, the Captain's Quarters
+// or the Holodeck.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LIVE_EVERY_MS, loadFixtures, loadLiveRailLog, loadLiveRails, withLiveDuty } from './lib/data';
 import { useBoard } from './lib/board';
@@ -10,6 +11,7 @@ import { BridgeBoard } from './components/BridgeBoard';
 import { Frame } from './components/Frame';
 import { Header } from './components/Header';
 import { QuartersBoard } from './components/quarters/QuartersBoard';
+import { HolodeckBoard } from './components/holodeck/HolodeckBoard';
 import { SideRail, type RailFilter } from './components/SideRail';
 import { useFit, useFullscreenKey } from './lib/fit';
 
@@ -73,11 +75,15 @@ export function App() {
             <Header ship={ship} board={board} error={error} />
             {ship && board === 'bridge' && (
               <BridgeBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget} onToast={showToast}
-                onQuarters={() => goBoard('quarters')} onRelieve={relieve} />
+                onBoard={goBoard} onRelieve={relieve} />
             )}
             {ship && board === 'quarters' && (
               <QuartersBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
                 onRelieve={relieve} onBridge={() => goBoard('bridge')} onToast={showToast} />
+            )}
+            {ship && board === 'holodeck' && (
+              <HolodeckBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
+                onBoard={goBoard} onToast={showToast} />
             )}
           </main>
         </Frame>

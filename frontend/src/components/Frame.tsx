@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react';
 import type { BoardId } from '../lib/board';
 import { dayAndTime } from '../lib/format';
+import { ASSETS } from '../lib/holodeck';
 import type { ShipView } from '../lib/ship';
 import { RAIL_IDS } from '../lib/ship';
 
@@ -10,7 +11,7 @@ export function Frame({ ship, board, side, children }: { ship: ShipView | null; 
     <div className="frame">
       <div className="elbow elbow-top" aria-hidden="true" />
       <header className="topbar">
-        <div className="topbar-stats mono">{ship ? (board === 'quarters' ? quartersStats(ship) : bridgeStats(ship)) : '—'}</div>
+        <div className="topbar-stats mono">{ship ? (board === 'quarters' ? quartersStats(ship) : board === 'holodeck' ? holodeckStats(ship) : bridgeStats(ship)) : '—'}</div>
         <span className="seg seg-gold" aria-hidden="true" />
         <span className="seg seg-local" aria-hidden="true" />
         <span className="seg seg-claude" aria-hidden="true" />
@@ -31,6 +32,13 @@ function bridgeStats(ship: ShipView): string {
   const onDuty = crew.filter((s) => s.status === 'live' && !ship.off(s)).length;
   const up = RAIL_IDS.filter((r) => ship.rail(r) !== 'out').length;
   return `${crew.length} CREW · ${onDuty} ON DUTY · ${up} OF 3 RAILS UP · ${hailCount(ship)} HAILS`;
+}
+
+function holodeckStats(ship: ShipView): string {
+  const rooms = ship.data.stations.stations;
+  const waiting = rooms.filter((s) => s.kind === 'station' && s.status !== 'live').length;
+  const places = rooms.filter((s) => s.kind === 'place').length;
+  return `${rooms.length - places} STATIONS · ${places} PLACES · ${waiting} WAITING FOR CREW · ${ASSETS.length} ASSETS`;
 }
 
 function quartersStats(ship: ShipView): string {

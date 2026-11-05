@@ -16,6 +16,11 @@ const BOARD_TEXT: Record<BoardId, { deck: string; title: string; intro: string }
     title: "Captain's Quarters",
     intro: 'Your hails, your campaigns and your own log. Pick something in the room to bring it up on the wall screen.',
   },
+  holodeck: {
+    deck: 'DECK 4 · HOLODECK & DESIGN',
+    title: 'Holodeck',
+    intro: 'The ship as a hologram: its rooms, its assets, and new sections spun up for the crew to build.',
+  },
 };
 
 export function Header({ ship, board, error }: { ship: ShipView | null; board: BoardId; error: string | null }) {

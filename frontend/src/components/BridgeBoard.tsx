@@ -1,6 +1,7 @@
 // The Bridge board (Deck 1): the ship plan with its console, rails, hails, orders in flight,
 // the duty roster, the ship's log and the comm badge. Picking anything shows it in the
 // console under the saucer; picking it again puts the console back on the watch.
+import type { BoardId } from '../lib/board';
 import { useCallback, useState } from 'react';
 import type { Drills, ShipView } from '../lib/ship';
 import type { ConsolePick } from './ShipConsole';
@@ -17,11 +18,11 @@ interface Props {
   target: string | null;
   onTarget: (id: string) => void;
   onToast: (text: string) => void;
-  onQuarters: () => void;
+  onBoard: (b: BoardId) => void;
   onRelieve: (id: string) => void;
 }
 
-export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast, onQuarters, onRelieve }: Props) {
+export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast, onBoard, onRelieve }: Props) {
   const [open, setOpen] = useState<ConsolePick | null>(null);
   // `from`: where the card was opened from (the Captain's chair, or a chain of command), so
   // Back can return there.
@@ -35,7 +36,7 @@ export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast, o
   const close = useCallback(() => setOpen(null), []);
   return (
     <div className="grid">
-      <ShipPlan ship={ship} filter={filter} pick={open} onPick={openStation} onDept={openDept} onBack={close} onQuarters={onQuarters} onRelieve={onRelieve} />
+      <ShipPlan ship={ship} filter={filter} pick={open} onPick={openStation} onDept={openDept} onBack={close} onBoard={onBoard} onRelieve={onRelieve} />
       <aside className="side">
         <RailsPanel ship={ship} drills={drills} />
         <HailsPanel ship={ship} picked={open?.order} onOpen={openStation} />

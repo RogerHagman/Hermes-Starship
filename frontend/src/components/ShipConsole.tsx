@@ -2,6 +2,7 @@
 // a room on the plan, a card on the right, a name in the roster. With nothing picked
 // it shows the watch: who is working right now. Esc or Back returns to the watch.
 // StationDetail is shared with the wall screen in the Captain's Quarters.
+import type { BoardId } from '../lib/board';
 import { useCallback, useEffect, type ReactNode } from 'react';
 import { DECKS, DEPTS, RAIL, RANK, STATUS, railColor } from '../lib/lookups';
 import { age } from '../lib/format';
@@ -29,7 +30,7 @@ interface Props {
   onDept?: (dept: string) => void;
   onBack: () => void;
   /** Opens the Captain's Quarters (from the Captain's chair). */
-  onQuarters?: () => void;
+  onBoard?: (b: BoardId) => void;
   /** Relieves a station, or recalls it to its post (screen only, like a drill). */
   onRelieve?: (id: string) => void;
 }
@@ -50,7 +51,7 @@ export function useEscape(active: boolean, onBack: () => void) {
   }, [active, onBack]);
 }
 
-export function ShipConsole({ ship, pick, onPick, onDept, onBack, onQuarters, onRelieve }: Props) {
+export function ShipConsole({ ship, pick, onPick, onDept, onBack, onBoard, onRelieve }: Props) {
   // A hail opened from the Captain's chair goes back to the chair, and a name picked in a
   // chain of command goes back to that chain, not to the watch.
   const fromDept = pick?.from?.startsWith('dept:') ? pick.from.slice(5) : undefined;
@@ -64,13 +65,13 @@ export function ShipConsole({ ship, pick, onPick, onDept, onBack, onQuarters, on
   if (pick?.dept) return <ChainOfCommand ship={ship} dept={pick.dept} onBack={onBack} onPick={(id) => onPick(id, undefined, `dept:${pick.dept}`)} />;
   const st = pick?.station ? ship.station(pick.station) : undefined;
   if (!st) return <Watch ship={ship} onPick={onPick} />;
-  if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />;
+  if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onBoard={onBoard} />;
   const backLabel = fromDept ? '‹ Chain' : from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch';
   // A station with a picture gets three pages (picture, card, service log), like the Captain's
   // chair. Keyed by station, so picking another one starts again on page 1.
   const relief: Relief | undefined = onRelieve && canRelieve(st)
     ? { on: ship.relieved.has(st.id), toggle: () => onRelieve(st.id) } : undefined;
-  if (hasArt(st.id)) return <StationScene key={st.id} ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} onQuarters={onQuarters} relief={relief} />;
+  if (hasArt(st.id)) return <StationScene key={st.id} ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} onBoard={onBoard} relief={relief} />;
   return (
     <section className="console" role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
       <StationDetail ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} relief={relief} />
@@ -144,13 +145,17 @@ export function OrderBox({ ship, st, orderId }: { ship: ShipView; st: Station; o
   );
 }
 
+/** The stations whose own board is built: their console button opens it. */
+const OWN_BOARD: Partial<Record<string, BoardId>> = { captain: 'quarters', quarters: 'quarters', holo: 'holodeck' };
+
 /**
  * The button to a station's own console, at the foot of its card. The Captain's and the
- * Quarters station's open the Captain's Quarters board (when `onQuarters` is given). Every
- * other one waits until that station's board exists.
+ * Quarters station's open the Captain's Quarters board, the Holodeck's opens the Holodeck
+ * (when `onBoard` is given). Every other one waits until that station's board exists.
  * With `relief`, a Relieve button sends the crew member to quarters, and Recall brings them back.
  */
-export function ConsoleFoot({ st, onQuarters, relief }: { st: Station; onQuarters?: () => void; relief?: Relief }) {
+export function ConsoleFoot({ st, onBoard, relief }: { st: Station; onBoard?: (b: BoardId) => void; relief?: Relief }) {
+  const own = OWN_BOARD[st.id];
   return (
     <div className="con-foot">
       {relief && (
@@ -159,10 +164,11 @@ export function ConsoleFoot({ st, onQuarters, relief }: { st: Station; onQuarter
           {relief.on ? 'Recall to post' : 'Relieve'}
         </button>
       )}
-      {st.id === 'captain'
-        ? onQuarters && <button type="button" className="btn btn-gold" onClick={onQuarters}>To your Quarters</button>
-        : st.id === 'quarters' && onQuarters
-        ? <button type="button" className="btn btn-gold" onClick={onQuarters}>{st.short} console</button>
+      {own && onBoard
+        ? <button type="button" className="btn btn-gold" onClick={() => onBoard(own)}>
+            {st.id === 'captain' ? 'To your Quarters' : `${st.short} console`}
+          </button>
+        : st.id === 'captain' ? null
         : <>
             <button type="button" className="btn btn-ghost" disabled>{st.short} console</button>
             <span className="con-hint">Not built yet.</span>
@@ -172,8 +178,8 @@ export function ConsoleFoot({ st, onQuarters, relief }: { st: Station; onQuarter
 }
 
 /** One station's card: who it is, its order, its duty. `actions` adds buttons to the title row. */
-export function StationDetail({ ship, st, orderId, back, onBack, actions, onQuarters, relief }: {
-  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; actions?: ReactNode; onQuarters?: () => void;
+export function StationDetail({ ship, st, orderId, back, onBack, actions, onBoard, relief }: {
+  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; actions?: ReactNode; onBoard?: (b: BoardId) => void;
   relief?: Relief;
 }) {
   return (
@@ -192,7 +198,7 @@ export function StationDetail({ ship, st, orderId, back, onBack, actions, onQuar
           {st.answersTo && <><dt>ANSWERS TO</dt><dd>{st.answersTo}</dd></>}
         </dl>
       </div>
-      <ConsoleFoot st={st} onQuarters={onQuarters} relief={relief} />
+      <ConsoleFoot st={st} onBoard={onBoard} relief={relief} />
     </>
   );
 }
