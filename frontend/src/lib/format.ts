@@ -9,6 +9,11 @@ export function dayAndTime(iso: string): string {
   return new Intl.DateTimeFormat('en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit', timeZone: TZ }).format(new Date(iso));
 }
 
+/** The day an entry falls on, like "TUE 3 NOV". */
+export function dayLine(iso: string): string {
+  return new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: TZ }).format(new Date(iso)).toUpperCase();
+}
+
 export function dateLine(now: Date): string {
   return new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: '2-digit', month: 'short', timeZone: TZ }).format(now).toUpperCase();
 }

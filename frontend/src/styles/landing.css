@@ -8,6 +8,15 @@ html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font
 :root{--stars:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360'><circle cx='127' cy='155' r='0.8' fill='white' opacity='0.42'/><circle cx='93' cy='139' r='0.9' fill='white' opacity='0.20'/><circle cx='151' cy='9' r='0.5' fill='white' opacity='0.18'/><circle cx='339' cy='285' r='1.1' fill='white' opacity='0.41'/><circle cx='330' cy='324' r='0.9' fill='white' opacity='0.36'/><circle cx='86' cy='185' r='0.8' fill='white' opacity='0.58'/><circle cx='12' cy='135' r='1.1' fill='white' opacity='0.33'/><circle cx='123' cy='207' r='0.6' fill='white' opacity='0.28'/><circle cx='303' cy='329' r='0.5' fill='white' opacity='0.23'/><circle cx='35' cy='208' r='0.9' fill='white' opacity='0.41'/><circle cx='91' cy='234' r='0.6' fill='white' opacity='0.57'/><circle cx='304' cy='79' r='1.1' fill='white' opacity='0.23'/><circle cx='150' cy='127' r='0.7' fill='white' opacity='0.55'/><circle cx='292' cy='291' r='0.7' fill='white' opacity='0.33'/><circle cx='204' cy='174' r='0.9' fill='white' opacity='0.51'/><circle cx='94' cy='263' r='0.6' fill='white' opacity='0.43'/><circle cx='226' cy='75' r='0.8' fill='white' opacity='0.29'/><circle cx='217' cy='333' r='0.6' fill='white' opacity='0.37'/><circle cx='353' cy='197' r='0.5' fill='white' opacity='0.21'/><circle cx='184' cy='224' r='0.8' fill='white' opacity='0.51'/><circle cx='157' cy='331' r='0.5' fill='white' opacity='0.44'/><circle cx='324' cy='219' r='1.1' fill='white' opacity='0.56'/><circle cx='329' cy='230' r='0.7' fill='white' opacity='0.53'/><circle cx='208' cy='76' r='0.8' fill='white' opacity='0.60'/><circle cx='345' cy='249' r='0.6' fill='white' opacity='0.38'/><circle cx='72' cy='35' r='1.1' fill='white' opacity='0.51'/><circle cx='124' cy='141' r='0.7' fill='white' opacity='0.37'/><circle cx='235' cy='149' r='0.7' fill='white' opacity='0.19'/><circle cx='15' cy='65' r='0.9' fill='white' opacity='0.53'/><circle cx='72' cy='278' r='0.8' fill='white' opacity='0.40'/><circle cx='203' cy='4' r='0.5' fill='white' opacity='0.25'/><circle cx='54' cy='196' r='1.1' fill='white' opacity='0.54'/><circle cx='316' cy='84' r='0.5' fill='white' opacity='0.34'/><circle cx='8' cy='109' r='0.9' fill='white' opacity='0.31'/><circle cx='221' cy='264' r='0.6' fill='white' opacity='0.41'/><circle cx='274' cy='223' r='0.9' fill='white' opacity='0.21'/><circle cx='177' cy='200' r='0.5' fill='white' opacity='0.35'/><circle cx='127' cy='109' r='0.8' fill='white' opacity='0.43'/><circle cx='23' cy='183' r='0.8' fill='white' opacity='0.45'/><circle cx='163' cy='6' r='0.9' fill='white' opacity='0.40'/><circle cx='348' cy='281' r='0.7' fill='white' opacity='0.51'/><circle cx='176' cy='41' r='0.6' fill='white' opacity='0.33'/><circle cx='119' cy='167' r='0.9' fill='white' opacity='0.22'/><circle cx='165' cy='166' r='0.7' fill='white' opacity='0.45'/><circle cx='247' cy='248' r='0.5' fill='white' opacity='0.58'/><circle cx='68' cy='245' r='0.5' fill='white' opacity='0.50'/></svg>")}
 body{min-height:100vh;background-color:var(--bg);background-image:var(--stars), radial-gradient(1200px 700px at 42% 38%, rgba(29,50,86,.55), transparent 70%)}
 button{font:inherit;color:inherit}
+/* Scrollbars: thin and dark, in the board's own colours (the Quarters' lilac tokens apply there).
+   scrollbar-color is for Chrome, Edge and Firefox; the ::-webkit-scrollbar rules are for Safari. */
+:root{color-scheme:dark}
+*{scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
+*:hover{scrollbar-color:var(--text-label) transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background-color:var(--text-label)}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .mono{font-family:var(--font-mono)}
 [hidden]{display:none!important}
@@ -263,6 +272,7 @@ html:has(.stage.fit){overflow:hidden}
 .log li{position:relative;display:grid;grid-template-columns:44px 18px minmax(0,1fr);gap:8px;align-items:baseline;padding:5px 0;font-size:13px}
 .log li::before{content:"";position:absolute;left:60px;top:0;bottom:0;width:2px;background:var(--border-strong)}
 .log li:first-child::before{top:50%}
+.log li.log-day{display:block;padding:8px 0 3px 78px;font-size:10px;letter-spacing:.1em;color:var(--text-label)}
 .log li:last-child::before{bottom:50%}
 .log time{font-family:var(--font-mono);font-size:10.5px;color:var(--text-label)}
 .log .dot{position:relative;z-index:1;justify-self:center;align-self:center;width:10px;height:10px;border-radius:50%;background:var(--c);
@@ -324,6 +334,58 @@ html:has(.stage.fit){overflow:hidden}
 @keyframes bcstreak{from{transform:translateX(520px)}to{transform:translateX(-100px)}}
 .cchair-art .bc-armlight{animation:bcarm 3.2s ease-in-out infinite}
 @keyframes bcarm{0%,100%{opacity:1}50%{opacity:.55}}
+/* a station card with its picture (StationArt.tsx): the picture left, the card right */
+.station-side{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+.station-duty{margin:0;line-height:1.4}
+.svc{gap:6px}
+.svc-list,.svc-log{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-direction:column;gap:4px}
+.svc-row{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 9px;border-radius:7px;border:none;background:var(--surface-raised);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.svc-row:hover{filter:brightness(1.2)}
+.svc-row[aria-pressed="true"]{box-shadow:0 0 0 1.5px var(--c)}
+.svc-row .statepill{grid-row:auto;grid-column:auto}
+.svc-row .statepill.done{color:var(--text-label)}
+.svc-row .statepill.awaiting-captain{color:var(--captain)}
+.svc-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-log li{display:grid;grid-template-columns:86px minmax(0,1fr);gap:10px;align-items:baseline;line-height:1.35}
+.con-foot{flex-shrink:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.con-foot .btn{min-height:30px;font-size:13px}
+.station-art-wrap .sa-tw{animation:bctw 4.5s ease-in-out infinite}
+.station-art-wrap .sa-streaks{transition:opacity 1.2s ease}
+.station-art-wrap .sa-streak{animation-name:bcstreak;animation-timing-function:linear;animation-iteration-count:infinite}
+.station-art-wrap .sa-flow{animation:saflow 1.6s linear infinite}
+@keyframes saflow{to{stroke-dashoffset:-24}}
+.station-art-wrap .sa-route{animation:saroute 2.6s linear infinite}
+@keyframes saroute{from{stroke-dashoffset:4}to{stroke-dashoffset:-92}}
+.station-art-wrap .sa-trace{stroke-dasharray:72 28;animation:satrace 3s linear infinite}
+@keyframes satrace{to{stroke-dashoffset:-100}}
+.station-art-wrap .sa-bar{animation:sabar 3.6s ease-in-out infinite alternate}
+@keyframes sabar{from{transform:scaleY(1)}to{transform:scaleY(.88)}}
+.station-art-wrap .sa-blink{animation:sablink 1.4s ease-in-out infinite}
+@keyframes sablink{50%{opacity:.15}}
+.station-art-wrap .sa-key,.station-art-wrap .sa-onair{animation:bcarm 2.6s ease-in-out infinite}
+.station-art-wrap .sa-spin{animation:saspin 24s linear infinite}
+@keyframes saspin{to{transform:rotate(360deg)}}
+.station-art-wrap .sa-ping{animation:saping 2.6s ease-out infinite}
+@keyframes saping{from{transform:scale(1);opacity:.8}to{transform:scale(2.2);opacity:0}}
+.station-art-wrap .sa-holo{animation:saholo 5s ease-in-out infinite alternate}
+@keyframes saholo{to{transform:translateY(-4px)}}
+/* a department's chain of command (ChainOfCommand.tsx), opened from a duty roster card */
+.chain{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.chain li{position:relative;padding-left:calc(var(--lvl) * 22px)}
+.chain li+li::before{content:"";position:absolute;left:calc(var(--lvl) * 22px - 12px);top:-3px;height:16px;width:9px;border-left:1.5px solid var(--border-strong);border-bottom:1.5px solid var(--border-strong);border-bottom-left-radius:6px}
+.chain-row{width:100%;display:grid;grid-template-columns:30px minmax(0,auto) minmax(0,1fr) auto;gap:10px;align-items:center;min-height:26px;padding:2px 10px;border-radius:7px;border:none;border-left:4px solid var(--c);background:var(--surface-raised);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.chain-row:hover{filter:brightness(1.2)}
+.chain-row.off{opacity:.6}
+.chain-pips{display:flex;justify-content:center}
+.chain-pips .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.chain-name{font-family:var(--font-display);font-weight:600;white-space:nowrap}
+.chain-rank{color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chain-tags{font-size:10px;letter-spacing:.08em;color:var(--captain);white-space:nowrap}
+.chain-cover{margin:0;flex-shrink:0;padding:7px 10px;border-radius:7px;border:1.5px dashed var(--border-strong);color:var(--text-muted)}
+.dept{cursor:pointer}
+.dept:hover{box-shadow:0 0 0 1.5px color-mix(in srgb, var(--u) 55%, transparent)}
+.dept[aria-current="true"]{box-shadow:0 0 0 1.5px var(--u)}
+.dept-name{width:100%;padding:0;border:none;background:none;color:inherit;text-align:left;cursor:pointer}
 .hail[aria-pressed="true"]{border-color:var(--captain);background:var(--surface-selected)}
 .member[aria-pressed="true"]{background:var(--surface-selected);box-shadow:0 0 0 1.5px var(--focus)}
 @container board (max-width: 1950px){
@@ -331,7 +393,7 @@ html:has(.stage.fit){overflow:hidden}
   .cchair-art{min-height:230px}
 }
 @container board (max-width: 760px){
-  .console.cchair{max-height:none}
+  .console.cchair,.console.scene{max-height:none}
   .cchair-body{grid-template-columns:minmax(0,1fr)}
   .cchair-art{min-height:200px}
 }
@@ -435,4 +497,7 @@ html:has(.stage.fit){overflow:hidden}
   .member{min-height:26px;font-size:12.5px}
   .log{margin-top:6px}
   .log li{padding:4px 0}
+  /* The log fills what is left of its panel and scrolls inside it, whatever the window. */
+  .log-panel{display:flex;flex-direction:column}
+  .log{flex:1;min-height:0;max-height:none}
 }

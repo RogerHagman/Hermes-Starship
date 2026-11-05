@@ -9,13 +9,14 @@ import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import { Icon } from './Icon';
 import type { RailFilter } from './SideRail';
-import { ShipConsole } from './ShipConsole';
+import { ShipConsole, type ConsolePick } from './ShipConsole';
 
 interface Props {
   ship: ShipView;
   filter: RailFilter;
-  pick: { station: string; order?: string; from?: string } | null;
+  pick: ConsolePick | null;
   onPick: (station: string, order?: string, from?: string) => void;
+  onDept: (dept: string) => void;
   onBack: () => void;
   onQuarters?: () => void;
 }
@@ -28,7 +29,7 @@ const ShipArt = memo(function ShipArt() {
   return <div className="ship-art-svg" dangerouslySetInnerHTML={{ __html: shipSvg }} />;
 });
 
-export function ShipPlan({ ship, filter, pick, onPick, onBack, onQuarters }: Props) {
+export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onQuarters }: Props) {
   const selected = pick?.station ?? null;
   const artRef = useRef<HTMLDivElement>(null);
   const codexUp = ship.rail('codex') !== 'out';
@@ -67,7 +68,7 @@ export function ShipPlan({ ship, filter, pick, onPick, onBack, onQuarters }: Pro
           ))}
         </div>
       </div>
-      <ShipConsole ship={ship} pick={pick} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />
+      <ShipConsole ship={ship} pick={pick} onPick={onPick} onDept={onDept} onBack={onBack} onQuarters={onQuarters} />
       </div>
     </section>
   );

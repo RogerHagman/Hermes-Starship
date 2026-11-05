@@ -3,6 +3,7 @@
 // console under the saucer; picking it again puts the console back on the watch.
 import { useCallback, useState } from 'react';
 import type { Drills, ShipView } from '../lib/ship';
+import type { ConsolePick } from './ShipConsole';
 import { CommBadge } from './CommBadge';
 import { HailsPanel, OrdersPanel, RailsPanel } from './Panels';
 import { LogPanel, RosterPanel } from './Roster';
@@ -20,23 +21,26 @@ interface Props {
 }
 
 export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast, onQuarters }: Props) {
-  const [open, setOpen] = useState<{ station: string; order?: string; from?: string } | null>(null);
-  // `from`: where the card was opened from (the Captain's chair), so Back can return there.
+  const [open, setOpen] = useState<ConsolePick | null>(null);
+  // `from`: where the card was opened from (the Captain's chair, or a chain of command), so
+  // Back can return there.
   const openStation = (station: string, order?: string, from?: string) => {
     const same = open?.station === station && open?.order === order;
     setOpen(same ? null : { station, order, from });
     onTarget(station);
   };
+  // A duty roster card: the department's chain of command. Clicking it again closes it.
+  const openDept = (dept: string) => setOpen(open?.dept === dept ? null : { dept });
   const close = useCallback(() => setOpen(null), []);
   return (
     <div className="grid">
-      <ShipPlan ship={ship} filter={filter} pick={open} onPick={openStation} onBack={close} onQuarters={onQuarters} />
+      <ShipPlan ship={ship} filter={filter} pick={open} onPick={openStation} onDept={openDept} onBack={close} onQuarters={onQuarters} />
       <aside className="side">
         <RailsPanel ship={ship} drills={drills} />
         <HailsPanel ship={ship} picked={open?.order} onOpen={openStation} />
         <OrdersPanel ship={ship} filter={filter} picked={open?.order} onOpen={openStation} />
       </aside>
-      <RosterPanel ship={ship} filter={filter} picked={open?.station} onOpen={(id) => openStation(id)} />
+      <RosterPanel ship={ship} filter={filter} picked={open?.station} pickedDept={open?.dept} onOpen={(id) => openStation(id)} onDept={openDept} />
       <LogPanel ship={ship} />
       <CommBadge ship={ship} target={target} onToast={onToast} />
     </div>

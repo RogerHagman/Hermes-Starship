@@ -1,6 +1,6 @@
 // Duty roster by department (head first) and the ship's log.
 import { DEPTS, PIPS, RANK, STATUS, railColor } from '../lib/lookups';
-import { clockTime } from '../lib/format';
+import { clockTime, dayLine } from '../lib/format';
 import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import type { RailFilter } from './SideRail';
@@ -17,7 +17,13 @@ export function Pips({ rank }: { rank: Station['rank'] }) {
   );
 }
 
-export function RosterPanel({ ship, filter, picked, onOpen }: { ship: ShipView; filter: RailFilter; picked?: string; onOpen: (id: string) => void }) {
+/**
+ * The duty roster. A name opens that station in the console; anywhere else on a department's
+ * card (or its title, for the keyboard) opens the department's chain of command.
+ */
+export function RosterPanel({ ship, filter, picked, pickedDept, onOpen, onDept }: {
+  ship: ShipView; filter: RailFilter; picked?: string; pickedDept?: string; onOpen: (id: string) => void; onDept: (dept: string) => void;
+}) {
   return (
     <section className="panel roster-panel" aria-labelledby="roster-title">
       <div className="panel-head">
@@ -32,11 +38,12 @@ export function RosterPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
           const onDuty = members.filter((s) => s.status === 'live' && !ship.off(s)).length;
           const dark = ship.acting[d.id] === 'dark';
           return (
-            <div key={d.id} className="dept" style={{ '--u': d.uniform } as React.CSSProperties}>
-              <div className="dept-name">
+            <div key={d.id} className="dept" style={{ '--u': d.uniform } as React.CSSProperties} aria-current={pickedDept === d.id}
+              onClick={(e) => { if (!(e.target as HTMLElement).closest('.member, .dept-name')) onDept(d.id); }}>
+              <button type="button" className="dept-name" onClick={() => onDept(d.id)} title={`${d.name}: chain of command`}>
                 {d.name}
                 <span className={'mono' + (dark ? ' dark' : '')}>{dark ? 'DARK · NO ONE TO ACT' : `${onDuty} OF ${members.length} ON DUTY`}</span>
-              </div>
+              </button>
               <div className="members">
                 {members.map((s) => {
                   const off = ship.off(s);
@@ -67,13 +74,19 @@ export function LogPanel({ ship }: { ship: ShipView }) {
     <section className="panel log-panel" aria-labelledby="log-title">
       <div className="panel-head"><h2 className="panel-title" id="log-title">Ship's log</h2></div>
       <ol className="log">
-        {ship.data.shiplog.entries.map((e) => (
-          <li key={e.at + e.text}>
-            <time dateTime={e.at}>{clockTime(e.at)}</time>
-            <span className="dot" style={{ '--c': railColor(ship.station(e.station)?.rail ?? 'mixed') } as React.CSSProperties} />
-            <span><span className="log-who">{(ship.station(e.station)?.short ?? e.station).toUpperCase()}</span>{e.text}</span>
-          </li>
-        ))}
+        {ship.data.shiplog.entries.map((e, i, all) => {
+          // Entries from an earlier day get that day's name above them.
+          const day = dayLine(e.at);
+          const newDay = day !== dayLine(i ? all[i - 1].at : ship.data.shiplog.asOf);
+          return [
+            newDay && <li key={'day' + day} className="log-day mono">{day}</li>,
+            <li key={e.at + e.text}>
+              <time dateTime={e.at}>{clockTime(e.at)}</time>
+              <span className="dot" style={{ '--c': railColor(ship.station(e.station)?.rail ?? 'mixed') } as React.CSSProperties} />
+              <span><span className="log-who">{(ship.station(e.station)?.short ?? e.station).toUpperCase()}</span>{e.text}</span>
+            </li>,
+          ];
+        })}
       </ol>
     </section>
   );
