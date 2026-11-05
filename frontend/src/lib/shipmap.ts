@@ -4,6 +4,15 @@ export const SHIP_MAP = {
   width: 2200,
   height: 1060,
   tileHeight: 64,
+  // Crew Quarters (deck 5) has 18 cabin doors in ship.svg, centred at x = 1180 + 48 * n, y = 562.
+  // An off-duty crew member's token walks to their own cabin. Order from DeckPlanV4.
+  cabins: { x: 1180, y: 562, step: 48 },
+  // The turbolifts the crew ride between decks (CrewTokens.tsx). The saucer lift starts at the
+  // Bridge's lift door; the engineering lift is the shaft beside the warp core. Between the two
+  // hulls the crew walk up the neck: from deck 6 at neckFoot to deck 5 at neckTop.
+  lifts: { saucer: 1210, engineering: 561, deck6: 764, neckFoot: { x: 1050, y: 700 }, neckTop: { x: 1240, y: 614 } },
+  cabinOrder: ['xo', 'ops', 'helm', 'nav', 'computer', 'archives', 'science', 'sensors', 'carto', 'security',
+    'qm', 'away', 'eng', 'sys', 'diag', 'strategist', 'yeoman', 'holo'],
   places: {
     xo: { x: 1228, y: 58, w: 166 },
     captain: { x: 1407, y: 58, w: 166 },

@@ -1,6 +1,6 @@
-// A Bridge station in the console under the saucer, on three pages like the Captain's chair:
+// A station in the console under the saucer, on three pages like the Captain's chair:
 //   1. The station: its picture, status, what it is working on and its console button.
-//   2. Station card: the same card every other station has.
+//   2. Station card: the full card (StationDetail).
 //   3. Service log: the orders it has handled and its lines in the ship's log, newest first.
 // Picking an order on page 3 shows it on page 1.
 import { useState } from 'react';
@@ -9,14 +9,14 @@ import { SHIP_MAP } from '../lib/shipmap';
 import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import { Pager } from './Pager';
-import { ConHead, ConsoleFoot, OrderBox, StationDetail, StationPills, stationColour, stationSub } from './ShipConsole';
+import { ConHead, ConsoleFoot, OrderBox, StationDetail, StationPills, stationColour, stationSub, type Relief } from './ShipConsole';
 import { StationArt } from './StationArt';
 
 const ICONS = SHIP_MAP.icons as Record<string, string>;
 const PAGES = ['The station', 'Station card', 'Service log'];
 
-export function StationScene({ ship, st, orderId, back, onBack }: {
-  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void;
+export function StationScene({ ship, st, orderId, back, onBack, onQuarters, relief }: {
+  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; onQuarters?: () => void; relief?: Relief;
 }) {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState(orderId);
@@ -25,7 +25,7 @@ export function StationScene({ ship, st, orderId, back, onBack }: {
   const showOrder = (id: string) => { setOrder(id); setPage(0); };
   return (
     <section className="console scene" role="region" aria-label={`${st.name} console`} style={{ '--c': stationColour(st) } as React.CSSProperties}>
-      {page === 1 && <StationDetail ship={ship} st={st} orderId={order} back={back} onBack={onBack} actions={pager} />}
+      {page === 1 && <StationDetail ship={ship} st={st} orderId={order} back={back} onBack={onBack} actions={pager} onQuarters={onQuarters} relief={relief} />}
       {page === 2 && <>{head}<ServiceLog ship={ship} st={st} picked={order} onOrder={showOrder} /></>}
       {page === 0 && <>
         {head}
@@ -37,7 +37,7 @@ export function StationScene({ ship, st, orderId, back, onBack }: {
               {(order ?? st.activeOrder) ? <OrderBox ship={ship} st={st} orderId={order} /> : <span className="cchair-count mono">NO ORDER AT THIS STATION</span>}
               <p className="con-text station-duty">{st.duty}</p>
             </div>
-            <ConsoleFoot st={st} />
+            <ConsoleFoot st={st} onQuarters={onQuarters} relief={relief} />
           </div>
         </div>
       </>}

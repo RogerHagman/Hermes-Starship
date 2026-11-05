@@ -1,0 +1,40 @@
+<svg class="station-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 440" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs>
+<linearGradient id="md-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070b14"/><stop offset="1" stop-color="#0c1526"/></linearGradient>
+<linearGradient id="md-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#131c2e"/><stop offset="1" stop-color="#060a12"/></linearGradient>
+<linearGradient id="md-space" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#050815"/><stop offset=".6" stop-color="#0a0f22"/><stop offset="1" stop-color="#10091a"/></linearGradient>
+<radialGradient id="md-neb-plum"><stop offset="0" stop-color="#7a3d8c" stop-opacity=".42"/><stop offset=".6" stop-color="#4a2560" stop-opacity=".16"/><stop offset="1" stop-color="#2a1538" stop-opacity="0"/></radialGradient>
+<radialGradient id="md-neb-teal"><stop offset="0" stop-color="#2f8a96" stop-opacity=".34"/><stop offset=".6" stop-color="#1f5a6a" stop-opacity=".12"/><stop offset="1" stop-color="#0f2a33" stop-opacity="0"/></radialGradient>
+<radialGradient id="md-starglow"><stop offset="0" stop-color="#ffffff" stop-opacity=".9"/><stop offset=".25" stop-color="#dfe8ff" stop-opacity=".35"/><stop offset="1" stop-color="#dfe8ff" stop-opacity="0"/></radialGradient>
+<linearGradient id="md-streak" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset="1" stop-color="#b9c8ff" stop-opacity="0"/></linearGradient>
+<radialGradient id="md-screenlight"><stop offset="0" stop-color="#9fc4ff" stop-opacity=".14"/><stop offset="1" stop-color="#9fc4ff" stop-opacity="0"/></radialGradient>
+<linearGradient id="md-console" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2840"/><stop offset="1" stop-color="#0c1322"/></linearGradient>
+<linearGradient id="md-seat" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0c111c"/><stop offset=".35" stop-color="#25304a"/><stop offset="1" stop-color="#0a0e18"/></linearGradient>
+<linearGradient id="md-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe0ff" stop-opacity=".65"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/></linearGradient>
+<linearGradient id="md-metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4a4048"/><stop offset=".5" stop-color="#8a7a7e"/><stop offset="1" stop-color="#3a3238"/></linearGradient>
+<radialGradient id="md-shadow"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<radialGradient id="md-teal-glow"><stop offset="0" stop-color="#3fc1a5" stop-opacity=".35"/><stop offset="1" stop-color="#3fc1a5" stop-opacity="0"/></radialGradient>
+<radialGradient id="md-vignette" cx=".5" cy=".42" r=".78"><stop offset=".62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></radialGradient>
+<radialGradient id="md-trim-glow"><stop offset="0" stop-color="#3fc1a5" stop-opacity=".32"/><stop offset="1" stop-color="#3fc1a5" stop-opacity="0"/></radialGradient><linearGradient id="md-bed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22324e"/><stop offset="1" stop-color="#121c30"/></linearGradient>
+</defs>
+<rect width="520" height="440" fill="url(#md-wall)"/>
+<path d="M0 270 L520 270 L520 440 L0 440 Z" fill="url(#md-floor)"/>
+<ellipse cx="260" cy="278" rx="250" ry="26" fill="url(#md-screenlight)"/>
+<rect x="124" y="30" width="272" height="132" rx="16" fill="#0b1220" stroke="#2e4569" stroke-width="1.6"/><rect x="130" y="36" width="260" height="120" rx="12" fill="#0b1220"/>
+<rect x="142" y="30" width="50" height="5" rx="2.5" fill="#5aa4ec" opacity="0.7"/>
+<path d="M146 100 L160 100 L165 74 L171 120 L176 100 L186 100 L200 100 L205 74 L211 120 L216 100 L226 100 L240 100 L245 74 L251 120 L256 100 L266 100 L280 100 L285 74 L291 120 L296 100 L306 100 L320 100 L325 74 L331 120 L336 100 L346 100 L360 100 L365 74 L371 120 L376 100 L386 100" pathLength="100" fill="none" stroke="#3fc1a5" stroke-width="1.8" class="sa-trace" style="opacity:var(--sa-glow,1)"/>
+<rect x="146" y="128" width="70" height="4" rx="2" fill="#8aa0c4" opacity=".35" transform="translate(0 0)"/>
+<rect x="146" y="128" width="50" height="4" rx="2" fill="#8aa0c4" opacity=".35" transform="translate(90 0)"/>
+<rect x="146" y="128" width="90" height="4" rx="2" fill="#8aa0c4" opacity=".35" transform="translate(180 0)"/>
+<path d="M150 300 L190 214 L330 214 L370 300 Z" fill="url(#md-bed)" stroke="#2e4569" stroke-width="1.5"/>
+<path d="M190 214 L330 214" stroke="#3fc1a5" stroke-opacity=".6" stroke-width="2" style="opacity:var(--sa-glow,1)"/>
+<rect x="150" y="300" width="220" height="40" rx="6" fill="#0e1729" stroke="#2e4569"/>
+<g style="opacity:var(--sa-glow,1)"><rect x="170" y="316" width="18" height="5" rx="2.5" fill="#3fc1a5" opacity="0.5"/><rect x="202" y="316" width="18" height="5" rx="2.5" fill="#5aa4ec" opacity="0.7"/><rect x="234" y="316" width="18" height="5" rx="2.5" fill="#3fc1a5" opacity="0.9"/><rect x="266" y="316" width="18" height="5" rx="2.5" fill="#5aa4ec" opacity="0.5"/><rect x="298" y="316" width="18" height="5" rx="2.5" fill="#3fc1a5" opacity="0.7"/><rect x="330" y="316" width="18" height="5" rx="2.5" fill="#5aa4ec" opacity="0.9"/></g>
+<path d="M226 222 C226 210 294 210 294 222 L300 246 C280 252 240 252 220 246 Z" fill="#1d2b44"/>
+<rect x="60" y="120" width="60" height="150" rx="8" fill="#0b1220" stroke="#2e4569"/>
+<g style="opacity:var(--sa-glow,1)"><rect x="70" y="136" width="10" height="4" rx="2" fill="#5aa4ec" opacity="0.5"/><rect x="85" y="136" width="10" height="4" rx="2" fill="#3fc1a5" opacity="0.7"/><rect x="100" y="136" width="10" height="4" rx="2" fill="#5aa4ec" opacity="0.9"/></g>
+<rect x="400" y="120" width="60" height="150" rx="8" fill="#0b1220" stroke="#2e4569"/>
+<g style="opacity:var(--sa-glow,1)"><rect x="410" y="136" width="10" height="4" rx="2" fill="#5aa4ec" opacity="0.5"/><rect x="425" y="136" width="10" height="4" rx="2" fill="#3fc1a5" opacity="0.7"/><rect x="440" y="136" width="10" height="4" rx="2" fill="#5aa4ec" opacity="0.9"/></g>
+<ellipse cx="260" cy="400" rx="180" ry="30" fill="url(#md-trim-glow)" style="opacity:var(--sa-glow,1)" opacity=".55"/>
+<rect width="520" height="440" fill="url(#md-vignette)" pointer-events="none"/>
+</svg>

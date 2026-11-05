@@ -6,7 +6,7 @@ import { useCallback, useEffect, type ReactNode } from 'react';
 import { DECKS, DEPTS, RAIL, RANK, STATUS, railColor } from '../lib/lookups';
 import { age } from '../lib/format';
 import { SHIP_MAP } from '../lib/shipmap';
-import type { ShipView } from '../lib/ship';
+import { canRelieve, type ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import { CaptainsChair } from './CaptainsChair';
 import { ChainOfCommand } from './ChainOfCommand';
@@ -30,7 +30,12 @@ interface Props {
   onBack: () => void;
   /** Opens the Captain's Quarters (from the Captain's chair). */
   onQuarters?: () => void;
+  /** Relieves a station, or recalls it to its post (screen only, like a drill). */
+  onRelieve?: (id: string) => void;
 }
+
+/** The Relieve button on a station card: whether it is relieved, and how to switch it. */
+export type Relief = { on: boolean; toggle: () => void };
 
 const css = (vars: Record<string, string>) => vars as React.CSSProperties;
 const ICONS = SHIP_MAP.icons as Record<string, string>;
@@ -45,7 +50,7 @@ export function useEscape(active: boolean, onBack: () => void) {
   }, [active, onBack]);
 }
 
-export function ShipConsole({ ship, pick, onPick, onDept, onBack, onQuarters }: Props) {
+export function ShipConsole({ ship, pick, onPick, onDept, onBack, onQuarters, onRelieve }: Props) {
   // A hail opened from the Captain's chair goes back to the chair, and a name picked in a
   // chain of command goes back to that chain, not to the watch.
   const fromDept = pick?.from?.startsWith('dept:') ? pick.from.slice(5) : undefined;
@@ -61,12 +66,14 @@ export function ShipConsole({ ship, pick, onPick, onDept, onBack, onQuarters }: 
   if (!st) return <Watch ship={ship} onPick={onPick} />;
   if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />;
   const backLabel = fromDept ? '‹ Chain' : from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch';
-  // A Bridge station with a picture gets two pages, like the Captain's chair. Keyed by
-  // station, so picking another one starts again on page 1.
-  if (hasArt(st.id)) return <StationScene key={st.id} ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} />;
+  // A station with a picture gets three pages (picture, card, service log), like the Captain's
+  // chair. Keyed by station, so picking another one starts again on page 1.
+  const relief: Relief | undefined = onRelieve && canRelieve(st)
+    ? { on: ship.relieved.has(st.id), toggle: () => onRelieve(st.id) } : undefined;
+  if (hasArt(st.id)) return <StationScene key={st.id} ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} onQuarters={onQuarters} relief={relief} />;
   return (
     <section className="console" role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
-      <StationDetail ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} />
+      <StationDetail ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} relief={relief} />
     </section>
   );
 }
@@ -138,14 +145,24 @@ export function OrderBox({ ship, st, orderId }: { ship: ShipView; st: Station; o
 }
 
 /**
- * The button to a station's own console, at the foot of its card. The Captain's opens the
- * Quarters (when `onQuarters` is given). Every other one waits until that station's board exists.
+ * The button to a station's own console, at the foot of its card. The Captain's and the
+ * Quarters station's open the Captain's Quarters board (when `onQuarters` is given). Every
+ * other one waits until that station's board exists.
+ * With `relief`, a Relieve button sends the crew member to quarters, and Recall brings them back.
  */
-export function ConsoleFoot({ st, onQuarters }: { st: Station; onQuarters?: () => void }) {
+export function ConsoleFoot({ st, onQuarters, relief }: { st: Station; onQuarters?: () => void; relief?: Relief }) {
   return (
     <div className="con-foot">
+      {relief && (
+        <button type="button" className="btn btn-ghost relieve" aria-pressed={relief.on} onClick={relief.toggle}
+          title={relief.on ? 'Bring them back to their post. Screen only.' : 'Send them to quarters. Screen only.'}>
+          {relief.on ? 'Recall to post' : 'Relieve'}
+        </button>
+      )}
       {st.id === 'captain'
         ? onQuarters && <button type="button" className="btn btn-gold" onClick={onQuarters}>To your Quarters</button>
+        : st.id === 'quarters' && onQuarters
+        ? <button type="button" className="btn btn-gold" onClick={onQuarters}>{st.short} console</button>
         : <>
             <button type="button" className="btn btn-ghost" disabled>{st.short} console</button>
             <span className="con-hint">Not built yet.</span>
@@ -155,8 +172,9 @@ export function ConsoleFoot({ st, onQuarters }: { st: Station; onQuarters?: () =
 }
 
 /** One station's card: who it is, its order, its duty. `actions` adds buttons to the title row. */
-export function StationDetail({ ship, st, orderId, back, onBack, actions, onQuarters }: {
+export function StationDetail({ ship, st, orderId, back, onBack, actions, onQuarters, relief }: {
   ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; actions?: ReactNode; onQuarters?: () => void;
+  relief?: Relief;
 }) {
   return (
     <>
@@ -174,7 +192,7 @@ export function StationDetail({ ship, st, orderId, back, onBack, actions, onQuar
           {st.answersTo && <><dt>ANSWERS TO</dt><dd>{st.answersTo}</dd></>}
         </dl>
       </div>
-      <ConsoleFoot st={st} onQuarters={onQuarters} />
+      <ConsoleFoot st={st} onQuarters={onQuarters} relief={relief} />
     </>
   );
 }

@@ -16,20 +16,21 @@ export const STATUS: Record<Station['status'], { label: string; line: 'solid' | 
   reserved: { label: 'NAME RESERVED',       line: 'dotted' },
 };
 
-/** Rank order decides who acts as department head. Lower order = more senior. */
-export const RANK: Record<Station['rank'], { label: string; order: number; officer: boolean }> = {
-  captain:   { label: 'Captain', order: 0, officer: true },
-  commander: { label: 'Commander', order: 1, officer: true },
-  ltcmdr:    { label: 'Lieutenant Commander', order: 2, officer: true },
-  lt:        { label: 'Lieutenant', order: 3, officer: true },
-  ltjg:      { label: 'Lieutenant junior grade', order: 4, officer: true },
-  ensign:    { label: 'Ensign', order: 5, officer: true },
-  cpo:       { label: 'Chief Petty Officer', order: 6, officer: false },
-  po:        { label: 'Petty Officer', order: 7, officer: false },
-  cadet:     { label: 'Cadet', order: 8, officer: false },
-  none:      { label: 'No rank (the computer)', order: 9, officer: false },
-  team:      { label: 'No rank (a team)', order: 10, officer: false },
-  space:     { label: 'A place', order: 11, officer: false },
+/** Rank order decides who acts as department head. Lower order = more senior.
+ *  `short` fits on a ship plan tile (Labels: Rank). */
+export const RANK: Record<Station['rank'], { label: string; short: string; order: number; officer: boolean }> = {
+  captain:   { label: 'Captain', short: 'Captain', order: 0, officer: true },
+  commander: { label: 'Commander', short: 'Commander', order: 1, officer: true },
+  ltcmdr:    { label: 'Lieutenant Commander', short: 'Lt Cmdr', order: 2, officer: true },
+  lt:        { label: 'Lieutenant', short: 'Lieutenant', order: 3, officer: true },
+  ltjg:      { label: 'Lieutenant junior grade', short: 'Lt jg', order: 4, officer: true },
+  ensign:    { label: 'Ensign', short: 'Ensign', order: 5, officer: true },
+  cpo:       { label: 'Chief Petty Officer', short: 'Chief PO', order: 6, officer: false },
+  po:        { label: 'Petty Officer', short: 'Petty Officer', order: 7, officer: false },
+  cadet:     { label: 'Cadet', short: 'Cadet', order: 8, officer: false },
+  none:      { label: 'No rank (the computer)', short: 'No rank', order: 9, officer: false },
+  team:      { label: 'No rank (a team)', short: 'No rank', order: 10, officer: false },
+  space:     { label: 'A place', short: 'Place', order: 11, officer: false },
 };
 
 export type DeptId = NonNullable<Station['dept']>;
