@@ -2,6 +2,7 @@
 // (CrewTokens.tsx). The Labels control switches the tile text: role, rank, or off so the rooms show.
 // The art is ship.svg (built from DeckPlanV4); rail state dims the nacelles and the warp core.
 // To redraw the ship later, swap the SVG and the positions in lib/shipmap.ts; nothing else changes.
+import type { BoardId } from '../lib/board';
 import { memo, useEffect, useRef, useState } from 'react';
 import shipSvg from '../assets/ship.svg?raw';
 import { RAIL, RANK, STATUS, railColor } from '../lib/lookups';
@@ -21,7 +22,7 @@ interface Props {
   onPick: (station: string, order?: string, from?: string) => void;
   onDept: (dept: string) => void;
   onBack: () => void;
-  onQuarters?: () => void;
+  onBoard?: (b: BoardId) => void;
   onRelieve?: (id: string) => void;
 }
 
@@ -48,7 +49,7 @@ const ShipArt = memo(function ShipArt() {
   return <div className="ship-art-svg" dangerouslySetInnerHTML={{ __html: shipSvg }} />;
 });
 
-export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onQuarters, onRelieve }: Props) {
+export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onBoard, onRelieve }: Props) {
   const selected = pick?.station ?? null;
   const artRef = useRef<HTMLDivElement>(null);
   const codexUp = ship.rail('codex') !== 'out';
@@ -97,7 +98,7 @@ export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onQuarter
           <CrewTokens ship={ship} filter={filter} selected={selected} slots={labels !== 'off'} onPick={onPick} />
         </div>
       </div>
-      <ShipConsole ship={ship} pick={pick} onPick={onPick} onDept={onDept} onBack={onBack} onQuarters={onQuarters} onRelieve={onRelieve} />
+      <ShipConsole ship={ship} pick={pick} onPick={onPick} onDept={onDept} onBack={onBack} onBoard={onBoard} onRelieve={onRelieve} />
       </div>
     </section>
   );

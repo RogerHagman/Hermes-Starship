@@ -55,10 +55,9 @@ export const NEVER_COMMANDS = new Set(['strategist']);
 export const BOARDS: { id: string; label: string; deck?: number; phase?: string; built?: boolean }[] = [
   { id: 'bridge',      label: 'Bridge',             deck: 1, built: true },
   { id: 'quarters',    label: "Captain's Quarters", deck: 2, built: true },
-  { id: 'deckplan',    label: 'Deck plan',          phase: 'H2' },
-  { id: 'sector',      label: 'Sector chart',       phase: 'H2' },
+  { id: 'holodeck',    label: 'Holodeck',           deck: 4, built: true },
   { id: 'science',     label: 'Science lab',        phase: 'H3' },
-  { id: 'sensors',     label: 'Sensor array',       phase: 'H3' },
+  { id: 'sensors',     label: 'Sensor array',       deck: 3, built: true },
   { id: 'engineering', label: 'Main Engineering',   phase: 'H3' },
   { id: 'conn',        label: 'Conn handoff',       phase: 'H4' },
 ];

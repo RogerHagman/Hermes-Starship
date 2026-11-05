@@ -115,6 +115,91 @@ export interface RailsFile {
   }[];
 }
 
+/**
+ * The Sensor array (Deck 3): the watches Sensors keeps, what they found (cited), the asks that reached Sensors word for word, and web content held in quarantine.
+ */
+export interface SensorsFile {
+  asOf: string;
+  synthetic: boolean;
+  watches: {
+    id: string;
+    name: string;
+    /**
+     * Where it sits on the scope.
+     */
+    sector: "jobs" | "market" | "tech" | "home";
+    kind: "price" | "jobs" | "release" | "research";
+    /**
+     * How often it is scanned. Tracked, never capped.
+     */
+    cadence: "daily" | "weekly" | "monthly";
+    /**
+     * What is watched, in plain words.
+     */
+    target: string;
+    /**
+     * The station the findings go to.
+     */
+    forStation: string;
+    lastScan: string;
+    nextScan: string;
+    state: "active" | "paused";
+    order?: string;
+  }[];
+  findings: {
+    id: string;
+    watch: string;
+    at: string;
+    title: string;
+    summary: string;
+    /**
+     * @minItems 1
+     */
+    sources: [
+      {
+        title: string;
+        site: string;
+      },
+      ...{
+        title: string;
+        site: string;
+      }[]
+    ];
+    /**
+     * The station it went to has read it.
+     */
+    seen: boolean;
+  }[];
+  asks: {
+    id: string;
+    at: string;
+    /**
+     * The Captain's words, exactly as they were sent.
+     */
+    words: string;
+    /**
+     * What Number One passed on, when it was not word for word.
+     */
+    passed?: string;
+    /**
+     * True when Sensors got the words unchanged.
+     */
+    unchanged: boolean;
+    state: "answered" | "running" | "queued";
+    order?: string;
+  }[];
+  quarantine: {
+    id: string;
+    at: string;
+    watch: string;
+    site: string;
+    /**
+     * Why it was held, described. Never the held text itself.
+     */
+    what: string;
+  }[];
+}
+
 export interface ShipFile {
   asOf: string;
   synthetic: boolean;

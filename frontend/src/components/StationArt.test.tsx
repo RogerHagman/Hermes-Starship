@@ -20,7 +20,7 @@ const open = (id: string, drills = {}) => render(
 describe('station art', () => {
   it("the Quarters station's console button opens the Captain's Quarters board", () => {
     let went = 0;
-    const c = render(<ShipConsole ship={makeShipView(data, {}, new Set())} pick={{ station: 'quarters' }} onPick={noop} onBack={noop} onQuarters={() => went++} />).container;
+    const c = render(<ShipConsole ship={makeShipView(data, {}, new Set())} pick={{ station: 'quarters' }} onPick={noop} onBack={noop} onBoard={() => went++} />).container;
     fireEvent.click([...c.querySelectorAll('button')].find((b) => b.textContent === 'Quarters console')!);
     expect(went).toBe(1);
   });
@@ -65,8 +65,14 @@ describe('station art', () => {
     expect(btn(card('captain'))).toBeUndefined();
     expect(btn(card('doctor'))).toBeUndefined();   // not built yet: nobody to relieve
   });
+  it('the Holodeck station\'s console button opens the Holodeck board', () => {
+    const went: string[] = [];
+    const c = render(<ShipConsole ship={makeShipView(data, {}, new Set())} pick={{ station: 'holo' }} onPick={noop} onBack={noop} onBoard={(b) => went.push(b)} />).container;
+    fireEvent.click([...c.querySelectorAll('button')].find((b) => b.textContent === 'Holodeck console')!);
+    expect(went).toEqual(['holodeck']);
+  });
   it('every station card has a console button, disabled until its board exists', () => {
-    for (const s of data.stations.stations.filter((x) => x.id !== 'captain' && x.id !== 'quarters')) {
+    for (const s of data.stations.stations.filter((x) => x.id !== 'captain' && x.id !== 'quarters' && x.id !== 'holo')) {
       const button = [...open(s.id).querySelectorAll('button')].find((b) => b.textContent === `${s.short} console`);
       expect(button, s.id).toBeDefined();
       expect(button!.disabled).toBe(true);

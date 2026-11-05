@@ -2,8 +2,11 @@
 // bookmark lands on the same board, and the browser's Back button goes back a board.
 import { useCallback, useEffect, useState } from 'react';
 
-export type BoardId = 'bridge' | 'quarters';
-export const BUILT_BOARDS: BoardId[] = ['bridge', 'quarters'];
+export type BoardId = 'bridge' | 'quarters' | 'holodeck' | 'sensors';
+export const BUILT_BOARDS: BoardId[] = ['bridge', 'quarters', 'holodeck', 'sensors'];
+
+/** The stations and places whose own board is built: their console button opens it. */
+export const OWN_BOARD: Partial<Record<string, BoardId>> = { captain: 'quarters', quarters: 'quarters', holo: 'holodeck', sensors: 'sensors' };
 
 /** '#/quarters' -> 'quarters'. Anything unknown is the Bridge. */
 export function boardFromHash(hash: string): BoardId {

@@ -5,6 +5,7 @@
 //      Crew Quarters and the Briefing Room have their own page 3 instead (PlaceLogs.tsx):
 //      the duty log of check-ins and check-outs, and the meetings with who attended.
 // Picking an order on page 3 shows it on page 1.
+import type { BoardId } from '../lib/board';
 import { useState } from 'react';
 import { dayAndTime } from '../lib/format';
 import { SHIP_MAP } from '../lib/shipmap';
@@ -19,8 +20,8 @@ const ICONS = SHIP_MAP.icons as Record<string, string>;
 /** The third page's name: the shared places keep a log of their own. */
 const THIRD: Record<string, string> = { crewq: 'Duty log', lounge: 'Meetings' };
 
-export function StationScene({ ship, st, orderId, back, onBack, onQuarters, relief }: {
-  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; onQuarters?: () => void; relief?: Relief;
+export function StationScene({ ship, st, orderId, back, onBack, onBoard, relief }: {
+  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; onBoard?: (b: BoardId) => void; relief?: Relief;
 }) {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState(orderId);
@@ -30,7 +31,7 @@ export function StationScene({ ship, st, orderId, back, onBack, onQuarters, reli
   const showOrder = (id: string) => { setOrder(id); setPage(0); };
   return (
     <section className="console scene" role="region" aria-label={`${st.name} console`} style={{ '--c': stationColour(st) } as React.CSSProperties}>
-      {page === 1 && <StationDetail ship={ship} st={st} orderId={order} back={back} onBack={onBack} actions={pager} onQuarters={onQuarters} relief={relief} />}
+      {page === 1 && <StationDetail ship={ship} st={st} orderId={order} back={back} onBack={onBack} actions={pager} onBoard={onBoard} relief={relief} />}
       {page === 2 && <>{head}{st.id === 'crewq' ? <DutyLog ship={ship} />
         : st.id === 'lounge' ? <MeetingLog ship={ship} />
         : <ServiceLog ship={ship} st={st} picked={order} onOrder={showOrder} />}</>}
@@ -44,7 +45,7 @@ export function StationScene({ ship, st, orderId, back, onBack, onQuarters, reli
               {(order ?? st.activeOrder) ? <OrderBox ship={ship} st={st} orderId={order} /> : <span className="cchair-count mono">NO ORDER AT THIS STATION</span>}
               <p className="con-text station-duty">{st.duty}</p>
             </div>
-            <ConsoleFoot st={st} onQuarters={onQuarters} relief={relief} />
+            <ConsoleFoot st={st} onBoard={onBoard} relief={relief} />
           </div>
         </div>
       </>}

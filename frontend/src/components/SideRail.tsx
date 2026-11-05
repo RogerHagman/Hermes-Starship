@@ -25,7 +25,7 @@ export function SideRail({ registry, board, onBoard, filter, onFilter, drills, o
     <nav className="siderail" aria-label="Boards">
       <div className="brand">
         <span className="brand-name">HERMES</span>
-        <span className="brand-reg mono">{registry} · {board === 'quarters' ? 'QUARTERS' : 'BRIDGE'}</span>
+        <span className="brand-reg mono">{registry} · {board.toUpperCase()}</span>
       </div>
 
       <p className="rail-label mono">BOARDS</p>
@@ -36,7 +36,7 @@ export function SideRail({ registry, board, onBoard, filter, onFilter, drills, o
             <li key={b.id}>
               <button
                 type="button"
-                className={'board-btn' + (b.built ? '' : ' not-built') + (b.id === 'quarters' ? ' quarters' : '')}
+                className={'board-btn' + (b.built ? '' : ' not-built') + (b.built && b.id !== 'bridge' ? ` ${b.id}` : '')}
                 aria-current={current ? 'page' : undefined}
                 onClick={() => {
                   if (!b.built) onToast(`${b.label} isn't built yet. It arrives in ${b.phase}.`);
