@@ -1,0 +1,96 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "hosts": [
+    {
+      "id": "nas",
+      "name": "NAS",
+      "role": "ZimaOS. Hermes, the boards and the probes run here.",
+      "state": "ok",
+      "seenAt": "2026-11-04T19:30:00Z",
+      "uptimeH": 316,
+      "cpuPct": 18,
+      "ram": { "usedGb": 5.1, "totalGb": 7.5 },
+      "swap": { "usedGb": 0.4, "totalGb": 4 },
+      "tempC": 47
+    },
+    {
+      "id": "gpu",
+      "name": "GPU box",
+      "role": "Ollama. The local rail runs here.",
+      "state": "ok",
+      "seenAt": "2026-11-04T19:30:00Z",
+      "uptimeH": 98,
+      "cpuPct": 6,
+      "ram": { "usedGb": 9.8, "totalGb": 32 },
+      "tempC": 58
+    }
+  ],
+  "network": {
+    "internet": { "state": "ok", "downMbps": 480, "upMbps": 95, "checkedAt": "2026-11-04T19:00:00Z" },
+    "devices": [
+      { "id": "router", "name": "Router", "kind": "router", "state": "ok", "link": "Gateway", "latencyMs": 0.3 },
+      { "id": "nas", "name": "NAS", "kind": "server", "host": "nas", "state": "ok", "link": "1 GbE", "latencyMs": 0.4 },
+      { "id": "gpu", "name": "GPU box", "kind": "server", "host": "gpu", "state": "ok", "link": "1 GbE", "latencyMs": 0.6 },
+      { "id": "desk", "name": "Captain's desktop", "kind": "desktop", "state": "ok", "link": "1 GbE", "latencyMs": 0.5, "note": "The Hermes desktop app." },
+      { "id": "phone", "name": "Captain's phone", "kind": "phone", "state": "ok", "link": "Wi-Fi", "latencyMs": 6, "note": "Telegram." }
+    ],
+    "links": [
+      { "id": "telegram", "name": "Telegram", "for": "Number One's chat with you", "state": "ok", "checkedAt": "2026-11-04T19:29:00Z" },
+      { "id": "codex", "name": "ChatGPT sign-in", "for": "The Codex rail", "state": "ok", "checkedAt": "2026-11-04T19:29:00Z" },
+      { "id": "claude", "name": "Claude sign-in", "for": "The Claude rail", "state": "ok", "checkedAt": "2026-11-04T19:25:00Z" },
+      { "id": "github", "name": "GitHub", "for": "The Starship repo, pulled by hand", "state": "ok", "checkedAt": "2026-11-04T18:02:00Z" }
+    ],
+    "ports": [
+      { "port": 8650, "service": "Starship boards", "host": "nas", "reach": "lan", "signIn": "Password (nginx)" },
+      { "port": 11434, "service": "Ollama", "host": "gpu", "reach": "lan", "signIn": "None", "note": "Anything on the LAN can use the model. Never forward it on the router." },
+      { "port": 22, "service": "SSH", "host": "nas", "reach": "lan", "signIn": "Password and key" }
+    ]
+  },
+  "containers": [
+    { "name": "hermes", "host": "nas", "image": "Hermes", "state": "running", "memMb": 2900, "limitMb": 4096, "restarts": 0, "upSince": "2026-11-03T19:02:00Z", "note": "Patches A to AE applied. A rebuilt container loses them." },
+    { "name": "hermes-starship", "host": "nas", "image": "nginx 1.27", "state": "running", "memMb": 11, "limitMb": 64, "restarts": 0, "upSince": "2026-11-04T18:02:00Z" },
+    { "name": "hermes-starship-rails", "host": "nas", "image": "python 3.12", "state": "running", "memMb": 15, "limitMb": 32, "restarts": 1, "upSince": "2026-11-04T18:02:00Z" },
+    { "name": "hermes-starship-ship", "host": "nas", "image": "python 3.12", "state": "running", "memMb": 22, "limitMb": 64, "restarts": 0, "upSince": "2026-11-04T18:02:00Z", "note": "No network at all." },
+    { "name": "ollama", "host": "gpu", "image": "Ollama", "state": "running", "memMb": 1800, "restarts": 0, "upSince": "2026-11-01T09:12:00Z" }
+  ],
+  "disks": [
+    { "id": "DK-901", "host": "nas", "label": "NAS data", "mount": "/DATA", "usedGb": 1100, "totalGb": 1800, "perDayGb": 1.2 },
+    { "id": "DK-902", "host": "nas", "label": "Backup disk", "mount": "/media/backup", "usedGb": 860, "totalGb": 1000, "perDayGb": 2.4, "note": "Flagged at 86% after the 3 Nov backup (ORD-9006). Old copies need pruning." },
+    { "id": "DK-903", "host": "nas", "label": "NAS system", "mount": "/", "usedGb": 21, "totalGb": 64 },
+    { "id": "DK-904", "host": "gpu", "label": "Model store", "mount": "/models", "usedGb": 412, "totalGb": 1000, "perDayGb": 0.1 }
+  ],
+  "gpu": {
+    "host": "gpu",
+    "name": "Sample 24 GB card",
+    "vramGb": 24,
+    "tempC": 61,
+    "powerW": 182,
+    "models": [
+      { "name": "qwen 27B", "sizeGb": 16.4, "until": "2026-11-04T19:55:00Z" },
+      { "name": "embeddings", "sizeGb": 0.6 }
+    ]
+  },
+  "jobs": [
+    { "id": "CR-901", "name": "Rails probe", "every": "Every minute", "owner": "ops", "last": "ok", "lastAt": "2026-11-04T19:30:00Z", "nextAt": "2026-11-04T19:31:00Z", "note": "Writes live/rails.json and the rail log." },
+    { "id": "CR-902", "name": "Ship probe", "every": "Every minute", "owner": "ops", "last": "ok", "lastAt": "2026-11-04T19:30:00Z", "nextAt": "2026-11-04T19:31:00Z", "note": "Writes live/orders.json and live/shiplog.json." },
+    { "id": "CR-903", "name": "Reminder clock", "every": "Every minute", "owner": "yeoman", "last": "ok", "lastAt": "2026-11-04T19:30:00Z", "nextAt": "2026-11-04T19:31:00Z", "note": "Fires the Yeoman's reminders by code, at their set time." },
+    { "id": "CR-904", "name": "Hermes data backup", "every": "Daily 03:30", "owner": "ops", "last": "ok", "lastAt": "2026-11-04T02:30:00Z", "nextAt": "2026-11-05T02:30:00Z", "backup": "BK-901" },
+    { "id": "CR-905", "name": "Backup disk prune", "every": "Daily 03:50", "owner": "ops", "last": "failed", "lastAt": "2026-11-04T02:50:00Z", "nextAt": "2026-11-05T02:50:00Z", "note": "Stopped: it would remove a copy that is still the newest of its week. Needs the Captain's call." },
+    { "id": "CR-906", "name": "Nightly health sweep", "every": "Daily 04:00", "owner": "ops", "last": "ok", "lastAt": "2026-11-04T03:00:00Z", "nextAt": "2026-11-05T03:00:00Z", "order": "ORD-9009" },
+    { "id": "CR-907", "name": "Weekly list reset", "every": "Mondays 00:05", "owner": "yeoman", "last": "ok", "lastAt": "2026-11-01T23:05:00Z", "nextAt": "2026-11-08T23:05:00Z" },
+    { "id": "CR-908", "name": "Dilithium burn window", "every": "Wed 10:00 to Thu 10:00", "owner": "xo", "last": "skipped", "lastAt": "2026-11-04T09:00:00Z", "nextAt": "2026-11-11T09:00:00Z", "note": "Skipped this week: the Claude window was already low." }
+  ],
+  "backups": [
+    { "id": "BK-901", "what": "Hermes data", "from": "/DATA/AppData/hermes", "to": "Backup disk", "lastAt": "2026-11-04T02:30:00Z", "sizeGb": 2.4, "verified": "ok", "keep": "7 daily, 4 weekly", "warnAfterH": 30 },
+    { "id": "BK-902", "what": "Patch rollbacks", "from": "Hermes, before each patch", "to": "/opt/data/backups", "lastAt": "2026-11-03T20:40:00Z", "sizeGb": 0.1, "verified": "ok", "keep": "One per patch", "warnAfterH": 720, "note": "The pre-patch tar the patch bay's backup step makes. It prints its file count." },
+    { "id": "BK-903", "what": "Starship repo", "from": "The NAS clone", "to": "GitHub", "lastAt": "2026-11-04T18:02:00Z", "verified": "ok", "keep": "Every commit", "warnAfterH": 720 },
+    { "id": "BK-904", "what": "Hermes config copies", "from": "config.yaml", "to": "Next to the file", "lastAt": "2026-10-24T20:10:00Z", "verified": "never", "keep": "By hand", "warnAfterH": 168, "note": "Hand copies only (.bak-good-1024). Nothing checks they still load." }
+  ],
+  "cautions": [
+    { "id": "CA-901", "text": "Don't change a memory cap in the ZimaOS portal.", "why": "It rebuilds the container, and every patch inside it is lost. Apply them again (apply.sh, check.sh, restart) before using Hermes. It happened on 24 and 25 October." },
+    { "id": "CA-902", "text": "Watch the NAS swap.", "why": "The NAS has 7.5 GB of RAM. On 24 October the swap filled and everything hung." },
+    { "id": "CA-903", "text": "Ollama has no sign-in.", "why": "Port 11434 stays on the LAN. Never forward it on the router." },
+    { "id": "CA-904", "text": "Ops only reads.", "why": "Ops reports and flags. You make every change on the NAS, with docker commands." }
+  ]
+}

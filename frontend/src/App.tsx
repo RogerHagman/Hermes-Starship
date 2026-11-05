@@ -1,6 +1,6 @@
 // The boards: loads the fixtures once, keeps what both boards share (the rail filter, drills,
 // who is relieved, who the comm badge speaks to), and shows the Bridge or one of the deck boards:
-// the Captain's Quarters, the Holodeck, the Sensor array, Main Engineering or the Science lab.
+// the Captain's Quarters, Ops, the Holodeck, the Sensor array, Main Engineering or the Science lab.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LIVE_EVERY_MS, loadLive, loadSample, withLive } from './lib/data';
 import { useBoard } from './lib/board';
@@ -14,6 +14,7 @@ import { QuartersBoard } from './components/quarters/QuartersBoard';
 import { HolodeckBoard } from './components/holodeck/HolodeckBoard';
 import { SensorsBoard } from './components/sensors/SensorsBoard';
 import { EngineeringBoard } from './components/engineering/EngineeringBoard';
+import { OpsBoard } from './components/ops/OpsBoard';
 import { ScienceBoard } from './components/science/ScienceBoard';
 import { SideRail, type RailFilter } from './components/SideRail';
 import { useFit, useFullscreenKey } from './lib/fit';
@@ -97,6 +98,10 @@ export function App() {
             )}
             {ship && board === 'engineering' && (
               <EngineeringBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
+                onBoard={goBoard} onToast={showToast} />
+            )}
+            {ship && board === 'ops' && (
+              <OpsBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
                 onBoard={goBoard} onToast={showToast} />
             )}
             {ship && board === 'science' && (

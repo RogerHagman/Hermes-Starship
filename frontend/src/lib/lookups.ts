@@ -54,6 +54,7 @@ export const NEVER_COMMANDS = new Set(['strategist']);
 /** The boards. Built ones open from the side rail; the rest say when they arrive. */
 export const BOARDS: { id: string; label: string; deck?: number; phase?: string; built?: boolean }[] = [
   { id: 'bridge',      label: 'Bridge',             deck: 1, built: true },
+  { id: 'ops',         label: 'Ops',                deck: 1, built: true },
   { id: 'quarters',    label: "Captain's Quarters", deck: 2, built: true },
   { id: 'holodeck',    label: 'Holodeck',           deck: 4, built: true },
   { id: 'science',     label: 'Science lab',        deck: 3, built: true },

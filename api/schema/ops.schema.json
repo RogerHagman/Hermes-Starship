@@ -1,0 +1,598 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship · ops",
+  "description": "Ops (Deck 1): what Ops knows about the ship's machines. The hosts, the network, the containers, the disks, the GPU, the schedule, the backups, and Ops's standing cautions. Ops only reads; every change is the Captain's, by hand.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "hosts",
+    "network",
+    "containers",
+    "disks",
+    "gpu",
+    "jobs",
+    "backups",
+    "cautions"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "hosts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "role",
+          "state",
+          "seenAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "ok",
+              "warn",
+              "bad",
+              "unknown"
+            ]
+          },
+          "seenAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "uptimeH": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cpuPct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "ram": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "usedGb",
+              "totalGb"
+            ],
+            "properties": {
+              "usedGb": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalGb": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          },
+          "swap": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "usedGb",
+              "totalGb"
+            ],
+            "properties": {
+              "usedGb": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalGb": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          },
+          "tempC": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "internet",
+        "devices",
+        "links",
+        "ports"
+      ],
+      "properties": {
+        "internet": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "checkedAt"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "ok",
+                "warn",
+                "bad",
+                "unknown"
+              ]
+            },
+            "downMbps": {
+              "type": "number",
+              "minimum": 0
+            },
+            "upMbps": {
+              "type": "number",
+              "minimum": 0
+            },
+            "checkedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+            }
+          }
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "kind",
+              "state",
+              "link"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "router",
+                  "server",
+                  "desktop",
+                  "phone",
+                  "other"
+                ]
+              },
+              "host": {
+                "type": "string",
+                "description": "The host id, when the device is one of the hosts."
+              },
+              "state": {
+                "enum": [
+                  "ok",
+                  "warn",
+                  "bad",
+                  "unknown"
+                ]
+              },
+              "link": {
+                "type": "string"
+              },
+              "latencyMs": {
+                "type": "number",
+                "minimum": 0
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "links": {
+          "type": "array",
+          "description": "What the ship reaches outside the LAN, and whether it answered.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "for",
+              "state",
+              "checkedAt"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "for": {
+                "type": "string"
+              },
+              "state": {
+                "enum": [
+                  "ok",
+                  "warn",
+                  "bad",
+                  "unknown"
+                ]
+              },
+              "checkedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+              }
+            }
+          }
+        },
+        "ports": {
+          "type": "array",
+          "description": "What listens on the LAN, and who can sign in.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "port",
+              "service",
+              "host",
+              "reach",
+              "signIn"
+            ],
+            "properties": {
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "service": {
+                "type": "string"
+              },
+              "host": {
+                "type": "string"
+              },
+              "reach": {
+                "enum": [
+                  "local",
+                  "lan",
+                  "internet"
+                ]
+              },
+              "signIn": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "containers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "host",
+          "image",
+          "state",
+          "memMb",
+          "restarts",
+          "upSince"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "running",
+              "restarting",
+              "paused",
+              "exited"
+            ]
+          },
+          "memMb": {
+            "type": "number",
+            "minimum": 0
+          },
+          "limitMb": {
+            "type": "number",
+            "minimum": 1
+          },
+          "restarts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "upSince": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "disks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "host",
+          "label",
+          "mount",
+          "usedGb",
+          "totalGb"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^DK-\\d{3}$"
+          },
+          "host": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "mount": {
+            "type": "string"
+          },
+          "usedGb": {
+            "type": "number",
+            "minimum": 0
+          },
+          "totalGb": {
+            "type": "number",
+            "minimum": 1
+          },
+          "perDayGb": {
+            "type": "number",
+            "minimum": 0,
+            "description": "How fast it fills, in GB a day."
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gpu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host",
+        "name",
+        "vramGb",
+        "models"
+      ],
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "vramGb": {
+          "type": "number",
+          "minimum": 1
+        },
+        "tempC": {
+          "type": "number"
+        },
+        "powerW": {
+          "type": "number",
+          "minimum": 0
+        },
+        "models": {
+          "type": "array",
+          "description": "The models Ollama has loaded.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "sizeGb"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "sizeGb": {
+                "type": "number",
+                "minimum": 0
+              },
+              "until": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+              }
+            }
+          }
+        }
+      },
+      "description": "The GPU box. The VRAM in use comes from the rails file's local VRAM meter, which is live."
+    },
+    "jobs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "every",
+          "owner",
+          "last"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^CR-\\d{3}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "every": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string",
+            "description": "The station that owns the job."
+          },
+          "last": {
+            "enum": [
+              "ok",
+              "failed",
+              "skipped",
+              "running",
+              "never"
+            ]
+          },
+          "lastAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "nextAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "order": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$"
+          },
+          "backup": {
+            "type": "string",
+            "pattern": "^BK-\\d{3}$"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "backups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "what",
+          "from",
+          "to",
+          "lastAt",
+          "verified",
+          "keep",
+          "warnAfterH"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^BK-\\d{3}$"
+          },
+          "what": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "lastAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "sizeGb": {
+            "type": "number",
+            "minimum": 0
+          },
+          "verified": {
+            "enum": [
+              "ok",
+              "failed",
+              "never"
+            ],
+            "description": "Whether the last copy was read back and found whole."
+          },
+          "keep": {
+            "type": "string"
+          },
+          "warnAfterH": {
+            "type": "number",
+            "minimum": 1,
+            "description": "A copy older than this many hours is overdue."
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "cautions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "why"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^CA-\\d{3}$"
+          },
+          "text": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

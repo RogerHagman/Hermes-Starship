@@ -31,6 +31,11 @@ const BOARD_TEXT: Record<BoardId, { deck: string; title: string; intro: string }
     title: 'Main Engineering',
     intro: 'The warp core, every patch from brief to live, the patch bay and the commands you run on the NAS.',
   },
+  ops: {
+    deck: 'DECK 1 · OPS · BEHIND THE BRIDGE',
+    title: 'Ops',
+    intro: 'What Ops knows about the ship: the NAS, the network, the containers, the disks, the GPU, the schedule and the backups. Ops only reads.',
+  },
   science: {
     deck: 'DECK 3 · SCIENCES · SCIENCE LAB',
     title: 'Science lab',
