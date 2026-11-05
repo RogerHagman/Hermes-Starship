@@ -72,7 +72,7 @@ export function App() {
             <Header ship={ship} board={board} error={error} />
             {ship && board === 'bridge' && (
               <BridgeBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget} onToast={showToast}
-                onQuarters={() => goBoard('quarters')} />
+                onQuarters={() => goBoard('quarters')} onRelieve={relieve} />
             )}
             {ship && board === 'quarters' && (
               <QuartersBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}

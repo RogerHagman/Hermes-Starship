@@ -14,7 +14,7 @@ import { BridgeBoard } from './BridgeBoard';
 const data = { ship, stations, rails, orders, shiplog, quarters } as unknown as Fixtures;
 const noop = () => {};
 const board = (drills = {}) => render(
-  <BridgeBoard ship={makeShipView(data, drills, new Set())} filter="all" drills={drills} target={null} onTarget={noop} onToast={noop} onQuarters={noop} />).container;
+  <BridgeBoard ship={makeShipView(data, drills, new Set())} filter="all" drills={drills} target={null} onTarget={noop} onToast={noop} onQuarters={noop} onRelieve={noop} />).container;
 const consoleOf = (c: HTMLElement) => c.querySelector('.console')!;
 const names = (c: HTMLElement) => [...c.querySelectorAll('.chain-name')].map((n) => n.textContent);
 

@@ -1,4 +1,4 @@
-import random, re
+import math, random, re
 random.seed(74656)
 RAILC = dict(captain='#e8c37a', local='#3fc1a5', codex='#f0a948', claude='#e889b6', mixed='#8fa8e0')
 ST = """xo,1,1228,58,166,local,live,
@@ -9,7 +9,7 @@ helm,1,1390,130,200,local,live,
 ops,1,1604,130,200,local,live,
 lounge,2,934,242,530,mixed,live,space
 strategist,2,1476,242,170,claude,approved,
-yeoman,2,1658,242,170,local,approved,
+yeoman,2,1658,242,170,local,live,
 quarters,2,1840,242,180,captain,live,space
 computer,3,840,338,240,local,live,
 archives,3,1094,338,240,local,live,
@@ -144,6 +144,109 @@ def furn(kind, s, C):
         g.append(f'<rect x="{R-98}" y="{F-14}" width="52" height="10" rx="4" fill="#4a3558"></rect><rect x="{R-98}" y="{F-20}" width="10" height="16" rx="3" fill="#4a3558"></rect><rect x="{R-94}" y="{F-4}" width="3" height="4" fill="{FILL}"></rect><rect x="{R-52}" y="{F-4}" width="3" height="4" fill="{FILL}"></rect>')
     return ''.join(g)
 
+
+# Second pieces of furniture (05/11): fill the left part of each room, between the crew
+# token at the post (x+8..x+48) and the first piece, so the rooms look lived in with the
+# labels off. Their own random source keeps every earlier piece exactly as it was.
+def desk2(x0, x1, F, C, rnd, h=16):
+    return (f'<path d="M{x0} {F} L{x0} {F-h+6} L{x0+8} {F-h} L{x1} {F-h} L{x1} {F} Z" fill="{FILL}" stroke="{EDGE}" stroke-width="1.2"></path>'
+            f'<rect x="{x0+9}" y="{F-h+1}" width="{x1-x0-12}" height="2.5" rx="1" fill="{C}" opacity="0.85"></rect>'
+            + ''.join(f'<rect x="{x0+10+k*9}" y="{F-h+7}" width="6" height="2.5" rx="1" fill="{rnd.choice(["#8fa8e0","#e8c37a","#3fc1a5","#e889b6","#f0a948"])}" opacity="0.7"></rect>' for k in range(max(1, (x1-x0-16)//9))))
+
+def plant(cx, F):
+    return (f'<path d="M{cx-6} {F} L{cx-5} {F-10} L{cx+5} {F-10} L{cx+6} {F} Z" fill="#3a4c6e" stroke="{HI}" stroke-width="0.8"></path>'
+            f'<path d="M{cx} {F-10} q-9 -6 -7 -17 M{cx} {F-10} q8 -8 5 -19 M{cx} {F-10} q2 -10 -1 -22 M{cx} {F-10} q-3 -4 -11 -6" fill="none" stroke="#3fa86a" stroke-width="2.2" stroke-linecap="round" opacity="0.85"></path>')
+
+def panel(x, y, w, h, C, rows, rnd):
+    bars = ''.join(f'<rect x="{x+4}" y="{y+4+k*5}" width="{rnd.choice([w-8, w-14, w-20, (w-8)//2])}" height="2.5" rx="1" fill="{rnd.choice([C, C, "#8fa8e0", "#e8c37a"])}" opacity="0.7"></rect>' for k in range(rows))
+    return screen(x, y, w, h, C, bars)
+
+def furn2(kind, s, C):
+    x, y, w = s['x'], s['y'], s['w']
+    L = x + 56; F = y + 60
+    rnd = random.Random(s['id'])
+    g = []
+    if kind == 'core':          # an operator's console and a wall readout
+        g.append(panel(L, F-54, 46, 26, C, 4, rnd))
+        g.append(desk2(L+52, L+96, F, C, rnd))
+        g.append(chair(L+72, F, C))
+    elif kind == 'shelves':     # a reading table with a lamp and a stack of books
+        g.append(f'<rect x="{L+6}" y="{F-16}" width="56" height="4" rx="1" fill="{HI}"></rect><rect x="{L+10}" y="{F-12}" width="3" height="12" fill="{FILL}"></rect><rect x="{L+55}" y="{F-12}" width="3" height="12" fill="{FILL}"></rect>')
+        g.append(f'<path d="M{L+16} {F-16} L{L+16} {F-30} L{L+24} {F-34}" fill="none" stroke="{HI}" stroke-width="1.5"></path><path d="M{L+20} {F-36} L{L+30} {F-36} L{L+27} {F-31} L{L+23} {F-31} Z" fill="#e8c37a" opacity="0.9"></path><path d="M{L+18} {F-31} L{L+34} {F-16} L{L+10} {F-16} Z" fill="#e8c37a" opacity="0.08"></path>')
+        for k, (bw, c) in enumerate([(14, '#8fa8e0'), (12, '#7d5a3a'), (15, '#e889b6')]):
+            g.append(f'<rect x="{L+38}" y="{F-20-k*3.5}" width="{bw}" height="3" rx="0.5" fill="{c}" opacity="0.75"></rect>')
+        g.append(chair(L+74, F, C))
+    elif kind == 'lab':         # a microscope bench and a specimen cabinet
+        g.append(f'<rect x="{L+2}" y="{F-46}" width="26" height="46" rx="1" fill="{FILL}" stroke="{EDGE}" stroke-width="1.2"></rect>'
+                 + ''.join(f'<rect x="{L+5+c*8}" y="{F-42+r*10}" width="6" height="7" rx="1" fill="none" stroke="#9fb3d1" stroke-width="0.8" opacity="0.7"></rect><rect x="{L+6+c*8}" y="{F-38+r*10}" width="4" height="2.5" fill="{rnd.choice([C, "#3fc1a5", "#e889b6", "#e8c37a"])}" opacity="0.8"></rect>' for r in range(4) for c in range(3)))
+        g.append(f'<rect x="{L+36}" y="{F-16}" width="50" height="4" rx="1" fill="{HI}"></rect><rect x="{L+40}" y="{F-12}" width="3" height="12" fill="{FILL}"></rect><rect x="{L+79}" y="{F-12}" width="3" height="12" fill="{FILL}"></rect>'
+                 f'<path d="M{L+52} {F-16} h12 M{L+58} {F-16} v-4 M{L+55} {F-20} l6 -12 M{L+60} {F-34} l-3 -5" stroke="#c4cfe2" stroke-width="2.2" stroke-linecap="round" opacity="0.8"></path><circle cx="{L+61}" cy="{F-32}" r="2" fill="{C}"></circle>')
+    elif kind == 'sensors':     # a telemetry wall and the operator's chair
+        pts = ' '.join(f'{L+4+k*6},{F-40+round(8*math.sin(k*0.9)) + rnd.choice([-1, 0, 1])}' for k in range(12))
+        g.append(screen(L, F-54, 78, 30, C, f'<polyline points="{pts}" fill="none" stroke="{C}" stroke-width="1.3"></polyline><path d="M{L+4} {F-30}H{L+74}" stroke="{C}" stroke-opacity="0.3"></path>'))
+        g.append(chair(L+40, F, C))
+    elif kind == 'biobed':      # a medicine cabinet and a drip stand
+        g.append(f'<rect x="{L+2}" y="{F-50}" width="30" height="34" rx="2" fill="#dfe7f3" fill-opacity="0.16" stroke="{EDGE}" stroke-width="1.2"></rect><path d="M{L+17} {F-41}v14 M{L+10} {F-34}h14" stroke="#ff8a8a" stroke-width="3"></path>')
+        g.append(f'<path d="M{L+48} {F} v-46 M{L+44} {F} h8 M{L+48} {F-46} h8" stroke="{HI}" stroke-width="1.6"></path><rect x="{L+52}" y="{F-44}" width="7" height="11" rx="2" fill="{C}" opacity="0.45"></rect><path d="M{L+55} {F-33} q2 10 -4 18" fill="none" stroke="{C}" stroke-width="0.8" opacity="0.6"></path>')
+        g.append(f'<rect x="{L+64}" y="{F-20}" width="28" height="4" rx="1" fill="{HI}"></rect><rect x="{L+66}" y="{F-16}" width="3" height="16" fill="{FILL}"></rect><rect x="{L+87}" y="{F-16}" width="3" height="16" fill="{FILL}"></rect><rect x="{L+70}" y="{F-24}" width="8" height="4" rx="1" fill="#c4cfe2" opacity="0.6"></rect>')
+    elif kind == 'holo':        # the arch control panel beside the holodeck doors
+        g.append(f'<rect x="{L+4}" y="{F-40}" width="22" height="30" rx="2" fill="#2a3a56" stroke="#f0c048" stroke-opacity="0.6" stroke-width="1.2"></rect>'
+                 + ''.join(f'<rect x="{L+8+c*7}" y="{F-35+r*6}" width="5" height="3" rx="1" fill="{rnd.choice(["#f0c048", "#e889b6", "#8fa8e0"])}" opacity="0.8"></rect>' for r in range(4) for c in range(2)))
+        g.append(''.join(f'<path d="M{L+36+k*12} {F} L{L+40+k*12} {F-50}" stroke="#f0c048" stroke-opacity="0.18" stroke-width="1"></path>' for k in range(5)))
+    elif kind == 'starmap':     # a star globe on a pedestal
+        cx, cy = L+30, F-30
+        g.append(f'<circle cx="{cx}" cy="{cy}" r="17" fill="#070d18" stroke="{EDGE}" stroke-width="1.2"></circle><ellipse cx="{cx}" cy="{cy}" rx="17" ry="6" fill="none" stroke="{C}" stroke-width="0.8" opacity="0.6"></ellipse><ellipse cx="{cx}" cy="{cy}" rx="6" ry="17" fill="none" stroke="{C}" stroke-width="0.8" opacity="0.6"></ellipse>'
+                 + ''.join(f'<circle cx="{cx+rnd.randint(-12,12)}" cy="{cy+rnd.randint(-12,12)}" r="0.9" fill="#ffffff" opacity="0.8"></circle>' for _ in range(8))
+                 + f'<path d="M{cx} {cy+17} v10 M{cx-10} {F} L{cx} {cy+27} L{cx+10} {F}" fill="none" stroke="{HI}" stroke-width="2"></path>')
+        g.append(chair(L+66, F, C))
+    elif kind == 'lifesupport':  # a valve wheel on the main pipe and a filter tank
+        g.append(f'<path d="M{L+6} {F-46} V{F} M{L+16} {F-46} V{F}" stroke="{HI}" stroke-width="3"></path><circle cx="{L+11}" cy="{F-24}" r="7" fill="none" stroke="#e8c37a" stroke-width="2" opacity="0.8"></circle><path d="M{L+4} {F-24}h14 M{L+11} {F-31}v14" stroke="#e8c37a" stroke-width="1.2" opacity="0.8"></path>')
+        g.append(f'<rect x="{L+28}" y="{F-34}" width="16" height="34" rx="7" fill="#2a3a56" stroke="{HI}" stroke-width="1"></rect><rect x="{L+31}" y="{F-20}" width="10" height="3" rx="1" fill="{C}" opacity="0.8"></rect>')
+    elif kind == 'security':    # a monitor bank on the wall
+        for k in range(2):
+            g.append(panel(L-2, F-54+k*20, 32, 16, C, 2, rnd))
+    elif kind == 'crates':      # a stock shelf and the weighing scale
+        g.append(f'<rect x="{L+2}" y="{F-46}" width="34" height="46" fill="{FILL}" stroke="{EDGE}" stroke-width="1.2"></rect>'
+                 + ''.join(f'<rect x="{L+5+c*10}" y="{F-42+r*15}" width="7" height="10" rx="2" fill="{rnd.choice(["#e8c37a", "#3fc1a5", "#c4cfe2", "#f0a948", "#7d5a3a"])}" opacity="0.65"></rect>' for r in range(3) for c in range(3))
+                 + ''.join(f'<rect x="{L+2}" y="{F-31+r*15}" width="34" height="2" fill="{HI}"></rect>' for r in range(2)))
+        g.append(f'<rect x="{L+44}" y="{F-8}" width="16" height="8" rx="1" fill="#2a3a56" stroke="{HI}" stroke-width="1"></rect><rect x="{L+47}" y="{F-6}" width="10" height="3" fill="#070d18"></rect><rect x="{L+48}" y="{F-5.5}" width="5" height="2" fill="{C}"></rect>')
+    elif kind == 'comms':       # a radio rack and a chair
+        g.append(f'<rect x="{L+2}" y="{F-48}" width="28" height="48" rx="1" fill="{FILL}" stroke="{EDGE}" stroke-width="1.2"></rect>'
+                 + ''.join(f'<rect x="{L+5}" y="{F-44+k*9}" width="22" height="6" rx="1" fill="#070d18"></rect><rect x="{L+7}" y="{F-42+k*9}" width="{rnd.choice([6, 10, 14])}" height="2" fill="{C}" opacity="0.8"></rect><circle cx="{L+24}" cy="{F-41+k*9}" r="1.5" fill="{rnd.choice(["#3fc1a5", "#e8c37a", "#ff8a8a"])}"></circle>' for k in range(5)))
+        g.append(chair(L+48, F, C))
+    elif kind == 'lockers':     # a kit bench with cases and a tricorder rack
+        g.append(f'<rect x="{L+2}" y="{F-14}" width="56" height="4" rx="1" fill="{HI}"></rect><rect x="{L+6}" y="{F-10}" width="3" height="10" fill="{FILL}"></rect><rect x="{L+51}" y="{F-10}" width="3" height="10" fill="{FILL}"></rect>'
+                 f'<rect x="{L+8}" y="{F-24}" width="18" height="10" rx="2" fill="#2a3a56" stroke="{HI}" stroke-width="1"></rect><rect x="{L+30}" y="{F-22}" width="22" height="8" rx="2" fill="#2a3a56" stroke="{HI}" stroke-width="1"></rect><rect x="{L+14}" y="{F-26}" width="6" height="2" rx="1" fill="{HI}"></rect>')
+        g.append(f'<rect x="{L+4}" y="{F-50}" width="50" height="14" rx="2" fill="#070d18" stroke="{EDGE}" stroke-width="1"></rect>'
+                 + ''.join(f'<rect x="{L+8+k*11}" y="{F-47}" width="7" height="9" rx="1.5" fill="#3a4c6e"></rect><rect x="{L+9+k*11}" y="{F-46}" width="5" height="2" fill="{C}" opacity="0.8"></rect>' for k in range(4)))
+    elif kind == 'eng':         # plasma conduits with a pressure gauge
+        g.append(f'<path d="M{L-2} {F-56} V{F} M{L+8} {F-56} V{F}" stroke="#2a3a56" stroke-width="6"></path><path d="M{L-2} {F-56} V{F} M{L+8} {F-56} V{F}" stroke="{C}" stroke-width="1.5" opacity="0.55" class="pulse"></path>'
+                 f'<circle cx="{L+24}" cy="{F-34}" r="8" fill="#0b1322" stroke="{HI}" stroke-width="1.5"></circle><path d="M{L+24} {F-34} L{L+29} {F-39}" stroke="{C}" stroke-width="1.5"></path><path d="M{L+8} {F-34} H{L+16}" stroke="{HI}" stroke-width="2"></path>')
+    elif kind == 'design':      # a swatch board and a stool
+        g.append(f'<rect x="{L}" y="{F-54}" width="36" height="24" rx="2" fill="#070d18" stroke="{EDGE}" stroke-width="1"></rect>'
+                 + ''.join(f'<rect x="{L+4+c*8}" y="{F-50+r*9}" width="6" height="6" rx="1" fill="{col}" opacity="0.8"></rect>' for r, row_ in enumerate([["#3fc1a5", "#f0a948", "#e889b6", "#8fa8e0"], ["#e8c37a", "#ff8a8a", "#6fc0ff", "#c4cfe2"]]) for c, col in enumerate(row_)))
+        g.append(f'<rect x="{L+8}" y="{F-14}" width="16" height="4" rx="2" fill="#2a3a56"></rect><rect x="{L+14}" y="{F-10}" width="3" height="10" fill="#1d2534"></rect>')
+    elif kind == 'calib':       # a rack of gauges
+        g.append(f'<rect x="{L}" y="{F-50}" width="36" height="50" rx="1" fill="{FILL}" stroke="{EDGE}" stroke-width="1.2"></rect>'
+                 + ''.join(f'<circle cx="{L+10+c*16}" cy="{F-40+r*14}" r="5" fill="#0b1322" stroke="{HI}" stroke-width="1"></circle><path d="M{L+10+c*16} {F-40+r*14} l{rnd.choice([-3, 3, 4])} -3" stroke="{C}" stroke-width="1.2"></path>' for r in range(3) for c in range(2)))
+    elif kind == 'sys':         # a server rack and a cable tray
+        g.append(f'<rect x="{L}" y="{F-52}" width="22" height="52" rx="1" fill="#16223a" stroke="{EDGE}" stroke-width="1.2"></rect>'
+                 + ''.join(f'<rect x="{L+3}" y="{F-48+k*7}" width="16" height="4" rx="1" fill="#070d18"></rect><rect x="{L+4}" y="{F-47+k*7}" width="{rnd.choice([3, 6, 9])}" height="2" fill="{C}" opacity="{rnd.choice([0.4, 0.7, 0.9])}"></rect>' for k in range(7)))
+        g.append(f'<path d="M{L+22} {F-50} H{L+50} M{L+22} {F-46} q14 4 28 0" fill="none" stroke="{HI}" stroke-width="1.5"></path>')
+    elif kind == 'diag':        # a tool cart with a probe, and the report printer
+        g.append(f'<rect x="{L+2}" y="{F-26}" width="30" height="4" rx="1" fill="{HI}"></rect><rect x="{L+2}" y="{F-12}" width="30" height="3" rx="1" fill="{HI}"></rect><path d="M{L+4} {F-22}V{F-4} M{L+30} {F-22}V{F-4}" stroke="{FILL}" stroke-width="2"></path><circle cx="{L+6}" cy="{F-2}" r="2" fill="#1d2534"></circle><circle cx="{L+28}" cy="{F-2}" r="2" fill="#1d2534"></circle>'
+                 f'<path d="M{L+10} {F-26} l10 -10" stroke="#c4cfe2" stroke-width="2" stroke-linecap="round" opacity="0.8"></path><circle cx="{L+21}" cy="{F-37}" r="2" fill="{C}"></circle>')
+        g.append(f'<rect x="{L+40}" y="{F-20}" width="20" height="12" rx="2" fill="#2a3a56" stroke="{HI}" stroke-width="1"></rect><rect x="{L+43}" y="{F-26}" width="14" height="7" fill="#c4cfe2" opacity="0.6"></rect><rect x="{L+44}" y="{F-8}" width="3" height="8" fill="{FILL}"></rect><rect x="{L+53}" y="{F-8}" width="3" height="8" fill="{FILL}"></rect>')
+    elif kind == 'strategist':  # a chess table
+        g.append(f'<rect x="{L}" y="{F-20}" width="24" height="3" rx="1" fill="{HI}"></rect><path d="M{L+12} {F-17}V{F} M{L+5} {F} H{L+19}" stroke="{FILL}" stroke-width="3"></path>'
+                 + ''.join(f'<rect x="{L+2+k*5}" y="{F-23}" width="4" height="3" fill="{"#e8c37a" if k % 2 else "#3a4c6e"}"></rect>' for k in range(4))
+                 + f'<path d="M{L+6} {F-23} v-5 M{L+17} {F-23} v-4" stroke="{C}" stroke-width="2.5" stroke-linecap="round"></path>')
+    elif kind == 'yeoman':      # a filing cabinet with a plant on it
+        g.append(f'<rect x="{L}" y="{F-30}" width="22" height="30" rx="1" fill="{FILL}" stroke="{EDGE}" stroke-width="1.2"></rect>'
+                 + ''.join(f'<path d="M{L+3} {F-26+k*10} h16" stroke="#0a1222" stroke-width="1"></path><rect x="{L+8}" y="{F-24+k*10}" width="6" height="2" rx="1" fill="{C}" opacity="0.8"></rect>' for k in range(3)))
+        g.append(plant(L+11, F-30))
+    return ''.join(g)
+
 KIND = dict(computer='core', archives='shelves', science='lab', sensors='sensors', doctor='biobed', holo='holo', carto='starmap',
             life='lifesupport', security='security', qm='crates', comms='comms', away='lockers', eng='eng', design='design',
             calib='calib', sys='sys', diag='diag', strategist='strategist', yeoman='yeoman', quarters='captquarters')
@@ -178,7 +281,15 @@ for s in S:
         continue
     k = KIND.get(s['id'])
     if k:
-        rooms.append(f'<g opacity="{1 if lit else 0.42}">' + furn(k, s, C) + '</g>')
+        rooms.append(f'<g opacity="{1 if lit else 0.42}">' + furn(k, s, C) + furn2(k, s, C) + '</g>')
+
+# crew quarters common area (left of the cabin doors): replicator, sofa, table, plants
+F5 = 590
+rooms.append(f'<g>'
+             f'<rect x="1016" y="{F5-44}" width="24" height="44" rx="2" fill="{FILL}" stroke="{EDGE}" stroke-width="1.2"></rect><rect x="1020" y="{F5-38}" width="16" height="14" rx="2" fill="#070d18"></rect><rect x="1022" y="{F5-28}" width="12" height="2" fill="#3fc1a5" opacity="0.8"></rect>'
+             f'<rect x="1058" y="{F5-16}" width="52" height="10" rx="4" fill="#3a4c6e"></rect><rect x="1058" y="{F5-24}" width="10" height="18" rx="3" fill="#3a4c6e"></rect><rect x="1100" y="{F5-24}" width="10" height="18" rx="3" fill="#3a4c6e"></rect><rect x="1070" y="{F5-22}" width="28" height="8" rx="3" fill="#8fa8e0" opacity="0.35"></rect><rect x="1062" y="{F5-6}" width="3" height="6" fill="{FILL}"></rect><rect x="1103" y="{F5-6}" width="3" height="6" fill="{FILL}"></rect>'
+             f'<rect x="1116" y="{F5-9}" width="20" height="3" rx="1" fill="{HI}"></rect><rect x="1124" y="{F5-6}" width="4" height="6" fill="{FILL}"></rect>'
+             + plant(1046, F5) + '</g>')
 
 # transporter room (no tile) and the warp core shaft
 tr = dict(x=322, y=828, w=200)

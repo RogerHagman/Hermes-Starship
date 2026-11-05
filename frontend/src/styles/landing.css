@@ -190,7 +190,7 @@ html:has(.stage.fit){overflow:hidden}
 .slot.quarters{border-color:rgba(232,195,122,.6)}
 .slot.dim{opacity:.12}
 .tok{border:2px solid var(--c);background:#0b1528;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;
-  transition:left 1.4s ease-in-out, top 1.4s ease-in-out, opacity .4s ease, box-shadow .4s ease, border-color .4s ease}
+  transition:opacity .4s ease, box-shadow .4s ease, border-color .4s ease}
 .tok svg{width:58%;height:58%;fill:none;stroke:var(--c);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .4s ease}
 .tok:hover{filter:brightness(1.35)}
 .tok.off{--c:#7d8aa3;opacity:.85}
@@ -375,6 +375,8 @@ html:has(.stage.fit){overflow:hidden}
 .svc-log li{display:grid;grid-template-columns:86px minmax(0,1fr);gap:10px;align-items:baseline;line-height:1.35}
 .con-foot{flex-shrink:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .con-foot .btn{min-height:30px;font-size:13px}
+.con-foot .relieve{order:2;margin-left:auto;color:var(--text)}
+.con-foot .relieve[aria-pressed="true"]{background:var(--captain);border-color:var(--captain);color:var(--captain-ink)}
 .station-art-wrap .sa-tw{animation:bctw 4.5s ease-in-out infinite}
 .station-art-wrap .sa-streaks{transition:opacity 1.2s ease}
 .station-art-wrap .sa-streak{animation-name:bcstreak;animation-timing-function:linear;animation-iteration-count:infinite}

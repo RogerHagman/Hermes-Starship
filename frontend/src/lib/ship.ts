@@ -6,7 +6,7 @@ import { DEPTS, NEVER_COMMANDS, RAIL, RANK } from './lookups';
 /** Drills mark a rail as out on this screen only. */
 export type Drills = Partial<Record<RailId, boolean>>;
 
-/** Stations the Captain has relieved from the Quarters board. Screen only, like a drill. */
+/** Stations the Captain has relieved (from the Quarters board or a Bridge station card). Screen only, like a drill. */
 export type Relieved = ReadonlySet<string>;
 const NOBODY: Relieved = new Set();
 

@@ -53,6 +53,18 @@ describe('station art', () => {
     expect(lit(open('design'))).toBe('0.45');
     expect(lit(open('sensors'))).toBe('1');
   });
+  it('a crew card has a Relieve button; the Captain and the Ship\'s Computer have none', () => {
+    const relieved: string[] = [];
+    const card = (id: string, drills = new Set<string>()) => render(<ShipConsole ship={makeShipView(data, {}, drills)} pick={{ station: id }}
+      onPick={noop} onBack={noop} onRelieve={(x) => relieved.push(x)} />).container;
+    const btn = (c: HTMLElement) => [...c.querySelectorAll('button.relieve')][0] as HTMLButtonElement | undefined;
+    fireEvent.click(btn(card('helm'))!);
+    expect(relieved).toEqual(['helm']);
+    expect(btn(card('helm', new Set(['helm'])))?.textContent).toBe('Recall to post');
+    expect(btn(card('computer'))).toBeUndefined();
+    expect(btn(card('captain'))).toBeUndefined();
+    expect(btn(card('doctor'))).toBeUndefined();   // not built yet: nobody to relieve
+  });
   it('every station card has a console button, disabled until its board exists', () => {
     for (const s of data.stations.stations.filter((x) => x.id !== 'captain' && x.id !== 'quarters')) {
       const button = [...open(s.id).querySelectorAll('button')].find((b) => b.textContent === `${s.short} console`);

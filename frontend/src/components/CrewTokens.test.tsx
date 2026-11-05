@@ -11,7 +11,7 @@ import quarters from '../../../fixtures/quarters.json';
 import type { Fixtures } from '../types';
 import { makeShipView, type Drills } from '../lib/ship';
 import { SHIP_MAP } from '../lib/shipmap';
-import { cabinOf, postOf } from './CrewTokens';
+import { cabinOf, postOf, walkPath } from './CrewTokens';
 import { ShipPlan } from './ShipPlan';
 
 const data = { ship, stations, rails, orders, shiplog, quarters } as unknown as Fixtures;
@@ -37,6 +37,25 @@ describe('crew tokens', () => {
     expect(off.style.top).toBe(pct(SHIP_MAP.cabins.y, SHIP_MAP.height));
     expect(off.className).toContain('off');
     expect(off.getAttribute('aria-label')).toContain('cabin 05-13');
+  });
+  it('the walk to a cabin goes by the turbolift, not through space', () => {
+    const st = (id: string) => data.stations.stations.find((s) => s.id === id)!;
+    const L = SHIP_MAP.lifts;
+    // Saucer crew: along the deck to the lift, down it, along Crew Quarters.
+    const helm = walkPath(st('helm'), postOf('helm'), cabinOf('helm', data.stations.stations));
+    expect(helm.map((p) => p.x).slice(1, 3)).toEqual([L.saucer, L.saucer]);
+    // Engineering hull crew: up their lift to deck 6, then up the neck into the saucer.
+    const eng = walkPath(st('eng'), postOf('eng'), cabinOf('eng', data.stations.stations));
+    expect(eng).toContainEqual({ x: L.engineering, y: L.deck6 });
+    expect(eng).toContainEqual(L.neckTop);
+    // Every step is straight along a deck, straight up a lift, or the neck.
+    for (const path of [helm, eng]) {
+      path.slice(1).forEach((p, i) => {
+        const a = path[i];
+        const neck = a === L.neckFoot && p === L.neckTop;
+        expect(a.x === p.x || a.y === p.y || neck, JSON.stringify([a, p])).toBe(true);
+      });
+    }
   });
   it('every crew member has a cabin door of their own', () => {
     const live = data.stations.stations.filter((s) => s.kind === 'station' && s.status === 'live' && s.id !== 'captain');

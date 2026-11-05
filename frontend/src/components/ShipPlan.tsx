@@ -22,6 +22,7 @@ interface Props {
   onDept: (dept: string) => void;
   onBack: () => void;
   onQuarters?: () => void;
+  onRelieve?: (id: string) => void;
 }
 
 const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
@@ -47,7 +48,7 @@ const ShipArt = memo(function ShipArt() {
   return <div className="ship-art-svg" dangerouslySetInnerHTML={{ __html: shipSvg }} />;
 });
 
-export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onQuarters }: Props) {
+export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onQuarters, onRelieve }: Props) {
   const selected = pick?.station ?? null;
   const artRef = useRef<HTMLDivElement>(null);
   const codexUp = ship.rail('codex') !== 'out';
@@ -96,7 +97,7 @@ export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onQuarter
           <CrewTokens ship={ship} filter={filter} selected={selected} slots={labels !== 'off'} onPick={onPick} />
         </div>
       </div>
-      <ShipConsole ship={ship} pick={pick} onPick={onPick} onDept={onDept} onBack={onBack} onQuarters={onQuarters} />
+      <ShipConsole ship={ship} pick={pick} onPick={onPick} onDept={onDept} onBack={onBack} onQuarters={onQuarters} onRelieve={onRelieve} />
       </div>
     </section>
   );

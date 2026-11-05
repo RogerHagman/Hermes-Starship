@@ -18,9 +18,10 @@ interface Props {
   onTarget: (id: string) => void;
   onToast: (text: string) => void;
   onQuarters: () => void;
+  onRelieve: (id: string) => void;
 }
 
-export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast, onQuarters }: Props) {
+export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast, onQuarters, onRelieve }: Props) {
   const [open, setOpen] = useState<ConsolePick | null>(null);
   // `from`: where the card was opened from (the Captain's chair, or a chain of command), so
   // Back can return there.
@@ -34,7 +35,7 @@ export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast, o
   const close = useCallback(() => setOpen(null), []);
   return (
     <div className="grid">
-      <ShipPlan ship={ship} filter={filter} pick={open} onPick={openStation} onDept={openDept} onBack={close} onQuarters={onQuarters} />
+      <ShipPlan ship={ship} filter={filter} pick={open} onPick={openStation} onDept={openDept} onBack={close} onQuarters={onQuarters} onRelieve={onRelieve} />
       <aside className="side">
         <RailsPanel ship={ship} drills={drills} />
         <HailsPanel ship={ship} picked={open?.order} onOpen={openStation} />
