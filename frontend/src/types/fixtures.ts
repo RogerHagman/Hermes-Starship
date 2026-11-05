@@ -14,6 +14,10 @@ export interface OrdersFile {
     updatedAt: string;
     parent?: string;
     detail?: string;
+    /**
+     * The card body as filed, plain text. A line that starts with GOAL:, CONTEXT:, CONSTRAINTS:, DONE WHEN: or START WITH: begins a section; a line that starts with '- ' is a list item.
+     */
+    body?: string;
   }[];
 }
 
