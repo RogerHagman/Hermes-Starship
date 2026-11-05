@@ -8,6 +8,7 @@ import art from '../assets/bridge-chair.svg?raw';
 import { SHIP_MAP } from '../lib/shipmap';
 import type { ShipView } from '../lib/ship';
 import { ConHead, StationDetail } from './ShipConsole';
+import { Pager } from './Pager';
 import { burning } from './StationArt';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
@@ -34,16 +35,8 @@ export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
     '--bc-burn': burn ? 1 : 0,
   });
 
-  // Two pages: the chair, then the station card. Small dots, the current one lit; the name
-  // of each page shows on hover.
-  const pager = captain && (
-    <span className="pager" role="group" aria-label="Pages">
-      {['The chair', 'Station card'].map((label, i) => (
-        <button key={label} type="button" className="pager-dot" aria-pressed={page === i} aria-label={`Page ${i + 1}: ${label}`}
-          data-tip={label} onClick={() => setPage(i)} />
-      ))}
-    </span>
-  );
+  // Two pages: the chair, then the station card.
+  const pager = captain && <Pager pages={['The chair', 'Station card']} page={page} onPage={setPage} />;
 
   if (page === 1 && captain) {
     return (

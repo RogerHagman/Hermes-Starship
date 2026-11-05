@@ -1,15 +1,21 @@
-// The picture beside a Bridge station's card, like the Captain's chair has its own.
+// The picture for a Bridge station, like the Captain's chair has its own, and the two-page
+// console that shows it (StationScene).
 // The art comes from tools/make_bridge_stations_svg.py. Two CSS variables light it:
 // --sa-glow dims the station's lights while it is off duty (relieved, or its rail is out),
 // and --sa-burn shows warp streaks on the viewscreen while the burn is on.
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import xo from '../assets/station-xo.svg?raw';
 import helm from '../assets/station-helm.svg?raw';
 import nav from '../assets/station-nav.svg?raw';
 import ops from '../assets/station-ops.svg?raw';
 import screen from '../assets/station-screen.svg?raw';
+import { SHIP_MAP } from '../lib/shipmap';
 import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
+import { Pager } from './Pager';
+import { ConHead, ConsoleFoot, OrderBox, StationDetail, StationPills, stationColour, stationSub } from './ShipConsole';
+
+const ICONS = SHIP_MAP.icons as Record<string, string>;
 
 const ART: Record<string, string> = { xo, helm, nav, ops, screen };
 
@@ -24,4 +30,37 @@ export function StationArt({ ship, st }: { ship: ShipView; st: Station }) {
   // The picture is our own file, never fixture text, and is inserted once per station.
   const svg = useMemo(() => <div className="cchair-svg" dangerouslySetInnerHTML={{ __html: ART[st.id] }} />, [st.id]);
   return <div className="cchair-art station-art-wrap" style={look}>{svg}</div>;
+}
+
+/**
+ * A Bridge station in the console, on two pages like the Captain's chair. Page 1 is the
+ * station itself: its picture, its status and what it is working on. Page 2 is its card,
+ * the same one every other station has.
+ */
+export function StationScene({ ship, st, orderId, back, onBack }: {
+  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void;
+}) {
+  const [page, setPage] = useState(0);
+  const pager = <Pager pages={['The station', 'Station card']} page={page} onPage={setPage} />;
+  const working = !!(orderId ?? st.activeOrder);
+  return (
+    <section className="console scene" role="region" aria-label={`${st.name} console`} style={{ '--c': stationColour(st) } as React.CSSProperties}>
+      {page === 1
+        ? <StationDetail ship={ship} st={st} orderId={orderId} back={back} onBack={onBack} actions={pager} />
+        : <>
+            <ConHead icon={ICONS[st.id]} title={st.name} sub={stationSub(st)} back={back} onBack={onBack}>{pager}</ConHead>
+            <div className="cchair-body">
+              <StationArt ship={ship} st={st} />
+              <div className="station-side">
+                <StationPills ship={ship} st={st} />
+                <div className="con-body">
+                  {working ? <OrderBox ship={ship} st={st} orderId={orderId} /> : <span className="cchair-count mono">NO ORDER AT THIS STATION</span>}
+                  <p className="con-text station-duty">{st.duty}</p>
+                </div>
+                <ConsoleFoot st={st} />
+              </div>
+            </div>
+          </>}
+    </section>
+  );
 }

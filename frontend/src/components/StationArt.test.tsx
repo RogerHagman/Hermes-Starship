@@ -1,6 +1,6 @@
 // The Bridge station pictures and the console button every station card has.
 import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import ship from '../../../fixtures/ship.json';
 import stations from '../../../fixtures/stations.json';
 import rails from '../../../fixtures/rails.json';
@@ -25,6 +25,14 @@ describe('station art', () => {
   it('a Bridge card shows its picture, other decks do not', () => {
     expect(open('helm').querySelector('.station-art-wrap svg')).not.toBeNull();
     expect(open('doctor').querySelector('.station-art-wrap')).toBeNull();
+  });
+  it('a Bridge station has two pages: the picture, then its full card', () => {
+    const c = open('helm');
+    expect(c.querySelector('.con-facts')).toBeNull();
+    fireEvent.click(c.querySelector('[aria-label="Page 2: Station card"]')!);
+    expect(c.querySelector('.station-art-wrap')).toBeNull();
+    expect(c.querySelector('.con-facts')?.textContent).toContain('DUTY');
+    expect(c.querySelector('.pager-dot[aria-pressed="true"]')?.getAttribute('data-tip')).toBe('Station card');
   });
   it('the lights dim while the station is off duty', () => {
     const lit = (c: HTMLElement) => (c.querySelector('.station-art-wrap') as HTMLElement).style.getPropertyValue('--sa-glow');

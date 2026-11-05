@@ -10,7 +10,7 @@ import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import { CaptainsChair } from './CaptainsChair';
 import { Icon } from './Icon';
-import { StationArt, hasArt } from './StationArt';
+import { StationScene, hasArt } from './StationArt';
 
 interface Props {
   ship: ShipView;
@@ -43,11 +43,13 @@ export function ShipConsole({ ship, pick, onPick, onBack, onQuarters }: Props) {
   const st = pick ? ship.station(pick.station) : undefined;
   if (!st) return <Watch ship={ship} onPick={onPick} />;
   if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />;
-  const art = hasArt(st.id);
+  const backLabel = from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch';
+  // A Bridge station with a picture gets two pages, like the Captain's chair. Keyed by
+  // station, so picking another one starts again on page 1.
+  if (hasArt(st.id)) return <StationScene key={st.id} ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} />;
   return (
-    <section className={'console' + (art ? ' scene' : '')} role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
-      <StationDetail ship={ship} st={st} orderId={pick?.order} back={from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch'} onBack={back}
-        art={art && <StationArt ship={ship} st={st} />} />
+    <section className="console" role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
+      <StationDetail ship={ship} st={st} orderId={pick?.order} back={backLabel} onBack={back} />
     </section>
   );
 }
@@ -73,47 +75,80 @@ export function ConHead({ icon, title, sub, back, onBack, children }: {
   );
 }
 
-/**
- * One station: who it is, its order, its duty. `actions` adds buttons to the title row, `art`
- * puts a picture beside the card (Bridge stations), and `onQuarters` makes the Captain's
- * console button open the Quarters. Every other station's console button waits for its board.
- */
-export function StationDetail({ ship, st, orderId, back, onBack, actions, art, onQuarters }: {
-  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; actions?: ReactNode;
-  art?: ReactNode; onQuarters?: () => void;
-}) {
-  const off = ship.off(st);
-  const acting = ship.actingFor(st.id);
+/** The small line under a station's title: deck, deck name, department. */
+export function stationSub(st: Station): string {
   const dept = DEPTS.find((d) => d.id === st.dept);
+  return `DECK ${st.deck} · ${DECKS[st.deck - 1].toUpperCase()}${dept ? ` · ${dept.name.toUpperCase()}` : ''}`;
+}
+
+/** The pills under the title: rail, status, rank, and off duty or acting head when they apply. */
+export function StationPills({ ship, st }: { ship: ShipView; st: Station }) {
+  const off = ship.off(st);
+  return (
+    <div className="con-pills">
+      <span className="railpill" style={css({ '--c': railColor(st.rail) })}>{RAIL[st.rail].label}</span>
+      <span className="railpill" style={css({ '--c': 'var(--text-label)', borderStyle: STATUS[st.status].line })}>{STATUS[st.status].label}</span>
+      <span className="railpill" style={css({ '--c': 'var(--text-label)' })}>{RANK[st.rank].label.toUpperCase()}</span>
+      {off && <span className="railpill" style={css({ '--c': 'var(--bad)' })}>OFF · {off.toUpperCase()}</span>}
+      {ship.actingFor(st.id) && <span className="railpill" style={css({ '--c': 'var(--captain)' })}>ACTING HEAD</span>}
+    </div>
+  );
+}
+
+/** The order a station is working on (or the one picked), if there is one. */
+export function OrderBox({ ship, st, orderId }: { ship: ShipView; st: Station; orderId?: string }) {
+  const off = ship.off(st);
   const oid = orderId ?? st.activeOrder;
   const o = oid ? ship.data.orders.orders.find((x) => x.id === oid) : undefined;
-  const card = (
+  if (!o) return null;
+  return (
+    <div className="con-order" style={css({ '--c': `var(--tier-${o.tier})` })}>
+      <span className="idtag">
+        {o.id} · {off ? `WAITS, ${off.toUpperCase()}` : o.state.toUpperCase()} · TIER {o.tier}
+        {o.speed ? ` · ${o.speed.toUpperCase()}` : ''} · {age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}
+      </span>
+      <span className="con-order-title">{o.title}</span>
+      {o.detail && <span className="con-text">{o.detail}</span>}
+      {o.state === 'awaiting-captain' && (
+        <span className="con-actions">
+          <button type="button" className="btn btn-ghost" disabled>Deny</button>
+          <button type="button" className="btn btn-gold" disabled>Approve</button>
+          <span className="con-hint">Orders arrive in H4.</span>
+        </span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The button to a station's own console, at the foot of its card. The Captain's opens the
+ * Quarters (when `onQuarters` is given). Every other one waits until that station's board exists.
+ */
+export function ConsoleFoot({ st, onQuarters }: { st: Station; onQuarters?: () => void }) {
+  return (
+    <div className="con-foot">
+      {st.id === 'captain'
+        ? onQuarters && <button type="button" className="btn btn-gold" onClick={onQuarters}>To your Quarters</button>
+        : <>
+            <button type="button" className="btn btn-ghost" disabled>{st.short} console</button>
+            <span className="con-hint">Not built yet.</span>
+          </>}
+    </div>
+  );
+}
+
+/** One station's card: who it is, its order, its duty. `actions` adds buttons to the title row. */
+export function StationDetail({ ship, st, orderId, back, onBack, actions, onQuarters }: {
+  ship: ShipView; st: Station; orderId?: string; back: string; onBack: () => void; actions?: ReactNode; onQuarters?: () => void;
+}) {
+  return (
     <>
-      <div className="con-pills">
-        <span className="railpill" style={css({ '--c': railColor(st.rail) })}>{RAIL[st.rail].label}</span>
-        <span className="railpill" style={css({ '--c': 'var(--text-label)', borderStyle: STATUS[st.status].line })}>{STATUS[st.status].label}</span>
-        <span className="railpill" style={css({ '--c': 'var(--text-label)' })}>{RANK[st.rank].label.toUpperCase()}</span>
-        {off && <span className="railpill" style={css({ '--c': 'var(--bad)' })}>OFF · {off.toUpperCase()}</span>}
-        {acting && <span className="railpill" style={css({ '--c': 'var(--captain)' })}>ACTING HEAD</span>}
-      </div>
+      <ConHead icon={ICONS[st.id]} title={st.name} back={back} onBack={onBack} sub={stationSub(st)}>
+        {actions}
+      </ConHead>
+      <StationPills ship={ship} st={st} />
       <div className="con-body">
-        {o && (
-          <div className="con-order" style={css({ '--c': `var(--tier-${o.tier})` })}>
-            <span className="idtag">
-              {o.id} · {off ? `WAITS, ${off.toUpperCase()}` : o.state.toUpperCase()} · TIER {o.tier}
-              {o.speed ? ` · ${o.speed.toUpperCase()}` : ''} · {age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}
-            </span>
-            <span className="con-order-title">{o.title}</span>
-            {o.detail && <span className="con-text">{o.detail}</span>}
-            {o.state === 'awaiting-captain' && (
-              <span className="con-actions">
-                <button type="button" className="btn btn-ghost" disabled>Deny</button>
-                <button type="button" className="btn btn-gold" disabled>Approve</button>
-                <span className="con-hint">Orders arrive in H4.</span>
-              </span>
-            )}
-          </div>
-        )}
+        <OrderBox ship={ship} st={st} orderId={orderId} />
         <dl className="con-facts">
           <dt>DUTY</dt><dd>{st.duty}</dd>
           {st.note && <><dt>NOTE</dt><dd>{st.note}</dd></>}
@@ -122,23 +157,7 @@ export function StationDetail({ ship, st, orderId, back, onBack, actions, art, o
           {st.answersTo && <><dt>ANSWERS TO</dt><dd>{st.answersTo}</dd></>}
         </dl>
       </div>
-      <div className="con-foot">
-        {st.id === 'captain'
-          ? onQuarters && <button type="button" className="btn btn-gold" onClick={onQuarters}>To your Quarters</button>
-          : <>
-              <button type="button" className="btn btn-ghost" disabled>{st.short} console</button>
-              <span className="con-hint">Not built yet.</span>
-            </>}
-      </div>
-    </>
-  );
-  return (
-    <>
-      <ConHead icon={ICONS[st.id]} title={st.name} back={back} onBack={onBack}
-        sub={`DECK ${st.deck} · ${DECKS[st.deck - 1].toUpperCase()}${dept ? ` · ${dept.name.toUpperCase()}` : ''}`}>
-        {actions}
-      </ConHead>
-      {art ? <div className="cchair-body">{art}<div className="station-side">{card}</div></div> : card}
+      <ConsoleFoot st={st} onQuarters={onQuarters} />
     </>
   );
 }
