@@ -76,6 +76,22 @@ export interface QuartersFile {
   };
 }
 
+/**
+ * live/rail-log.json from the rails probe: a line each time a rail went out or came back, newest first. The page works out which crew went to quarters (Crew Quarters duty log).
+ */
+export interface RailLogFile {
+  asOf: string;
+  synthetic: boolean;
+  events: {
+    at: string;
+    rail: "local" | "codex" | "claude";
+    /**
+     * out: the rail went out. up: it came back.
+     */
+    state: "out" | "up";
+  }[];
+}
+
 export interface RailsFile {
   asOf: string;
   synthetic: boolean;

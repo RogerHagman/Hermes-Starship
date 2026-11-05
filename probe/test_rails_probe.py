@@ -236,6 +236,61 @@ class Claude(unittest.TestCase):
             self.assertNotIn(writes, claude_part.replace("refreshed", ""))
 
 
+class TheRailLog(unittest.TestCase):
+    def reading(self, at, **states):
+        return {"asOf": at, "rails": [{"id": r, "state": states.get(r, "up")} for r in ("local", "codex", "claude")]}
+
+    def test_writes_a_line_when_a_rail_goes_out_and_when_it_comes_back(self):
+        with tempfile.TemporaryDirectory() as d:
+            log = rails_probe.RailLog(d)
+            self.assertFalse(log.note(self.reading("2026-11-05T08:00:00Z")))            # first look, all up: nothing
+            self.assertTrue(log.note(self.reading("2026-11-05T09:00:00Z", codex="out")))
+            self.assertFalse(log.note(self.reading("2026-11-05T09:01:00Z", codex="out")))  # still out: nothing new
+            self.assertTrue(log.note(self.reading("2026-11-05T10:00:00Z", codex="up")))
+            self.assertFalse(log.note(self.reading("2026-11-05T10:01:00Z", codex="degraded")))  # degraded is not out
+        self.assertEqual([("codex", "up", "2026-11-05T10:00:00Z"), ("codex", "out", "2026-11-05T09:00:00Z")],
+                         [(e["rail"], e["state"], e["at"]) for e in log.events])
+
+    def test_a_rail_that_is_out_at_the_first_look_is_written(self):
+        with tempfile.TemporaryDirectory() as d:
+            log = rails_probe.RailLog(d)
+            self.assertTrue(log.note(self.reading("2026-11-05T08:00:00Z", claude="out")))
+        self.assertEqual([{"at": "2026-11-05T08:00:00Z", "rail": "claude", "state": "out"}], log.events)
+
+    def test_a_restart_keeps_the_history_and_invents_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            log = rails_probe.RailLog(d)
+            log.note(self.reading("2026-11-05T08:00:00Z", local="out"))
+            rails_probe.atomic_write(d, log.file(NOW), rails_probe.RAIL_LOG)
+            again = rails_probe.RailLog(d)
+            self.assertFalse(again.note(self.reading("2026-11-05T08:05:00Z", local="out")))
+            self.assertEqual(1, len(again.events))
+            self.assertTrue(again.note(self.reading("2026-11-05T08:10:00Z")))
+
+    def test_keeps_only_the_newest_lines(self):
+        with tempfile.TemporaryDirectory() as d:
+            log = rails_probe.RailLog(d)
+            for i in range(rails_probe.RAIL_LOG_KEEP + 10):
+                log.note(self.reading(f"2026-11-05T{i // 60 % 24:02d}:{i % 60:02d}:00Z", codex="out" if i % 2 else "up"))
+        self.assertEqual(rails_probe.RAIL_LOG_KEEP, len(log.events))
+
+    def test_a_broken_log_file_starts_a_new_one(self):
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, rails_probe.RAIL_LOG).write_text("not json")
+            self.assertEqual([], rails_probe.RailLog(d).events)
+
+    def test_the_file_matches_the_schema(self):
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema not installed")
+        schema = json.loads((ROOT / "api/schema/raillog.schema.json").read_text())
+        with tempfile.TemporaryDirectory() as d:
+            log = rails_probe.RailLog(d)
+            log.note(self.reading("2026-11-05T08:00:00Z", codex="out"))
+        jsonschema.validate(log.file(NOW), schema)
+
+
 class TheFile(unittest.TestCase):
     def test_matches_the_schema(self):
         try:

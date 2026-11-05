@@ -12,6 +12,12 @@ It only reads, and it never runs a model:
 | Codex | The rate-limit records in the newest few Codex session logs: the 5-hour and weekly window use and their resets. A passed reset shows 0. |
 | Claude | The account's 5-hour and weekly use and their resets, asked from Anthropic at most every 5 minutes (3 times longer after a "too many" answer) with the sign-in Claude Code already keeps for the ship's Claude stations. It is the same answer as Claude Code's usage screen, and claude.ai chats count too. The sign-in file is only read: never written, renewed, copied or logged, and a test checks the token never reaches the log or the file. An expired sign-in is not used; the rail says why until Claude Code renews it. Plus the burn window, from Hermes' `burn.json`. |
 
+It also keeps `deploy/live/rail-log.json`: one line each time a rail goes out or comes back
+(the newest 500). The page turns it into the Crew Quarters duty log: who went to quarters, and
+when they were back at their post. The probe records only the rail; the page works out which
+crew needed it. On a restart the probe reads its own log back, so nothing is forgotten or
+written twice. A rail that is merely degraded doesn't count as out.
+
 It runs as the `rails-probe` service in `deploy/compose.yaml`: `python:3.12-alpine`, read-only,
 no capabilities, 32 MB of RAM (it uses about 15), no ports. It sees the Codex sessions folder,
 `burn.json` and Claude Code's sign-in folder read-only, and writes only `deploy/live/`.

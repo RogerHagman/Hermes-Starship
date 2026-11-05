@@ -1,7 +1,7 @@
 // Friendly names for the generated fixture types.
-import type { OrdersFile, QuartersFile, RailsFile, ShipFile, ShipLogFile, StationsFile } from './fixtures';
+import type { OrdersFile, QuartersFile, RailLogFile, RailsFile, ShipFile, ShipLogFile, StationsFile } from './fixtures';
 
-export type { OrdersFile, QuartersFile, RailsFile, ShipFile, ShipLogFile, StationsFile };
+export type { OrdersFile, QuartersFile, RailLogFile, RailsFile, ShipFile, ShipLogFile, StationsFile };
 export type Station = StationsFile['stations'][number];
 export type Rail = RailsFile['rails'][number];
 export type RailId = Rail['id'];
@@ -20,4 +20,6 @@ export interface Fixtures {
   orders: OrdersFile;
   shiplog: ShipLogFile;
   quarters: QuartersFile;
+  /** live/rail-log.json from the rails probe, when there is one. Its duty lines replace the samples. */
+  raillog?: RailLogFile;
 }

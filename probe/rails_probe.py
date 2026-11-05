@@ -11,6 +11,10 @@ Read-only. It looks at three things and changes none of them:
   The sign-in file is only read: never written, refreshed, copied or logged. No model runs.
   Plus the burn window, from burn.json.
 
+It also keeps live/rail-log.json: a line each time a rail goes out or comes back, so the
+page can show which crew went to quarters and when (the Crew Quarters duty log). The probe
+only records the rail; the page works out who needed it.
+
 The file has the shape of api/schema/rails.schema.json, with "synthetic": false. It is written
 atomically (a temp file, then a rename), so the page never reads half a file. A missing source
 never stops the probe: that rail shows what it can and the probe logs one line.
@@ -289,6 +293,50 @@ def claude_burn(burn_file, now):
         return {"active": False}
 
 
+# ---------- the rail log: when each rail went out and came back ----------
+
+RAIL_LOG = "rail-log.json"
+RAIL_LOG_KEEP = 500   # the newest lines kept; older ones drop off
+
+
+class RailLog:
+    """Remembers each rail's last state and adds a line when it changes between out and not out.
+
+    It starts from the file it wrote before, so a restart neither forgets the history nor
+    writes a change that didn't happen. The first time it sees a rail it writes a line only if
+    the rail is out, so the page knows those crew are in quarters.
+    """
+
+    def __init__(self, out_dir):
+        self.path = Path(out_dir) / RAIL_LOG
+        self.events = []
+        try:
+            with self.path.open("r", encoding="utf-8") as handle:
+                events = json.load(handle).get("events", [])
+            self.events = [e for e in events if isinstance(e, dict) and {"at", "rail", "state"} <= e.keys()]
+        except (OSError, ValueError, AttributeError):
+            pass   # no log yet, or an unreadable one: start a new one
+        self.last = {}
+        for event in sorted(self.events, key=lambda e: e["at"]):
+            self.last[event["rail"]] = event["state"]
+
+    def note(self, reading):
+        """Add a line for every rail that changed. True when something was added."""
+        added = False
+        for rail in reading["rails"]:
+            state = "out" if rail["state"] == "out" else "up"
+            before = self.last.get(rail["id"])
+            if state != before and (before is not None or state == "out"):
+                self.events.insert(0, {"at": reading["asOf"], "rail": rail["id"], "state": state})
+                added = True
+            self.last[rail["id"]] = state
+        del self.events[RAIL_LOG_KEEP:]
+        return added
+
+    def file(self, now):
+        return {"asOf": utc_stamp(now), "synthetic": False, "events": self.events}
+
+
 # ---------- the file ----------
 
 def build_reading(ollama_url, vram_gb, codex_sessions, burn_file, now=None, claude=None):
@@ -307,7 +355,7 @@ def build_reading(ollama_url, vram_gb, codex_sessions, burn_file, now=None, clau
     }
 
 
-def atomic_write(out_dir, reading):
+def atomic_write(out_dir, reading, name="rails.json"):
     directory = Path(out_dir)
     directory.mkdir(parents=True, exist_ok=True)
     fd, temp = tempfile.mkstemp(dir=directory, prefix=".rails.", suffix=".tmp")
@@ -318,7 +366,7 @@ def atomic_write(out_dir, reading):
             handle.flush()
             os.fsync(handle.fileno())
         os.chmod(temp, 0o644)   # nginx runs as another user and must be able to read it
-        os.replace(temp, directory / "rails.json")
+        os.replace(temp, directory / name)
     finally:
         if os.path.exists(temp):
             os.unlink(temp)
@@ -335,11 +383,15 @@ def main():
     except ValueError:
         every = CLAUDE_EVERY
     claude = ClaudeGauge(env("CLAUDE_SIGNIN", "/data/claude/.credentials.json"), max(every, 60))
+    out_dir = env("OUT_DIR", ".")
+    rail_log = RailLog(out_dir)
     while True:
         reading = build_reading(env("OLLAMA_URL", ""), env("VRAM_GB", "24"),
                                 env("CODEX_SESSIONS", "/data/codex-sessions"), env("BURN_FILE", "/data/burn.json"),
                                 claude=claude)
-        atomic_write(env("OUT_DIR", "."), reading)
+        atomic_write(out_dir, reading)
+        if rail_log.note(reading) or not rail_log.path.exists():
+            atomic_write(out_dir, rail_log.file(datetime.now(UTC)), RAIL_LOG)
         if interval <= 0:
             return
         time.sleep(interval)
