@@ -6,14 +6,18 @@ Read-only. It looks at three things and changes none of them:
   is ever asked of Ollama, so no model runs.
 - Codex: the newest Codex session logs, for the last 5-hour and weekly window use they record.
   Only the few newest files are opened, and only their rate-limit records are read.
-- Claude: not measured yet. Only the burn window, from burn.json.
+- Claude: the account's 5-hour and weekly use, asked from Anthropic at most every 5 minutes
+  with the sign-in Claude Code already keeps (the same answer as Claude Code's usage screen).
+  The sign-in file is only read: never written, refreshed, copied or logged. No model runs.
+  Plus the burn window, from burn.json.
 
 The file has the shape of api/schema/rails.schema.json, with "synthetic": false. It is written
 atomically (a temp file, then a rename), so the page never reads half a file. A missing source
 never stops the probe: that rail shows what it can and the probe logs one line.
 
-Settings come from the environment: OLLAMA_URL, VRAM_GB, CODEX_SESSIONS, BURN_FILE, OUT_DIR
-and INTERVAL (seconds; 0 runs once). Standard library only.
+Settings come from the environment: OLLAMA_URL, VRAM_GB, CODEX_SESSIONS, BURN_FILE,
+CLAUDE_SIGNIN (the .credentials.json Claude Code keeps), CLAUDE_EVERY (seconds between asks),
+OUT_DIR and INTERVAL (seconds; 0 runs once). Standard library only.
 """
 import json
 import os
@@ -22,6 +26,7 @@ import tempfile
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -150,7 +155,114 @@ def codex_rail(sessions_dir, now):
     return rail
 
 
-# ---------- Claude: the burn window only ----------
+# ---------- Claude: the account's usage windows ----------
+
+USAGE_URL = "https://api.anthropic.com/api/oauth/usage"
+CLAUDE_EVERY = 300          # ask at most every 5 minutes
+CLAUDE_KEEP = 15 * 60       # show the last answer for up to 15 minutes if a later ask fails
+WINDOWS = (("five_hour", "window", "5 h window"), ("seven_day", "week", "Week"))
+
+
+def signin_token(path, now):
+    """The access token from Claude Code's sign-in file, or (None, why). The file is only read."""
+    try:
+        with Path(path).open("r", encoding="utf-8") as handle:
+            oauth = json.load(handle).get("claudeAiOauth") or {}
+    except (OSError, ValueError, AttributeError):
+        return None, "no Claude sign-in file"
+    token, expires = oauth.get("accessToken"), oauth.get("expiresAt")
+    if not isinstance(token, str) or not token:
+        return None, "no token in the Claude sign-in file"
+    try:
+        if expires and float(expires) / 1000 <= now.timestamp():
+            return None, "the Claude sign-in has expired and waits for Claude Code to renew it"
+    except (TypeError, ValueError):
+        pass
+    return token, ""
+
+
+def usage_meters(payload, now):
+    """The two meters from Anthropic's answer, or None if it doesn't have the shape we know."""
+    if not isinstance(payload, dict):
+        return None
+    meters = []
+    for key, meter_id, label in WINDOWS:
+        window = payload.get(key)
+        if not isinstance(window, dict) or window.get("utilization") is None:
+            return None
+        reset = parse_time(window.get("resets_at"))
+        used = 0 if reset and reset <= now else percent(window["utilization"])   # a passed reset starts at 0
+        meter = {"id": meter_id, "label": label, "percent": used}
+        if reset:
+            meter["resetsAt"] = utc_stamp(reset)
+        meters.append(meter)
+    return meters
+
+
+class ClaudeGauge:
+    """Asks Anthropic for the Claude usage at most every `every` seconds, and keeps the last answer."""
+
+    def __init__(self, signin, every=CLAUDE_EVERY):
+        self.signin, self.every = signin, every
+        self.wait = every         # seconds until the next ask; longer after Anthropic says "too many"
+        self.asked_at = None      # when we last asked (monotonic seconds)
+        self.meters, self.got_at = [], None   # the last good answer and when it came (datetime)
+        self.why = "not asked yet"
+
+    def read(self, now, clock=time.monotonic):
+        if self.asked_at is None or clock() - self.asked_at >= self.wait:
+            self.asked_at = clock()
+            self.ask(now)
+        if self.got_at and (now - self.got_at).total_seconds() > CLAUDE_KEEP:
+            self.meters = []      # too old to show
+        if self.got_at:   # an answer kept from an earlier ask: let a passed reset show 0
+            for m in self.meters:
+                reset = parse_time(m.get("resetsAt"))
+                if reset and reset <= now:
+                    m["percent"] = 0
+        return self.meters, self.why
+
+    def ask(self, now):
+        token, why = signin_token(self.signin, now)
+        if token is None:
+            self.why = why
+            log(f"claude usage: {why}")
+            return
+        request = Request(USAGE_URL, method="GET", headers={
+            "Authorization": f"Bearer {token}", "anthropic-beta": "oauth-2025-04-20",
+            "Accept": "application/json", "User-Agent": "hermes-starship-rails-probe"})
+        try:
+            with urlopen(request, timeout=8) as response:
+                meters = usage_meters(json.load(response), now)
+        except HTTPError as exc:          # the status only: never the request, which holds the token
+            self.why = f"Anthropic answered {exc.code}"
+            if exc.code == 429:           # asked too often: wait three times as long before the next ask
+                self.wait = self.every * 3
+            log(f"claude usage unavailable: HTTP {exc.code}")
+            return
+        except (OSError, ValueError) as exc:
+            self.why = "Anthropic did not answer"
+            log(f"claude usage unavailable: {type(exc).__name__}")
+            return
+        if meters is None:
+            self.why = "Anthropic's answer has a shape the probe doesn't know"
+            log("claude usage: unexpected answer")
+            return
+        self.meters, self.got_at, self.why, self.wait = meters, now, "", self.every
+
+
+def claude_rail(gauge, burn_file, now):
+    meters, why = gauge.read(now) if gauge else ([], "not set up")
+    rail = {"id": "claude", "label": "Claude", "engine": "claude top and mid models", "host": "cloud",
+            "state": "out" if any(m["percent"] >= 100 for m in meters) else "up",
+            "meters": [dict(m) for m in meters], "burn": claude_burn(burn_file, now),
+            "note": "Starboard nacelle. The whole account: claude.ai chats count too."}
+    if not meters:
+        rail["note"] = f"Not measured right now: {why or 'no fresh answer'}."
+    return rail
+
+
+# ---------- Claude: the burn window ----------
 
 DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
@@ -179,7 +291,7 @@ def claude_burn(burn_file, now):
 
 # ---------- the file ----------
 
-def build_reading(ollama_url, vram_gb, codex_sessions, burn_file, now=None):
+def build_reading(ollama_url, vram_gb, codex_sessions, burn_file, now=None, claude=None):
     now = now or datetime.now(UTC)
     local_state, vram = read_ollama(ollama_url, vram_gb)
     return {
@@ -190,8 +302,7 @@ def build_reading(ollama_url, vram_gb, codex_sessions, burn_file, now=None):
              "state": local_state, "meters": [{"id": "vram", "label": "VRAM", "percent": vram}],
              "note": "Warp core. Rule 0 data stays here."},
             codex_rail(codex_sessions, now),
-            {"id": "claude", "label": "Claude", "engine": "claude top and mid models", "host": "cloud",
-             "state": "up", "meters": [], "burn": claude_burn(burn_file, now), "note": "Not measured yet"},
+            claude_rail(claude, burn_file, now),
         ],
     }
 
@@ -219,9 +330,15 @@ def main():
         interval = float(env("INTERVAL", "60"))
     except ValueError:
         interval = 60
+    try:
+        every = float(env("CLAUDE_EVERY", str(CLAUDE_EVERY)))
+    except ValueError:
+        every = CLAUDE_EVERY
+    claude = ClaudeGauge(env("CLAUDE_SIGNIN", "/data/claude/.credentials.json"), max(every, 60))
     while True:
         reading = build_reading(env("OLLAMA_URL", ""), env("VRAM_GB", "24"),
-                                env("CODEX_SESSIONS", "/data/codex-sessions"), env("BURN_FILE", "/data/burn.json"))
+                                env("CODEX_SESSIONS", "/data/codex-sessions"), env("BURN_FILE", "/data/burn.json"),
+                                claude=claude)
         atomic_write(env("OUT_DIR", "."), reading)
         if interval <= 0:
             return

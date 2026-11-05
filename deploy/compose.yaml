@@ -1,6 +1,7 @@
 # Hermes Starship · the Bridge landing page, plus the rails probe that keeps live/rails.json fresh.
 # nginx serves static files (about 10 MB of RAM). The probe is read-only towards Hermes and
-# writes only deploy/live/. No model runs: its one Ollama call is GET /api/ps.
+# writes only deploy/live/. No model runs: its one Ollama call is GET /api/ps, and its one
+# Anthropic call asks for the Claude usage (at most every 5 minutes).
 # Settings for this NAS go in deploy/.env (git ignores it), see deploy/env.example.
 services:
   starship:
@@ -38,12 +39,19 @@ services:
       VRAM_GB: ${VRAM_GB:-24}
       CODEX_SESSIONS: /data/codex-sessions
       BURN_FILE: /data/burn.json
+      # Claude: the sign-in Claude Code keeps for the ship's Claude stations, read-only. The probe
+      # asks Anthropic for the 5 h and weekly use with it at most every CLAUDE_EVERY seconds.
+      CLAUDE_SIGNIN: /data/claude/.credentials.json
+      CLAUDE_EVERY: "300"
       OUT_DIR: /out
       INTERVAL: "60"
     volumes:
       # Hermes keeps its data in /DATA/AppData/hermes (/opt/data inside Hermes). Read-only.
       - ${CODEX_SESSIONS_HOST:-/DATA/AppData/hermes/home/.codex/sessions}:/data/codex-sessions:ro
       - ${BURN_FILE_HOST:-/DATA/AppData/hermes/handoff/burn.json}:/data/burn.json:ro
+      # The folder, not the file: when Claude Code renews the sign-in it replaces the file, and a
+      # mount of the file alone would keep showing the old one.
+      - ${CLAUDE_HOME_HOST:-/DATA/AppData/hermes/home/.claude}:/data/claude:ro
       - ./live:/out
       - ../probe/rails_probe.py:/app/rails_probe.py:ro
     command: python -u /app/rails_probe.py
