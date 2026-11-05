@@ -14,6 +14,7 @@ takes props (its inputs) and returns the markup it draws.
 |---|---|
 | `src/App.tsx` | Loads the fixtures and holds the screen state (rail filter, drills, open station), then lays out the board |
 | `src/lib/ship.ts` | The ship logic as plain functions: rail state, who is off duty, who acts as head. Tested in `ship.test.ts` |
+| `src/lib/fit.ts` | Scales the 2560 × 1440 board to fit a desktop window, like the design boards (F for full screen). Small screens get the reflowing layout. Tested in `fit.test.ts` |
 | `src/lib/lookups.ts` | Colours, status line styles, ranks, departments, boards |
 | `src/lib/shipmap.ts` | Where each room sits on the ship art, and its icon |
 | `src/lib/data.ts` | Reads `fixtures/*.json`. This is the only network code, and it fetches local files only |

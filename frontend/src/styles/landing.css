@@ -1,5 +1,5 @@
 /* Hermes Starship · Bridge landing page.
-   Designed at 2560 x 1440, responsive down. Colour = rail, gold = Captain,
+   Designed at 2560 x 1440 and scaled to fit a desktop window; reflows on small screens. Colour = rail, gold = Captain,
    solid / dashed / dotted = live / approved-or-proposed / reserved. */
 
 *{box-sizing:border-box}
@@ -9,6 +9,14 @@ button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .mono{font-family:var(--font-mono)}
 [hidden]{display:none!important}
+
+/* ---------- the board ----------
+   .stage is the 2560 x 1440 board. In a desktop window it is scaled to fit (.fit, see lib/fit.ts),
+   so the breakpoints below are @container rules on the board's own width, not on the window. */
+.stage{container:board / inline-size}
+.stage.fit{position:fixed;width:2560px;height:1440px;transform-origin:0 0}
+.stage.fit .frame{height:1440px;min-height:0}
+html:has(.stage.fit){overflow:hidden}
 
 /* ---------- LCARS frame ---------- */
 .frame{
@@ -267,27 +275,27 @@ button{font:inherit;color:inherit}
 .con-row-text{color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hail[aria-pressed="true"]{border-color:var(--captain);background:var(--surface-selected)}
 .member[aria-pressed="true"]{background:var(--surface-selected);box-shadow:0 0 0 1.5px var(--focus)}
-@media (max-width: 1950px){
+@container board (max-width: 1950px){
   .console{position:static;width:auto;height:auto;max-height:360px;margin-top:14px}
 }
 .toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:var(--surface-raised);border:1.5px solid var(--border-strong);border-radius:99px;padding:10px 18px;font-size:13.5px;transition:all .25s ease;z-index:30}
 .toast.show{opacity:1;transform:translateX(-50%)}
 
 /* ---------- responsive (designed at 2560, not optimised for laptops) ---------- */
-@media (max-width: 2300px){
+@container board (max-width: 2300px){
   .grid{grid-template-columns:minmax(0,1fr) 440px 560px}
 }
-@media (max-width: 1950px){
+@container board (max-width: 1950px){
   .grid{grid-template-columns:minmax(0,1fr) 520px;grid-template-rows:auto auto auto auto;grid-template-areas:"hero side" "roster roster" "log log" "badge badge"}
   .log{max-height:none}
 }
-@media (max-width: 1700px){
+@container board (max-width: 1700px){
   .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hero hero" "side side" "roster roster" "log log" "badge badge"}
   .side{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));align-items:start;height:auto;min-height:0}
   .side > .panel:first-child{grid-column:1 / -1}
   .orders{max-height:420px}
 }
-@media (max-width: 1200px){
+@container board (max-width: 1200px){
   .frame{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"top" "rail" "main";padding:12px 16px}
   .elbow{display:none}
   .siderail{padding:0}
@@ -300,7 +308,7 @@ button{font:inherit;color:inherit}
   .roster{grid-template-columns:repeat(2, minmax(0,1fr))}
   .topbar .topbar-stats{display:none}
 }
-@media (max-width: 760px){
+@container board (max-width: 760px){
   .ship-tiles .tile{display:none}
   .hero-label::after{content:" · USE THE ROSTER BELOW"}
   .roster{grid-template-columns:minmax(0,1fr)}
@@ -351,7 +359,7 @@ button{font:inherit;color:inherit}
 .btext{width:100%;height:96px;resize:none;padding:12px 14px;border-radius:10px;border:1.5px solid #6b5a33;background:#0b0d12;color:#fff3da;font-family:var(--font-body);font-size:17px;line-height:1.4}
 .btext::placeholder{color:#7d7058}
 .bmeta{display:flex;justify-content:space-between;gap:16px;font-size:11.5px;color:#a8987a}
-@media (max-width: 1950px){
+@container board (max-width: 1950px){
   .brow{flex-wrap:wrap}
   .bpresets{flex-basis:100%;order:10;flex-wrap:wrap}
   .badgewrap{min-height:0;position:sticky;bottom:0;z-index:15;padding:10px 0 12px;background:var(--bg)}
@@ -359,7 +367,7 @@ button{font:inherit;color:inherit}
 }
 
 /* Fit the badge row at 2560 x 1440: tighter bottom panels. */
-@media (min-width: 1951px){
+@container board (min-width: 1951px){
   .main{gap:12px;padding-top:14px;padding-bottom:8px}
   .grid{gap:16px 20px}
   .roster-panel,.log-panel{padding:14px 16px}
