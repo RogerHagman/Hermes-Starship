@@ -1,6 +1,7 @@
 // The Captain's chair on the Bridge: what the console under the saucer shows when you pick
 // the Captain. The command chair faces the main viewscreen, with the hails beside it.
-// Picking a hail opens it in the console; Approve and Deny open in H4, in the Quarters.
+// Picking a hail opens it in the console, and Back returns to the chair. Approve and Deny
+// open in H4, in the Quarters.
 import { useMemo } from 'react';
 import art from '../assets/bridge-chair.svg?raw';
 import { SHIP_MAP } from '../lib/shipmap';
@@ -16,7 +17,7 @@ function Art() {
 }
 
 export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
-  ship: ShipView; onPick: (station: string, order?: string) => void; onBack: () => void; onQuarters?: () => void;
+  ship: ShipView; onPick: (station: string, order?: string, from?: string) => void; onBack: () => void; onQuarters?: () => void;
 }) {
   const hails = ship.data.orders.orders.filter((o) => o.state === 'awaiting-captain').sort((a, b) => b.tier - a.tier);
   const burning = ship.data.rails.rails.some((r) => r.burn?.active && ship.rail(r.id) !== 'out');
@@ -41,7 +42,7 @@ export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
             {hails.map((o) => (
               <li key={o.id}>
                 <button type="button" className="cchair-hail" style={css({ '--c': `var(--tier-${o.tier})` })}
-                  onClick={() => onPick(o.station, o.id)} title={`${o.id} · ${o.title}`}>
+                  onClick={() => onPick(o.station, o.id, 'captain')} title={`${o.id} · ${o.title}`}>
                   <span className="tierpill">TIER {o.tier}</span>
                   <span className="cchair-hail-title">{o.title}</span>
                 </button>

@@ -20,10 +20,11 @@ interface Props {
 }
 
 export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast, onQuarters }: Props) {
-  const [open, setOpen] = useState<{ station: string; order?: string } | null>(null);
-  const openStation = (station: string, order?: string) => {
+  const [open, setOpen] = useState<{ station: string; order?: string; from?: string } | null>(null);
+  // `from`: where the card was opened from (the Captain's chair), so Back can return there.
+  const openStation = (station: string, order?: string, from?: string) => {
     const same = open?.station === station && open?.order === order;
-    setOpen(same ? null : { station, order });
+    setOpen(same ? null : { station, order, from });
     onTarget(station);
   };
   const close = useCallback(() => setOpen(null), []);

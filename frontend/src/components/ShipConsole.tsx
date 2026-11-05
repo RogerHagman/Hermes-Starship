@@ -2,7 +2,7 @@
 // a room on the plan, a card on the right, a name in the roster. With nothing picked
 // it shows the watch: who is working right now. Esc or Back returns to the watch.
 // StationDetail is shared with the wall screen in the Captain's Quarters.
-import { useEffect, type ReactNode } from 'react';
+import { useCallback, useEffect, type ReactNode } from 'react';
 import { DECKS, DEPTS, RAIL, RANK, STATUS, railColor } from '../lib/lookups';
 import { age } from '../lib/format';
 import { SHIP_MAP } from '../lib/shipmap';
@@ -13,8 +13,9 @@ import { Icon } from './Icon';
 
 interface Props {
   ship: ShipView;
-  pick: { station: string; order?: string } | null;
-  onPick: (station: string, order?: string) => void;
+  /** `from` names the station a card was opened from, so Back returns there (the Captain's chair). */
+  pick: { station: string; order?: string; from?: string } | null;
+  onPick: (station: string, order?: string, from?: string) => void;
   onBack: () => void;
   /** Opens the Captain's Quarters (from the Captain's chair). */
   onQuarters?: () => void;
@@ -34,13 +35,16 @@ export function useEscape(active: boolean, onBack: () => void) {
 }
 
 export function ShipConsole({ ship, pick, onPick, onBack, onQuarters }: Props) {
-  useEscape(!!pick, onBack);
+  // A hail opened from the Captain's chair goes back to the chair, not to the watch.
+  const from = pick?.from ? ship.station(pick.from) : undefined;
+  const back = useCallback(() => (from ? onPick(from.id) : onBack()), [from, onPick, onBack]);
+  useEscape(!!pick, back);
   const st = pick ? ship.station(pick.station) : undefined;
   if (!st) return <Watch ship={ship} onPick={onPick} />;
   if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />;
   return (
     <section className="console" role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
-      <StationDetail ship={ship} st={st} orderId={pick?.order} back="‹ Watch" onBack={onBack} />
+      <StationDetail ship={ship} st={st} orderId={pick?.order} back={from ? `‹ ${from.id === 'captain' ? 'Chair' : from.short}` : '‹ Watch'} onBack={back} />
     </section>
   );
 }

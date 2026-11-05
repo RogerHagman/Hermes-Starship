@@ -14,8 +14,8 @@ import { ShipConsole } from './ShipConsole';
 interface Props {
   ship: ShipView;
   filter: RailFilter;
-  pick: { station: string; order?: string } | null;
-  onPick: (station: string, order?: string) => void;
+  pick: { station: string; order?: string; from?: string } | null;
+  onPick: (station: string, order?: string, from?: string) => void;
   onBack: () => void;
   onQuarters?: () => void;
 }
