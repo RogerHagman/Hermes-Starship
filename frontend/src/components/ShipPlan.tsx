@@ -17,6 +17,7 @@ interface Props {
   pick: { station: string; order?: string } | null;
   onPick: (station: string, order?: string) => void;
   onBack: () => void;
+  onQuarters?: () => void;
 }
 
 const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
@@ -27,7 +28,7 @@ const ShipArt = memo(function ShipArt() {
   return <div className="ship-art-svg" dangerouslySetInnerHTML={{ __html: shipSvg }} />;
 });
 
-export function ShipPlan({ ship, filter, pick, onPick, onBack }: Props) {
+export function ShipPlan({ ship, filter, pick, onPick, onBack, onQuarters }: Props) {
   const selected = pick?.station ?? null;
   const artRef = useRef<HTMLDivElement>(null);
   const codexUp = ship.rail('codex') !== 'out';
@@ -66,7 +67,7 @@ export function ShipPlan({ ship, filter, pick, onPick, onBack }: Props) {
           ))}
         </div>
       </div>
-      <ShipConsole ship={ship} pick={pick} onPick={onPick} onBack={onBack} />
+      <ShipConsole ship={ship} pick={pick} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />
       </div>
     </section>
   );

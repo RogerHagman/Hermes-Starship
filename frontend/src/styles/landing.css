@@ -297,10 +297,35 @@ html:has(.stage.fit){overflow:hidden}
 .con-row .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
 .con-row-name{font-family:var(--font-display);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .con-row-text{color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the Captain's chair: the console when you pick the Captain (CaptainsChair.tsx) */
+.cchair-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px}
+.cchair-art{position:relative;min-height:0;border-radius:9px;overflow:hidden;border:1.5px solid var(--border);background:#070b14}
+.cchair-svg,.cchair-svg svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cchair-side{display:flex;flex-direction:column;gap:6px;min-width:0;min-height:0}
+.cchair-count{font-size:10px;letter-spacing:.1em;color:var(--text-label)}
+.cchair-hails{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;min-height:0;overflow:auto}
+.cchair-hail{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;padding:6px 9px;border-radius:7px;border:none;border-left:4px solid var(--c);background:var(--surface-raised);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.cchair-hail:hover{filter:brightness(1.2)}
+.cchair-hail-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cchair-foot{margin-top:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cchair-foot .btn{min-height:30px;font-size:13px}
+.cchair-art .bc-tw{animation:bctw 4.5s ease-in-out infinite}
+@keyframes bctw{0%,100%{opacity:.95}50%{opacity:.25}}
+.cchair-art .bc-streaks{transition:opacity 1.2s ease}
+.cchair-art .bc-streak{animation-name:bcstreak;animation-timing-function:linear;animation-iteration-count:infinite}
+@keyframes bcstreak{from{transform:translateX(520px)}to{transform:translateX(-100px)}}
+.cchair-art .bc-armlight{animation:bcarm 3.2s ease-in-out infinite}
+@keyframes bcarm{0%,100%{opacity:1}50%{opacity:.55}}
 .hail[aria-pressed="true"]{border-color:var(--captain);background:var(--surface-selected)}
 .member[aria-pressed="true"]{background:var(--surface-selected);box-shadow:0 0 0 1.5px var(--focus)}
 @container board (max-width: 1950px){
   .console{position:static;width:auto;height:auto;max-height:360px;margin-top:14px}
+  .cchair-art{min-height:230px}
+}
+@container board (max-width: 760px){
+  .console.cchair{max-height:none}
+  .cchair-body{grid-template-columns:minmax(0,1fr)}
+  .cchair-art{min-height:200px}
 }
 .toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:var(--surface-raised);border:1.5px solid var(--border-strong);border-radius:99px;padding:10px 18px;font-size:13.5px;transition:all .25s ease;z-index:30}
 .toast.show{opacity:1;transform:translateX(-50%)}

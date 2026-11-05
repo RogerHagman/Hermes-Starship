@@ -64,7 +64,8 @@ export function App() {
           <main className="main">
             <Header ship={ship} board={board} error={error} />
             {ship && board === 'bridge' && (
-              <BridgeBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget} onToast={showToast} />
+              <BridgeBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget} onToast={showToast}
+                onQuarters={() => goBoard('quarters')} />
             )}
             {ship && board === 'quarters' && (
               <QuartersBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}

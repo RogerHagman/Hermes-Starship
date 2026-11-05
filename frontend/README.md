@@ -29,11 +29,12 @@ takes props (its inputs) and returns the markup it draws.
 | `src/lib/shipmap.ts` | Where each room sits on the ship art, and its icon |
 | `src/lib/data.ts` | Reads `fixtures/*.json`. This is the only network code, and it fetches local files only |
 | `src/types/fixtures.ts` | Generated from `api/schema` by `npm run types`. Don't edit it by hand |
-| `src/components/` | `Frame`, `SideRail`, `Header`, `BridgeBoard`, `ShipPlan`, `ShipConsole` (the console, shared with the wall screen), `Panels` (rails, hails, in flight), `Roster` (roster, log, rank pips), `CommBadge` |
+| `src/components/` | `Frame`, `SideRail`, `Header`, `BridgeBoard`, `ShipPlan`, `ShipConsole` (the console, shared with the wall screen), `CaptainsChair` (the console when you pick the Captain), `Panels` (rails, hails, in flight), `Roster` (roster, log, rank pips), `CommBadge` |
 | `src/components/quarters/` | `QuartersBoard`, `Room` (the picture and its buttons), `WallScreen` (one view at a time), `Panels` (duty roster, campaigns, order log) |
 | `src/styles/` | Tokens from the design system, the Bridge styles (`landing.css`), the warmer Quarters theme (`quarters.css`), the mess-hall animation |
 | `src/assets/ship.svg` | Ship art from DeckPlanV4 (`tools/make_ship_svg.py`). To redraw the ship, swap this file and `shipmap.ts` |
 | `src/assets/quarters.svg` | The Captain's Quarters picture, drawn by `tools/make_quarters_svg.py` (`python3 frontend/tools/make_quarters_svg.py`). Move something there, then move its box in `lib/quarters.ts` |
+| `src/assets/bridge-chair.svg` | The Captain's chair on the Bridge, drawn by `tools/make_bridge_chair_svg.py` from the same chair as the Quarters |
 | `dist/` | The built page that the NAS serves. Committed, and CI checks it matches a fresh build |
 
 ## Commands

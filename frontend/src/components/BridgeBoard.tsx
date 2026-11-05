@@ -16,9 +16,10 @@ interface Props {
   target: string | null;
   onTarget: (id: string) => void;
   onToast: (text: string) => void;
+  onQuarters: () => void;
 }
 
-export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast }: Props) {
+export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast, onQuarters }: Props) {
   const [open, setOpen] = useState<{ station: string; order?: string } | null>(null);
   const openStation = (station: string, order?: string) => {
     const same = open?.station === station && open?.order === order;
@@ -28,7 +29,7 @@ export function BridgeBoard({ ship, filter, drills, target, onTarget, onToast }:
   const close = useCallback(() => setOpen(null), []);
   return (
     <div className="grid">
-      <ShipPlan ship={ship} filter={filter} pick={open} onPick={openStation} onBack={close} />
+      <ShipPlan ship={ship} filter={filter} pick={open} onPick={openStation} onBack={close} onQuarters={onQuarters} />
       <aside className="side">
         <RailsPanel ship={ship} drills={drills} />
         <HailsPanel ship={ship} picked={open?.order} onOpen={openStation} />

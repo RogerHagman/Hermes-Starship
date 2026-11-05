@@ -8,6 +8,7 @@ import { age } from '../lib/format';
 import { SHIP_MAP } from '../lib/shipmap';
 import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
+import { CaptainsChair } from './CaptainsChair';
 import { Icon } from './Icon';
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
   pick: { station: string; order?: string } | null;
   onPick: (station: string, order?: string) => void;
   onBack: () => void;
+  /** Opens the Captain's Quarters (from the Captain's chair). */
+  onQuarters?: () => void;
 }
 
 const css = (vars: Record<string, string>) => vars as React.CSSProperties;
@@ -30,10 +33,11 @@ export function useEscape(active: boolean, onBack: () => void) {
   }, [active, onBack]);
 }
 
-export function ShipConsole({ ship, pick, onPick, onBack }: Props) {
+export function ShipConsole({ ship, pick, onPick, onBack, onQuarters }: Props) {
   useEscape(!!pick, onBack);
   const st = pick ? ship.station(pick.station) : undefined;
   if (!st) return <Watch ship={ship} onPick={onPick} />;
+  if (st.id === 'captain') return <CaptainsChair ship={ship} onPick={onPick} onBack={onBack} onQuarters={onQuarters} />;
   return (
     <section className="console" role="region" aria-label={`${st.name} console`} style={css({ '--c': stationColour(st) })}>
       <StationDetail ship={ship} st={st} orderId={pick?.order} back="‹ Watch" onBack={onBack} />
