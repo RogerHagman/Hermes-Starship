@@ -33,12 +33,13 @@ export function CaptainsChair({ ship, onPick, onBack, onQuarters }: {
     '--bc-burn': burning ? 1 : 0,
   });
 
-  // Two pages: the chair, then the station card.
+  // Two pages: the chair, then the station card. Small dots, the current one lit; the name
+  // of each page shows on hover.
   const pager = captain && (
     <span className="pager" role="group" aria-label="Pages">
       {['The chair', 'Station card'].map((label, i) => (
         <button key={label} type="button" className="pager-dot" aria-pressed={page === i} aria-label={`Page ${i + 1}: ${label}`}
-          title={label} onClick={() => setPage(i)}>{i + 1}</button>
+          data-tip={label} onClick={() => setPage(i)} />
       ))}
     </span>
   );
