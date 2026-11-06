@@ -26,17 +26,19 @@ export interface Live {
   orders: OrdersFile | null;
   shiplog: ShipLogFile | null;
   nas?: NasFile | null;
+  records?: OrdersFile | null;
 }
 
 export async function loadLive(): Promise<Live> {
-  const [rails, raillog, orders, shiplog, nas] = await Promise.all([loadLiveRails(), loadLiveRailLog(), loadLiveOrders(), loadLiveShipLog(), loadLiveNas()]);
-  return { rails, raillog, orders, shiplog, nas };
+  const [rails, raillog, orders, shiplog, nas, records] = await Promise.all([loadLiveRails(), loadLiveRailLog(), loadLiveOrders(), loadLiveShipLog(), loadLiveNas(), loadLiveRecords()]);
+  return { rails, raillog, orders, shiplog, nas, records };
 }
 
 /** The sample data with each live part in place of its sample. */
 export function withLive(base: Fixtures, live: Live): Fixtures {
   const data = live.rails ? { ...base, rails: live.rails } : base;
-  return withLiveNas(withLiveDuty(withLiveOrders(data, live.orders, live.shiplog), live.raillog), live.nas ?? null);
+  const out = withLiveNas(withLiveDuty(withLiveOrders(data, live.orders, live.shiplog), live.raillog), live.nas ?? null);
+  return live.records ? { ...out, records: live.records } : out;
 }
 
 /** A live file, or null when there is none or it doesn't look like a real reading. */
@@ -54,6 +56,8 @@ async function loadLiveFile<T extends { synthetic: boolean; asOf: string }>(name
 
 /** live/orders.json from the ship probe: the real orders, from orders.csv and the Kanban cards. */
 export const loadLiveOrders = () => loadLiveFile<OrdersFile>('orders', (f) => Array.isArray(f.orders));
+/** live/records.json from the ship probe: every order on file, in any state, for the core terminal. */
+export const loadLiveRecords = () => loadLiveFile<OrdersFile>('records', (f) => Array.isArray(f.orders));
 /** live/shiplog.json from the ship probe: orders opening and closing, and the customs log. */
 export const loadLiveShipLog = () => loadLiveFile<ShipLogFile>('shiplog', (f) => Array.isArray(f.entries));
 

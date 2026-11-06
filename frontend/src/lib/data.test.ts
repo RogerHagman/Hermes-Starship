@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { loadLiveOrders, loadLiveRails, loadLiveShipLog, nasSource, railsSource, withLive, withLiveNas, withLiveOrders } from './data';
+import { loadLiveOrders, loadLiveRails, loadLiveRecords, loadLiveShipLog, nasSource, railsSource, withLive, withLiveNas, withLiveOrders } from './data';
 import type { Fixtures, NasFile, OrdersFile, ShipLogFile } from '../types';
 
 const live = { asOf: '2026-11-05T09:00:00Z', synthetic: false, rails: [] };
@@ -112,6 +112,16 @@ describe('live orders and log', () => {
   it('a live log replaces the sample lines; without a rail log no sample duty lines stay', async () => {
     const data = withLive(await base(), { rails: null, raillog: null, orders: null, shiplog });
     expect(data.shiplog.entries).toEqual(shiplog.entries);
+  });
+
+  it('the records file, every order on file, sits beside the boards\' orders and never replaces them', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => new Response(url.includes('records') ? JSON.stringify(orders) : '', { status: url.includes('records') ? 200 : 404 })));
+    expect(await loadLiveRecords()).toEqual(orders);
+    const b = await base();
+    const data = withLive(b, { rails: null, raillog: null, orders: null, shiplog: null, records: orders });
+    expect(data.records).toEqual(orders);
+    expect(data.orders).toBe(b.orders);
+    expect(withLive(b, { rails: null, raillog: null, orders: null, shiplog: null }).records).toBeUndefined();
   });
 });
 

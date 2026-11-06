@@ -20,7 +20,8 @@ runs, and nothing leaves the NAS.
 
 Settings come from the environment: ORDERS_CSV, KANBAN_DB, HANDOFF_LOG, ANSWERS, ROSTER, OUT_DIR, SCRATCH
 (where the database copy goes; never inside OUT_DIR, which nginx serves), INTERVAL (seconds; 0 runs
-once), DAYS (how far back done orders are kept) and KEEP (the most orders the file holds).
+once), DAYS (how far back done orders are kept), KEEP (the most orders the file holds) and RECORDS_KEEP
+(the most orders records.json holds: every order on file, any state, for the core terminal).
 Standard library only.
 """
 import csv
@@ -335,8 +336,12 @@ def clean_title(title):
 
 # ---------- the orders file ----------
 
-def build_orders(rows, cards, names, now, days=7, keep=80, answers=None):
-    """Orders for the boards: everything not done, plus what closed in the last `days` days."""
+def build_orders(rows, cards, names, now, days=7, keep=80, answers=None, archive=False):
+    """Orders for the boards: everything not done, plus what closed in the last `days` days.
+
+    With `archive`, every order on file instead (the core terminal's records): nothing drops off
+    for age, and an order that never got a card stays too, with a line that says so.
+    """
     since = now - timedelta(days=days)
     orders = []
     for oid in sorted(set(rows) | set(cards), reverse=True):
@@ -347,10 +352,11 @@ def build_orders(rows, cards, names, now, days=7, keep=80, answers=None):
         card = max(theirs, key=lambda c: c.get("updated") or now) if theirs else {}
         when = max([t for t in (parse_time(row.get("closed_at")), parse_time(row.get("received_at")),
                                 *(c.get("updated") for c in theirs)) if t] or [now])
-        if state == "done" and when < since:
+        if state == "done" and when < since and not archive:
             continue
         said = (answers or {}).get(oid, [])
-        if not theirs and not said and state == "queued" and when < now - timedelta(hours=OPEN_HOURS):
+        stale = not theirs and not said and state == "queued" and when < now - timedelta(hours=OPEN_HOURS)
+        if stale and not archive:
             continue   # still open in the log, but no card was ever filed for it
         worker = card.get("worker") or row.get("station") or "xo"
         order = {
@@ -369,6 +375,8 @@ def build_orders(rows, cards, names, now, days=7, keep=80, answers=None):
             order["replies"] = replies
         if len(theirs) > 1:
             order["detail"] = f"{len(theirs)} cards: " + ", ".join(station_of(names, c.get("worker")) for c in theirs)
+        elif stale:
+            order["detail"] = "No card was filed, and the order log still has it open: answered in chat, or never picked up."
         orders.append(order)
     orders.sort(key=lambda o: o["updatedAt"], reverse=True)
     return orders[:keep]
@@ -448,6 +456,9 @@ def run_once(env, scratch, now=None):
     out = env.get("OUT_DIR", ".")
     atomic_write(out, {"asOf": stamp, "synthetic": False, "orders": orders}, "orders.json")
     atomic_write(out, {"asOf": stamp, "synthetic": False, "entries": entries}, "shiplog.json")
+    # Every order on file, any state, for the core terminal (same shape as orders.json).
+    records = build_orders(rows, cards, names, now, keep=int(env.get("RECORDS_KEEP", "1000")), answers=answers, archive=True)
+    atomic_write(out, {"asOf": stamp, "synthetic": False, "orders": records}, "records.json")
     return orders, entries
 
 

@@ -1,0 +1,188 @@
+/* Hermes Starship · the computer core (Deck 3).
+   Core blue: deep blue-black surfaces, core blue (--core) for the room and its light rings, and a
+   phosphor green server terminal (--phos). Order states keep one colour each, everywhere on this
+   board: queued grey, running blue, review violet, awaiting you gold, blocked red, done green.
+   Rail colours keep their meaning. Reuses the Quarters layout (quarters.css) and the Ops panels. */
+
+.board-computer{
+  --bg:#05080d;
+  --surface:#0d131c;
+  --surface-raised:#131b26;
+  --surface-selected:#1b2a3c;
+  --border:#1f2c3c;
+  --border-strong:#33445c;
+  --text:#e6eef8;
+  --text-label:#a9b9cc;
+  --text-muted:#98a8bb;
+  --lcars-frame:#7cc4ff;
+  --lcars-dark:#0f1824;
+  --focus:#d8ecff;
+  --core:#7cc4ff;
+  --phos:#9cf0b8;
+  --burn:#f2a6d0;
+}
+html:has(.board-computer) body{background-color:#05080d;background-image:var(--stars), radial-gradient(1400px 800px at 26% 22%, rgba(124,196,255,.1), transparent 70%)}
+.board-btn.computer:not([aria-current]):not(.not-built){border-left-color:#7cc4ff}
+
+/* one colour per order state */
+.ts-queued{--ts:var(--text-label)}
+.ts-running{--ts:var(--core)}
+.ts-review{--ts:#b8a2f5}
+.ts-awaiting-captain{--ts:var(--captain)}
+.ts-blocked{--ts:var(--bad)}
+.ts-done{--ts:var(--good)}
+.ts-all,.ts-open{--ts:var(--phos)}
+.tstate{display:inline-block;padding:1px 7px;border-radius:99px;border:1px solid var(--ts);color:var(--ts);font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;line-height:1.5;white-space:nowrap}
+.tstate.ts-blocked{background:color-mix(in srgb, var(--bad) 16%, transparent)}
+.tstate.ts-queued{border-style:dashed}
+
+/* ---------- the room ---------- */
+.core-pic{background:#05080d}
+.core-pic .spot-label{border-color:rgba(124,196,255,.45)}
+.core-pic .spot:hover .spot-label,.core-pic .spot:focus-visible .spot-label{border-color:var(--core);background:rgba(13,22,34,.94)}
+.core-pic .spot-meta{color:var(--core)}
+.core-pic .spot[aria-pressed="true"] .spot-label{background:var(--core);border-color:var(--core);color:#06101c}
+.core-pic .spot[aria-pressed="true"] .spot-meta{color:#06101c}
+.room-art .c-hl{opacity:0;transition:opacity .25s ease}
+.core-pic[data-on="memory"] #c-hl-memory,.core-pic[data-on="core"] #c-hl-core,.core-pic[data-on="records"] #c-hl-records,
+.core-pic[data-on="minutes"] #c-hl-minutes,.core-pic[data-on="burn"] #c-hl-burn{opacity:.55}
+.core-pic[data-hot="memory"] #c-hl-memory,.core-pic[data-hot="core"] #c-hl-core,.core-pic[data-hot="records"] #c-hl-records,
+.core-pic[data-hot="desk"] #c-hl-desk,.core-pic[data-hot="minutes"] #c-hl-minutes,.core-pic[data-hot="burn"] #c-hl-burn,
+.core-pic[data-hot="bridge"] #c-hl-bridge{opacity:1}
+.room-art .c-lamp{animation:qarm 3.2s ease-in-out infinite}
+.room-art .c-blink{animation:cblink 1.6s steps(2, jump-none) infinite}
+@keyframes cblink{0%,100%{opacity:.9}50%{opacity:.25}}
+.room-art .c-flow{animation:cflow 4s ease-in-out infinite}
+@keyframes cflow{0%,100%{opacity:.45}50%{opacity:.15}}
+.room-art .c-mem{animation:cmem 6s ease-in-out infinite}
+@keyframes cmem{0%,100%{opacity:.08}50%{opacity:.26}}
+/* The core's rings pulse up the column while the local rail is up; they go dark when it is out. */
+.room-art .c-ring{animation:cring 2.6s ease-in-out infinite;transition:stroke .4s ease}
+@keyframes cring{0%,100%{opacity:.35}45%{opacity:1}}
+.room-art .c-shaft{animation:cshaft 5s ease-in-out infinite}
+@keyframes cshaft{0%,100%{opacity:.75}50%{opacity:1}}
+.core-pic[data-core="degraded"] .room-art .c-ring{stroke:#c9a85a;animation-duration:5s}
+.core-pic[data-core="out"] .room-art .c-ring{stroke:#3a4048;animation:none;opacity:.35}
+.core-pic[data-core="out"] .room-art .c-shaft,.core-pic[data-core="out"] .room-art .c-pool{opacity:.15;animation:none}
+/* The dilithium crystal glows while a burn is on. */
+.room-art .c-burn{transition:opacity .6s ease}
+.core-pic[data-burn="off"] .room-art .c-burn{opacity:.18}
+.core-pic[data-burn="on"] .room-art .c-crystal{animation:cburn 2.2s ease-in-out infinite}
+@keyframes cburn{0%,100%{opacity:.7}50%{opacity:1}}
+
+/* ---------- the records board on the table ---------- */
+.records-board{position:absolute;padding:8px 10px}
+.rb-cols{list-style:none;margin:0;padding:0;height:100%;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.rb-cols li{min-width:0}
+.rb-col{width:100%;height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:2px;padding:4px 8px;border-radius:6px;border:1px solid color-mix(in srgb, var(--ts) 35%, transparent);
+  background:rgba(4,8,14,.6);color:var(--text);cursor:pointer;text-align:left}
+.rb-col:hover{border-color:var(--ts)}
+.rb-col:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.rb-col[aria-pressed="true"]{background:color-mix(in srgb, var(--ts) 22%, rgba(4,8,14,.9));border-color:var(--ts)}
+.rb-word{font-size:8.5px;letter-spacing:.08em;color:var(--ts);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb-n{font-family:var(--font-display);font-weight:600;font-size:24px;line-height:1}
+.rb-bar{display:block;height:4px;border-radius:2px;background:color-mix(in srgb, var(--ts) 14%, transparent);overflow:hidden}
+.rb-bar b{display:block;height:100%;border-radius:2px;background:var(--ts)}
+
+/* ---------- the core terminal ---------- */
+.core-screen{background:linear-gradient(180deg, rgba(6,12,20,.98), rgba(2,5,9,.98)) !important;border-color:color-mix(in srgb, var(--phos) 45%, var(--core)) !important}
+.core-screen .linkish{color:var(--core);text-decoration-color:color-mix(in srgb, var(--core) 40%, transparent)}
+.core-screen .linkish:hover{color:#e2f1ff}
+.core-screen .con-icon svg{stroke:var(--phos)}
+.term{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:8px;
+  background:repeating-linear-gradient(180deg, rgba(156,240,184,.025) 0 2px, transparent 2px 4px), #02050a;
+  border:1px solid color-mix(in srgb, var(--phos) 22%, transparent);color:var(--phos);font-family:var(--font-mono)}
+.tchips{display:flex;flex-wrap:wrap;gap:6px}
+.tchip{padding:2px 9px;border-radius:99px;border:1px solid color-mix(in srgb, var(--ts) 55%, transparent);background:transparent;color:var(--ts);
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;cursor:pointer}
+.tchip b{font-weight:600;color:var(--text)}
+.tchip:hover{border-color:var(--ts)}
+.tchip[aria-pressed="true"]{background:var(--ts);color:#03070b}
+.tchip[aria-pressed="true"] b{color:#03070b}
+.techo{margin:0;font-size:11.5px;color:var(--phos);display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;opacity:.9}
+.tprompt{color:var(--core)}
+.tclear{padding:0 7px;border-radius:99px;border:1px solid color-mix(in srgb, var(--phos) 40%, transparent);background:transparent;color:var(--phos);font-family:var(--font-mono);font-size:10px;cursor:pointer}
+.tclear:hover{border-color:var(--phos)}
+.tlist{list-style:none;margin:0;padding:0;flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;border-top:1px dashed color-mix(in srgb, var(--phos) 22%, transparent)}
+.trow{width:100%;display:grid;grid-template-columns:74px 86px 74px minmax(0,1fr) auto;gap:10px;align-items:center;padding:5px 6px;border:none;
+  border-bottom:1px solid rgba(156,240,184,.07);background:transparent;color:var(--text);text-align:left;cursor:pointer;font-size:13px}
+.trow:hover,.trow:focus-visible{background:rgba(156,240,184,.07);outline:none}
+.trow:focus-visible{box-shadow:inset 2px 0 0 var(--phos)}
+.tid{font-size:11.5px;color:var(--phos)}
+.tst{font-size:10px;letter-spacing:.06em;color:var(--rc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow.ts-done .ttitle{color:var(--text-muted)}
+.twhen{font-size:10px;color:var(--text-label);white-space:nowrap}
+.tnone{padding:12px 6px;font-size:12px;color:var(--text-label)}
+.tnone b{color:var(--phos)}
+.tcount{margin:0;font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
+.tsaid{color:var(--captain)}
+.tline{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;border:1px solid color-mix(in srgb, var(--phos) 35%, transparent);background:rgba(156,240,184,.04)}
+.tline:focus-within{border-color:var(--phos);box-shadow:0 0 0 1px color-mix(in srgb, var(--phos) 40%, transparent)}
+.tline .tprompt{font-size:12px;white-space:nowrap}
+.tinput{flex:1;min-width:0;border:none;background:transparent;color:var(--phos);font-size:13px;caret-color:var(--phos);outline:none}
+.tinput::placeholder{color:color-mix(in srgb, var(--phos) 40%, transparent)}
+
+/* one record */
+.trecord{font-size:13.5px}
+.tfacts{margin:0;display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:6px 14px;padding:10px 12px;border-radius:8px;background:#02050a;border:1px solid color-mix(in srgb, var(--phos) 20%, transparent)}
+.tfacts div{min-width:0}
+.tfacts .wide{grid-column:1 / -1}
+.tfacts dt{font-size:9px;letter-spacing:.08em;color:var(--text-label)}
+.tfacts dd{margin:2px 0 0;font-size:12px;color:var(--phos);display:flex;flex-wrap:wrap;gap:4px 8px}
+.tfacts .linkish{font-family:var(--font-mono);font-size:12px}
+.tsec{display:flex;flex-direction:column;gap:6px}
+.tnote{margin:0;font-size:13px;line-height:1.45;color:var(--text-muted)}
+.tlog{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.tlog li{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;font-size:12.5px;color:var(--text-muted)}
+.tlog time{font-size:10px;color:var(--text-label);padding-top:2px}
+.core-screen .stepper .con-back:disabled{opacity:.35;cursor:default}
+
+/* minutes, burn, memory */
+.tminutes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tminutes li{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:var(--surface-raised);border-left:3px solid var(--core)}
+.tm-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.tm-topic{font-family:var(--font-display);font-weight:600;font-size:15px}
+.tm-when{margin-left:auto;font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
+.tm-who{font-size:9.5px;letter-spacing:.06em;color:var(--core)}
+.tm-out{font-size:13px;line-height:1.4;color:var(--text-muted)}
+.tburn{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.tburn li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:9px;background:var(--surface-raised);border-left:3px solid var(--rc)}
+.tburn li.on{background:color-mix(in srgb, var(--burn) 10%, var(--surface-raised))}
+.tb-name{font-family:var(--font-display);font-weight:600;font-size:14px}
+.tb-state{font-size:10px;letter-spacing:.06em;color:var(--text-label)}
+.tburn li.on .tb-state{color:var(--burn)}
+.tseal{margin:0;padding:10px 12px 10px 28px;border-radius:10px;background:var(--surface-raised);border-left:3px solid var(--captain);display:flex;flex-direction:column;gap:6px;font-size:13.5px;line-height:1.45}
+
+/* ---------- panels ---------- */
+.core-stations{display:flex;flex-direction:column;min-height:0;flex:1;padding:14px 16px}
+.cst-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;overflow:auto;min-height:0}
+.cst-row{width:100%;display:grid;grid-template-columns:10px minmax(0,110px) minmax(0,1fr) auto;gap:10px;align-items:center;padding:5px 10px;border-radius:8px;border:none;background:transparent;color:var(--text);cursor:pointer;text-align:left}
+.cst-row:hover{background:var(--surface-raised)}
+.cst-row[aria-pressed="true"]{background:var(--surface-selected);box-shadow:inset 2px 0 0 var(--core)}
+.cst-row .dot{width:8px;height:8px;border-radius:50%;background:var(--rc)}
+.cst-name{font-family:var(--font-display);font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cst-bar{display:block;height:5px;border-radius:3px;background:color-mix(in srgb, var(--rc) 14%, transparent);overflow:hidden}
+.cst-bar b{display:block;height:100%;border-radius:3px;background:var(--rc)}
+.cst-n{font-size:10px;letter-spacing:.05em;color:var(--text-label);white-space:nowrap}
+.core-minutes{display:flex;flex-direction:column;min-height:0}
+.cmin-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;overflow:auto;min-height:0}
+.cmin-list .empty{color:var(--text-muted);font-size:13px}
+.cmin-row{width:100%;display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:9px;border:none;border-left:3px solid var(--core);background:var(--surface-raised);color:var(--text);text-align:left;cursor:pointer}
+.cmin-row:hover{background:color-mix(in srgb, var(--surface-raised) 85%, var(--text))}
+.cmin-topic{font-family:var(--font-display);font-weight:600;font-size:14px}
+.cmin-when{font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
+.cmin-out{font-size:12.5px;line-height:1.35;color:var(--text-muted);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+.cgrid .alog .linkish{font-family:var(--font-body, inherit)}
+
+/* ---------- smaller boards ---------- */
+@container board (max-width: 760px){
+  .rb-word{font-size:7px}
+  .rb-n{font-size:16px}
+  .trow{grid-template-columns:70px minmax(0,1fr) auto}
+  .trow .tst,.trow .twhen{display:none}
+  .tfacts{grid-template-columns:repeat(2, minmax(0,1fr))}
+}
+@media (prefers-reduced-motion: reduce){
+  .room-art .c-ring,.room-art .c-shaft,.room-art .c-blink,.room-art .c-flow,.room-art .c-mem,.room-art .c-crystal{animation:none}
+}

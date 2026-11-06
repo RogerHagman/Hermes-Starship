@@ -128,6 +128,24 @@ class Files(unittest.TestCase):
         o = next(x for x in orders if x["id"] == "ORD-1203")
         self.assertEqual(("queued", "xo", "Message on dashboard"), (o["state"], o["station"], o["title"]))
 
+    def test_the_records_keep_every_order_on_file_in_any_state(self):
+        self.run_probe()
+        data = json.loads((self.d / "live" / "records.json").read_text())
+        self.assertIs(data["synthetic"], False)
+        jsonschema.validate(data, schema("orders"))
+        recs = {o["id"]: o for o in data["orders"]}
+        # The old done order and the stale one with no card stay on file; the test row never does.
+        self.assertEqual(["ORD-1100", "ORD-1150", "ORD-1201", "ORD-1202", "ORD-1203"], sorted(recs))
+        self.assertEqual("done", recs["ORD-1100"]["state"])
+        self.assertIn("No card was filed", recs["ORD-1150"]["detail"])
+        # Newest first, like the boards.
+        self.assertEqual("ORD-1100", data["orders"][-1]["id"])
+
+    def test_the_records_hold_at_most_records_keep(self):
+        self.run_probe(RECORDS_KEEP="2")
+        data = json.loads((self.d / "live" / "records.json").read_text())
+        self.assertEqual(2, len(data["orders"]))
+
     def test_without_the_kanban_the_order_log_still_gives_every_order(self):
         orders, _ = self.run_probe(KANBAN_DB=str(self.d / "missing.db"))
         o = next(x for x in orders if x["id"] == "ORD-1201")
@@ -145,6 +163,7 @@ class Files(unittest.TestCase):
     def test_without_the_order_log_nothing_is_written(self):
         self.assertIsNone(self.run_probe(ORDERS_CSV=str(self.d / "missing.csv")))
         self.assertFalse((self.d / "live" / "orders.json").exists())
+        self.assertFalse((self.d / "live" / "records.json").exists())
 
     def test_the_database_is_read_from_a_copy_and_never_changed(self):
         before = (self.d / "kanban.db").read_bytes()
