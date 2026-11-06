@@ -1,7 +1,7 @@
 // The panels around the room in the Captain's Quarters: the duty roster with Relieve and
 // Recall, the campaigns with their missions, and the order log.
 import { useState } from 'react';
-import { DEPTS, railColor, RANK, tierVar } from '../../lib/lookups';
+import { DEPTS, railColor, RANK, speedText, tierVar } from '../../lib/lookups';
 import { clockTime, dayAndTime } from '../../lib/format';
 import { canRelieve, type ShipView } from '../../lib/ship';
 import type { Order } from '../../types';
@@ -184,7 +184,7 @@ export function OrderLog({ ship, filter, scope, onScope, picked, onOpen }: {
                   </td>
                   <td className="mono">{o.mission ?? '—'}</td>
                   <td className="mono">{sameDay(o.updatedAt) ? clockTime(o.updatedAt) : dayAndTime(o.updatedAt)}</td>
-                  <td className="mono">{o.speed?.toUpperCase() ?? '—'}</td>
+                  <td className="mono">{speedText(o.speed).toUpperCase()}</td>
                   <td><span className="dot" style={css({ '--c': railColor(st?.rail ?? 'mixed') })} />{st?.short ?? o.station}</td>
                   <td className="olog-what">{o.title}</td>
                   <td><span className="tierpill" style={css({ '--c': tierVar(o.tier) })}>{o.tier ?? '—'}</span></td>

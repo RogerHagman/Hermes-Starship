@@ -4,7 +4,7 @@
 // StationDetail is shared with the wall screen in the Captain's Quarters.
 import { OWN_BOARD, type BoardId } from '../lib/board';
 import { useCallback, useEffect, type ReactNode } from 'react';
-import { DECKS, DEPTS, RAIL, railColor, RANK, STATUS, tierText, tierVar } from '../lib/lookups';
+import { DECKS, DEPTS, RAIL, railColor, RANK, STATUS, speedText, tierText, tierVar } from '../lib/lookups';
 import { age } from '../lib/format';
 import { SHIP_MAP } from '../lib/shipmap';
 import { canRelieve, type ShipView } from '../lib/ship';
@@ -133,7 +133,7 @@ export function OrderBox({ ship, st, orderId, withReply }: { ship: ShipView; st:
     <div className="con-order" style={css({ '--c': tierVar(o.tier) })}>
       <span className="idtag">
         {o.id} · {off ? `WAITS, ${off.toUpperCase()}` : o.state.toUpperCase()} · {tierText(o.tier)}
-        {o.speed ? ` · ${o.speed.toUpperCase()}` : ''} · {age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}
+         · {speedText(o.speed).toUpperCase()} · {age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}
       </span>
       <span className="con-order-title">{o.title}</span>
       {o.detail && <span className="con-text">{o.detail}</span>}

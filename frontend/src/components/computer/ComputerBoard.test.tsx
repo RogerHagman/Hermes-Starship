@@ -126,6 +126,12 @@ describe('computer core', () => {
     expect(facts).toContain('TOOK 8 MIN');
     expect(facts).toContain('CARDS1');
   });
+  it('an order with no speed word says the default speed was used', () => {
+    const plain = { ...data, orders: { ...data.orders, orders: data.orders.orders.map((o) => (o.id === 'ORD-9008' ? { ...o, speed: undefined } : o)) } };
+    const c = board(plain as Fixtures);
+    type(c, 'ORD-9008');
+    expect(screen(c).querySelector('.tfacts')!.textContent).toContain('SPEEDDefault speed');
+  });
   it('the order log opens a record by its number', () => {
     const c = board();
     const link = [...c.querySelectorAll('.alog-link')].find((l) => l.textContent?.startsWith('ORD-9010'))!;

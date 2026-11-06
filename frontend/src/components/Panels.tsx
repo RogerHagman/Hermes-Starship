@@ -1,6 +1,6 @@
 // The side panels: rails, hails awaiting the Captain, orders in flight.
 import { useState } from 'react';
-import { byTier, railColor, SPEEDS_NOTE, tierText, tierVar } from '../lib/lookups';
+import { byTier, railColor, SPEEDS_NOTE, speedText, tierText, tierVar } from '../lib/lookups';
 import { age, clockTime, dayAndTime } from '../lib/format';
 import { railsSource } from '../lib/data';
 import type { Drills, ShipView } from '../lib/ship';
@@ -174,7 +174,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
                   <Chevron />
                 </button>
                 <span className="ocard-sub">
-                  {st?.short ?? o.station} · {o.speed ?? ''} · {age(ship.data.orders.asOf, o.updatedAt)}
+                  {st?.short ?? o.station} · {speedText(o.speed)} · {age(ship.data.orders.asOf, o.updatedAt)}
                   {o.replies && <span className="ocard-replies">{o.replies.length} {o.replies.length === 1 ? 'REPLY' : 'REPLIES'}</span>}
                   {subs.length > 0 && (
                     <button type="button" className="subfold" aria-expanded={!isFolded}
