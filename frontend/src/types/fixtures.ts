@@ -52,6 +52,155 @@ export interface EngineeringFile {
   };
 }
 
+/**
+ * Ops (Deck 1): what Ops knows about the ship's machines. The hosts, the network, the containers, the disks, the GPU, the schedule, the backups, and Ops's standing cautions. Ops only reads; every change is the Captain's, by hand.
+ */
+export interface OpsFile {
+  asOf: string;
+  synthetic: boolean;
+  hosts: {
+    id: string;
+    name: string;
+    role: string;
+    state: "ok" | "warn" | "bad" | "unknown";
+    seenAt: string;
+    uptimeH?: number;
+    cpuPct?: number;
+    ram?: {
+      usedGb: number;
+      totalGb: number;
+    };
+    swap?: {
+      usedGb: number;
+      totalGb: number;
+    };
+    tempC?: number;
+    note?: string;
+  }[];
+  network: {
+    internet: {
+      state: "ok" | "warn" | "bad" | "unknown";
+      downMbps?: number;
+      upMbps?: number;
+      checkedAt: string;
+    };
+    devices: {
+      id: string;
+      name: string;
+      kind: "router" | "server" | "desktop" | "phone" | "other";
+      /**
+       * The host id, when the device is one of the hosts.
+       */
+      host?: string;
+      state: "ok" | "warn" | "bad" | "unknown";
+      link: string;
+      latencyMs?: number;
+      note?: string;
+    }[];
+    /**
+     * What the ship reaches outside the LAN, and whether it answered.
+     */
+    links: {
+      id: string;
+      name: string;
+      for: string;
+      state: "ok" | "warn" | "bad" | "unknown";
+      checkedAt: string;
+    }[];
+    /**
+     * What listens on the LAN, and who can sign in.
+     */
+    ports: {
+      port: number;
+      service: string;
+      host: string;
+      reach: "local" | "lan" | "internet";
+      signIn: string;
+      note?: string;
+    }[];
+  };
+  containers: {
+    name: string;
+    host: string;
+    image: string;
+    state: "running" | "restarting" | "paused" | "exited";
+    memMb: number;
+    limitMb?: number;
+    restarts: number;
+    upSince: string;
+    note?: string;
+  }[];
+  disks: {
+    id: string;
+    host: string;
+    label: string;
+    mount: string;
+    usedGb: number;
+    totalGb: number;
+    /**
+     * How fast it fills, in GB a day.
+     */
+    perDayGb?: number;
+    note?: string;
+  }[];
+  /**
+   * The GPU box. The VRAM in use comes from the rails file's local VRAM meter, which is live.
+   */
+  gpu: {
+    host: string;
+    name: string;
+    vramGb: number;
+    tempC?: number;
+    powerW?: number;
+    /**
+     * The models Ollama has loaded.
+     */
+    models: {
+      name: string;
+      sizeGb: number;
+      until?: string;
+    }[];
+  };
+  jobs: {
+    id: string;
+    name: string;
+    every: string;
+    /**
+     * The station that owns the job.
+     */
+    owner: string;
+    last: "ok" | "failed" | "skipped" | "running" | "never";
+    lastAt?: string;
+    nextAt?: string;
+    order?: string;
+    backup?: string;
+    note?: string;
+  }[];
+  backups: {
+    id: string;
+    what: string;
+    from: string;
+    to: string;
+    lastAt: string;
+    sizeGb?: number;
+    /**
+     * Whether the last copy was read back and found whole.
+     */
+    verified: "ok" | "failed" | "never";
+    keep: string;
+    /**
+     * A copy older than this many hours is overdue.
+     */
+    warnAfterH: number;
+    note?: string;
+  }[];
+  cautions: {
+    id: string;
+    text: string;
+    why: string;
+  }[];
+}
+
 export interface OrdersFile {
   asOf: string;
   synthetic: boolean;
@@ -85,6 +234,21 @@ export interface OrdersFile {
      * The card body as filed, plain text. A line that starts with GOAL:, CONTEXT:, CONSTRAINTS:, DONE WHEN: or START WITH: begins a section; a line that starts with '- ' is a list item.
      */
     body?: string;
+    /**
+     * What came back on the order, oldest first: the answer the Captain was sent, a card's result, a run's summary or error, and comments. The newest few only.
+     */
+    replies?: {
+      at: string;
+      /**
+       * A station id, or the name of whoever wrote it.
+       */
+      by: string;
+      kind: "answer" | "result" | "run" | "error" | "comment";
+      /**
+       * Plain text, as written.
+       */
+      text: string;
+    }[];
   }[];
 }
 

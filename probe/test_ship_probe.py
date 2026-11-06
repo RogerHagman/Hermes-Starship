@@ -26,13 +26,21 @@ def at(text):
     return int(datetime.fromisoformat(text.replace("Z", "+00:00")).timestamp())
 
 
-def kanban(path, rows, table="tasks"):
-    """A Kanban database with the columns of Hermes' own tasks table that the probe reads."""
+def kanban(path, rows, table="tasks", runs=(), comments=(), results=()):
+    """A Kanban database with the columns of Hermes' own tables that the probe reads."""
     con = sqlite3.connect(path)
     con.execute(f"create table {table} (id text primary key, title text not null, body text, assignee text, status text not null,"
-                " priority integer default 0, created_at integer not null, started_at integer, completed_at integer, last_heartbeat_at integer)")
+                " priority integer default 0, created_at integer not null, started_at integer, completed_at integer, last_heartbeat_at integer,"
+                " result text)")
     con.execute("create table task_links (parent_id text not null, child_id text not null, primary key (parent_id, child_id))")
+    con.execute("create table task_comments (id integer primary key autoincrement, task_id text not null, author text not null,"
+                " body text not null, created_at integer not null)")
+    con.execute("create table task_runs (id integer primary key autoincrement, task_id text not null, profile text, step_key text,"
+                " status text not null, started_at integer not null, ended_at integer, outcome text, summary text, metadata text, error text)")
     con.executemany(f"insert into {table} (id, title, body, status, assignee, created_at, started_at, completed_at) values (?,?,?,?,?,?,?,?)", rows)
+    con.executemany(f"update {table} set result = ? where id = ?", [(text, task) for task, text in results])
+    con.executemany("insert into task_runs (task_id, profile, status, started_at, ended_at, outcome, summary, error) values (?,?,?,?,?,?,?,?)", runs)
+    con.executemany("insert into task_comments (task_id, author, body, created_at) values (?,?,?,?)", comments)
     con.commit()
     con.close()
 
@@ -55,9 +63,14 @@ class Files(unittest.TestCase):
             ("t_aa", "ORD-1201 · Fix the reminder time", "GOAL: Fire on time.\nDONE WHEN:\n- It fires.", "running", "forge", at("2026-11-05T18:00:05Z"), at("2026-11-05T18:01:00Z"), None),
             ("t_bb", "ORD-1201 tests for the reminder", "", "ready", "diagnostics", at("2026-11-05T18:00:06Z"), None, None),
             ("t_cc", "ORD-1202 log the meal", "", "done", "scribe", at("2026-11-05T18:10:02Z"), at("2026-11-05T18:10:05Z"), at("2026-11-05T18:20:00Z")),
-        ])
+        ], runs=[
+            ("t_aa", "forge", "crashed", at("2026-11-05T18:01:00Z"), at("2026-11-05T18:05:00Z"), "crashed", None, "worker exited"),
+            ("t_cc", "scribe", "done", at("2026-11-05T18:10:05Z"), at("2026-11-05T18:19:00Z"), "completed", "Logged: pasta, 640 kcal.", None),
+        ], comments=[
+            ("t_aa", "forge", "Found it: the reminder used UTC.", at("2026-11-05T18:30:00Z")),
+        ], results=[("t_cc", "Logged: pasta, 640 kcal.")])
         self.env = {"ORDERS_CSV": str(self.d / "orders.csv"), "KANBAN_DB": str(self.d / "kanban.db"),
-                    "HANDOFF_LOG": str(self.d / "handoff-log.csv"), "ROSTER": str(ROOT / "fixtures" / "stations.json"),
+                    "HANDOFF_LOG": str(self.d / "handoff-log.csv"), "ANSWERS": str(self.d / "answers.jsonl"), "ROSTER": str(ROOT / "fixtures" / "stations.json"),
                     "OUT_DIR": str(self.d / "live")}
 
     def tearDown(self):
@@ -84,6 +97,29 @@ class Files(unittest.TestCase):
         self.assertEqual("running", o["state"])        # one card running, one ready: running
         self.assertIn("2 cards: eng, diag", o["detail"])
         self.assertEqual("2026-11-05T18:01:00Z", o["updatedAt"])
+
+    def test_what_came_back_is_on_the_order(self):
+        orders, _ = self.run_probe()
+        o = next(x for x in orders if x["id"] == "ORD-1201")
+        self.assertEqual([("error", "eng", "crashed: worker exited"), ("comment", "eng", "Found it: the reminder used UTC.")],
+                         [(r["kind"], r["by"], r["text"]) for r in o["replies"]])
+        self.assertEqual("2026-11-05T18:05:00Z", o["replies"][0]["at"])
+        # The result repeats the run's summary: it shows once, as the result.
+        done = next(x for x in orders if x["id"] == "ORD-1202")
+        self.assertEqual([("result", "Logged: pasta, 640 kcal.")], [(r["kind"], r["text"]) for r in done["replies"]])
+        self.assertNotIn("replies", next(x for x in orders if x["id"] == "ORD-1203"))
+
+    def test_answers_from_patch_af_show_and_keep_a_chat_order(self):
+        (self.d / "answers.jsonl").write_text(
+            '{"order_id": "ORD-1150", "at": "2026-11-01T09:01:00Z", "by": "default", "path": "chat", "text": "Tuesday."}\n'
+            'not json\n'
+            '{"order_id": "ORD-1203", "at": "2026-11-05T19:02:00Z", "by": "default", "path": "chat", "text": "Here is the list."}\n')
+        orders, _ = self.run_probe()
+        o = next(x for x in orders if x["id"] == "ORD-1203")
+        self.assertEqual([("answer", "xo", "Here is the list.", "2026-11-05T19:02:00Z")],
+                         [(r["kind"], r["by"], r["text"], r["at"]) for r in o["replies"]])
+        # ORD-1150 is old and has no card, but it was answered: it stays.
+        self.assertIn("ORD-1150", [x["id"] for x in orders])
 
     def test_old_done_orders_stale_open_ones_and_test_rows_drop_off(self):
         orders, _ = self.run_probe()

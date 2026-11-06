@@ -228,7 +228,7 @@ function PatchView({ ship, p, onScreen, onBack }: { ship: ShipView; p: Patch; on
         {(p.orders ?? []).map((id) => {
           const o = ship.data.orders.orders.find((x) => x.id === id);
           const st = o && ship.station(o.station);
-          return st ? <OrderBox key={id} ship={ship} st={st} orderId={id} /> : null;
+          return st ? <OrderBox key={id} ship={ship} st={st} orderId={id} withReply /> : null;
         })}
         {!p.orders?.length && <p className="con-text">No orders on it yet.</p>}
       </div>

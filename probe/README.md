@@ -43,6 +43,8 @@ It reads three things in Hermes' data folder, and never changes them:
 |---|---|
 | `handoff/orders.csv` | Every order: its id, when it came in, from which surface (Telegram, desktop, dashboard), its speed and whether it is open or done. Rows of kind `test` are skipped. |
 | `kanban.db` | The cards. A card belongs to the order whose `ORD-` number its title carries. The order takes its title and brief from its first card, its station from that card's assignee (`forge` is the Chief Engineer, and so on, through `fixtures/stations.json`) and its state from all its cards: running if any card runs, done only when every card is done. |
+| `kanban.db`, again | What came back: each card's result, its runs' summaries (or the error when a run failed) and its comments. They show as the order's replies, oldest first, the newest 12. |
+| `handoff/answers.jsonl` | Once patch AF is in: every answer the Captain was sent, in chat or from a card. An order answered in chat with no card stays on the board because of it. Until then the file doesn't exist and nothing is missed. |
 | `handoff/handoff-log.csv` | The customs lines in the ship's log: each hand-off to Codex or Claude, and whether it came back accepted. |
 
 What drops off the boards: done orders older than `DAYS` (7), and open orders that never got a

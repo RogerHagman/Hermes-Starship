@@ -175,6 +175,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
                 </button>
                 <span className="ocard-sub">
                   {st?.short ?? o.station} · {o.speed ?? ''} · {age(ship.data.orders.asOf, o.updatedAt)}
+                  {o.replies && <span className="ocard-replies">{o.replies.length} {o.replies.length === 1 ? 'REPLY' : 'REPLIES'}</span>}
                   {subs.length > 0 && (
                     <button type="button" className="subfold" aria-expanded={!isFolded}
                       onClick={(e) => { e.stopPropagation(); flip(setFolded, o.id); }}>
@@ -186,6 +187,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
               {isRead && (
                 <div className="ocard-body" id={`body-${o.id}`}>
                   {o.body ? <CardBody text={o.body} /> : o.detail && <p className="cb-text">{o.detail}</p>}
+                  {o.replies && <Replies ship={ship} replies={o.replies} />}
                   <p className="cb-facts mono">
                     {(st?.name ?? o.station).toUpperCase()} · {tierText(o.tier)}
                     {o.parent && ` · PART OF ${o.parent}`}
@@ -198,6 +200,40 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
         })}
       </ol>
     </section>
+  );
+}
+
+type Reply = NonNullable<Order['replies']>[number];
+const REPLY_WORD: Record<Reply['kind'], string> = { answer: 'ANSWER', result: 'RESULT', run: 'RUN', error: 'FAILED', comment: 'NOTE' };
+
+/**
+ * What came back on an order, oldest first: the answer the Captain was sent, card results, run
+ * summaries, failures and notes. The newest one shows in full; older ones show their first lines
+ * until clicked.
+ */
+export function Replies({ ship, replies }: { ship: ShipView; replies: Reply[] }) {
+  const [open, setOpen] = useState<Set<number>>(new Set());
+  return (
+    <div className="replies">
+      <span className="cb-head mono">{replies.length === 1 ? 'REPLY' : `REPLIES · ${replies.length}`}</span>
+      <ol className="reply-list">
+        {replies.map((r, i) => {
+          const last = i === replies.length - 1;
+          const full = last || open.has(i);
+          return (
+            <li key={i} className={`reply reply-${r.kind}`}>
+              <span className="reply-meta mono">
+                {dayAndTime(r.at).toUpperCase()} · {(ship.station(r.by)?.short ?? r.by).toUpperCase()} · {REPLY_WORD[r.kind]}
+              </span>
+              {last
+                ? <p className="reply-text">{r.text}</p>
+                : <button type="button" className={'reply-text' + (full ? '' : ' clamped')} aria-expanded={full}
+                    onClick={() => setOpen((was) => { const now = new Set(was); if (!now.delete(i)) now.add(i); return now; })}>{r.text}</button>}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
   );
 }
 

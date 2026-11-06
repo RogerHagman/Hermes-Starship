@@ -2,7 +2,7 @@
 // never calls a model: these are local files only, served by the page's own nginx.
 import type { Fixtures, LogEntry, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station } from '../types';
 
-const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science'] as const;
+const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops'] as const;
 
 declare global {
   interface Window { FIXTURES?: Fixtures }   // set only in the single-file preview build

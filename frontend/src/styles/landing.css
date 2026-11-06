@@ -495,7 +495,7 @@ html:has(.stage.fit){overflow:hidden}
   .ocard-sub{grid-column:1;grid-row:3}
   .ocard-head .statepill{grid-column:2;grid-row:1 / 4}
   .fold{grid-column:3;grid-row:1 / 4}
-  .cb-sec{grid-template-columns:minmax(0,1fr);gap:2px}
+  .cb-sec,.replies{grid-template-columns:minmax(0,1fr);gap:2px}
 }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -556,3 +556,17 @@ html:has(.stage.fit){overflow:hidden}
   .log-panel{display:flex;flex-direction:column}
   .log{flex:1;min-height:0;max-height:none}
 }
+
+/* What came back on an order: the answer, card results, runs, failures and notes. */
+.replies{display:grid;grid-template-columns:86px minmax(0,1fr);gap:12px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
+.reply-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.reply{display:flex;flex-direction:column;gap:2px;padding-left:10px;border-left:2px solid var(--border)}
+.reply-answer,.reply-result{border-left-color:var(--good)}
+.reply-error{border-left-color:var(--bad)}
+.reply-meta{font-size:10px;letter-spacing:.08em;color:var(--text-label)}
+.reply-text{margin:0;font:inherit;font-size:13.5px;line-height:1.45;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;background:none;border:0;padding:0}
+button.reply-text{cursor:pointer}
+button.reply-text:hover{color:var(--c,var(--text))}
+.reply-text.clamped{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+.con-reply{display:flex;flex-direction:column;gap:2px;margin-top:4px;padding-top:6px;border-top:1px dashed var(--border)}
+.ocard-replies{color:var(--good)}

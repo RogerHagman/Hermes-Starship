@@ -1,7 +1,7 @@
 // Friendly names for the generated fixture types.
-import type { EngineeringFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile } from './fixtures';
+import type { EngineeringFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile } from './fixtures';
 
-export type { EngineeringFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile };
+export type { EngineeringFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile };
 export type Station = StationsFile['stations'][number];
 export type Rail = RailsFile['rails'][number];
 export type RailId = Rail['id'];
@@ -22,6 +22,12 @@ export type Run = ScienceFile['runs'][number];
 export type Serve = ScienceFile['serving'][number];
 export type Dataset = ScienceFile['datasets'][number];
 export type StudyTrack = ScienceFile['study'][number];
+export type Host = OpsFile['hosts'][number];
+export type Container = OpsFile['containers'][number];
+export type Disk = OpsFile['disks'][number];
+export type Job = OpsFile['jobs'][number];
+export type Backup = OpsFile['backups'][number];
+export type Health = Host['state'];
 
 /** Everything the boards read, one object per fixture file. */
 export interface Fixtures {
@@ -34,6 +40,7 @@ export interface Fixtures {
   sensors: SensorsFile;
   engineering: EngineeringFile;
   science: ScienceFile;
+  ops: OpsFile;
   /** live/rail-log.json from the rails probe, when there is one. Its duty lines replace the samples. */
   raillog?: RailLogFile;
 }

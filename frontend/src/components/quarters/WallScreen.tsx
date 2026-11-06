@@ -9,7 +9,7 @@ import { age, clockTime, dateLine, dayAndTime } from '../../lib/format';
 import { ROOM_ICONS, greeting, localHM, nights, stardate } from '../../lib/quarters';
 import { canRelieve, type ShipView } from '../../lib/ship';
 import type { Order, Rail, YeomanItem } from '../../types';
-import { CardBody } from '../Panels';
+import { CardBody, Replies } from '../Panels';
 import { ConHead, StationDetail, stationColour, useEscape } from '../ShipConsole';
 
 export type Screen =
@@ -183,6 +183,7 @@ function ChairView({ ship, hail, onScreen, onBack }: { ship: ShipView; hail?: st
           <h3 className="hailcard-title">{o.title}</h3>
           {o.detail && <p className="con-text">{o.detail}</p>}
           {o.body && <CardBody text={o.body} />}
+          {o.replies && <Replies ship={ship} replies={o.replies} />}
         </article>
       </div>
       <div className="wall-actions">

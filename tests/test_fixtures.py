@@ -13,7 +13,7 @@ import jsonschema
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
-NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science"]
+NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops"]
 
 
 def load(path):
@@ -253,6 +253,45 @@ class NoRealData(unittest.TestCase):
             for label, pattern in self.PATTERNS.items():
                 with self.subTest(file=path.name, pattern=label):
                     self.assertIsNone(re.search(pattern, text), f"{label} in {path.name}")
+
+class OpsAgree(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.o = load(FIX / "ops.json")
+        cls.hosts = {h["id"] for h in cls.o["hosts"]}
+        cls.stations = {s["id"] for s in load(FIX / "stations.json")["stations"]}
+        cls.orders = {o["id"] for o in load(FIX / "orders.json")["orders"]}
+
+    def test_ids_unique_and_samples_in_the_900s(self):
+        for key in ("disks", "jobs", "backups", "cautions"):
+            ids = [x["id"] for x in self.o[key]]
+            self.assertEqual(len(ids), len(set(ids)), key)
+            for i in ids:
+                self.assertRegex(i, r"-9\d\d$")
+
+    def test_everything_sits_on_a_known_host(self):
+        things = self.o["containers"] + self.o["disks"] + self.o["network"]["ports"] + [self.o["gpu"]]
+        for x in things:
+            self.assertIn(x["host"], self.hosts, x)
+        for d in self.o["network"]["devices"]:
+            if "host" in d:
+                self.assertIn(d["host"], self.hosts)
+        for d in self.o["disks"]:
+            self.assertLessEqual(d["usedGb"], d["totalGb"], d["id"])
+
+    def test_jobs_point_at_stations_orders_and_backups(self):
+        backups = {b["id"] for b in self.o["backups"]}
+        for j in self.o["jobs"]:
+            self.assertIn(j["owner"], self.stations, j["id"])
+            if "order" in j:
+                self.assertIn(j["order"], self.orders)
+            if "backup" in j:
+                self.assertIn(j["backup"], backups)
+
+    def test_no_lan_addresses_in_the_sample(self):
+        # Ops knows the network, but addresses stay out of the repo.
+        text = (FIX / "ops.json").read_text()
+        self.assertNotRegex(text, r"\b(10|172|192)\.\d+\.\d+\.\d+\b")
 
 
 if __name__ == "__main__":

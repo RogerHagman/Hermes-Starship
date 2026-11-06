@@ -1,0 +1,164 @@
+/* Hermes Starship · Ops (Deck 1).
+   Ops violet: cool dark surfaces, violet (--ops) for the room and the department, and the three
+   health colours for what Ops reads: green OK, gold WATCH, red ACT. The GPU's fans glow in the
+   local rail's colour and dim when it goes out. Rail colours keep their meaning. Reuses the
+   Quarters layout (quarters.css) and Engineering's rail cards. */
+
+.board-ops{
+  --bg:#08070d;
+  --surface:#12111a;
+  --surface-raised:#1a1824;
+  --surface-selected:#2a2640;
+  --border:#2a2738;
+  --border-strong:#3d3856;
+  --text:#ecebf5;
+  --text-label:#b8b2d4;
+  --text-muted:#a39dbd;
+  --lcars-frame:#b8a2f5;
+  --lcars-dark:#15131f;
+  --focus:#e6dcff;
+  --ops:#b8a2f5;
+  --fan:#3fc1a5;
+}
+html:has(.board-ops) body{background-color:#08070d;background-image:var(--stars), radial-gradient(1400px 800px at 26% 22%, rgba(184,162,245,.12), transparent 70%)}
+.board-btn.ops:not([aria-current]):not(.not-built){border-left-color:#b8a2f5}
+
+/* ---------- health pills: OK, WATCH, ACT ---------- */
+.hpill{display:inline-block;padding:1px 7px;border-radius:99px;border:1px solid currentColor;font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;line-height:1.5;white-space:nowrap;vertical-align:middle}
+.hpill.h-ok{color:var(--good)}
+.hpill.h-warn{color:var(--captain)}
+.hpill.h-bad{color:var(--bad);background:color-mix(in srgb, var(--bad) 14%, transparent)}
+.hpill.h-unknown{color:var(--text-label);border-style:dashed}
+
+/* ---------- the room ---------- */
+.ops-pic{background:#08070d}
+.ops-pic .spot-label{border-color:rgba(184,162,245,.45)}
+.ops-pic .spot:hover .spot-label,.ops-pic .spot:focus-visible .spot-label{border-color:var(--ops);background:rgba(26,22,40,.94)}
+.ops-pic .spot-meta{color:var(--ops)}
+.ops-pic .spot[aria-pressed="true"] .spot-label{background:var(--ops);border-color:var(--ops);color:#14101f}
+.ops-pic .spot[aria-pressed="true"] .spot-meta{color:#14101f}
+.room-art .o-hl{opacity:0;transition:opacity .25s ease}
+.ops-pic[data-on="net"] #o-hl-net,.ops-pic[data-on="ops"] #o-hl-ops,.ops-pic[data-on="nas"] #o-hl-nas,.ops-pic[data-on="clock"] #o-hl-clock,
+.ops-pic[data-on="storage"] #o-hl-storage,.ops-pic[data-on="vault"] #o-hl-vault,.ops-pic[data-on="desk"] #o-hl-desk,.ops-pic[data-on="gpu"] #o-hl-gpu{opacity:.6}
+.ops-pic[data-hot="net"] #o-hl-net,.ops-pic[data-hot="ops"] #o-hl-ops,.ops-pic[data-hot="nas"] #o-hl-nas,.ops-pic[data-hot="clock"] #o-hl-clock,
+.ops-pic[data-hot="storage"] #o-hl-storage,.ops-pic[data-hot="vault"] #o-hl-vault,.ops-pic[data-hot="desk"] #o-hl-desk,
+.ops-pic[data-hot="gpu"] #o-hl-gpu,.ops-pic[data-hot="bridge"] #o-hl-bridge{opacity:1}
+.room-art .o-lamp{animation:qarm 3.2s ease-in-out infinite}
+.room-art .o-blink{animation:oblink 1.8s steps(2, jump-none) infinite}
+@keyframes oblink{0%,100%{opacity:.9}50%{opacity:.25}}
+.room-art .o-flow{animation:oflow 4s ease-in-out infinite}
+@keyframes oflow{0%,100%{opacity:.45}50%{opacity:.2}}
+/* The chronometer's hand shows the ship's time: the page sets --hand. */
+.room-art .o-hand{transform:rotate(var(--hand, 0deg));transition:transform 1s ease}
+/* The GPU's fans glow with the local rail, turn while it is up, and stop when it is out. */
+.room-art .o-glow{fill:var(--fan);transition:opacity .4s ease}
+.room-art .o-fan{animation:ofan 2.4s linear infinite}
+@keyframes ofan{to{transform:rotate(360deg)}}
+.ops-pic[data-gpu="degraded"]{--fan:#c9a85a}
+.ops-pic[data-gpu="degraded"] .room-art .o-fan{animation-duration:6s}
+.ops-pic[data-gpu="out"] .room-art .o-glow{fill:#3a4048;opacity:.25}
+.ops-pic[data-gpu="out"] .room-art .o-fan{animation:none}
+
+/* ---------- the status board on the table ---------- */
+.status-board{position:absolute;padding:8px 10px;pointer-events:none}
+.status-board button{pointer-events:auto}
+.sb-cols{list-style:none;margin:0;padding:0;height:100%;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.sb-col{display:flex;flex-direction:column;gap:5px;padding:2px 5px;border-left:1px solid rgba(184,162,245,.25);min-width:0}
+.sb-area{align-self:flex-start;padding:1px 6px;border-radius:99px;border:1px solid rgba(184,162,245,.4);background:rgba(14,12,22,.85);color:var(--ops);font-size:8.5px;letter-spacing:.08em;cursor:pointer;white-space:nowrap}
+.sb-area:hover,.sb-area:focus-visible{border-color:var(--ops);outline:none}
+.sb-area[aria-pressed="true"]{background:var(--ops);color:#14101f}
+.sb-chips{display:flex;flex-wrap:wrap;gap:4px}
+.sb-chip{width:13px;height:13px;padding:0;border-radius:4px;border:1px solid var(--good);background:color-mix(in srgb, var(--good) 30%, transparent);cursor:pointer}
+.sb-chip.h-warn{border-color:var(--captain);background:color-mix(in srgb, var(--captain) 45%, transparent)}
+.sb-chip.h-bad{border-color:var(--bad);background:var(--bad);box-shadow:0 0 8px color-mix(in srgb, var(--bad) 60%, transparent);animation:qarm 1.6s ease-in-out infinite}
+.sb-chip.h-unknown{border-style:dashed;border-color:var(--text-label);background:transparent}
+.sb-chip:hover{transform:scale(1.25)}
+.sb-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* ---------- the live rail gauges on the usage desk ---------- */
+.usage-desk{position:absolute;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px 10px;border:none;background:transparent;cursor:pointer;text-align:left;border-radius:8px}
+.usage-desk:hover{background:rgba(184,162,245,.06)}
+.usage-desk:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.ud-rail{display:flex;flex-direction:column;gap:4px;min-width:0;padding-left:7px;border-left:2px solid var(--c)}
+.ud-rail.out{opacity:.55}
+.ud-name{font-size:8.5px;letter-spacing:.08em;color:var(--c);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ud-meter{display:grid;grid-template-columns:minmax(0,1fr) 22px;gap:5px;align-items:center}
+.ud-bar{display:block;height:6px;border-radius:3px;background:color-mix(in srgb, var(--c) 14%, transparent);overflow:hidden}
+.ud-bar b{display:block;height:100%;border-radius:3px;background:var(--c)}
+.ud-val{font-size:8.5px;color:var(--text-label);text-align:right}
+
+/* ---------- the wall screen ---------- */
+.ops-screen{background:linear-gradient(180deg, rgba(24,21,36,.97), rgba(9,8,14,.97)) !important}
+.ops-screen .linkish{color:var(--ops);text-decoration-color:color-mix(in srgb, var(--ops) 40%, transparent)}
+.ops-screen .linkish:hover{color:#efe9ff}
+.ops-ease{grid-template-columns:repeat(3, minmax(0,1fr));gap:8px}
+.ops-tile{padding:9px 11px;gap:3px;background:linear-gradient(180deg, rgba(184,162,245,.07), transparent 55%), var(--surface-raised)}
+.ops-tile:hover{border-color:var(--ops)}
+.ops-tile .ease-label svg{stroke:var(--ops)}
+.ops-tile .ease-label{font-size:9px}
+.ops-tile .ease-figure{display:flex;align-items:center;gap:8px;font-size:24px}
+.ops-tile .ease-text{font-size:12px;line-height:1.35;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+.ops-tile.t-warn{border-color:color-mix(in srgb, var(--captain) 55%, var(--border))}
+.ops-tile.t-bad{border-color:color-mix(in srgb, var(--bad) 70%, var(--border))}
+
+.ops-card{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:10px;background:var(--surface-raised);border-left:3px solid var(--good)}
+.ops-card + .ops-card{margin-top:8px}
+.ops-card.s-warn{border-left-color:var(--captain)}
+.ops-card.s-bad{border-left-color:var(--bad)}
+.ops-card-head{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
+.ops-card-name{font-family:var(--font-display);font-weight:600;font-size:16px}
+.ops-card-meta{margin-left:auto;font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
+.ops-card-sub{font-size:13px;line-height:1.4;color:var(--text-muted)}
+.ops-meter{grid-template-columns:78px minmax(0,1fr) 104px}
+.ops-meter .meter-val{font-family:var(--font-mono);font-size:10.5px;color:var(--text);text-align:right;white-space:nowrap}
+
+.ops-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.ops-card .ops-rows{margin-top:4px}
+.ops-row{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) auto auto;gap:3px 10px;align-items:center;padding:6px 10px;border-radius:8px;background:color-mix(in srgb, var(--surface-raised) 70%, var(--bg));border-left:2px solid var(--good)}
+.ops-card .ops-row{background:var(--surface)}
+.ops-row.s-warn{border-left-color:var(--captain)}
+.ops-row.s-bad{border-left-color:var(--bad);background:color-mix(in srgb, var(--bad) 8%, var(--surface-raised))}
+.ops-row.s-unknown{border-left-style:dashed;border-left-color:var(--text-label)}
+.ops-row-name{font-family:var(--font-display);font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ops-row-name.mono{font-family:var(--font-mono);font-weight:400;font-size:11.5px}
+.ops-row-what{font-size:12.5px;color:var(--text-muted);min-width:0}
+.ops-row-fig{font-size:9.5px;letter-spacing:.05em;color:var(--text-label);white-space:nowrap}
+.ops-row-note{grid-column:1 / -1;font-size:12px;line-height:1.35;color:var(--text-label)}
+.ops-row.two{grid-template-columns:minmax(0,150px) minmax(0,1fr) auto}
+.ops-row.two .hpill{grid-column:3;grid-row:1}
+.ops-row.two .ops-row-fig{grid-column:2 / -1;grid-row:2}
+.ops-line{margin:0;padding:8px 12px;border-radius:9px;background:var(--surface-raised);font-size:13.5px;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.ops-line .mono{font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
+.ops-screen .readhead{margin:6px 0 0}
+
+.cautions{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.cautions li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;padding:10px 12px;border-radius:10px;background:var(--surface-raised);border-left:3px solid var(--captain)}
+.caution-text{font-family:var(--font-display);font-weight:600;font-size:15px}
+.caution-why{grid-column:1 / -1;font-size:13px;line-height:1.4;color:var(--text-muted)}
+.caution-id{grid-column:2;grid-row:1;font-size:9.5px;color:var(--text-label)}
+
+/* ---------- panels ---------- */
+.look-panel{flex:1;min-height:0;display:flex;flex-direction:column;padding:14px 16px}
+.look-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:5px;overflow:auto;min-height:0}
+.look-list .empty{color:var(--text-muted);font-size:13px}
+.look-row{width:100%;display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:7px 12px;border-radius:9px;border:none;border-left:3px solid var(--captain);background:var(--surface-raised);text-align:left;cursor:pointer;color:var(--text)}
+.look-row.s-bad{border-left-color:var(--bad)}
+.look-row.s-unknown{border-left-color:var(--text-label)}
+.look-row:hover{background:color-mix(in srgb, var(--surface-raised) 85%, var(--text))}
+.look-name{font-family:var(--font-display);font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.look-area{font-size:9px;letter-spacing:.08em;color:var(--ops)}
+.look-text{grid-column:2 / -1;font-size:12.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ogrid .olog .hpill{font-size:8.5px}
+.ogrid .olog .olog-what{max-width:none;white-space:normal;min-width:150px}
+
+/* ---------- smaller boards ---------- */
+@container board (max-width: 760px){
+  .sb-area{font-size:7px;padding:1px 4px}
+  .sb-chip{width:9px;height:9px}
+  .ud-name{font-size:7px}
+  .ops-row{grid-template-columns:minmax(0,1fr) auto}
+  .ops-row-what,.ops-row-fig{grid-column:1 / -1}
+}
+@media (prefers-reduced-motion: reduce){
+  .room-art .o-fan,.room-art .o-blink,.room-art .o-flow,.sb-chip.h-bad{animation:none}
+}

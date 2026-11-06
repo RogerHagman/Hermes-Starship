@@ -76,6 +76,7 @@ services:
       ORDERS_CSV: /hermes/handoff/orders.csv
       KANBAN_DB: /hermes/kanban.db
       HANDOFF_LOG: /hermes/handoff/handoff-log.csv
+      ANSWERS: /hermes/handoff/answers.jsonl
       ROSTER: /srv/fixtures/stations.json
       OUT_DIR: /out
       SCRATCH: /scratch
