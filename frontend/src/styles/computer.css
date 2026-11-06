@@ -45,7 +45,7 @@ html:has(.board-computer) body{background-color:#05080d;background-image:var(--s
 .core-pic .spot[aria-pressed="true"] .spot-meta{color:#06101c}
 .room-art .c-hl{opacity:0;transition:opacity .25s ease}
 .core-pic[data-on="memory"] #c-hl-memory,.core-pic[data-on="core"] #c-hl-core,.core-pic[data-on="records"] #c-hl-records,
-.core-pic[data-on="minutes"] #c-hl-minutes,.core-pic[data-on="burn"] #c-hl-burn{opacity:.55}
+.core-pic[data-on="desk"] #c-hl-desk,.core-pic[data-on="minutes"] #c-hl-minutes,.core-pic[data-on="burn"] #c-hl-burn{opacity:.55}
 .core-pic[data-hot="memory"] #c-hl-memory,.core-pic[data-hot="core"] #c-hl-core,.core-pic[data-hot="records"] #c-hl-records,
 .core-pic[data-hot="desk"] #c-hl-desk,.core-pic[data-hot="minutes"] #c-hl-minutes,.core-pic[data-hot="burn"] #c-hl-burn,
 .core-pic[data-hot="bridge"] #c-hl-bridge{opacity:1}
@@ -138,6 +138,30 @@ html:has(.board-computer) body{background-color:#05080d;background-image:var(--s
 .tlog time{font-size:10px;color:var(--text-label);padding-top:2px}
 .core-screen .stepper .con-back:disabled{opacity:.35;cursor:default}
 
+/* the numbers: one hue, thin marks, labels in text ink */
+.tstats{margin-left:auto}
+.core-screen .tstats-body{gap:14px}
+.tkpis{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:8px}
+.tkpis li{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:10px;background:var(--surface-raised)}
+.tk-n{font-family:var(--font-display);font-weight:600;font-size:24px;line-height:1.1;color:var(--text)}
+.tk-l{font-size:9px;letter-spacing:.07em;color:var(--text-label)}
+.tdays{list-style:none;margin:0;padding:8px 10px 6px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;height:120px;border-radius:10px;background:#02050a;border:1px solid color-mix(in srgb, var(--core) 18%, transparent)}
+.tdays li{display:grid;grid-template-rows:14px minmax(0,1fr) 14px;align-items:end;justify-items:center;min-width:0}
+.td-n{font-size:10px;color:var(--text)}
+.td-bar{width:min(18px, 70%);height:100%;display:flex;align-items:flex-end;border-bottom:1px solid color-mix(in srgb, var(--text-label) 35%, transparent)}
+.td-bar b{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--core);min-height:0}
+.tdays li:hover .td-bar b{background:color-mix(in srgb, var(--core) 75%, #fff)}
+.td-day{font-size:9px;color:var(--text-label)}
+.tstat-cols{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px}
+.tbars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.tbar-row{width:100%;display:grid;grid-template-columns:minmax(0,104px) minmax(0,1fr) auto;gap:10px;align-items:center;padding:4px 8px;border-radius:7px;border:none;background:transparent;color:var(--text);text-align:left;font:inherit}
+button.tbar-row{cursor:pointer}
+button.tbar-row:hover{background:var(--surface-raised)}
+.tb-label{font-family:var(--font-display);font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-track{display:block;height:6px;border-radius:3px;background:color-mix(in srgb, var(--core) 12%, transparent);overflow:hidden}
+.tb-track b{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--core)}
+.tb-v{font-size:10px;letter-spacing:.05em;color:var(--text-muted);white-space:nowrap}
+
 /* minutes, burn, memory */
 .tminutes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .tminutes li{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:var(--surface-raised);border-left:3px solid var(--core)}
@@ -182,6 +206,8 @@ html:has(.board-computer) body{background-color:#05080d;background-image:var(--s
   .trow{grid-template-columns:70px minmax(0,1fr) auto}
   .trow .tst,.trow .twhen{display:none}
   .tfacts{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .tkpis{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .tstat-cols{grid-template-columns:minmax(0,1fr)}
 }
 @media (prefers-reduced-motion: reduce){
   .room-art .c-ring,.room-art .c-shaft,.room-art .c-blink,.room-art .c-flow,.room-art .c-mem,.room-art .c-crystal{animation:none}

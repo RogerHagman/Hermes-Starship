@@ -2,6 +2,7 @@
 // box, drawn by tools/make_computer_svg.py), and the core terminal's records: every order the
 // ship has taken, in any state, with the terminal's search. The records come from live/records.json
 // on the NAS (the ship probe keeps every order there); without it, from the orders on the boards.
+import { dayKey } from './format';
 import type { Fixtures, Order, OrdersFile } from '../types';
 import type { ShipView } from './ship';
 
@@ -133,8 +134,96 @@ export function minutes(data: Fixtures) {
   return data.shiplog.entries.filter((e) => e.kind === 'briefing').sort((a, b) => b.at.localeCompare(a.at));
 }
 
+// ---------- the numbers: what the records say about how the ship works ----------
+
+const MIN = 60_000;
+
+/** Minutes from an order coming in to it closing, for a done order that has both times. */
+export function took(o: Order): number | null {
+  if (o.state !== 'done' || !o.openedAt || !o.closedAt) return null;
+  const m = (Date.parse(o.closedAt) - Date.parse(o.openedAt)) / MIN;
+  return Number.isFinite(m) && m >= 0 ? m : null;
+}
+
+/** A length of time, short: 45 MIN, 3.5 H, 2.1 DAYS. */
+export function span(mins: number): string {
+  const one = (x: number) => x.toFixed(1).replace(/\.0$/, '');
+  if (mins < 90) return `${Math.max(1, Math.round(mins))} MIN`;
+  if (mins < 48 * 60) return `${one(mins / 60)} H`;
+  return `${one(mins / 1440)} DAYS`;
+}
+
+function median(xs: number[]): number | null {
+  if (!xs.length) return null;
+  const s = [...xs].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+export const SURFACE_WORD: Record<string, string> = { telegram: 'Telegram', desktop: 'Desktop app', dashboard: 'Web dashboard' };
+
+export interface Day { key: string; label: string; opened: number; closed: number }
+export interface Stats {
+  /** The last `days` ship's days, oldest first, ending on the day of asOf. */
+  days: Day[];
+  /** Done orders with both times, per station: how many and the median time to close. Slowest first. */
+  stations: { id: string; done: number; median: number }[];
+  /** Where the orders came from, the most first. */
+  surfaces: { id: string; n: number }[];
+  /** Orders with a card filed, and orders answered in chat (no card). Older records may say neither. */
+  card: number;
+  chat: number;
+  /** Median time to close over every timed done order. */
+  median: number | null;
+  timed: number;
+  week: { opened: number; closed: number };
+}
+
+/** What the records say: orders per day, time to close per station, surfaces, chat or card. */
+export function stats(list: Order[], asOf: string, days = 14): Stats {
+  const [y, m, d] = dayKey(asOf).split('-').map(Number);
+  const out: Day[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const t = new Date(Date.UTC(y, m - 1, d - i, 12));
+    out.push({ key: t.toISOString().slice(0, 10), opened: 0, closed: 0,
+      label: new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }).format(t).toUpperCase() });
+  }
+  const at = new Map(out.map((x) => [x.key, x]));
+  const week = new Set(out.slice(-7).map((x) => x.key));
+  const by = new Map<string, number[]>();
+  const from = new Map<string, number>();
+  const s: Stats = { days: out, stations: [], surfaces: [], card: 0, chat: 0, median: null, timed: 0, week: { opened: 0, closed: 0 } };
+  const all: number[] = [];
+  for (const o of list) {
+    if (o.openedAt) {
+      const k = dayKey(o.openedAt);
+      if (at.has(k)) at.get(k)!.opened += 1;
+      if (week.has(k)) s.week.opened += 1;
+    }
+    if (o.closedAt) {
+      const k = dayKey(o.closedAt);
+      if (at.has(k)) at.get(k)!.closed += 1;
+      if (week.has(k)) s.week.closed += 1;
+    }
+    const t = took(o);
+    if (t !== null) {
+      all.push(t);
+      by.set(o.station, [...(by.get(o.station) ?? []), t]);
+    }
+    if (o.surface) from.set(o.surface, (from.get(o.surface) ?? 0) + 1);
+    if (o.cards !== undefined) { if (o.cards > 0) s.card += 1; else s.chat += 1; }
+  }
+  s.median = median(all);
+  s.timed = all.length;
+  s.stations = [...by.entries()].map(([id, xs]) => ({ id, done: xs.length, median: median(xs)! }))
+    .sort((a, b) => b.median - a.median || a.id.localeCompare(b.id));
+  s.surfaces = [...from.entries()].map(([id, n]) => ({ id, n })).sort((a, b) => b.n - a.n || a.id.localeCompare(b.id));
+  return s;
+}
+
 /** 24 x 24 line icons for the room's things. */
-export const CORE_ICONS: Record<CoreObject | 'ease' | 'record' | 'station', string> = {
+export const CORE_ICONS: Record<CoreObject | 'ease' | 'record' | 'station' | 'stats', string> = {
+  stats: 'M4 20h16 M7 20v-6 M11 20V8 M15 20v-9 M19 20V5',
   ease: 'M4 5h16v11H4z M8 20h8 M12 16v4 M7 9l2 2-2 2 M11 13h4',
   record: 'M6 3h9l3 3v15H6z M9 9h6 M9 13h6 M9 17h4',
   records: 'M5 4h14v4H5z M5 10h14v4H5z M5 16h14v4H5z M8 6h.01 M8 12h.01 M8 18h.01',

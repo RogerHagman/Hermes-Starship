@@ -368,6 +368,15 @@ def build_orders(rows, cards, names, now, days=7, keep=80, answers=None, archive
         }
         if speed_of(row.get("speed")):
             order["speed"] = speed_of(row.get("speed"))
+        # For the Computer's statistics: when it came in, when it closed, from where, and how many cards.
+        opened = parse_time(row.get("received_at")) or min((t for t in (parse_time(c.get("created")) for c in theirs) if t), default=None)
+        if opened:
+            order["openedAt"] = utc_stamp(opened)
+        if state == "done":
+            order["closedAt"] = utc_stamp(parse_time(row.get("closed_at")) or when)
+        if row.get("from_surface"):
+            order["surface"] = row["from_surface"].lower()
+        order["cards"] = len(theirs)
         if head.get("body"):
             order["body"] = str(head["body"]).strip()[:BODY_KEEP]
         replies = replies_of(theirs, names, now, said)

@@ -74,6 +74,27 @@
             "format": "date-time",
             "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
           },
+          "openedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$",
+            "description": "When the order came in (orders.csv received_at, else its first card)."
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$",
+            "description": "When the order closed. Done orders only."
+          },
+          "surface": {
+            "type": "string",
+            "description": "Where the Captain gave it: telegram, desktop, dashboard, ..."
+          },
+          "cards": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many Kanban cards were filed for it. 0: answered in chat, or never picked up."
+          },
           "parent": {
             "type": "string",
             "pattern": "^ORD-\\d{4}$"

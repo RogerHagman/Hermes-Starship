@@ -25,3 +25,8 @@ export function age(asOf: string, iso: string): string {
   if (mins < 60) return `${mins} min ago`;
   return `${Math.floor(mins / 60)} h ${mins % 60} min ago`;
 }
+
+/** The ship's day an instant falls on, as YYYY-MM-DD. */
+export function dayKey(iso: string | Date): string {
+  return new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: TZ }).format(new Date(iso));
+}

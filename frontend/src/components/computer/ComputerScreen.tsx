@@ -6,8 +6,8 @@ import { useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { dayAndTime, dayLine } from '../../lib/format';
 import { railColor } from '../../lib/lookups';
 import {
-  ALL, CORE_ICONS, LIST_MAX, STATES, STATE_WORD, counts, echo, find, logOf, minutes, parseCommand, records, recordsFile,
-  type Query, type State,
+  ALL, CORE_ICONS, LIST_MAX, STATES, STATE_WORD, SURFACE_WORD, counts, echo, find, logOf, minutes, parseCommand, records, recordsFile,
+  span, stats, took, type Query, type State,
 } from '../../lib/computer';
 import type { ShipView } from '../../lib/ship';
 import { RAIL_IDS } from '../../lib/ship';
@@ -16,11 +16,12 @@ import { CardBody, Replies } from '../Panels';
 import { ConHead, StationDetail, useEscape } from '../ShipConsole';
 
 export type Screen =
-  | { view: 'ease' } | { view: 'record'; id: string } | { view: 'minutes' } | { view: 'burn' } | { view: 'memory' }
+  | { view: 'ease' } | { view: 'record'; id: string } | { view: 'stats' } | { view: 'minutes' } | { view: 'burn' } | { view: 'memory' }
   | { view: 'station'; id: string };
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const up = (s: string) => s.toUpperCase();
+const when = (iso: string) => `${dayLine(iso)} · ${dayAndTime(iso).split(' ')[1]}`;
 
 /** A small state pill for an order. */
 export function StatePill({ state }: { state: State }) {
@@ -41,6 +42,7 @@ export function ComputerScreen({ ship, screen, onScreen, query, onQuery }: Props
   let body: ReactNode;
   switch (screen.view) {
     case 'record': body = <RecordView ship={ship} id={screen.id} query={query} onScreen={onScreen} onBack={back} />; break;
+    case 'stats': body = <StatsView ship={ship} onQuery={(q) => { onQuery(q); back(); }} onBack={back} />; break;
     case 'minutes': body = <MinutesView ship={ship} onBack={back} />; break;
     case 'burn': body = <BurnView ship={ship} onBack={back} />; break;
     case 'memory': body = <MemoryView ship={ship} onScreen={onScreen} onBack={back} />; break;
@@ -50,7 +52,7 @@ export function ComputerScreen({ ship, screen, onScreen, query, onQuery }: Props
       break;
     }
   }
-  if (!body) body = <Terminal ship={ship} query={query} onQuery={onQuery} onOpen={(id) => onScreen({ view: 'record', id })} />;
+  if (!body) body = <Terminal ship={ship} query={query} onQuery={onQuery} onOpen={(id) => onScreen({ view: 'record', id })} onStats={() => onScreen({ view: 'stats' })} />;
   return (
     <section className="console wall core-screen" role="region" aria-label="Core terminal" style={css({ '--c': 'var(--core)' })}>
       {body}
@@ -60,7 +62,11 @@ export function ComputerScreen({ ship, screen, onScreen, query, onQuery }: Props
 
 // ---------- the records: every order, any state ----------
 
-function Terminal({ ship, query, onQuery, onOpen }: { ship: ShipView; query: Query; onQuery: (q: Query) => void; onOpen: (id: string) => void }) {
+const STATS_WORDS = new Set(['stats', 'statistics', 'numbers']);
+
+function Terminal({ ship, query, onQuery, onOpen, onStats }: {
+  ship: ShipView; query: Query; onQuery: (q: Query) => void; onOpen: (id: string) => void; onStats: () => void;
+}) {
   const all = records(ship.data);
   const file = recordsFile(ship.data);
   const shown = find(all, query);
@@ -73,6 +79,7 @@ function Terminal({ ship, query, onQuery, onOpen }: { ship: ShipView; query: Que
   const run = (e: FormEvent) => {
     e.preventDefault();
     if (!line.trim()) return;
+    if (STATS_WORDS.has(line.trim().toLowerCase())) { setLine(''); onStats(); return; }
     const { query: q, open: id } = parseCommand(line, ship, query);
     setLine('');
     if (id) {
@@ -103,6 +110,7 @@ function Terminal({ ship, query, onQuery, onOpen }: { ship: ShipView; query: Que
           {station && <button type="button" className="tclear" onClick={() => onQuery({ ...query, station: null })}>× {station.short}</button>}
           {query.words && <button type="button" className="tclear" onClick={() => onQuery({ ...query, words: '' })}>× “{query.words}”</button>}
           {(query.state !== 'all' || query.station || query.words) && <button type="button" className="tclear" onClick={() => onQuery(ALL)}>× all</button>}
+          <button type="button" className="tclear tstats" onClick={onStats}>the numbers ›</button>
         </p>
         <ol className="tlist" aria-label="Orders">
           {shown.length === 0 && <li className="tnone mono">No order matches. Type <b>all</b> to see every record.</li>}
@@ -115,7 +123,7 @@ function Terminal({ ship, query, onQuery, onOpen }: { ship: ShipView; query: Que
         <form className="tline" onSubmit={run} role="search">
           <label className="tprompt mono" htmlFor="core-cmd">computer@core:~$</label>
           <input id="core-cmd" ref={input} className="tinput mono" value={line} onChange={(e) => setLine(e.target.value)}
-            autoComplete="off" spellCheck={false} placeholder="ORD-1232 · state blocked · station forge · words to find · all" />
+            autoComplete="off" spellCheck={false} placeholder="ORD-1232 · state blocked · station forge · words to find · stats · all" />
         </form>
       </div>
     </>
@@ -174,12 +182,15 @@ function RecordView({ ship, id, query, onScreen, onBack }: { ship: ShipView; id:
             : o.station}</dd></div>
           <div><dt>SPEED</dt><dd>{o.speed ?? '—'}</dd></div>
           <div><dt>TIER</dt><dd>{o.tier === undefined ? 'NO TIER' : `TIER ${o.tier}`}</dd></div>
-          <div><dt>UPDATED</dt><dd>{dayLine(o.updatedAt)} · {dayAndTime(o.updatedAt).split(' ')[1]}</dd></div>
+          {o.openedAt && <div><dt>OPENED</dt><dd>{when(o.openedAt)}{o.surface ? ` · ${up(SURFACE_WORD[o.surface] ?? o.surface)}` : ''}</dd></div>}
+          {o.closedAt && <div><dt>CLOSED</dt><dd>{when(o.closedAt)}{took(o) !== null ? ` · TOOK ${span(took(o)!)}` : ''}</dd></div>}
+          <div><dt>UPDATED</dt><dd>{when(o.updatedAt)}</dd></div>
+          {o.cards !== undefined && <div><dt>CARDS</dt><dd>{o.cards === 0 ? 'NONE · ANSWERED IN CHAT' : o.cards}</dd></div>}
           {o.parent && <div><dt>PART OF</dt><dd><button type="button" className="linkish" onClick={() => go(o.parent!)}>{o.parent}</button></dd></div>}
           {subs.length > 0 && <div><dt>SUB-ORDERS</dt><dd>{subs.map((s) => (
             <button key={s.id} type="button" className="linkish" onClick={() => go(s.id)}>{s.id}</button>))}</dd></div>}
           {o.mission && <div><dt>MISSION</dt><dd>{o.mission}</dd></div>}
-          {o.detail && <div className="wide"><dt>CARDS</dt><dd>{o.detail}</dd></div>}
+          {o.detail && <div className="wide"><dt>NOTE</dt><dd>{o.detail}</dd></div>}
         </dl>
         {o.body
           ? <div className="tsec"><span className="cb-head mono">THE BRIEF</span><CardBody text={o.body} /></div>
@@ -197,6 +208,86 @@ function RecordView({ ship, id, query, onScreen, onBack }: { ship: ShipView; id:
             </ol>
           </div>
         )}
+      </div>
+    </>
+  );
+}
+
+// ---------- the numbers ----------
+
+function StatsView({ ship, onQuery, onBack }: { ship: ShipView; onQuery: (q: Query) => void; onBack: () => void }) {
+  const all = records(ship.data);
+  const file = recordsFile(ship.data);
+  const s = stats(all, file.asOf);
+  const most = Math.max(1, ...s.days.map((d) => d.opened));
+  const slowest = Math.max(1, ...s.stations.map((x) => x.median));
+  const from = Math.max(1, ...s.surfaces.map((x) => x.n));
+  const peak = s.days.reduce((a, d) => (d.opened > a.opened ? d : a), s.days[0]);
+  const today = s.days[s.days.length - 1];
+  const handled = s.card + s.chat;
+  const oldest = all.reduce<string | null>((a, o) => { const t = o.openedAt ?? o.updatedAt; return !a || t < a ? t : a; }, null);
+  return (
+    <>
+      <ConHead icon={CORE_ICONS.stats} title="Records · the numbers" back="‹ Records" onBack={onBack}
+        sub={`${all.length} ORDERS ON FILE${oldest ? ` · SINCE ${dayLine(oldest)}` : ''} · ${file.synthetic ? 'SAMPLE RECORDS' : sourceWord(ship)}`} />
+      <div className="con-body tstats-body">
+        <ul className="tkpis">
+          <li><span className="tk-n">{s.week.opened}</span><span className="tk-l mono">OPENED · LAST 7 DAYS</span></li>
+          <li><span className="tk-n">{s.week.closed}</span><span className="tk-l mono">CLOSED · LAST 7 DAYS</span></li>
+          <li><span className="tk-n">{s.median === null ? '—' : span(s.median).toLowerCase()}</span>
+            <span className="tk-l mono">MEDIAN TIME TO CLOSE · {s.timed} TIMED</span></li>
+          <li><span className="tk-n">{handled ? `${s.chat} of ${handled}` : '—'}</span><span className="tk-l mono">ANSWERED IN CHAT · NO CARD</span></li>
+        </ul>
+
+        <div className="tsec">
+          <span className="cb-head mono">ORDERS OPENED PER DAY · LAST {s.days.length} DAYS</span>
+          <ol className="tdays" aria-label="Orders opened per day">
+            {s.days.map((d) => (
+              <li key={d.key} title={`${d.label}: ${d.opened} opened, ${d.closed} closed`} aria-label={`${d.label}, ${d.opened} opened, ${d.closed} closed`}>
+                <span className="td-n mono">{d.opened > 0 && (d === peak || d === today) ? d.opened : ''}</span>
+                <span className="td-bar"><b style={{ height: `${(d.opened / most) * 100}%` }} /></span>
+                <span className="td-day mono">{d.label.split(' ')[1]}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="tstat-cols">
+          <div className="tsec">
+            <span className="cb-head mono">TIME TO CLOSE · MEDIAN PER STATION · SLOWEST FIRST</span>
+            {s.stations.length === 0 && <p className="tnote">No done order has both its times yet.</p>}
+            <ul className="tbars">
+              {s.stations.map((x) => {
+                const st = ship.station(x.id);
+                return (
+                  <li key={x.id}>
+                    <button type="button" className="tbar-row" title={`Show ${st?.short ?? x.id}'s done orders`}
+                      onClick={() => onQuery({ state: 'done', station: x.id, words: '' })}>
+                      <span className="tb-label">{st?.short ?? x.id}</span>
+                      <span className="tb-track"><b style={{ width: `${(x.median / slowest) * 100}%` }} /></span>
+                      <span className="tb-v mono">{span(x.median)} · {x.done} DONE</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="tsec">
+            <span className="cb-head mono">WHERE THE ORDERS CAME FROM</span>
+            {s.surfaces.length === 0 && <p className="tnote">The records don't say yet.</p>}
+            <ul className="tbars">
+              {s.surfaces.map((x) => (
+                <li key={x.id}>
+                  <span className="tbar-row">
+                    <span className="tb-label">{SURFACE_WORD[x.id] ?? x.id}</span>
+                    <span className="tb-track"><b style={{ width: `${(x.n / from) * 100}%` }} /></span>
+                    <span className="tb-v mono">{x.n}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     </>
   );

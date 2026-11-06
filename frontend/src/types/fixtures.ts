@@ -267,6 +267,22 @@ export interface OrdersFile {
       | "High Warp"
       | "Maximum Warp";
     updatedAt: string;
+    /**
+     * When the order came in (orders.csv received_at, else its first card).
+     */
+    openedAt?: string;
+    /**
+     * When the order closed. Done orders only.
+     */
+    closedAt?: string;
+    /**
+     * Where the Captain gave it: telegram, desktop, dashboard, ...
+     */
+    surface?: string;
+    /**
+     * How many Kanban cards were filed for it. 0: answered in chat, or never picked up.
+     */
+    cards?: number;
     parent?: string;
     mission?: string;
     detail?: string;

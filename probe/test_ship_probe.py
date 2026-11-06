@@ -141,6 +141,15 @@ class Files(unittest.TestCase):
         # Newest first, like the boards.
         self.assertEqual("ORD-1100", data["orders"][-1]["id"])
 
+    def test_an_order_says_when_it_opened_and_closed_where_from_and_how_many_cards(self):
+        orders, _ = self.run_probe()
+        o = {x["id"]: x for x in orders}
+        self.assertEqual(("2026-11-05T18:00:00Z", "telegram", 2), (o["ORD-1201"]["openedAt"], o["ORD-1201"]["surface"], o["ORD-1201"]["cards"]))
+        self.assertNotIn("closedAt", o["ORD-1201"])                     # still running
+        self.assertEqual(("2026-11-05T18:10:00Z", "2026-11-05T18:20:00Z", 1),
+                         (o["ORD-1202"]["openedAt"], o["ORD-1202"]["closedAt"], o["ORD-1202"]["cards"]))
+        self.assertEqual(("dashboard", 0), (o["ORD-1203"]["surface"], o["ORD-1203"]["cards"]))   # answered in chat, or not yet
+
     def test_the_records_hold_at_most_records_keep(self):
         self.run_probe(RECORDS_KEEP="2")
         data = json.loads((self.d / "live" / "records.json").read_text())
