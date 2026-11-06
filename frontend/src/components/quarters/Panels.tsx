@@ -184,7 +184,7 @@ export function OrderLog({ ship, filter, scope, onScope, picked, onOpen }: {
                   </td>
                   <td className="mono">{o.mission ?? '—'}</td>
                   <td className="mono">{sameDay(o.updatedAt) ? clockTime(o.updatedAt) : dayAndTime(o.updatedAt)}</td>
-                  <td className="mono">{speedText(o.speed).toUpperCase()}</td>
+                  <td className="mono">{speedText(o.speed, st).toUpperCase()}</td>
                   <td><span className="dot" style={css({ '--c': railColor(st?.rail ?? 'mixed') })} />{st?.short ?? o.station}</td>
                   <td className="olog-what">{o.title}</td>
                   <td><span className="tierpill" style={css({ '--c': tierVar(o.tier) })}>{o.tier ?? '—'}</span></td>

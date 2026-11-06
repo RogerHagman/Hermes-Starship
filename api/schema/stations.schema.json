@@ -120,6 +120,20 @@
           "model": {
             "type": "string"
           },
+          "defaultSpeed": {
+            "enum": [
+              "Thrusters",
+              "Quarter Impulse",
+              "Half Impulse",
+              "Full Impulse",
+              "Impulse",
+              "Warp",
+              "Warp 9",
+              "High Warp",
+              "Maximum Warp"
+            ],
+            "description": "The speed the station works at when the Captain gives no speed word. Without it, Impulse."
+          },
           "answersTo": {
             "type": "string"
           },
@@ -153,5 +167,5 @@
       }
     }
   },
-  "title": "Hermes Starship \u00b7 stations"
+  "title": "Hermes Starship · stations"
 }

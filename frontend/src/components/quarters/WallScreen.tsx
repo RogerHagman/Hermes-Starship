@@ -176,7 +176,7 @@ function ChairView({ ship, hail, onScreen, onBack }: { ship: ShipView; hail?: st
             <span className="idtag">{o.id}</span>
             <span className="railpill" style={css({ '--c': railColor(st?.rail ?? 'mixed') })}>{(st?.short ?? o.station).toUpperCase()}</span>
             <span className="tierpill" style={css({ '--c': tierVar(o.tier) })}>{tierText(o.tier)}</span>
-            <span className="idtag">{speedText(o.speed).toUpperCase()}</span>
+            <span className="idtag">{speedText(o.speed, st).toUpperCase()}</span>
             {mission && <span className="idtag">{mission.id} · {mission.name.toUpperCase()}</span>}
             <span className="idtag">{age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}</span>
           </div>

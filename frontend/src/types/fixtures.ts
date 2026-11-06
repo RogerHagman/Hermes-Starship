@@ -660,6 +660,19 @@ export interface StationsFile {
     profile?: string;
     aliases: string[];
     model?: string;
+    /**
+     * The speed the station works at when the Captain gives no speed word. Without it, Impulse.
+     */
+    defaultSpeed?:
+      | "Thrusters"
+      | "Quarter Impulse"
+      | "Half Impulse"
+      | "Full Impulse"
+      | "Impulse"
+      | "Warp"
+      | "Warp 9"
+      | "High Warp"
+      | "Maximum Warp";
     answersTo?: string;
     needs?: ("local" | "codex" | "claude")[];
     head?: boolean;

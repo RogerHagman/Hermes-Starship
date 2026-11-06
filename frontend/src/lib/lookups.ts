@@ -74,7 +74,7 @@ export const PIPS: Partial<Record<Station['rank'], { full: number; hollow: numbe
   ensign:    { full: 1, hollow: 0 },
 };
 
-export const SPEEDS_NOTE = 'Speed words set the reasoning level: Thrusters, Quarter, Half and Full Impulse, Warp, Warp 9, Maximum Warp. No word: the station\'s default speed.';
+export const SPEEDS_NOTE = 'Speed words set the reasoning level: Thrusters, Quarter, Half and Full Impulse, Warp, Warp 9, Maximum Warp. No word: the station\'s default speed, Impulse for most.';
 
 export function railColor(rail: RailColour | string): string {
   return (RAIL as Record<string, { color: string }>)[rail]?.color ?? RAIL.mixed.color;
@@ -83,7 +83,9 @@ export function railColor(rail: RailColour | string): string {
 /** An order's tier colour and label. Live orders have no tier until the tier classifier exists. */
 export const tierVar = (tier?: number) => (tier === undefined ? 'var(--text-label)' : `var(--tier-${tier})`);
 export const tierText = (tier?: number) => (tier === undefined ? 'NO TIER' : `TIER ${tier}`);
+/** The speed most stations work at when the Captain gives no speed word. */
+export const DEFAULT_SPEED = 'Impulse';
 /** An order's speed word. With none, the Captain gave no word and the station's default speed was used. */
-export const speedText = (speed?: string) => speed ?? 'Default speed';
+export const speedText = (speed?: string, station?: { defaultSpeed?: string }) => speed ?? `${station?.defaultSpeed ?? DEFAULT_SPEED} · default`;
 /** Highest tier first; orders with no tier last. */
 export const byTier = (a: { tier?: number }, b: { tier?: number }) => (b.tier ?? -1) - (a.tier ?? -1);

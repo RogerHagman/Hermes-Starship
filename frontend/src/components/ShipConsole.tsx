@@ -133,7 +133,7 @@ export function OrderBox({ ship, st, orderId, withReply }: { ship: ShipView; st:
     <div className="con-order" style={css({ '--c': tierVar(o.tier) })}>
       <span className="idtag">
         {o.id} · {off ? `WAITS, ${off.toUpperCase()}` : o.state.toUpperCase()} · {tierText(o.tier)}
-         · {speedText(o.speed).toUpperCase()} · {age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}
+         · {speedText(o.speed, ship.station(o.station)).toUpperCase()} · {age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}
       </span>
       <span className="con-order-title">{o.title}</span>
       {o.detail && <span className="con-text">{o.detail}</span>}

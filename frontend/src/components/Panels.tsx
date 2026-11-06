@@ -174,7 +174,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
                   <Chevron />
                 </button>
                 <span className="ocard-sub">
-                  {st?.short ?? o.station} · {speedText(o.speed)} · {age(ship.data.orders.asOf, o.updatedAt)}
+                  {st?.short ?? o.station} · {speedText(o.speed, st)} · {age(ship.data.orders.asOf, o.updatedAt)}
                   {o.replies && <span className="ocard-replies">{o.replies.length} {o.replies.length === 1 ? 'REPLY' : 'REPLIES'}</span>}
                   {subs.length > 0 && (
                     <button type="button" className="subfold" aria-expanded={!isFolded}

@@ -180,7 +180,7 @@ function RecordView({ ship, id, query, onScreen, onBack }: { ship: ShipView; id:
           <div><dt>STATION</dt><dd>{st
             ? <button type="button" className="linkish" onClick={() => onScreen({ view: 'station', id: st.id })}>{st.name}</button>
             : o.station}</dd></div>
-          <div><dt>SPEED</dt><dd>{speedText(o.speed)}</dd></div>
+          <div><dt>SPEED</dt><dd>{speedText(o.speed, st)}</dd></div>
           <div><dt>TIER</dt><dd>{o.tier === undefined ? 'NO TIER' : `TIER ${o.tier}`}</dd></div>
           {o.openedAt && <div><dt>OPENED</dt><dd>{when(o.openedAt)}{o.surface ? ` · ${up(SURFACE_WORD[o.surface] ?? o.surface)}` : ''}</dd></div>}
           {o.closedAt && <div><dt>CLOSED</dt><dd>{when(o.closedAt)}{took(o) !== null ? ` · TOOK ${span(took(o)!)}` : ''}</dd></div>}
