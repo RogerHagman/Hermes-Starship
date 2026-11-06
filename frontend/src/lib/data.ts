@@ -1,6 +1,6 @@
 // Loads the fixture files, and the live rails and rail log when the NAS probe writes them. Moving around
 // never calls a model: these are local files only, served by the page's own nginx.
-import type { Fixtures, LogEntry, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station } from '../types';
+import type { Fixtures, LogEntry, NasFile, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station } from '../types';
 
 const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops'] as const;
 
@@ -25,17 +25,18 @@ export interface Live {
   raillog: RailLogFile | null;
   orders: OrdersFile | null;
   shiplog: ShipLogFile | null;
+  nas?: NasFile | null;
 }
 
 export async function loadLive(): Promise<Live> {
-  const [rails, raillog, orders, shiplog] = await Promise.all([loadLiveRails(), loadLiveRailLog(), loadLiveOrders(), loadLiveShipLog()]);
-  return { rails, raillog, orders, shiplog };
+  const [rails, raillog, orders, shiplog, nas] = await Promise.all([loadLiveRails(), loadLiveRailLog(), loadLiveOrders(), loadLiveShipLog(), loadLiveNas()]);
+  return { rails, raillog, orders, shiplog, nas };
 }
 
 /** The sample data with each live part in place of its sample. */
 export function withLive(base: Fixtures, live: Live): Fixtures {
   const data = live.rails ? { ...base, rails: live.rails } : base;
-  return withLiveDuty(withLiveOrders(data, live.orders, live.shiplog), live.raillog);
+  return withLiveNas(withLiveDuty(withLiveOrders(data, live.orders, live.shiplog), live.raillog), live.nas ?? null);
 }
 
 /** A live file, or null when there is none or it doesn't look like a real reading. */
@@ -128,4 +129,31 @@ export function withLiveDuty(data: Fixtures, raillog: RailLogFile | null): Fixtu
   const entries = [...data.shiplog.entries.filter((e) => e.kind !== 'duty'), ...dutyFromRailLog(data.stations.stations, raillog)]
     .sort((a, b) => b.at.localeCompare(a.at));
   return { ...data, raillog, shiplog: { ...data.shiplog, entries } };
+}
+
+/** live/nas.json from the Ops probe: the NAS's own memory, swap, CPU, uptime, temperature and disks. */
+export const loadLiveNas = () => loadLiveFile<NasFile>('nas', (f) => Array.isArray(f.hosts) && Array.isArray(f.disks));
+
+/** Whether the Ops board's NAS readings are the samples, live from the Ops probe, or stale (the probe stopped). */
+export function nasSource(data: Fixtures, now = Date.now()): 'sample' | 'live' | 'stale' {
+  if (!data.nas) return 'sample';
+  return now - Date.parse(data.nas.asOf) > STALE_AFTER_MS ? 'stale' : 'live';
+}
+
+/**
+ * With a live NAS reading, each host it has takes the place of the sample one, and the sample
+ * disks of those hosts go: the probe's disks are the real ones. A reading that has gone stale
+ * keeps its numbers, but the host says NO READING, so an old figure never passes for a new one.
+ */
+export function withLiveNas(data: Fixtures, nas: NasFile | null, now = Date.now()): Fixtures {
+  if (!nas) return data;
+  const stale = now - Date.parse(nas.asOf) > STALE_AFTER_MS;
+  const ids = new Set(nas.hosts.map((h) => h.id));
+  const live = new Map(nas.hosts.map((h) => [h.id, stale
+    ? { ...h, state: 'unknown' as const, note: 'The Ops probe has stopped: these are its last readings.' }
+    : h]));
+  const ops = data.ops;
+  const hosts = [...ops.hosts.map((h) => live.get(h.id) ?? h), ...nas.hosts.filter((h) => !ops.hosts.some((x) => x.id === h.id))];
+  const disks = [...ops.disks.filter((d) => !ids.has(d.host)), ...nas.disks].sort((a, b) => a.id.localeCompare(b.id));
+  return { ...data, nas, ops: { ...ops, hosts, disks } };
 }

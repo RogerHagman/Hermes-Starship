@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship · nas",
+  "description": "live/nas.json from the Ops probe: the NAS's own readings (memory, swap, CPU, uptime, temperature and the disks it is told to watch). The page puts them in place of the sample NAS and its disks in ops.json. The probe only reads /proc, /sys and the size of each disk.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "hosts",
+    "disks"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "hosts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "role",
+          "state",
+          "seenAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "ok",
+              "warn",
+              "bad",
+              "unknown"
+            ]
+          },
+          "seenAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "uptimeH": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cpuPct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "ram": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "usedGb",
+              "totalGb"
+            ],
+            "properties": {
+              "usedGb": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalGb": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          },
+          "swap": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "usedGb",
+              "totalGb"
+            ],
+            "properties": {
+              "usedGb": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalGb": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          },
+          "tempC": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "disks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "host",
+          "label",
+          "mount",
+          "usedGb",
+          "totalGb"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^DK-\\d{3}$"
+          },
+          "host": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "mount": {
+            "type": "string"
+          },
+          "usedGb": {
+            "type": "number",
+            "minimum": 0
+          },
+          "totalGb": {
+            "type": "number",
+            "minimum": 1
+          },
+          "perDayGb": {
+            "type": "number",
+            "minimum": 0,
+            "description": "How fast it fills, in GB a day."
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

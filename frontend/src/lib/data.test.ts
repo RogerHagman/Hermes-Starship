@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { loadLiveOrders, loadLiveRails, loadLiveShipLog, railsSource, withLive, withLiveOrders } from './data';
-import type { Fixtures, OrdersFile, ShipLogFile } from '../types';
+import { loadLiveOrders, loadLiveRails, loadLiveShipLog, nasSource, railsSource, withLive, withLiveNas, withLiveOrders } from './data';
+import type { Fixtures, NasFile, OrdersFile, ShipLogFile } from '../types';
 
 const live = { asOf: '2026-11-05T09:00:00Z', synthetic: false, rails: [] };
 
@@ -112,5 +112,37 @@ describe('live orders and log', () => {
   it('a live log replaces the sample lines; without a rail log no sample duty lines stay', async () => {
     const data = withLive(await base(), { rails: null, raillog: null, orders: null, shiplog });
     expect(data.shiplog.entries).toEqual(shiplog.entries);
+  });
+});
+
+describe('live NAS readings', () => {
+  const base = async () => ({ ops: (await import('../../../fixtures/ops.json')).default } as unknown as Fixtures);
+  const nas = (asOf: string): NasFile => ({
+    asOf, synthetic: false,
+    hosts: [{ id: 'nas', name: 'NAS', role: 'Live', state: 'ok', seenAt: asOf, ram: { usedGb: 6, totalGb: 7.5 } }],
+    disks: [{ id: 'DK-905', host: 'nas', label: 'Real data', mount: '/DATA', usedGb: 900, totalGb: 1800 }],
+  });
+  const at = '2026-11-06T13:00:00Z';
+
+  it('the live NAS and its disks replace the sample ones; other hosts and disks stay', async () => {
+    const data = withLiveNas(await base(), nas(at), Date.parse(at));
+    expect(data.ops.hosts.find((h) => h.id === 'nas')?.role).toBe('Live');
+    expect(data.ops.hosts.some((h) => h.id === 'gpu')).toBe(true);
+    expect(data.ops.disks.filter((d) => d.host === 'nas').map((d) => d.id)).toEqual(['DK-905']);
+    expect(data.ops.disks.some((d) => d.host === 'gpu')).toBe(true);
+    expect(nasSource(data, Date.parse(at))).toBe('live');
+  });
+
+  it('a stale reading keeps its numbers but says NO READING', async () => {
+    const later = Date.parse(at) + 10 * 60_000;
+    const data = withLiveNas(await base(), nas(at), later);
+    expect(data.ops.hosts.find((h) => h.id === 'nas')?.state).toBe('unknown');
+    expect(nasSource(data, later)).toBe('stale');
+  });
+
+  it('without a live file nothing changes', async () => {
+    const b = await base();
+    expect(withLiveNas(b, null)).toBe(b);
+    expect(nasSource(b)).toBe('sample');
   });
 });

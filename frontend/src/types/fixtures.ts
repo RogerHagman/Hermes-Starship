@@ -53,6 +53,46 @@ export interface EngineeringFile {
 }
 
 /**
+ * live/nas.json from the Ops probe: the NAS's own readings (memory, swap, CPU, uptime, temperature and the disks it is told to watch). The page puts them in place of the sample NAS and its disks in ops.json. The probe only reads /proc, /sys and the size of each disk.
+ */
+export interface NasFile {
+  asOf: string;
+  synthetic: boolean;
+  hosts: {
+    id: string;
+    name: string;
+    role: string;
+    state: "ok" | "warn" | "bad" | "unknown";
+    seenAt: string;
+    uptimeH?: number;
+    cpuPct?: number;
+    ram?: {
+      usedGb: number;
+      totalGb: number;
+    };
+    swap?: {
+      usedGb: number;
+      totalGb: number;
+    };
+    tempC?: number;
+    note?: string;
+  }[];
+  disks: {
+    id: string;
+    host: string;
+    label: string;
+    mount: string;
+    usedGb: number;
+    totalGb: number;
+    /**
+     * How fast it fills, in GB a day.
+     */
+    perDayGb?: number;
+    note?: string;
+  }[];
+}
+
+/**
  * Ops (Deck 1): what Ops knows about the ship's machines. The hosts, the network, the containers, the disks, the GPU, the schedule, the backups, and Ops's standing cautions. Ops only reads; every change is the Captain's, by hand.
  */
 export interface OpsFile {

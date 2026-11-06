@@ -8,6 +8,7 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import art from '../../assets/ops.svg?raw';
 import type { BoardId } from '../../lib/board';
+import { nasSource } from '../../lib/data';
 import { HEALTH_WORD, ROOM, SCREEN, SPOTS, areas, handAngle, pct, worst, type OpsObject, type OpsView } from '../../lib/ops';
 import type { Drills, ShipView } from '../../lib/ship';
 import { CommBadge } from '../CommBadge';
@@ -35,6 +36,13 @@ const Art = memo(function Art() {
 const VIEW_OF: Partial<Record<OpsObject, OpsView>> = {
   net: 'net', nas: 'nas', clock: 'schedule', storage: 'storage', vault: 'backups', desk: 'usage', gpu: 'gpu',
 };
+
+/** What the hint says about where the readings come from. Only the rails and the NAS are measured so far. */
+const READINGS = {
+  sample: 'SAMPLE READINGS, LIVE RAILS · ',
+  live: 'LIVE NAS AND RAILS, THE REST SAMPLE · ',
+  stale: 'NAS READING STOPPED, LIVE RAILS, THE REST SAMPLE · ',
+} as const;
 
 /** The ship's time on the chronometer, moved on every minute. */
 function useHand(): number {
@@ -84,7 +92,7 @@ export function OpsBoard({ ship, drills, target, onTarget, onBoard, onToast }: P
       <section className="room" aria-label="Ops">
         <div className="hero-top">
           <p className="mono hero-label">DECK 1 · OPS · PICK SOMETHING IN THE ROOM, OR A CHECK ON THE STATUS BOARD</p>
-          <p className="mono hero-label room-hint">{ship.data.ops.synthetic ? 'SAMPLE READINGS, LIVE RAILS · ' : ''}OPS ONLY READS · ESC RETURNS THE SCREEN</p>
+          <p className="mono hero-label room-hint">{READINGS[nasSource(ship.data)]}OPS ONLY READS · ESC RETURNS THE SCREEN</p>
         </div>
         <div className="room-wrap">
           <div className="room-pic ops-pic" data-hot={hot ?? ''} data-on={on ?? ''} data-gpu={ship.rail('local')}

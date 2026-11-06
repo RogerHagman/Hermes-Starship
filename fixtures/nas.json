@@ -1,0 +1,52 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "hosts": [
+    {
+      "id": "nas",
+      "name": "NAS",
+      "role": "ZimaOS. Hermes, the boards and the probes run here.",
+      "state": "ok",
+      "seenAt": "2026-11-04T19:30:00Z",
+      "uptimeH": 316,
+      "cpuPct": 18,
+      "ram": {
+        "usedGb": 5.1,
+        "totalGb": 7.5
+      },
+      "swap": {
+        "usedGb": 0.4,
+        "totalGb": 4
+      },
+      "tempC": 47
+    }
+  ],
+  "disks": [
+    {
+      "id": "DK-901",
+      "host": "nas",
+      "label": "NAS data",
+      "mount": "/DATA",
+      "usedGb": 1100,
+      "totalGb": 1800,
+      "perDayGb": 1.2
+    },
+    {
+      "id": "DK-902",
+      "host": "nas",
+      "label": "Backup disk",
+      "mount": "/media/backup",
+      "usedGb": 860,
+      "totalGb": 1000,
+      "perDayGb": 2.4
+    },
+    {
+      "id": "DK-903",
+      "host": "nas",
+      "label": "NAS system",
+      "mount": "/",
+      "usedGb": 21,
+      "totalGb": 64
+    }
+  ]
+}
