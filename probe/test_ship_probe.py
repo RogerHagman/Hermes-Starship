@@ -212,6 +212,10 @@ class States(unittest.TestCase):
         self.assertEqual("running", s("", "running"))   # the card first, then the order log
         self.assertEqual("queued", s(None, None))
 
+    def test_speed_from_a_level_or_the_word(self):
+        self.assertEqual(["Warp", "Warp", "Warp 9", "Maximum Warp", "Full Impulse", None, None],
+                         [ship_probe.speed_of(v) for v in ("high", " Warp ", "warp  9", "MAX", "full_impulse", "", "fast")])
+
     def test_times_in_text_or_seconds(self):
         self.assertEqual(datetime(2026, 11, 5, 18, 0, tzinfo=timezone.utc), ship_probe.parse_time("2026-11-05T18:00:00Z"))
         self.assertEqual(datetime(2026, 11, 5, 18, 0, tzinfo=timezone.utc), ship_probe.parse_time(str(int(datetime(2026, 11, 5, 18, 0, tzinfo=timezone.utc).timestamp()))))

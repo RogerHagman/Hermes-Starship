@@ -139,7 +139,9 @@ def cards_state(card_states, logged):
 
 
 def speed_of(value):
-    return SPEEDS.get((value or "").strip().lower())
+    """The speed word for what orders.csv holds: a reasoning level ("high") or the word itself ("Warp")."""
+    said = " ".join(str(value or "").replace("_", " ").split()).lower()
+    return SPEEDS.get(said) or next((w for w in SPEEDS.values() if w.lower() == said), None)
 
 
 def station_of(names, value):
