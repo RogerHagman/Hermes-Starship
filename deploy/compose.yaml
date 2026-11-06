@@ -1,6 +1,7 @@
-# Hermes Starship · the boards, plus two read-only probes that keep live/ fresh: the rails probe
-# (live/rails.json, and live/rail-log.json, when each rail went out or came back) and the ship
-# probe (live/orders.json and live/shiplog.json, from Hermes' order log and Kanban cards).
+# Hermes Starship · the boards, plus three read-only probes that keep live/ fresh: the rails probe
+# (live/rails.json, and live/rail-log.json, when each rail went out or came back), the ship
+# probe (live/orders.json and live/shiplog.json, from Hermes' order log and Kanban cards) and the
+# Ops probe (live/nas.json, the NAS's own memory, CPU, temperature and disks).
 # nginx serves static files (about 10 MB of RAM). The probe is read-only towards Hermes and
 # writes only deploy/live/. No model runs: its one Ollama call is GET /api/ps, and its one
 # Anthropic call asks for the Claude usage (at most every 5 minutes).
@@ -89,3 +90,33 @@ services:
       - ./scratch:/scratch
       - ../probe/ship_probe.py:/app/ship_probe.py:ro
     command: python -u /app/ship_probe.py
+
+  # The Ops probe: the NAS's own readings for the Ops board. It reads /proc and /sys (memory,
+  # swap, CPU, uptime, temperature) and asks each disk below for its size, nothing more: no file
+  # on a disk is opened or listed, and it sees none of Hermes' data. No network, no capabilities,
+  # 32 MB of RAM. It writes only ./live/nas.json and its own disk history in ./scratch/ops.
+  ops-probe:
+    image: python:3.12-alpine
+    container_name: hermes-starship-ops
+    restart: unless-stopped
+    mem_limit: 32m
+    read_only: true
+    network_mode: none
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      # Each disk: the path in here, its DK- id on the board, its name, and its mount on the NAS.
+      # Add the backup disk in deploy/.env once its mount is known (see env.example).
+      DISKS: ${OPS_DISKS:-/disks/1|DK-901|NAS data|/DATA;/disks/2|DK-903|NAS system|/}
+      OUT_DIR: /out
+      SCRATCH: /scratch
+      INTERVAL: "60"
+    volumes:
+      # Any folder or file on a disk gives that disk's size. These are small, harmless ones.
+      - ${DISK_1_HOST:-/DATA/AppData/hermes-starship}:/disks/1:ro
+      - ${DISK_2_HOST:-/etc/os-release}:/disks/2:ro
+      - ${DISK_3_HOST:-/etc/os-release}:/disks/3:ro
+      - ./live:/out
+      - ./scratch/ops:/scratch
+      - ../probe/ops_probe.py:/app/ops_probe.py:ro
+    command: python -u /app/ops_probe.py

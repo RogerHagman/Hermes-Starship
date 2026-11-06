@@ -76,3 +76,30 @@ sudo head -c 400 deploy/live/orders.json
 
 The log should say how many orders and log lines it wrote. Reload the Bridge: the pill turns
 green and says LIVE ORDERS.
+
+# Ops probe
+
+`ops_probe.py` writes `deploy/live/nas.json` about once a minute. With it the Ops board shows the
+NAS's real figures in place of the samples: in the Hosts view and on the status board (memory,
+swap, CPU, uptime, temperature) and in the Storage view (the NAS's disks, and how fast each one
+fills). The room's hint then says LIVE NAS AND RAILS. The rest of Ops (the GPU box, the
+containers, the network, the schedule, the backups) stays sample data for now.
+
+| Reading | Where it comes from |
+|---|---|
+| RAM, swap | `/proc/meminfo`. Used RAM is total minus available, what programs actually hold. |
+| CPU | `/proc/stat`, between two readings a minute apart. |
+| Uptime | `/proc/uptime`. |
+| Temperature | The warmest sensor in `/sys/class/thermal` and `/sys/class/hwmon`, if there is one. |
+| Disks | One `statvfs` call on a folder or file of each disk, mounted read-only. No file is opened or listed. |
+| Fill rate | The probe's own history: one reading a day per disk, the last 8 days, in `deploy/scratch/ops/`. It shows after a day. |
+
+When the file is over five minutes old the NAS says NO READING, so an old figure never passes for
+a new one.
+
+It runs as the `ops-probe` service: `python:3.12-alpine`, read-only, no network, no capabilities,
+32 MB of RAM. It sees no Hermes data at all. By default it watches `/DATA` and the system disk;
+`deploy/env.example` says how to add the backup disk.
+
+Tests: `python -m unittest discover -s probe`. A test checks the code opens no connection, runs
+no command and lists no folder.

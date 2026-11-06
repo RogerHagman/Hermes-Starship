@@ -5,6 +5,7 @@
 import type { ReactNode } from 'react';
 import { RAIL, railColor } from '../../lib/lookups';
 import { dayAndTime } from '../../lib/format';
+import { nasSource } from '../../lib/data';
 import {
   HEALTH_WORD, OPS_ICONS, ago, areas, backupState, containerState, daysLeft, diskState, gpuState, hostState,
   jobState, percent, portState, railHealth, until, vramPercent, worst, type OpsView,
@@ -53,6 +54,9 @@ export function OpsScreen({ ship, screen, onScreen }: { ship: ShipView; screen: 
     </section>
   );
 }
+
+/** Where the NAS's figures come from, for the Hosts and Storage views. */
+const NAS_WORD = { sample: 'SAMPLE READINGS', live: 'NAS LIVE FROM THE OPS PROBE', stale: 'NAS PROBE STOPPED' } as const;
 
 // ---------- Ops ready: one tile per area ----------
 
@@ -136,7 +140,7 @@ function HostsView({ ship, onBack }: { ship: ShipView; onBack: () => void }) {
   return (
     <>
       <ConHead icon={OPS_ICONS.nas} title="Hosts and containers" back="‹ Ops" onBack={onBack}
-        sub={`${o.hosts.length} HOSTS · ${o.containers.length} CONTAINERS · ${o.containers.filter((c) => c.state === 'running').length} RUNNING`} />
+        sub={`${o.hosts.length} HOSTS · ${o.containers.length} CONTAINERS · ${o.containers.filter((c) => c.state === 'running').length} RUNNING · ${NAS_WORD[nasSource(ship.data)]}`} />
       <div className="con-body">
         {o.hosts.map((h) => <HostCard key={h.id} ship={ship} h={h} />)}
       </div>
@@ -240,7 +244,7 @@ function StorageView({ ship, onBack }: { ship: ShipView; onBack: () => void }) {
   return (
     <>
       <ConHead icon={OPS_ICONS.storage} title="Storage" back="‹ Ops" onBack={onBack}
-        sub={`${o.disks.length} DISKS · 80% FULL IS WATCH, 90% IS ACT`} />
+        sub={`${o.disks.length} DISKS · 80% FULL IS WATCH, 90% IS ACT · ${NAS_WORD[nasSource(ship.data)]}`} />
       <div className="con-body">
         {o.disks.map((d) => {
           const left = daysLeft(d);
