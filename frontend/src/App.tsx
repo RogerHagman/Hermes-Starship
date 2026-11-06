@@ -15,6 +15,7 @@ import { HolodeckBoard } from './components/holodeck/HolodeckBoard';
 import { SensorsBoard } from './components/sensors/SensorsBoard';
 import { EngineeringBoard } from './components/engineering/EngineeringBoard';
 import { OpsBoard } from './components/ops/OpsBoard';
+import { ComputerBoard } from './components/computer/ComputerBoard';
 import { ScienceBoard } from './components/science/ScienceBoard';
 import { SideRail, type RailFilter } from './components/SideRail';
 import { useFit, useFullscreenKey } from './lib/fit';
@@ -102,6 +103,10 @@ export function App() {
             )}
             {ship && board === 'ops' && (
               <OpsBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
+                onBoard={goBoard} onToast={showToast} />
+            )}
+            {ship && board === 'computer' && (
+              <ComputerBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
                 onBoard={goBoard} onToast={showToast} />
             )}
             {ship && board === 'science' && (

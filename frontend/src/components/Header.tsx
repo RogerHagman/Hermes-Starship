@@ -36,6 +36,11 @@ const BOARD_TEXT: Record<BoardId, { deck: string; title: string; intro: string }
     title: 'Ops',
     intro: 'What Ops knows about the ship: the NAS, the network, the containers, the disks, the GPU, the schedule and the backups. Ops only reads.',
   },
+  computer: {
+    deck: 'DECK 3 · COMPUTER CORE',
+    title: 'Computer core',
+    intro: "Every order the ship has taken, in any state, on the core terminal. The Ship's Computer keeps the records; its memory banks stay sealed.",
+  },
   science: {
     deck: 'DECK 3 · SCIENCES · SCIENCE LAB',
     title: 'Science lab',

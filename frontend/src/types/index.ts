@@ -45,4 +45,6 @@ export interface Fixtures {
   raillog?: RailLogFile;
   /** live/nas.json from the Ops probe, when there is one. Its NAS and disks replace the sample ones in ops. */
   nas?: NasFile;
+  /** live/records.json from the ship probe, when there is one: every order on file, any state. The core terminal reads it. */
+  records?: OrdersFile;
 }

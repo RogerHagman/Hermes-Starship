@@ -32,7 +32,7 @@ repo, and whole-number percentages.
 
 # Ship probe
 
-`ship_probe.py` writes `deploy/live/orders.json` and `deploy/live/shiplog.json` about once a
+`ship_probe.py` writes `deploy/live/orders.json`, `deploy/live/shiplog.json` and `deploy/live/records.json` about once a
 minute. With them the boards show the real orders in place of the sample ones: the Bridge
 order list, who is working on what (each station's active order is its newest running one),
 and the ship's log. Without them the sample fixtures stay, and the header pill says SAMPLE.
@@ -50,6 +50,11 @@ It reads three things in Hermes' data folder, and never changes them:
 What drops off the boards: done orders older than `DAYS` (7), and open orders that never got a
 card and are over a day old (Number One answered them in chat). The newest `KEEP` (80) orders
 are kept.
+
+It also writes `deploy/live/records.json`, in the same shape: every order on file, in any state,
+for the core terminal on the Computer core board (Deck 3). Nothing drops off it for age. An open
+order that never got a card stays, with a line that says so. The newest `RECORDS_KEEP` (1000)
+orders are kept. Without it the terminal shows the orders the boards have.
 
 SQLite can't read a live database on a read-only mount, so the probe copies `kanban.db` (and its
 `-wal`) into `deploy/scratch/` when it has changed, and reads the copy read-only. Hermes'
