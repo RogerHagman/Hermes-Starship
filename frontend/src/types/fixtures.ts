@@ -53,6 +53,95 @@ export interface EngineeringFile {
 }
 
 /**
+ * The coded fast paths: first words that code routes straight to a station's profile, before Number One reads the message. Hermes keeps them in routing/fast-paths.json, which the arrival hook reads; live/fastpaths.json from the ship probe copies it for the board. Without it the board shows this sample (patch P's words).
+ */
+export interface FastPathsFile {
+  asOf: string;
+  synthetic: boolean;
+  /**
+   * @maxItems 100
+   */
+  paths: {
+    /**
+     * First words, lower case, matched at the very start of the typed text as whole words. A speed word before them still counts as the start.
+     *
+     * @minItems 1
+     * @maxItems 8
+     */
+    words:
+      | [string]
+      | [string, string]
+      | [string, string, string]
+      | [string, string, string, string]
+      | [string, string, string, string, string]
+      | [string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string];
+    /**
+     * The Hermes profile code files the card for.
+     */
+    profile: string;
+    /**
+     * The patch that added it.
+     */
+    patch?: string;
+    /**
+     * A message that takes this path.
+     */
+    example?: string;
+  }[];
+}
+
+/**
+ * Helm's application tracker: job ads, applications and their events, from find to close. live/helm.json from the ship probe reads the tracker's own files (helm/app-tracker/*.csv) once they live on the NAS; without it the board shows this sample. Contact details, salary asks and file paths are never copied.
+ */
+export interface HelmFile {
+  asOf: string;
+  synthetic: boolean;
+  /**
+   * Job ads, newest found first.
+   */
+  ads: {
+    id: string;
+    found: string;
+    company: string;
+    role: string;
+    location?: string;
+    source?: string;
+    deadline?: string;
+    /**
+     * Keyword match with the CV, percent.
+     */
+    match?: number;
+    fit?: string;
+    status: "found" | "shortlisted" | "applying" | "skipped" | "parked";
+    notes?: string;
+  }[];
+  applications: {
+    id: string;
+    job: string;
+    company: string;
+    role: string;
+    status: "drafting" | "ready" | "applied" | "interview" | "offer" | "rejected" | "withdrawn" | "ghosted";
+    created: string;
+    applied?: string;
+    match?: number;
+    nextStep?: string;
+    nextDate?: string;
+    notes?: string;
+  }[];
+  /**
+   * Everything that happened, newest first: found, shortlisted, sent, reply, interview, closed and so on.
+   */
+  events: {
+    date: string;
+    id: string;
+    kind: string;
+    text: string;
+  }[];
+}
+
+/**
  * The Science lab's meters: what the crew spends (tokens, and dollars where Hermes knows a price) by rail, station and time window, from Hermes' own session records; how fast each cloud rail works, from the hand-off log; the weekly leak share, from leak-kpis.csv; and the speed trials on the local rail (time to first token and tokens a second). live/meters.json from the meter probe replaces the sample.
  */
 export interface MetersFile {
@@ -221,6 +310,49 @@ export interface NasFile {
      */
     perDayGb?: number;
     note?: string;
+  }[];
+}
+
+/**
+ * Navigation's calendar, trips and bookings. A sample only: Navigation keeps no files of its own yet. Bookings stop before Confirm for the Captain.
+ */
+export interface NavFile {
+  asOf: string;
+  synthetic: boolean;
+  events: {
+    id: string;
+    title: string;
+    start: string;
+    end?: string;
+    place?: string;
+    kind: "appointment" | "travel" | "work" | "personal" | "hold";
+    sourceOrd?: string;
+  }[];
+  trips: {
+    id: string;
+    title: string;
+    from: string;
+    to: string;
+    depart: string;
+    back?: string;
+    status: "idea" | "planned" | "booked" | "done";
+    sourceOrd?: string;
+    legs?: {
+      mode: "train" | "bus" | "car" | "flight" | "ferry" | "walk" | "bike";
+      from: string;
+      to: string;
+      depart: string;
+      arrive?: string;
+    }[];
+  }[];
+  bookings: {
+    id: string;
+    what: string;
+    when: string;
+    where?: string;
+    status: "held" | "confirmed" | "released";
+    heldUntil?: string;
+    sourceOrd?: string;
   }[];
 }
 
@@ -811,6 +943,35 @@ export interface StationsFile {
     duty: string;
     note?: string;
     activeOrder: string | null;
+  }[];
+}
+
+/**
+ * The Main Viewscreen's sessions: each time the Captain's desktop went on screen, and every click, key and line typed, with the Captain's answer. A sample only: the computer-use sessions keep no log the probe reads yet.
+ */
+export interface ViewscreenFile {
+  asOf: string;
+  synthetic: boolean;
+  /**
+   * Newest first.
+   */
+  sessions: {
+    id: string;
+    start: string;
+    end?: string;
+    surface: "telegram" | "desktop" | "dashboard";
+    why: string;
+    sourceOrd?: string;
+    /**
+     * Screenshots sent to Telegram.
+     */
+    captures: number;
+    actions: {
+      at: string;
+      kind: "click" | "type" | "key" | "scroll";
+      what: string;
+      decision: "approved" | "denied" | "waiting";
+    }[];
   }[];
 }
 

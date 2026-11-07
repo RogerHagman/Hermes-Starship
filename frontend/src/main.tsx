@@ -10,6 +10,7 @@ import './styles/engineering.css';
 import './styles/ops.css';
 import './styles/computer.css';
 import './styles/yeoman.css';
+import './styles/posts.css';
 import './styles/science.css';
 import { App } from './App';
 
