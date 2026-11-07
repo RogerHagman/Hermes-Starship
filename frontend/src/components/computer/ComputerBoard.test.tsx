@@ -135,8 +135,8 @@ describe('computer core', () => {
     type(c, 'ORD-9008');
     const facts = screen(c).querySelector('.tfacts')!.textContent!;
     expect(facts).toContain('TELEGRAM');
-    expect(facts).toContain('took 8 min');
-    expect(facts).toContain('EFFECTIVE5 min 00 s');
+    expect(facts).toContain('TOTAL TIME8 min 00 s');
+    expect(facts).toContain('EFFECTIVE TIME5 min 00 s');
     expect(facts).toContain('CARDS1');
   });
   it('an order with no speed word says the station\'s default speed was used: its own, else Impulse', () => {
@@ -270,9 +270,9 @@ describe('the core terminal: pages, the manual, the jump key and the settings', 
     // the columns: each can be hidden, from the page or with set
     expect(screen(c).querySelectorAll('.trow .tclock').length).toBe(screen(c).querySelectorAll('.trow').length * 2);
     type(c, 'set effective off');
-    expect(said(c)).toBe('Effective column: Hidden.');
+    expect(said(c)).toBe('Effective time column: Hidden.');
     expect(screen(c).querySelectorAll('.trow .tclock').length).toBe(screen(c).querySelectorAll('.trow').length);
-    expect(screen(c).querySelector('.thead')?.textContent).not.toContain('EFFECTIVE');
+    expect(screen(c).querySelector('.thead')?.textContent).not.toContain('EFFECTIVE TIME');
     type(c, 'set station hide');
     expect(screen(c).querySelector('.trow .tst')).toBeNull();
     type(c, 'set phosphor amber');

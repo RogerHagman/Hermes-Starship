@@ -1,6 +1,6 @@
 // The task clock on an order: ticks each second while the order is open, stops when it closes.
 import { useEffect, useState } from 'react';
-import { clockNow, taskClock } from '../lib/clock';
+import { clockNow, taskClock, type Clock } from '../lib/clock';
 import type { ShipView } from '../lib/ship';
 import type { Order } from '../types';
 
@@ -23,11 +23,8 @@ export function TaskClock({ ship, order, className = 'taskclock', short = false,
 }) {
   const clock = useClock(ship, order);
   if (!clock) return null;
-  // The worked time alone, for the terminal's EFFECTIVE column: a dash when no card was claimed.
-  if (effective) {
-    return <span className={`${className} ${clock.effective ? clock.kind : 'done'}`}
-      title={clock.effective ? `Effective: worked ${clock.effective}` : 'No card was claimed'}>{clock.effective ?? '–'}</span>;
-  }
+  // The effective time alone, for the terminal's EFFECTIVE column: always a duration.
+  if (effective) return <span className={`${className} ${clock.kind}`} title={EFFECTIVE_WHY[clock.effectiveFrom]}>{clock.effective}</span>;
   return (
     <span className={`${className} ${clock.kind}`} title={short ? clock.text : clock.kind === 'done'
       ? 'Task clock: from the order coming in to it closing'
@@ -47,10 +44,15 @@ export function ClockRow({ ship, order }: { ship: ShipView; order: Order }) {
   const cls = `taskclock ${clock.kind}`;
   return (
     <>
-      <div><dt>CLOCK</dt><dd><span className={cls} title="From the order coming in to now, or to its close">{clock.main}</span></dd></div>
-      <div><dt>EFFECTIVE</dt><dd>{clock.effective
-        ? <span className={cls} title="From a crew member starting on it (the first card claimed) to now, or to its close">{clock.effective}</span>
-        : <span className="taskclock done" title="No card was claimed: answered in chat, or not started yet">{order.state === 'done' ? 'no card' : 'not started'}</span>}</dd></div>
+      <div><dt>TOTAL TIME</dt><dd><span className={cls} title="Total time: from the order coming in to now, or to its close">{clock.short}</span></dd></div>
+      <div><dt>EFFECTIVE TIME</dt><dd><span className={cls} title={EFFECTIVE_WHY[clock.effectiveFrom]}>{clock.effective}</span></dd></div>
     </>
   );
 }
+
+/** Where the effective time comes from, for its tooltip. */
+const EFFECTIVE_WHY: Record<Clock['effectiveFrom'], string> = {
+  start: 'Effective time: from a crew member starting on it (the first card claimed) to now, or to its close',
+  waiting: 'Effective time: 0 s, no crew member has started on it yet',
+  whole: 'Effective time: the whole clock, no card start on file (answered in chat, or the card has no start time)',
+};

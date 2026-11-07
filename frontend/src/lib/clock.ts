@@ -37,8 +37,13 @@ export interface Clock {
   short: string;
   /** The total with its word and no worked part, for a field of its own: "took 34 s". */
   main: string;
-  /** The worked time alone ("30 s"), when a card was claimed; else undefined. */
-  effective?: string;
+  /**
+   * The effective time, always a duration: the worked time when a card was claimed; 0 s while the
+   * order waits to be started; else the whole clock (answered in chat, or no start on file).
+   */
+  effective: string;
+  /** How the effective time was found: from a card's start, still waiting, or the whole clock. */
+  effectiveFrom: 'start' | 'waiting' | 'whole';
 }
 
 const between = (from?: string, to?: number) => {
@@ -58,5 +63,11 @@ export function taskClock(o: Order, now: number): Clock | null {
   const extra = worked !== undefined && total - worked >= 5 * S ? ` · worked ${duration(worked)}` : '';
   const word = done ? 'took' : o.state === 'running' ? 'running' : 'open';
   return { kind: done ? 'done' : 'running', total, worked, text: `${word} ${duration(total)}${extra}`, short: duration(total),
-    main: `${word} ${duration(total)}`, effective: worked === undefined ? undefined : duration(worked) };
+    main: `${word} ${duration(total)}`, ...effectiveOf(o, total, worked) };
+}
+
+function effectiveOf(o: Order, total: number, worked?: number): Pick<Clock, 'effective' | 'effectiveFrom'> {
+  if (worked !== undefined) return { effective: duration(worked), effectiveFrom: 'start' };
+  if (o.state === 'queued') return { effective: duration(0), effectiveFrom: 'waiting' };
+  return { effective: duration(total), effectiveFrom: 'whole' };
 }

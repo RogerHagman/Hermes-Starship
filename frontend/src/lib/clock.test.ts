@@ -16,7 +16,8 @@ describe('task clock', () => {
     expect(taskClock({ ...o, startedAt: '2026-11-07T20:00:02Z' }, 0)?.text).toBe('took 34 s');
     const split = taskClock({ ...o, startedAt: '2026-11-07T20:00:20Z' }, 0);
     expect([split?.main, split?.effective]).toEqual(['took 34 s', '14 s']);
-    expect(taskClock(o, 0)?.effective).toBeUndefined();
+    expect([taskClock(o, 0)?.effective, taskClock(o, 0)?.effectiveFrom]).toEqual(['34 s', 'whole']);
+    expect(taskClock({ ...o, state: 'queued' }, Date.parse('2026-11-07T20:01:00Z'))?.effective).toBe('0 s');
   });
   it('ticks for an open order and says nothing without an opening time', () => {
     const now = Date.parse('2026-11-07T20:03:12Z');
