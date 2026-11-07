@@ -216,8 +216,8 @@ function Terminal({ ship, all, list, query, onQuery, page, onPage, settings, sai
           {list.length > 0 && (
             <li className="thead mono" aria-hidden="true" style={css({ '--cols': colsOf(settings) })}>
               <span>ORDER</span><span>STATE</span>{settings.station === 'on' && <span className="tst">STATION</span>}<span>TITLE</span>
-              {settings.clock === 'on' && <span className="tclock">CLOCK</span>}
-              {settings.effective === 'on' && <span className="tclock">EFFECTIVE</span>}
+              {settings.clock === 'on' && <span className="tclock">TOTAL TIME</span>}
+              {settings.effective === 'on' && <span className="tclock">WORK TIME</span>}
               {settings.dates !== 'off' && <span className="twhen">UPDATED</span>}
             </li>
           )}
