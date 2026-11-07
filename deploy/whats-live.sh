@@ -31,11 +31,17 @@ for name in "$HERMES" hermes-starship hermes-starship-ship hermes-starship-meter
   echo "$name $state" >> "$FACTS/containers.txt"
 done
 
-# Hermes: patches, the B2-36 report, the fast-path file and whether the hook reads it.
+# Hermes: patches, the B2-36 fix, the fast-path file and whether the hook reads it.
 $DOCKER exec -u root "$HERMES" sh /opt/data/patches/check.sh > "$FACTS/check.txt" 2>&1
 echo $? > "$FACTS/check.rc"
-if $DOCKER exec "$HERMES" test -f /opt/data/handoff/engineering/b236-report.md 2>/dev/null; then
-  echo yes > "$FACTS/b236-report"
+# The B2-36 fix (patch_B235.diff, apply.sh only): built, and applied when it reverse-checks.
+if $DOCKER exec "$HERMES" test -f /opt/data/patches/patch_B235.diff 2>/dev/null; then
+  if $DOCKER exec -u root -w / "$HERMES" git apply --reverse --check --unsafe-paths -p1 \
+       /opt/data/patches/patch_B235.diff >/dev/null 2>&1; then
+    echo applied > "$FACTS/apply-fix"
+  else
+    echo built > "$FACTS/apply-fix"
+  fi
 fi
 $DOCKER exec "$HERMES" cat /opt/data/routing/fast-paths.json > "$FACTS/fast-paths.json" 2>/dev/null \
   || rm -f "$FACTS/fast-paths.json"
