@@ -9,6 +9,7 @@ import type { Station } from '../../types';
 import { Pips } from '../Roster';
 import { PatchChip, inCharge } from './EngScreen';
 import { Marked } from '../Marked';
+import { Src } from '../Src';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const up = (s: string) => s.toUpperCase();
@@ -40,6 +41,7 @@ export function InFlightPanel({ ship, picked, onOpen }: { ship: ShipView; picked
     <section className="panel flight-panel" aria-labelledby="flight-title">
       <div className="panel-head">
         <h2 className="panel-title" id="flight-title">In flight</h2>
+        <Src ids={['engineering']} />
         <span className="mono panel-meta">{ps.length} PATCHES · FURTHEST ALONG FIRST</span>
       </div>
       <ul className="flist">
@@ -104,6 +106,7 @@ export function PatchesTable({ ship, picked, onOpen }: { ship: ShipView; picked?
     <section className="panel log-table-panel" aria-labelledby="patches-title">
       <div className="panel-head">
         <h2 className="panel-title" id="patches-title">Patches</h2>
+        <Src ids={['engineering']} />
         <span className="mono panel-meta"><Marked>{rows.length} · FURTHEST ALONG FIRST · SAMPLE</Marked></span>
       </div>
       <div className="olog-scroll">
@@ -146,6 +149,7 @@ export function EngLog({ ship }: { ship: ShipView }) {
     <section className="panel array-log" aria-labelledby="elog-title">
       <div className="panel-head">
         <h2 className="panel-title" id="elog-title">Engineering log</h2>
+        <Src ids={['engineering']} />
         <span className="mono panel-meta">PATCHES, CHECKS AND DUTY · NEWEST FIRST</span>
       </div>
       <ol className="alog">

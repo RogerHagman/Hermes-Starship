@@ -128,16 +128,17 @@ function Clock() {
  */
 function Sources({ board, ship }: { board: BoardId; ship: ShipView }) {
   const parts = boardSources(board, ship.data);
-  const sample = parts.filter((p) => p.state !== 'live').length;
+  const sample = parts.filter((p) => p.state === 'sample').length;
+  const down = parts.filter((p) => p.state === 'stale').length;
   return (
     <div className="sources" aria-label="What this board reads">
       <span className="mono sources-label" title="Nothing on this screen calls a model.">
-        {sample ? `${sample} OF ${parts.length} SAMPLE` : 'ALL LIVE'} · NO MODEL CALLS
+        {down ? `${down} DOWN · ` : ''}{sample ? `${sample} OF ${parts.length} SAMPLE` : down ? '' : 'ALL LIVE'}{sample || !down ? ' · ' : ''}NO MODEL CALLS
       </span>
       <span className="sources-chips">
         {parts.map((p) => (
           <span key={p.id} className={`src-chip mono src-${p.state}`} title={p.why}>
-            {p.state === 'live' ? 'LIVE' : p.state === 'stale' ? 'STALE' : 'SAMPLE'} · {p.label}
+            {p.state === 'live' ? 'LIVE' : p.state === 'stale' ? 'DOWN' : 'SAMPLE'} · {p.label}
           </span>
         ))}
       </span>

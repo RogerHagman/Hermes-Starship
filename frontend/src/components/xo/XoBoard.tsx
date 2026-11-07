@@ -25,6 +25,7 @@ import { PostRoom } from '../post/PostRoom';
 import { DayBars, DeskTiles, Kpis, OrdersPanel, css, sourceWord, up } from '../post/Parts';
 import { XoScreen, type Screen } from './XoScreen';
 import { Marked } from '../Marked';
+import { Src } from '../Src';
 
 interface Props {
   ship: ShipView;
@@ -130,6 +131,7 @@ function RoutedPanel({ ship, route, onRoute, onOpen }: { ship: ShipView; route: 
     <section className="panel grow xroute" aria-labelledby="xroute-title">
       <div className="panel-head">
         <h2 className="panel-title" id="xroute-title">{title}</h2>
+        <Src ids={['orders']} />
         <span className="mono panel-meta"><Marked>{list.length} · {sub} · NEWEST FIRST</Marked></span>
         {(route.station || route.surface) && <button type="button" className="pchip" onClick={() => onRoute(EVERY)}>× ALL</button>}
       </div>
@@ -167,6 +169,7 @@ function HailsPanel({ ship, onOpen }: { ship: ShipView; onOpen: (id: string) => 
     <section className="panel" aria-labelledby="xhail-title">
       <div className="panel-head">
         <h2 className="panel-title" id="xhail-title">Waiting for you</h2>
+        <Src ids={['orders']} />
         <span className="mono panel-meta">{list.length} HAILS</span>
       </div>
       <ul className="plist">
@@ -193,6 +196,7 @@ function WeekPanel({ ship }: { ship: ShipView }) {
     <section className="panel" aria-labelledby="xweek-title">
       <div className="panel-head">
         <h2 className="panel-title" id="xweek-title">This week</h2>
+        <Src ids={['orders']} />
         <span className="mono panel-meta">ASKS PER DAY · LAST 7 DAYS</span>
       </div>
       <div className="pweek-body">

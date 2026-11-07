@@ -6,6 +6,7 @@ import { railsSource } from '../lib/data';
 import type { Drills, ShipView } from '../lib/ship';
 import type { Order } from '../types';
 import type { RailFilter } from './SideRail';
+import { Src } from './Src';
 
 const SOURCE_NOTE = {
   sample: 'Sample numbers: the rails probe is not running yet.',
@@ -21,6 +22,7 @@ export function RailsPanel({ ship, drills, compact = false }: { ship: ShipView; 
     <section className={'panel' + (compact ? ' rails-compact' : '')} aria-labelledby="rails-title">
       <div className="panel-head">
         <h2 className="panel-title" id="rails-title">Rails</h2>
+        <Src ids={['rails']} />
         <span className="mono panel-meta" title={SOURCE_NOTE[railsSource(ship.data.rails)]}>
           {railsSource(ship.data.rails).toUpperCase()} · AS OF {clockTime(ship.data.rails.asOf)}{compact ? ' · RESETS ON THE VIEWPORT' : ''}
         </span>
@@ -86,6 +88,7 @@ export function HailsPanel({ ship, picked, onOpen, help = "Approve and Deny open
     <section className="panel panel-captain" aria-labelledby="hails-title">
       <div className="panel-head">
         <h2 className="panel-title" id="hails-title">Awaiting your orders</h2>
+        <Src ids={['orders']} />
         <span className={'count' + (hails.length ? '' : ' zero')}>{hails.length}</span>
       </div>
       <p className="help">{help}</p>
@@ -142,6 +145,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
     <section className="panel panel-grow" aria-labelledby="flight-title">
       <div className="panel-head">
         <h2 className="panel-title" id="flight-title">In flight</h2>
+        <Src ids={['orders']} />
         <span className="mono panel-meta" title={SPEEDS_NOTE}>{open.length} ORDERS · SPEED SETS THE REASONING</span>
         <button type="button" className="foldall" aria-expanded={allRead}
           onClick={() => setRead(allRead ? new Set() : new Set(rows.map((o) => o.id)))}>

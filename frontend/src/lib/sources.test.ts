@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Fixtures } from '../types';
 import { BUILT_BOARDS } from './board';
-import { BOARD_SOURCES, boardSources, splitSample } from './sources';
+import { BOARD_SOURCES, boardSources, panelSource, splitSample } from './sources';
 
 const NAMES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops',
   'yeoman', 'helm', 'nav', 'viewscreen', 'fastpaths', 'meters'];
@@ -45,6 +45,26 @@ describe('boardSources', () => {
     const old = { ...data, rails: { ...data.rails, synthetic: false, asOf: '2026-11-07T10:00:00Z' } } as Fixtures;
     const rails = boardSources('bridge', old, Date.parse('2026-11-07T16:00:00Z')).find((s) => s.id === 'rails');
     expect(rails?.state).toBe('stale');
+  });
+});
+
+describe('panelSource', () => {
+  const now = Date.parse('2026-11-07T16:00:00Z');
+  it('is sample on the fixtures, live once every part is live, and part sample in between', async () => {
+    const data = await sample();
+    expect(panelSource(['sensors'], data, now).state).toBe('sample');
+    const live = { ...data, rails: { ...data.rails, synthetic: false, asOf: '2026-11-07T15:59:00Z' } } as Fixtures;
+    expect(panelSource(['rails'], live, now).state).toBe('live');
+    const mixed = panelSource(['rails', 'ops'], live, now);
+    expect(mixed.state).toBe('mixed');
+    expect(mixed.why).toContain('NETWORK · GPU · JOBS is sample');
+  });
+  it('is down when a live feed stops writing, even next to sample parts', async () => {
+    const data = await sample();
+    const old = { ...data, rails: { ...data.rails, synthetic: false, asOf: '2026-11-07T10:00:00Z' } } as Fixtures;
+    const p = panelSource(['rails', 'ops'], old, now);
+    expect(p.state).toBe('stale');
+    expect(p.why).toMatch(/^Down: RAILS stopped writing/);
   });
 });
 

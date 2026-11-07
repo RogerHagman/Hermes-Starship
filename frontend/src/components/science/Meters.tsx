@@ -12,6 +12,7 @@ import type { ShipView } from '../../lib/ship';
 import type { MeterRail, MeterWindow, MetersFile } from '../../types';
 import { ConHead } from '../ShipConsole';
 import type { Screen } from './LabScreen';
+import { Src } from '../Src';
 
 type Go = (s: Screen) => void;
 const up = (s: string) => s.toUpperCase();
@@ -197,6 +198,7 @@ export function MetersPanel({ ship, onScreen }: { ship: ShipView; onScreen: Go }
     <section className="panel meters-panel" aria-labelledby="meters-title">
       <div className="panel-head">
         <h2 className="panel-title" id="meters-title">Meters</h2>
+        <Src ids={['meters']} />
         <span className="mono panel-meta">{metersLabel(m)}</span>
       </div>
       <div className="mp-rows">

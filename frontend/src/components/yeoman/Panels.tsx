@@ -6,6 +6,7 @@ import {
   BOX, BOXES, HOW_WORD, ROOM, TABLE, URGENT_H, late, matrix, next48, nowOf, pct, until, week, type Box,
 } from '../../lib/yeoman';
 import { BoxPill, DoneRow, KindPill, sourceWord } from './YeomanScreen';
+import { Src } from '../Src';
 
 const up = (s: string) => s.toUpperCase();
 
@@ -38,6 +39,7 @@ export function NextPanel({ ship, onOpen, onAll }: { ship: ShipView; onOpen: (id
     <section className="panel ynext" aria-labelledby="ynext-title">
       <div className="panel-head">
         <h2 className="panel-title" id="ynext-title">Next {URGENT_H} hours</h2>
+        <Src ids={['yeoman']} />
         <span className="mono panel-meta">{marks.length} DUE · {sourceWord(ship)}</span>
       </div>
       <ol className="ynext-list">
@@ -67,6 +69,7 @@ export function WaitingPanel({ ship, onOpen }: { ship: ShipView; onOpen: (id: st
     <section className="panel ywait" aria-labelledby="ywait-title">
       <div className="panel-head">
         <h2 className="panel-title" id="ywait-title">Waiting for</h2>
+        <Src ids={['yeoman']} />
         <span className="mono panel-meta">{list.length} OPEN{n ? ` · ${n} LATE` : ''}</span>
       </div>
       <ul className="ywait-list">
@@ -92,6 +95,7 @@ export function DonePanel({ ship, onOpen, onAll }: { ship: ShipView; onOpen: (id
     <section className="panel ydone-panel" aria-labelledby="ydone-title">
       <div className="panel-head">
         <h2 className="panel-title" id="ydone-title">Done log</h2>
+        <Src ids={['yeoman']} />
         <span className="mono panel-meta">{done.length} CLOSED · WRITTEN BY CODE · NEWEST FIRST</span>
       </div>
       <ol className="ydone">
@@ -115,6 +119,7 @@ export function WeekPanel({ ship }: { ship: ShipView }) {
     <section className="panel yweek" aria-labelledby="yweek-title">
       <div className="panel-head">
         <h2 className="panel-title" id="yweek-title">This week</h2>
+        <Src ids={['yeoman']} />
         <span className="mono panel-meta">LAST 7 DAYS TO {dayLine(ship.data.yeoman.asOf)}</span>
       </div>
       <div className="yweek-body">

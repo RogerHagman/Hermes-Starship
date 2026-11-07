@@ -10,6 +10,7 @@ import type { Order } from '../../types';
 import { CardBody, Replies } from '../Panels';
 import { ConHead } from '../ShipConsole';
 import { StatePill } from '../computer/ComputerScreen';
+import { Src } from '../Src';
 
 export const up = (s: string) => s.toUpperCase();
 export const when = (iso: string) => `${dayLine(iso)} · ${dayAndTime(iso).split(' ')[1]}`;
@@ -128,6 +129,7 @@ export function OrdersPanel({ ship, ids, title, onOpen, max = 10 }: { ship: Ship
     <section className="panel porders-panel" aria-label={title}>
       <div className="panel-head">
         <h2 className="panel-title">{title}</h2>
+        <Src ids={['orders']} />
         <span className="mono panel-meta">{list.length} ON FILE · {open} OPEN · NEWEST FIRST</span>
       </div>
       <ol className="porders">

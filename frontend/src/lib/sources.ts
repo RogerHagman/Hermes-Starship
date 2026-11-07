@@ -88,3 +88,18 @@ export function splitSample(text: string): { text: string; sample: boolean }[] {
   if (at < text.length) out.push({ text: text.slice(at), sample: false });
   return out;
 }
+
+/** How one panel reads: all live, partly sample, all sample, or a live feed that has stopped (down). */
+export type PanelState = 'live' | 'mixed' | 'sample' | 'stale';
+
+/** One panel's state from the parts it reads. Down wins, then any sample. The why is the panel tag's tooltip. */
+export function panelSource(ids: SourceId[], data: Fixtures, now = Date.now()): { state: PanelState; why: string } {
+  const parts = ids.map((id) => ({ id, state: stateOf(id, data, now) }));
+  const name = (s: SourceState) => parts.filter((p) => p.state === s).map((p) => LABEL[p.id]).join(', ');
+  const down = name('stale');
+  if (down) return { state: 'stale', why: `Down: ${down} stopped writing. This panel shows the last read.` };
+  const sample = name('sample');
+  if (!sample) return { state: 'live', why: `Live: ${name('live')}.` };
+  if (parts.every((p) => p.state === 'sample')) return { state: 'sample', why: `Sample: ${sample} has no live read yet.` };
+  return { state: 'mixed', why: `Part sample: ${sample} is sample, ${name('live')} is live.` };
+}
