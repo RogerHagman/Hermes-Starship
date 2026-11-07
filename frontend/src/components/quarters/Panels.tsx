@@ -7,6 +7,7 @@ import { canRelieve, type ShipView } from '../../lib/ship';
 import type { Order } from '../../types';
 import { Pips } from '../Roster';
 import type { RailFilter } from '../SideRail';
+import { Marked } from '../Marked';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 
@@ -84,7 +85,7 @@ export function CampaignsPanel({ ship, scope, onScope }: { ship: ShipView; scope
     <section className="panel camp-panel" aria-labelledby="camp-title">
       <div className="panel-head">
         <h2 className="panel-title" id="camp-title">Campaigns</h2>
-        <span className="mono panel-meta">LONG-TERM GOALS · ONLY YOU OPEN OR CLOSE ONE · SAMPLE</span>
+        <span className="mono panel-meta"><Marked>LONG-TERM GOALS · ONLY YOU OPEN OR CLOSE ONE · SAMPLE</Marked></span>
       </div>
       <div className="camps">
         {q.campaigns.map((c) => {

@@ -4,6 +4,7 @@ import { clockTime, dayAndTime } from '../../lib/format';
 import { CHAMBER, ROOM, RUN_KIND, byNewest, modelName, modelOf, pct } from '../../lib/science';
 import type { ShipView } from '../../lib/ship';
 import { Measured, TrackRow, type Screen } from './LabScreen';
+import { Marked } from '../Marked';
 
 const up = (s: string) => s.toUpperCase();
 type Go = (s: Screen) => void;
@@ -80,7 +81,7 @@ export function EvalsTable({ ship, onScreen }: { ship: ShipView; onScreen: Go })
     <section className="panel log-table-panel" aria-labelledby="evals-title">
       <div className="panel-head">
         <h2 className="panel-title" id="evals-title">Evals</h2>
-        <span className="mono panel-meta">{rows.length} · EVERY SCORE WITH ITS RUN · SAMPLE</span>
+        <span className="mono panel-meta"><Marked>{rows.length} · EVERY SCORE WITH ITS RUN · SAMPLE</Marked></span>
       </div>
       <div className="olog-scroll">
         <table className="olog">

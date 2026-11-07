@@ -7,6 +7,7 @@ import type { ShipView } from '../../lib/ship';
 import type { Station } from '../../types';
 import { Pips } from '../Roster';
 import { HealthPill } from './OpsScreen';
+import { Marked } from '../Marked';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const up = (s: string) => s.toUpperCase();
@@ -121,7 +122,7 @@ export function ScheduleTable({ ship, onOpen }: { ship: ShipView; onOpen: () => 
     <section className="panel log-table-panel" aria-labelledby="sched-title">
       <div className="panel-head">
         <h2 className="panel-title" id="sched-title">Schedule</h2>
-        <span className="mono panel-meta">{o.jobs.length} JOBS · SHIP'S TIME{o.synthetic ? ' · SAMPLE' : ''}</span>
+        <span className="mono panel-meta"><Marked>{o.jobs.length} JOBS · SHIP'S TIME{o.synthetic ? ' · SAMPLE' : ''}</Marked></span>
       </div>
       <div className="olog-scroll">
         <table className="olog">

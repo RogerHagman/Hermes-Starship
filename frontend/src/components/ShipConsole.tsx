@@ -14,6 +14,7 @@ import { ChainOfCommand } from './ChainOfCommand';
 import { Icon } from './Icon';
 import { hasArt } from './StationArt';
 import { StationScene } from './StationScene';
+import { Marked } from './Marked';
 
 /**
  * What the console shows: a station (and maybe one of its orders), or a department's chain
@@ -92,7 +93,7 @@ export function ConHead({ icon, title, sub, back, onBack, children }: {
       <span className="con-icon"><Icon path={icon} /></span>
       <span className="con-titles">
         <span className="con-title">{title}</span>
-        <span className="con-sub mono">{sub}</span>
+        <span className="con-sub mono"><Marked>{sub}</Marked></span>
       </span>
       {children}
       {onBack && <button type="button" className="con-back" onClick={onBack} title="Back (Esc)">{back}</button>}

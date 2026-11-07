@@ -6,6 +6,7 @@ import { progress, untilLabel } from '../../lib/sensors';
 import type { ShipView } from '../../lib/ship';
 import type { RailFilter } from '../SideRail';
 import { byNextScan } from './SensorScreen';
+import { Marked } from '../Marked';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const up = (s: string) => s.toUpperCase();
@@ -72,7 +73,7 @@ export function FindingsPanel({ ship, picked, onOpen }: { ship: ShipView; picked
     <section className="panel log-table-panel" aria-labelledby="find-title">
       <div className="panel-head">
         <h2 className="panel-title" id="find-title">Findings</h2>
-        <span className="mono panel-meta">{rows.length} · {rows.filter((f) => !f.seen).length} NEW · EVERY ONE CITED · SAMPLE</span>
+        <span className="mono panel-meta"><Marked>{rows.length} · {rows.filter((f) => !f.seen).length} NEW · EVERY ONE CITED · SAMPLE</Marked></span>
       </div>
       <div className="olog-scroll">
         <table className="olog">

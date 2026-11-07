@@ -14,6 +14,7 @@ import type { RailFilter } from '../SideRail';
 import { AsksPanel, ArrayLog, FindingsPanel, WatchesPanel } from './Panels';
 import { Scope } from './Scope';
 import { SensorScreen, type Screen } from './SensorScreen';
+import { Marked } from '../Marked';
 
 interface Props {
   ship: ShipView;
@@ -63,7 +64,7 @@ export function SensorsBoard({ ship, filter, drills, target, onTarget, onBoard, 
       <section className="room" aria-label="Sensor array">
         <div className="hero-top">
           <p className="mono hero-label">DECK 3 · THE SENSOR ARRAY · PICK A CONTACT ON THE SCOPE, OR SOMETHING IN THE ROOM</p>
-          <p className="mono hero-label room-hint">{s.synthetic ? 'SAMPLE WATCHES · ' : ''}ESC RETURNS THE WORK SCREEN</p>
+          <p className="mono hero-label room-hint"><Marked>{s.synthetic ? 'SAMPLE WATCHES · ' : ''}ESC RETURNS THE WORK SCREEN</Marked></p>
         </div>
         <div className="room-wrap">
           <div className="room-pic sensor-pic" data-hot={hot ?? ''} data-on={on ?? ''}>

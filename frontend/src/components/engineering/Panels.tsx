@@ -8,6 +8,7 @@ import type { ShipView } from '../../lib/ship';
 import type { Station } from '../../types';
 import { Pips } from '../Roster';
 import { PatchChip, inCharge } from './EngScreen';
+import { Marked } from '../Marked';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const up = (s: string) => s.toUpperCase();
@@ -103,7 +104,7 @@ export function PatchesTable({ ship, picked, onOpen }: { ship: ShipView; picked?
     <section className="panel log-table-panel" aria-labelledby="patches-title">
       <div className="panel-head">
         <h2 className="panel-title" id="patches-title">Patches</h2>
-        <span className="mono panel-meta">{rows.length} · FURTHEST ALONG FIRST · SAMPLE</span>
+        <span className="mono panel-meta"><Marked>{rows.length} · FURTHEST ALONG FIRST · SAMPLE</Marked></span>
       </div>
       <div className="olog-scroll">
         <table className="olog">

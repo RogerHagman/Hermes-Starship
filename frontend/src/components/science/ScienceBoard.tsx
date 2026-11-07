@@ -15,6 +15,7 @@ import type { RailFilter } from '../SideRail';
 import { LabScreen, type Screen } from './LabScreen';
 import { MetersPanel } from './Meters';
 import { Chamber, EvalsTable, RunLogPanel, ServingPanel, StudyPanel } from './Panels';
+import { Marked } from '../Marked';
 
 interface Props {
   ship: ShipView;
@@ -70,7 +71,7 @@ export function ScienceBoard({ ship, drills, target, onTarget, onBoard, onToast 
       <section className="room" aria-label="Science lab">
         <div className="hero-top">
           <p className="mono hero-label">DECK 3 · THE SCIENCE LAB · PICK SOMETHING IN THE ROOM · EVERY NUMBER OPENS ITS RUN</p>
-          <p className="mono hero-label room-hint">{s.synthetic ? 'SAMPLE RUNS · ' : ''}ESC RETURNS THE WORK SCREEN</p>
+          <p className="mono hero-label room-hint"><Marked>{s.synthetic ? 'SAMPLE RUNS · ' : ''}ESC RETURNS THE WORK SCREEN</Marked></p>
         </div>
         <div className="room-wrap">
           <div className="room-pic lab-pic" data-hot={hot ?? ''} data-on={on ?? ''}>

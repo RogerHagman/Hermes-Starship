@@ -30,6 +30,8 @@
   --tier-3:#ff5050;
   --good:#7fd8a8;
   --bad:#f08a7a;
+  /* Sample data that still needs a live read: dashed, so it never passes for live. */
+  --sample:#ffd84d;
   --focus:#ffffff;
 
   /* LCARS frame blocks (from the deck plan boards) */

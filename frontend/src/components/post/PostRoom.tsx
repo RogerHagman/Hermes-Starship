@@ -4,6 +4,7 @@
 // things, labels and views.
 import { memo, useState, type ReactNode } from 'react';
 import { ROOM, SCREEN, pct, type Spot } from '../../lib/post';
+import { Marked } from '../Marked';
 
 // The SVG is our own file, never fixture text, so it is safe to insert as markup.
 const Art = memo(function Art({ svg }: { svg: string }) {
@@ -45,7 +46,7 @@ export function PostRoom<T extends string>({ name, art, prefix, spots, labels, o
       <style>{light}</style>
       <div className="hero-top">
         <p className="mono hero-label">{hero}</p>
-        <p className="mono hero-label room-hint">{hint}</p>
+        <p className="mono hero-label room-hint"><Marked>{hint}</Marked></p>
       </div>
       <div className="room-wrap">
         <div className={`room-pic post-pic ${prefix}-pic`} data-hot={hot ?? ''} data-on={on ?? ''} {...data}>
