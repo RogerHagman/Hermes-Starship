@@ -321,6 +321,52 @@ button.plist-row:hover,button.plist-row:focus-visible{background:var(--surface-s
 @keyframes xfrun{from{stroke-dashoffset:4}to{stroke-dashoffset:-380}}
 @keyframes xfflow{to{stroke-dashoffset:-64}}
 @keyframes xfping{from{transform:scale(1);opacity:.8}to{transform:scale(2.4);opacity:0}}
+/* Number One: the fast path's pages */
+.xfp{display:flex;flex-direction:column;gap:14px}
+.xfp-words{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:10px}
+.xfp-word{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto 1fr auto;gap:6px 10px;align-items:center;padding:18px 18px 14px;min-height:170px;border-radius:12px;
+  background:var(--surface-raised);border-top:3px solid var(--pc, var(--good))}
+.xfp-say{grid-column:1 / -1;font-family:var(--font-display);font-weight:600;font-size:24px;color:var(--text)}
+.xfp-eg{grid-column:1 / -1;align-self:start;font-size:12.5px;line-height:1.45;color:var(--text-muted)}
+.xfp-arrow{color:var(--pc);font-size:18px}
+.xfp-to{font-family:var(--font-display);font-size:15px;color:var(--text)}
+.xfp-how{grid-column:1 / -1;font-size:9.5px;letter-spacing:.1em;color:var(--text-label)}
+.xfp-rules{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:8px 18px}
+.xfp-rules li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:13.5px;line-height:1.45;color:var(--text-muted)}
+.xfp-rules b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--acc);color:var(--acc);font-size:11px}
+.xfp .wall-actions{margin-top:auto}
+.xfp-names{display:grid;grid-template-columns:repeat(4, minmax(0,1fr))}
+.xfp-names .prow{padding:5px 9px;gap:2px 8px}
+.xfp-names .pr-text{font-size:13px}
+.xfp-names .pr-when{font-size:8.5px}
+.xfp-names .pr-why{display:flex;flex-wrap:wrap;gap:3px}
+.xfp-names .pr-none{font-size:11px;font-style:italic;color:var(--text-label)}
+.xfp-new{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px;min-height:0}
+.xfp-form{display:flex;flex-direction:column;gap:12px;min-width:0}
+.xfp-form .hf input:focus,.xfp-form .hf select:focus{border-color:var(--acc)}
+.xfp-form .con-hint{font-size:11px}
+.xfp-check{list-style:none;margin:0;padding:8px 10px;border-radius:8px;background:rgba(5,8,11,.55);border:1px solid var(--border);display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text-muted)}
+.xfp-check li::before{content:"·";margin-right:6px;color:var(--acc)}
+.xfp-check li.stop{color:var(--text)}
+.xfp-check li.stop::before{content:"!";color:var(--bad);font-weight:700}
+.xfp-form .wall-actions{margin-top:auto;flex-wrap:wrap}
+.xfp-draft{margin:0;min-height:0;overflow:auto;padding:10px 12px;border-radius:10px;background:#05080b;border:1px solid var(--border);
+  font-family:var(--font-mono);font-size:10.5px;line-height:1.5;color:var(--text-muted);white-space:pre-wrap;user-select:text}
+/* Number One: where would this go? */
+.xtry{gap:12px}
+.xtry-in input{min-height:40px;font-size:16px}
+.xtry-in input:focus{border-color:var(--acc)}
+.xtry-try{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.xtry-try > .mono{font-size:9.5px;letter-spacing:.1em;color:var(--text-label);margin-right:4px}
+.xtry-path{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:26px}
+.xtry-step{position:relative;display:flex;flex-direction:column;gap:5px;min-height:108px;padding:14px 14px 12px;border-radius:12px;
+  background:var(--surface-raised);border:1.5px dashed var(--border-strong);opacity:.55;transition:opacity .2s,border-color .2s}
+.xtry-step.on{opacity:1;border-style:solid;border-color:var(--pc);box-shadow:0 0 0 1px color-mix(in srgb, var(--pc) 25%, transparent), 0 0 22px color-mix(in srgb, var(--pc) 18%, transparent)}
+.xtry-step:not(:last-child)::after{content:"→";position:absolute;right:-20px;top:50%;transform:translateY(-50%);color:var(--text-label);font-size:16px}
+.xtry-label{font-size:9.5px;letter-spacing:.12em;color:var(--text-label)}
+.xtry-value{font-family:var(--font-display);font-weight:600;font-size:19px;color:var(--text);overflow-wrap:anywhere}
+.xtry-sub{font-size:9px;letter-spacing:.08em;color:var(--text-label)}
+.xtry-verdict{margin:4px 0 0;padding:12px 14px;border-radius:10px;border-left:3px solid var(--acc);background:rgba(5,8,11,.55);font-size:15px;line-height:1.45;color:var(--text)}
 /* the side console: the asks routed, a page at a time */
 .xroute .xr-rows{margin-top:8px}
 .xroute .xr-rows .plist-row{padding:6px 10px}

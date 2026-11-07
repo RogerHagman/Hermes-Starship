@@ -108,6 +108,54 @@ describe("Number One's post", () => {
     fireEvent.click(spot(c, 'xspot-rules'));
     expect(title(c)).toBe('Routing');
   });
+  const dots = (c: HTMLElement) => c.querySelectorAll('.post-screen .pager-dot');
+  it('the fast path has three pages: the coded first words, the station names, and a new fast path', () => {
+    const c = mount(XoBoard);
+    fireEvent.click(spot(c, 'xspot-fastpath'));
+    expect([...c.querySelectorAll('.xfp-say')].map((x) => x.textContent)).toEqual(['“remind me…”', '“todo… / todo!…”', '“yeoman…”']);
+    expect(c.querySelector('.xfp-names')).toBeNull();
+    fireEvent.click(dots(c)[1]);
+    expect(c.querySelectorAll('.xfp-names .prow')).toHaveLength(27);
+    expect(c.querySelector('.xfp-say')).toBeNull();
+    fireEvent.click(dots(c)[2]);
+    expect(c.querySelector('.xfp-form')).not.toBeNull();
+  });
+  it('a new fast path builds the card for the Chief Engineer as you type, and stops on a speed word', () => {
+    const c = mount(XoBoard);
+    fireEvent.click(spot(c, 'xspot-fastpath'));
+    fireEvent.click([...c.querySelectorAll('.xfp .btn')].find((b) => b.textContent === 'New fast path')!);
+    const [words] = [...c.querySelectorAll('.xfp-form input')] as HTMLInputElement[];
+    const copy = c.querySelector('.xfp-form button[type="submit"]') as HTMLButtonElement;
+    expect(copy.disabled).toBe(true);
+    fireEvent.change(words, { target: { value: 'log meal, meal' } });
+    fireEvent.change(c.querySelector('.xfp-form select')!, { target: { value: 'qm' } });
+    expect(copy.disabled).toBe(false);
+    const card = c.querySelector('.xfp-draft')?.textContent ?? '';
+    expect(card).toContain('## GOAL');
+    expect(card).toContain('assignee scribe');
+    fireEvent.change(words, { target: { value: 'warp' } });
+    expect(copy.disabled).toBe(true);
+    expect(c.querySelector('.xfp-check .stop')?.textContent).toContain('speed word');
+  });
+  it('the routing screen has a second page: type a message and see where it would go', () => {
+    const c = mount(XoBoard);
+    fireEvent.click(dots(c)[1]);
+    expect(title(c)).toBe('Routing · where would this go?');
+    const input = c.querySelector('.xtry-in input') as HTMLInputElement;
+    const lit = () => [...c.querySelectorAll('.xtry-step.on .xtry-label')].map((x) => x.textContent);
+    const station = () => c.querySelectorAll('.xtry-step .xtry-value')[3].textContent;
+    fireEvent.change(input, { target: { value: 'Warp: remind me at 21:00 to call the garage' } });
+    expect(lit()).toEqual(['SPEED WORD', 'FAST PATH', 'STATION']);
+    expect(station()).toBe("Captain's Yeoman");
+    fireEvent.change(input, { target: { value: 'Helm, shortlist the new job ads' } });
+    expect(lit()).toEqual(['NUMBER ONE', 'STATION']);
+    expect(station()).toBe('Helm');
+    fireEvent.change(input, { target: { value: "What's the weather tomorrow?" } });
+    expect(station()).toBe('Number One decides');
+    expect(c.querySelector('.xtry-verdict')?.textContent).toContain('fails the task rather than doing it itself');
+    fireEvent.click(dots(c)[0]);
+    expect(title(c)).toBe('Routing');
+  });
   it('the turbolift goes to the bridge', () => {
     const go = vi.fn();
     fireEvent.click(spot(mount(XoBoard, go), 'xspot-bridge'));

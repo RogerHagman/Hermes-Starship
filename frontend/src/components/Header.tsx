@@ -44,7 +44,7 @@ const BOARD_TEXT: Record<BoardId, { deck: string; title: string; intro: string }
   xo: {
     deck: "DECK 1 · NUMBER ONE'S POST · BESIDE THE CAPTAIN'S CHAIR",
     title: "Number One's post",
-    intro: 'Where every ask came from and which station took it, the fast path, the rail rules and what waits for you. Number One only routes.',
+    intro: 'Number One routes: every ask comes in here and goes out to one station. It never does the work itself.',
   },
   helm: {
     deck: 'DECK 1 · HELM · FLIGHT CONTROL',

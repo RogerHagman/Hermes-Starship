@@ -4,7 +4,7 @@
 // orders); the fast path is each station's aliases; the rail rules are hermes/routing-rules.md.
 import { SURFACE_WORD, records } from './computer';
 import { inLastDays, openedOf, type Spot } from './post';
-import type { Fixtures, Order } from '../types';
+import type { Fixtures, Order, Station } from '../types';
 
 export type XoObject = 'bridge' | 'channels' | 'fastpath' | 'rules' | 'hails' | 'lounge' | 'blocked' | 'desk';
 
@@ -96,12 +96,105 @@ export const RAIL_RULES: { n: string; name: string; rail: 'local' | 'codex' | 'c
   { n: '9', name: 'Cross-rail review', rail: 'mixed', text: 'A review normally goes to a different rail than the one that made the work.' },
 ];
 
-/** The first words that go straight to a station, without Number One deciding (patch P). */
-export const FAST_WORDS: { say: string; to: string }[] = [
-  { say: 'remind me…', to: 'yeoman' },
-  { say: 'todo… / todo!…', to: 'yeoman' },
-  { say: 'yeoman…', to: 'yeoman' },
+/** The first words that go straight to a station, without Number One deciding: code files the card. */
+export const FAST_WORDS: { say: string; to: string; patch: string; eg: string }[] = [
+  { say: 'remind me…', to: 'yeoman', patch: 'P', eg: 'remind me in 2 minutes to test' },
+  { say: 'todo… / todo!…', to: 'yeoman', patch: 'P', eg: 'Todo! book tyres' },
+  { say: 'yeoman…', to: 'yeoman', patch: 'P', eg: "yeoman: what's on my list?" },
 ];
+/** How a coded fast path behaves (patches K and P). */
+export const FAST_RULES: string[] = [
+  'The words are matched at the very start of your typed message, case-insensitive, as whole words. A speed word before them still counts as the start.',
+  'Code files the card for that station itself, with your words unchanged, and stamps the ORD.',
+  'Number One only sends the receipt. It files nothing and decides nothing.',
+  'If code can\'t file the card, nothing is lost: Number One gets the message as usual.',
+];
+
+// ---------- a new fast path: the board drafts it, the Chief Engineer codes it, you apply it ----------
+
+/** Speed words (patch K) come before a fast path's words, so a fast path can't start with one. */
+const SPEED_WORDS = ['thrusters', 'quarter', 'half', 'full', 'impulse', 'warp', 'maximum'];
+/** The first word of each coded fast path, and where it goes. */
+const CODED: Record<string, { to: string; patch: string }> = { remind: { to: 'yeoman', patch: 'P' }, todo: { to: 'yeoman', patch: 'P' }, yeoman: { to: 'yeoman', patch: 'P' } };
+
+export interface FastDraft { words: string; to: string; avoid: string }
+
+/** Comma-separated text, cleaned: lower case, single spaces, no quotes or end punctuation, no repeats. */
+export function fastWords(s: string): string[] {
+  const out = s.split(',')
+    .map((w) => w.toLowerCase().replace(/[“”"'‘’…]/g, '').trim().replace(/[.:;!?]+$/, '').replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+  return [...new Set(out)];
+}
+
+/** Stations a fast path can go to: live crew stations with a profile of their own. Not Number One, and not specialists whose cards come from their head. */
+export function fastTargets(stations: Station[]): Station[] {
+  return stations.filter((s) => s.kind === 'station' && s.status === 'live' && s.id !== 'xo'
+    && /^[a-z_]+$/.test(s.profile ?? '') && !s.aliases.some((a) => a.startsWith('none')));
+}
+
+/** What stops a draft (stop), and what is worth knowing before you send it (note). */
+export function fastCheck(d: FastDraft, stations: Station[]): { stop: string[]; note: string[] } {
+  const words = fastWords(d.words);
+  const stop: string[] = [];
+  const note: string[] = [];
+  if (!words.length) stop.push('Type the first words.');
+  if (!fastTargets(stations).some((s) => s.id === d.to)) stop.push('Pick the station it goes to.');
+  for (const w of words) {
+    const first = w.split(' ')[0];
+    if (SPEED_WORDS.includes(first)) stop.push(`"${w}" starts with a speed word, and a speed word always comes first.`);
+    else if (CODED[first]) stop.push(`"${first}" already has a fast path to the Captain's Yeoman.`);
+    const owner = stations.find((s) => s.id !== d.to && s.aliases.includes(w));
+    if (owner) note.push(`"${w}" is also ${owner.short}'s name. In code, the fast path wins.`);
+  }
+  if (words.some((w) => w.length < 3)) note.push('A very short word matches more than you might mean.');
+  return { stop, note };
+}
+
+/** "a"; "a" or "b"; "a", "b" or "c". */
+const orList = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} or ${xs[xs.length - 1]}`);
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const quote = (s: string) => `"${s}"`;
+
+/** The card for the Chief Engineer, in the house brief format (GOAL, CONTEXT, CONSTRAINTS, DONE WHEN). */
+export function fastPathBrief(d: FastDraft, st: Station, chief: Station | undefined): string {
+  const words = fastWords(d.words);
+  const said = orList(words.map(quote));
+  const by = chief?.profile ?? 'forge';
+  const prof = st.profile ?? st.id;
+  const slug = words[0].replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'new';
+  const yes = [...words.map((w) => quote(`${cap(w)} test`)), quote(`Warp: ${words[0]} test`)];
+  const no = [quote(`tell me about ${words[0]}`), ...fastWords(d.avoid).map(quote)];
+  return [
+    `# New fast path · ${said} goes to ${st.name} in code (${by}, solo)`,
+    '',
+    `Paste to Number One as one card for ${by}. ${cap(by)} works this card alone: no child cards.`,
+    '',
+    '## GOAL',
+    `When the Captain's message starts with ${said}, code files the card to the ${prof} profile (${st.name}) with the Captain's words unchanged. Number One only sends the receipt.`,
+    '',
+    '## CONTEXT',
+    '- Patch P does this for the Captain\'s Yeoman: "remind", "todo" and "yeoman" at the very start of the typed text are matched in the arrival hook, and code files the card. A speed word before them (patch K) still counts as the start.',
+    `- This adds ${said} to the same path, for the ${prof} profile. The Captain drafted it on Number One's board, on the fast path.`,
+    '- Prompt rules don\'t hold on qwen; code does.',
+    '',
+    '## CONSTRAINTS',
+    `- Match at the very start of the Captain's typed text, case-insensitive, as whole words: ${said}. A speed word before it still counts as the start. The words anywhere else are not a match.`,
+    `- On a match, code creates the Kanban card itself: assignee ${prof}, title with the ORD, body = the Captain's words exactly. It then tells Number One the card is already filed (card ID and ORD), so Number One replies with the receipt only and files nothing.`,
+    '- If code can\'t create the card, nothing is lost: Number One gets the message as today.',
+    '- Change only what this needs, next to patch P\'s words. Write patches and scripts only. Never edit a live file under /opt/hermes or the live profiles. The Captain applies the patch.',
+    '- Name the patch with the next free letter. Add it to apply.sh and check.sh with a "present under overlay" check, as B2-31 did.',
+    '- Test on scratch copies only, with fake messages and an empty test board, and delete them when done. No real cards and no real messages.',
+    '- Never sleep, wait or poll. When done, report and finish.',
+    '- Manual steps in the report use the NAS-host docker form, for example `sudo docker exec -u root hermes sh /opt/data/patches/apply.sh`, under "## Manual steps for Roger (NAS host)", numbered, one code block each, with the expected output. Rollback goes in its own section after the steps.',
+    '',
+    '## DONE WHEN',
+    `- Tests pass: ${yes.join(', ')} each create one ${prof} card with the exact words. ${cap(orList(no))} create${no.length > 1 ? '' : 's'} none. A card-creation failure falls back to normal routing. The tests for K and P still pass.`,
+    '- apply.sh and check.sh know the new patch, and check.sh says "OK through" it on the scratch copy.',
+    `- /opt/data/handoff/engineering/fast-path-${slug}-report.md holds the change, the test output, the manual steps, and a live test for the Captain: send ${yes[0]} from the desktop app, then check that the newest card is on ${prof}'s board with those words.`,
+    `- ${cap(by)}'s final report says plainly whether each item was done.`,
+  ].join('\n');
+}
 
 /** 24 x 24 line icons for the room's things. */
 export const XO_ICONS: Record<XoObject | 'ease' | 'order' | 'stations', string> = {
@@ -117,3 +210,59 @@ export const XO_ICONS: Record<XoObject | 'ease' | 'order' | 'stations', string> 
   blocked: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M6 6l12 12',
   desk: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 21a8 8 0 0 1 16 0',
 };
+
+// ---------- where would this go? ----------
+
+/** Speed words the arrival hook reads at the very start, before a colon or a comma (patch K), longest first. */
+const SPEED_START = ['maximum warp', 'warp 9', 'warp', 'full impulse', 'half impulse', 'quarter impulse', 'impulse', 'thrusters'];
+const esc = (w: string) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+export interface RouteGuess {
+  /** The speed word read at the start, if any. */
+  speed?: string;
+  /** The words after it. */
+  rest: string;
+  /** A coded fast path the first word matches: code files the card. */
+  coded?: { word: string; to: string; patch: string };
+  /** Stations the words name, the first named first. */
+  named: { id: string; alias: string }[];
+}
+
+/** Where a message would go, by the same rules: a speed word first, then the coded fast path (exact, it is code),
+ *  then the station names in the words (what Number One usually goes by). */
+export function routeOf(text: string, stations: Station[]): RouteGuess {
+  let rest = text.trim();
+  let speed: string | undefined;
+  for (const w of SPEED_START) {
+    const m = rest.match(new RegExp(`^${esc(w).replace(' ', '\\s+')}\\s*[:,]\\s*`, 'i'));
+    if (m) { speed = w.split(' ').map(cap).join(' '); rest = rest.slice(m[0].length); break; }
+  }
+  const lower = rest.toLowerCase();
+  const first = lower.match(/^[a-z]+/)?.[0];
+  const hit = first ? CODED[first] : undefined;
+  const coded = hit && first ? { word: first, ...hit } : undefined;
+  const named: { id: string; alias: string; at: number }[] = [];
+  for (const st of stations) {
+    let best: { alias: string; at: number } | undefined;
+    for (const a of st.aliases) {
+      if (a.startsWith('none')) continue;
+      const m = lower.match(new RegExp(`(^|[^a-z0-9])${esc(a)}(?=$|[^a-z0-9])`));
+      if (m && m.index !== undefined) {
+        const at = m.index + m[1].length;
+        if (!best || at < best.at) best = { alias: a, at };
+      }
+    }
+    if (best) named.push({ id: st.id, ...best });
+  }
+  named.sort((a, b) => a.at - b.at);
+  return { speed, rest, coded, named: named.map(({ id, alias }) => ({ id, alias })) };
+}
+
+/** Messages to try on the tester. */
+export const TRY_THESE = [
+  'Warp: remind me at 21:00 to call the garage',
+  'Helm, shortlist the new job ads',
+  'Ask Navigation for the train times to Gothenburg',
+  "What's the weather tomorrow?",
+];
+

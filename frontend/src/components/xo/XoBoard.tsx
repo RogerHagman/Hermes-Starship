@@ -2,7 +2,8 @@
 // (where asks come in), the fast-path plaque, the hails, the rail-rules cabinet, the briefing room
 // door and the not-done tray each open a view on the wall screen. The wall screen is wider here and
 // the routing fan fills it: your channels in, the stations out. Pick a station or a channel and the
-// side console lists those asks, a page at a time. On the desk, a tile per surface filters the fan.
+// side console lists those asks, a page at a time; the fan's second page tests where a message would
+// go. The fast path drafts new coded first words for Engineering. On the desk, a tile per surface filters the fan.
 // Around the room: the side console and what waits for you, Number One's own orders and the week.
 // Reading only: nothing here reaches Hermes.
 import { useCallback, useState } from 'react';
@@ -14,7 +15,7 @@ import type { Drills, ShipView } from '../../lib/ship';
 import { dayAndTime, dayKey } from '../../lib/format';
 import { railColor } from '../../lib/lookups';
 import {
-  EVERY, SCREEN, SPOTS, SURFACES, SURFACE_COLOUR, asks, channels, routed, surfaceWord, type Route, type XoObject,
+  EVERY, FAST_WORDS, SCREEN, SPOTS, SURFACES, SURFACE_COLOUR, asks, channels, routed, surfaceWord, type Route, type XoObject,
 } from '../../lib/xo';
 import { CommBadge } from '../CommBadge';
 import { RailsPanel } from '../Panels';
@@ -66,7 +67,7 @@ export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Pr
   const labels: Record<XoObject, { name: string; meta?: string }> = {
     bridge: { name: 'Turbolift', meta: 'TO THE BRIDGE' },
     channels: { name: 'Comm channels', meta: `${ch.reduce((n, c) => n + c.week, 0)} THIS WEEK` },
-    fastpath: { name: 'Fast path', meta: 'FIRST WORDS' },
+    fastpath: { name: 'Fast path', meta: `${FAST_WORDS.length} IN CODE` },
     rules: { name: 'Rail rules', meta: '0 TO 9' },
     hails: { name: 'Hails', meta: hails ? `${hails} FOR YOU` : 'NONE' },
     lounge: { name: 'Briefing room', meta: 'MINUTES' },
@@ -79,7 +80,7 @@ export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Pr
   return (
     <div className="qgrid pgrid">
       <PostRoom name="Number One's post" art={art} prefix="x" spots={SPOTS} labels={labels} on={on} onPick={pick} screen={SCREEN}
-        hero="DECK 1 · NUMBER ONE'S POST · BESIDE YOUR CHAIR · PICK SOMETHING IN THE ROOM, OR A CHANNEL ON THE DESK"
+        hero="DECK 1 · NUMBER ONE'S POST · EVERY ASK IN, ONE STATION OUT · PICK SOMETHING IN THE ROOM, OR A CHANNEL ON THE DESK"
         hint={`${sourceWord(f.synthetic, f.asOf)} · ONLY ROUTES · READ ONLY · ESC RETURNS THE SCREEN`}
         attrs={{ hails: hails ? 'on' : '0' }}
         desk={<DeskTiles tiles={[
@@ -91,7 +92,7 @@ export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Pr
           { id: 'speed', name: 'Speed words', n: kept, sub: `OF ${total} KEPT WITH THE ORDER`, colour: 'var(--good)', label: `Speed words, ${kept} of ${total} kept`,
             pressed: screen.view === 'channels', onClick: () => show({ view: 'channels' }) },
         ]} />}>
-        <XoScreen ship={ship} screen={screen} onScreen={setScreen} route={route} onRoute={routeTo} />
+        <XoScreen ship={ship} screen={screen} onScreen={setScreen} route={route} onRoute={routeTo} onToast={onToast} />
       </PostRoom>
       <aside className="side qside">
         {/* a new pick starts on the first page */}
