@@ -1,7 +1,7 @@
 // Friendly names for the generated fixture types.
-import type { EngineeringFile, NasFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, YeomanFile } from './fixtures';
+import type { EngineeringFile, HelmFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile } from './fixtures';
 
-export type { EngineeringFile, NasFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, YeomanFile };
+export type { EngineeringFile, HelmFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile };
 export type Station = StationsFile['stations'][number];
 export type Rail = RailsFile['rails'][number];
 export type RailId = Rail['id'];
@@ -33,6 +33,14 @@ export type Reminder = YeomanFile['reminders'][number];
 export type WaitingFor = YeomanFile['waiting'][number];
 export type Recurring = YeomanFile['recurring'][number];
 export type Closed = YeomanFile['done'][number];
+export type JobAd = HelmFile['ads'][number];
+export type Application = HelmFile['applications'][number];
+export type HelmEvent = HelmFile['events'][number];
+export type NavEvent = NavFile['events'][number];
+export type Trip = NavFile['trips'][number];
+export type Booking = NavFile['bookings'][number];
+export type AwaySession = ViewscreenFile['sessions'][number];
+export type AwayAction = AwaySession['actions'][number];
 
 /** Everything the boards read, one object per fixture file. */
 export interface Fixtures {
@@ -48,6 +56,12 @@ export interface Fixtures {
   ops: OpsFile;
   /** The Yeoman's list: the sample, or live/yeoman.json from the ship probe. */
   yeoman: YeomanFile;
+  /** Helm's application tracker: the sample, or live/helm.json from the ship probe. */
+  helm: HelmFile;
+  /** Navigation's charts: calendar, trips and bookings held. Sample only until Navigation keeps its own files. */
+  nav: NavFile;
+  /** The Away Team's sessions on the Main Viewscreen. Sample only until computer use is fitted. */
+  viewscreen: ViewscreenFile;
   /** live/rail-log.json from the rails probe, when there is one. Its duty lines replace the samples. */
   raillog?: RailLogFile;
   /** live/nas.json from the Ops probe, when there is one. Its NAS and disks replace the sample ones in ops. */

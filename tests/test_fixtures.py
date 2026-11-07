@@ -13,7 +13,8 @@ import jsonschema
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
-NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops", "nas", "yeoman"]
+NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops", "nas", "yeoman",
+         "helm", "nav", "viewscreen"]
 
 
 def load(path):
@@ -248,8 +249,8 @@ class NoRealData(unittest.TestCase):
 
     def test_fixtures_hold_no_personal_or_secret_patterns(self):
         for path in FIX.glob("*.json"):
-            # Timestamps are expected; drop them so they don't read as phone numbers.
-            text = re.sub(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ", "", path.read_text(encoding="utf-8"))
+            # Timestamps and dates are expected; drop them so they don't read as phone numbers.
+            text = re.sub(r"\d{4}-\d\d-\d\d(T\d\d:\d\d:\d\dZ)?", "", path.read_text(encoding="utf-8"))
             for label, pattern in self.PATTERNS.items():
                 with self.subTest(file=path.name, pattern=label):
                     self.assertIsNone(re.search(pattern, text), f"{label} in {path.name}")
@@ -318,3 +319,43 @@ class YeomanAgree(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BridgePostsAgree(unittest.TestCase):
+    """Helm, Navigation and the Viewscreen samples: ids that never look real, and links that point somewhere."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.helm = load(FIX / "helm.json")
+        cls.nav = load(FIX / "nav.json")
+        cls.vs = load(FIX / "viewscreen.json")
+        cls.orders = {o["id"] for o in load(FIX / "orders.json")["orders"]}
+
+    def test_helm_ids_live_in_the_9000s_and_point_at_real_ads(self):
+        ads = {a["id"] for a in self.helm["ads"]}
+        apps = {a["id"] for a in self.helm["applications"]}
+        for i in ads | apps:
+            self.assertRegex(i, r"^[JA]-9\d{3}$")
+        self.assertEqual(len(ads), len(self.helm["ads"]))
+        for a in self.helm["applications"]:
+            self.assertIn(a["job"], ads, a["id"])
+            if a["status"] in ("applied", "interview", "offer", "rejected", "ghosted"):
+                self.assertIn("applied", a, a["id"])
+        for e in self.helm["events"]:
+            self.assertIn(e["id"], ads | apps, e)
+
+    def test_nav_and_viewscreen_ids_and_orders(self):
+        for key in ("events", "trips", "bookings"):
+            ids = [x["id"] for x in self.nav[key]]
+            self.assertEqual(len(ids), len(set(ids)), key)
+            for x in self.nav[key]:
+                self.assertRegex(x["id"], r"-9\d\d$")
+                if "sourceOrd" in x:
+                    self.assertIn(x["sourceOrd"], self.orders)
+        for s in self.vs["sessions"]:
+            self.assertRegex(s["id"], r"^vs-9\d\d$")
+            if "sourceOrd" in s:
+                self.assertIn(s["sourceOrd"], self.orders)
+            times = [a["at"] for a in s["actions"]]
+            self.assertEqual(times, sorted(times), s["id"])
+            self.assertTrue(all(t >= s["start"] for t in times), s["id"])

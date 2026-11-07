@@ -53,6 +53,55 @@ export interface EngineeringFile {
 }
 
 /**
+ * Helm's application tracker: job ads, applications and their events, from find to close. live/helm.json from the ship probe reads the tracker's own files (helm/app-tracker/*.csv) once they live on the NAS; without it the board shows this sample. Contact details, salary asks and file paths are never copied.
+ */
+export interface HelmFile {
+  asOf: string;
+  synthetic: boolean;
+  /**
+   * Job ads, newest found first.
+   */
+  ads: {
+    id: string;
+    found: string;
+    company: string;
+    role: string;
+    location?: string;
+    source?: string;
+    deadline?: string;
+    /**
+     * Keyword match with the CV, percent.
+     */
+    match?: number;
+    fit?: string;
+    status: "found" | "shortlisted" | "applying" | "skipped" | "parked";
+    notes?: string;
+  }[];
+  applications: {
+    id: string;
+    job: string;
+    company: string;
+    role: string;
+    status: "drafting" | "ready" | "applied" | "interview" | "offer" | "rejected" | "withdrawn" | "ghosted";
+    created: string;
+    applied?: string;
+    match?: number;
+    nextStep?: string;
+    nextDate?: string;
+    notes?: string;
+  }[];
+  /**
+   * Everything that happened, newest first: found, shortlisted, sent, reply, interview, closed and so on.
+   */
+  events: {
+    date: string;
+    id: string;
+    kind: string;
+    text: string;
+  }[];
+}
+
+/**
  * live/nas.json from the Ops probe: the NAS's own readings (memory, swap, CPU, uptime, temperature and the disks it is told to watch). The page puts them in place of the sample NAS and its disks in ops.json. The probe only reads /proc, /sys and the size of each disk.
  */
 export interface NasFile {
@@ -89,6 +138,49 @@ export interface NasFile {
      */
     perDayGb?: number;
     note?: string;
+  }[];
+}
+
+/**
+ * Navigation's calendar, trips and bookings. A sample only: Navigation keeps no files of its own yet. Bookings stop before Confirm for the Captain.
+ */
+export interface NavFile {
+  asOf: string;
+  synthetic: boolean;
+  events: {
+    id: string;
+    title: string;
+    start: string;
+    end?: string;
+    place?: string;
+    kind: "appointment" | "travel" | "work" | "personal" | "hold";
+    sourceOrd?: string;
+  }[];
+  trips: {
+    id: string;
+    title: string;
+    from: string;
+    to: string;
+    depart: string;
+    back?: string;
+    status: "idea" | "planned" | "booked" | "done";
+    sourceOrd?: string;
+    legs?: {
+      mode: "train" | "bus" | "car" | "flight" | "ferry" | "walk" | "bike";
+      from: string;
+      to: string;
+      depart: string;
+      arrive?: string;
+    }[];
+  }[];
+  bookings: {
+    id: string;
+    what: string;
+    when: string;
+    where?: string;
+    status: "held" | "confirmed" | "released";
+    heldUntil?: string;
+    sourceOrd?: string;
   }[];
 }
 
@@ -679,6 +771,35 @@ export interface StationsFile {
     duty: string;
     note?: string;
     activeOrder: string | null;
+  }[];
+}
+
+/**
+ * The Main Viewscreen's sessions: each time the Captain's desktop went on screen, and every click, key and line typed, with the Captain's answer. A sample only: the computer-use sessions keep no log the probe reads yet.
+ */
+export interface ViewscreenFile {
+  asOf: string;
+  synthetic: boolean;
+  /**
+   * Newest first.
+   */
+  sessions: {
+    id: string;
+    start: string;
+    end?: string;
+    surface: "telegram" | "desktop" | "dashboard";
+    why: string;
+    sourceOrd?: string;
+    /**
+     * Screenshots sent to Telegram.
+     */
+    captures: number;
+    actions: {
+      at: string;
+      kind: "click" | "type" | "key" | "scroll";
+      what: string;
+      decision: "approved" | "denied" | "waiting";
+    }[];
   }[];
 }
 

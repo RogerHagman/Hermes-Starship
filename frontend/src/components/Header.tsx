@@ -41,6 +41,26 @@ const BOARD_TEXT: Record<BoardId, { deck: string; title: string; intro: string }
     title: 'Computer core',
     intro: "Every order the ship has taken, in any state, on the core terminal. The Ship's Computer keeps the records; its memory banks stay sealed.",
   },
+  xo: {
+    deck: "DECK 1 · NUMBER ONE'S POST · BESIDE THE CAPTAIN'S CHAIR",
+    title: "Number One's post",
+    intro: 'Where every ask came from and which station took it, the fast path, the rail rules and what waits for you. Number One only routes.',
+  },
+  helm: {
+    deck: 'DECK 1 · HELM · FLIGHT CONTROL',
+    title: 'Helm',
+    intro: 'The career course: every job ad and application from find to close, your gates, the follow-ups and the method. You send every application yourself.',
+  },
+  nav: {
+    deck: 'DECK 1 · NAVIGATION · FLIGHT CONTROL',
+    title: 'Navigation',
+    intro: "The calendar, trips and bookings, and slots for the Yeoman's Schedule box. Every booking stops before Confirm for you.",
+  },
+  viewscreen: {
+    deck: 'DECK 1 · MAIN VIEWSCREEN',
+    title: 'Main Viewscreen',
+    intro: 'Your desktop on the bridge: every on-screen session, and every click, key and line typed, with your OK or no. Never yolo.',
+  },
   yeoman: {
     deck: "DECK 2 · YEOMAN'S POST · BY THE CAPTAIN'S DOOR",
     title: "Yeoman's post",

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship \u00b7 viewscreen",
+  "description": "The Main Viewscreen's sessions: each time the Captain's desktop went on screen, and every click, key and line typed, with the Captain's answer. A sample only: the computer-use sessions keep no log the probe reads yet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "sessions"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "start",
+          "surface",
+          "why",
+          "captures",
+          "actions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "surface": {
+            "enum": [
+              "telegram",
+              "desktop",
+              "dashboard"
+            ]
+          },
+          "why": {
+            "type": "string"
+          },
+          "sourceOrd": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$"
+          },
+          "captures": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Screenshots sent to Telegram."
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "at",
+                "kind",
+                "what",
+                "decision"
+              ],
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+                },
+                "kind": {
+                  "enum": [
+                    "click",
+                    "type",
+                    "key",
+                    "scroll"
+                  ]
+                },
+                "what": {
+                  "type": "string"
+                },
+                "decision": {
+                  "enum": [
+                    "approved",
+                    "denied",
+                    "waiting"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Newest first."
+    }
+  }
+}

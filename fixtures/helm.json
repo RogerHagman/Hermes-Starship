@@ -1,0 +1,292 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "ads": [
+    {
+      "id": "J-9006",
+      "found": "2026-11-04",
+      "company": "Hjo Infra",
+      "role": "Network Engineer",
+      "location": "Hjo, on site",
+      "source": "Platsbanken",
+      "deadline": "2026-11-07",
+      "match": 35,
+      "fit": "weak",
+      "status": "found",
+      "notes": "Cisco-heavy. Triage: probably skip."
+    },
+    {
+      "id": "J-9005",
+      "found": "2026-11-03",
+      "company": "Skara Drift",
+      "role": "IT Technician",
+      "location": "Skara, on site",
+      "source": "Platsbanken",
+      "match": 66,
+      "fit": "fair",
+      "status": "found"
+    },
+    {
+      "id": "J-9004",
+      "found": "2026-11-02",
+      "company": "L\u00e4ck\u00f6 Labs",
+      "role": "Inference Engineer",
+      "location": "Stockholm, hybrid",
+      "source": "company site",
+      "match": 41,
+      "fit": "stretch",
+      "status": "parked",
+      "notes": "Wanted, but the public model-serving benchmark comes first."
+    },
+    {
+      "id": "J-9003",
+      "found": "2026-10-30",
+      "company": "Kinnekulle Systems",
+      "role": "Software Engineer",
+      "location": "Remote",
+      "source": "Platsbanken",
+      "match": 63,
+      "fit": "good",
+      "status": "applying"
+    },
+    {
+      "id": "J-9002",
+      "found": "2026-10-29",
+      "company": "Nordkust GPU",
+      "role": "Systems Engineer",
+      "location": "G\u00f6teborg, hybrid",
+      "source": "Platsbanken",
+      "deadline": "2026-11-06",
+      "match": 61,
+      "fit": "fair",
+      "status": "applying",
+      "notes": "Deadline Friday."
+    },
+    {
+      "id": "J-9001",
+      "found": "2026-10-28",
+      "company": "V\u00e4nern Datahall",
+      "role": "Support Engineer",
+      "location": "Lidk\u00f6ping, on site",
+      "source": "company site",
+      "match": 74,
+      "fit": "good",
+      "status": "applying",
+      "notes": "Local GPU datacenter, top of the list. Support, Linux, monitoring."
+    },
+    {
+      "id": "J-9007",
+      "found": "2026-10-25",
+      "company": "Mariestad Media",
+      "role": "Web Developer",
+      "location": "Mariestad",
+      "source": "Platsbanken",
+      "match": 38,
+      "fit": "weak",
+      "status": "skipped",
+      "notes": "Agency work, far from the course."
+    },
+    {
+      "id": "J-9008",
+      "found": "2026-10-14",
+      "company": "Tidaholm Tech",
+      "role": "Support Technician",
+      "location": "Tidaholm",
+      "source": "Platsbanken",
+      "match": 70,
+      "fit": "good",
+      "status": "applying"
+    },
+    {
+      "id": "J-9009",
+      "found": "2026-10-02",
+      "company": "Falk\u00f6ping Fiber",
+      "role": "Field Engineer",
+      "location": "Falk\u00f6ping",
+      "source": "company site",
+      "match": 58,
+      "fit": "fair",
+      "status": "applying"
+    },
+    {
+      "id": "J-9010",
+      "found": "2026-09-20",
+      "company": "G\u00f6tene Systems",
+      "role": "Operations Engineer",
+      "location": "G\u00f6tene",
+      "source": "Platsbanken",
+      "match": 55,
+      "fit": "fair",
+      "status": "applying"
+    }
+  ],
+  "applications": [
+    {
+      "id": "A-9002",
+      "job": "J-9002",
+      "company": "Nordkust GPU",
+      "role": "Systems Engineer",
+      "status": "drafting",
+      "created": "2026-11-03",
+      "match": 61,
+      "nextStep": "Proofread the letter, then send",
+      "nextDate": "2026-11-05"
+    },
+    {
+      "id": "A-9003",
+      "job": "J-9003",
+      "company": "Kinnekulle Systems",
+      "role": "Software Engineer",
+      "status": "ready",
+      "created": "2026-11-01",
+      "match": 63,
+      "nextStep": "Send it from your own mail",
+      "nextDate": "2026-11-05"
+    },
+    {
+      "id": "A-9001",
+      "job": "J-9001",
+      "company": "V\u00e4nern Datahall",
+      "role": "Support Engineer",
+      "status": "applied",
+      "created": "2026-10-30",
+      "applied": "2026-11-02",
+      "match": 74,
+      "nextStep": "Follow up if no reply",
+      "nextDate": "2026-11-16"
+    },
+    {
+      "id": "A-9004",
+      "job": "J-9008",
+      "company": "Tidaholm Tech",
+      "role": "Support Technician",
+      "status": "applied",
+      "created": "2026-10-15",
+      "applied": "2026-10-16",
+      "match": 70,
+      "nextStep": "Send one short follow-up",
+      "nextDate": "2026-10-30"
+    },
+    {
+      "id": "A-9005",
+      "job": "J-9009",
+      "company": "Falk\u00f6ping Fiber",
+      "role": "Field Engineer",
+      "status": "interview",
+      "created": "2026-10-03",
+      "applied": "2026-10-05",
+      "match": 58,
+      "nextStep": "First call: prepare two stories and the questions to ask",
+      "nextDate": "2026-11-06"
+    },
+    {
+      "id": "A-9006",
+      "job": "J-9010",
+      "company": "G\u00f6tene Systems",
+      "role": "Operations Engineer",
+      "status": "ghosted",
+      "created": "2026-09-22",
+      "applied": "2026-09-25",
+      "match": 55,
+      "notes": "No reply in 30 days."
+    }
+  ],
+  "events": [
+    {
+      "date": "2026-11-04",
+      "id": "J-9006",
+      "kind": "found",
+      "text": "Network Engineer, Hjo Infra (Platsbanken)"
+    },
+    {
+      "date": "2026-11-03",
+      "id": "A-9002",
+      "kind": "started",
+      "text": "Tailoring the CV for Nordkust GPU"
+    },
+    {
+      "date": "2026-11-03",
+      "id": "J-9005",
+      "kind": "found",
+      "text": "IT Technician, Skara Drift (Platsbanken)"
+    },
+    {
+      "date": "2026-11-02",
+      "id": "A-9001",
+      "kind": "sent",
+      "text": "Sent to V\u00e4nern Datahall; the CV and letter are frozen"
+    },
+    {
+      "date": "2026-11-02",
+      "id": "J-9004",
+      "kind": "parked",
+      "text": "Inference role parked: the benchmark comes first"
+    },
+    {
+      "date": "2026-11-01",
+      "id": "A-9003",
+      "kind": "started",
+      "text": "Tailoring the CV for Kinnekulle Systems"
+    },
+    {
+      "date": "2026-10-31",
+      "id": "A-9005",
+      "kind": "reply",
+      "text": "Invited to a first call"
+    },
+    {
+      "date": "2026-10-30",
+      "id": "A-9001",
+      "kind": "started",
+      "text": "Tailoring the CV for V\u00e4nern Datahall"
+    },
+    {
+      "date": "2026-10-30",
+      "id": "J-9003",
+      "kind": "shortlisted",
+      "text": "Remote, good fit"
+    },
+    {
+      "date": "2026-10-29",
+      "id": "J-9002",
+      "kind": "shortlisted",
+      "text": "Hybrid, deadline Friday"
+    },
+    {
+      "date": "2026-10-28",
+      "id": "J-9001",
+      "kind": "found",
+      "text": "Support Engineer, V\u00e4nern Datahall (company site)"
+    },
+    {
+      "date": "2026-10-27",
+      "id": "A-9006",
+      "kind": "closed",
+      "text": "No reply in 30 days: ghosted"
+    },
+    {
+      "date": "2026-10-25",
+      "id": "J-9007",
+      "kind": "skipped",
+      "text": "Agency work, far from the course"
+    },
+    {
+      "date": "2026-10-16",
+      "id": "A-9004",
+      "kind": "sent",
+      "text": "Sent to Tidaholm Tech"
+    },
+    {
+      "date": "2026-10-05",
+      "id": "A-9005",
+      "kind": "sent",
+      "text": "Sent to Falk\u00f6ping Fiber"
+    },
+    {
+      "date": "2026-09-25",
+      "id": "A-9006",
+      "kind": "sent",
+      "text": "Sent to G\u00f6tene Systems"
+    }
+  ]
+}

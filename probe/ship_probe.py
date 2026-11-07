@@ -15,13 +15,15 @@ Read-only, like the rails probe. It reads four of Hermes' own records and change
 - The Yeoman's five files (yeoman/*.csv) and its timer heartbeat: live/yeoman.json, the Captain's
   open todos, reminders, waiting-fors and recurring dates, and the newest closed ones. Test rows
   are left out, and a chat id is never copied.
+- Helm's application tracker (helm/app-tracker/*.csv): live/helm.json, the job ads, applications
+  and what happened to them. Contact details, salary asks, ad links and file paths are never copied.
 
 The files have the shapes of api/schema/orders.schema.json and shiplog.schema.json, with
 "synthetic": false. They are written atomically, so the page never reads half a file. A missing
 or unreadable source never stops the probe: it writes what it can and logs one line. No model
 runs, and nothing leaves the NAS.
 
-Settings come from the environment: ORDERS_CSV, KANBAN_DB, HANDOFF_LOG, ANSWERS, ROSTER, YEOMAN_DIR, OUT_DIR, SCRATCH
+Settings come from the environment: ORDERS_CSV, KANBAN_DB, HANDOFF_LOG, ANSWERS, ROSTER, YEOMAN_DIR, HELM_DIR, OUT_DIR, SCRATCH
 (where the database copy goes; never inside OUT_DIR, which nginx serves), INTERVAL (seconds; 0 runs
 once), DAYS (how far back done orders are kept), KEEP (the most orders the file holds) and RECORDS_KEEP
 (the most orders records.json holds: every order on file, any state, for the core terminal).
@@ -497,6 +499,82 @@ def read_yeoman(folder):
     return out
 
 
+# ---------- Helm's application tracker ----------
+
+HELM_AD = {"found", "shortlisted", "applying", "skipped", "parked"}
+HELM_APP = {"drafting", "ready", "applied", "interview", "offer", "rejected", "withdrawn", "ghosted"}
+HELM_EVENTS_KEEP = 200
+HELM_TEXT = 300
+EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
+PHONE = re.compile(r"\+?\d[\d \-]{7,}\d")
+MONEY = re.compile(r"\d[\d ,.]*\s*(k\s*)?(SEK|kr|kronor)\b(\s*/\s*\w+)?", re.I)
+PATHLIKE = re.compile(r"(\S+/)+\S+\.(pdf|md|txt|docx?|odt|html)\b", re.I)
+
+
+def helm_text(value):
+    """A short note with no contact details, salary figures or file paths left in it."""
+    text = EMAIL.sub("[contact]", value or "")
+    text = PHONE.sub("[contact]", text)
+    text = MONEY.sub("[salary]", text)
+    text = PATHLIKE.sub("[file]", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text if len(text) <= HELM_TEXT else text[:HELM_TEXT - 1].rstrip() + "\u2026"
+
+
+def helm_date(value):
+    return value if re.fullmatch(r"\d{4}-\d\d-\d\d", value or "") else ""
+
+
+def helm_number(value):
+    try:
+        number = int(float(value))
+    except (TypeError, ValueError):
+        return None
+    return number if 0 <= number <= 100 else None
+
+
+def optional(item, **values):
+    for name, value in values.items():
+        if value not in (None, ""):
+            item[name] = value
+    return item
+
+
+def read_helm(folder):
+    """Helm's application tracker (job-ads.csv, applications.csv, application-events.csv), or None
+    without the folder. The contact, salary ask, ad link, ad file, CV and letter columns are never
+    read out, and contact details, salary figures and file paths are taken out of the notes."""
+    base = Path(folder)
+    if not base.is_dir():
+        return None
+    out = {"ads": [], "applications": [], "events": []}
+    for row in read_rows(base / "job-ads.csv"):
+        found = helm_date(row.get("found"))
+        if re.fullmatch(r"J-\d{4}", row.get("id", "")) and found and row.get("status") in HELM_AD:
+            item = {"id": row["id"], "found": found, "company": helm_text(row.get("company")), "role": helm_text(row.get("role")),
+                    "status": row["status"]}
+            out["ads"].append(optional(item, location=helm_text(row.get("location")), source=helm_text(row.get("source")),
+                                       deadline=helm_date(row.get("deadline")), match=helm_number(row.get("match")),
+                                       fit=helm_text(row.get("fit")), notes=helm_text(row.get("notes"))))
+    for row in read_rows(base / "applications.csv"):
+        created = helm_date(row.get("created"))
+        if re.fullmatch(r"A-\d{4}", row.get("id", "")) and created and row.get("status") in HELM_APP:
+            item = {"id": row["id"], "job": row.get("job", ""), "company": helm_text(row.get("company")), "role": helm_text(row.get("role")),
+                    "status": row["status"], "created": created}
+            out["applications"].append(optional(item, applied=helm_date(row.get("applied")), match=helm_number(row.get("match")),
+                                                nextStep=helm_text(row.get("next_step")), nextDate=helm_date(row.get("next_date")),
+                                                notes=helm_text(row.get("notes"))))
+    for row in read_rows(base / "application-events.csv"):
+        date = helm_date(row.get("date"))
+        if re.fullmatch(r"[JA]-\d{4}", row.get("id", "")) and date and row.get("kind"):
+            out["events"].append({"date": date, "id": row["id"], "kind": helm_text(row["kind"]).lower(), "text": helm_text(row.get("text"))})
+    out["ads"].sort(key=lambda a: (a["found"], a["id"]), reverse=True)
+    out["applications"].sort(key=lambda a: (a["created"], a["id"]), reverse=True)
+    out["events"] = sorted(enumerate(out["events"]), key=lambda e: (e[1]["date"], e[0]), reverse=True)
+    out["events"] = [e for _, e in out["events"]][:HELM_EVENTS_KEEP]
+    return out
+
+
 # ---------- the ship's log ----------
 
 def read_customs(path):
@@ -564,6 +642,10 @@ def run_once(env, scratch, now=None):
     yeoman = read_yeoman(env["YEOMAN_DIR"]) if env.get("YEOMAN_DIR") else None
     if yeoman is not None:
         atomic_write(out, {"asOf": utc_stamp(now), "synthetic": False, **yeoman}, "yeoman.json")
+    # So does Helm's application tracker.
+    helm = read_helm(env["HELM_DIR"]) if env.get("HELM_DIR") else None
+    if helm is not None:
+        atomic_write(out, {"asOf": utc_stamp(now), "synthetic": False, **helm}, "helm.json")
     names = read_roster(env.get("ROSTER", "/srv/fixtures/stations.json"))
     rows = read_orders_csv(env.get("ORDERS_CSV", "/data/handoff/orders.csv"))
     if rows is None:   # no order log: write nothing, so the boards keep the last file (or the samples)

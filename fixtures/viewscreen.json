@@ -1,0 +1,96 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "sessions": [
+    {
+      "id": "vs-903",
+      "start": "2026-11-04T19:12:00Z",
+      "surface": "telegram",
+      "why": "Show the application tracker's follow-ups",
+      "captures": 2,
+      "actions": [
+        {
+          "at": "2026-11-04T19:12:40Z",
+          "kind": "click",
+          "what": "Open Files, then the app-tracker folder",
+          "decision": "approved"
+        },
+        {
+          "at": "2026-11-04T19:14:05Z",
+          "kind": "click",
+          "what": "Open the Helm Career Console page",
+          "decision": "approved"
+        },
+        {
+          "at": "2026-11-04T19:28:50Z",
+          "kind": "scroll",
+          "what": "Scroll to the follow-ups",
+          "decision": "waiting"
+        }
+      ]
+    },
+    {
+      "id": "vs-902",
+      "start": "2026-11-04T10:58:00Z",
+      "end": "2026-11-04T11:06:00Z",
+      "surface": "desktop",
+      "why": "On screen: the job tracker",
+      "sourceOrd": "ORD-9007",
+      "captures": 3,
+      "actions": [
+        {
+          "at": "2026-11-04T10:58:30Z",
+          "kind": "click",
+          "what": "Bring the browser to the front",
+          "decision": "approved"
+        },
+        {
+          "at": "2026-11-04T10:59:10Z",
+          "kind": "scroll",
+          "what": "Scroll the tracker to the open applications",
+          "decision": "approved"
+        },
+        {
+          "at": "2026-11-04T11:02:00Z",
+          "kind": "click",
+          "what": "Close the other browser tabs",
+          "decision": "denied"
+        },
+        {
+          "at": "2026-11-04T11:05:30Z",
+          "kind": "key",
+          "what": "Ctrl+S to save the tracker page",
+          "decision": "approved"
+        }
+      ]
+    },
+    {
+      "id": "vs-901",
+      "start": "2026-11-02T19:10:00Z",
+      "end": "2026-11-02T19:14:00Z",
+      "surface": "dashboard",
+      "why": "Show the NAS dashboard",
+      "captures": 1,
+      "actions": [
+        {
+          "at": "2026-11-02T19:10:20Z",
+          "kind": "click",
+          "what": "Open the NAS dashboard tab",
+          "decision": "approved"
+        },
+        {
+          "at": "2026-11-02T19:11:00Z",
+          "kind": "type",
+          "what": "Type the dashboard sign-in",
+          "decision": "denied"
+        },
+        {
+          "at": "2026-11-02T19:12:30Z",
+          "kind": "key",
+          "what": "Escape to close the sign-in box",
+          "decision": "approved"
+        }
+      ]
+    }
+  ]
+}

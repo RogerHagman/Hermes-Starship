@@ -17,6 +17,10 @@ import { EngineeringBoard } from './components/engineering/EngineeringBoard';
 import { OpsBoard } from './components/ops/OpsBoard';
 import { ComputerBoard } from './components/computer/ComputerBoard';
 import { YeomanBoard } from './components/yeoman/YeomanBoard';
+import { XoBoard } from './components/xo/XoBoard';
+import { HelmBoard } from './components/helm/HelmBoard';
+import { NavBoard } from './components/nav/NavBoard';
+import { ViewscreenBoard } from './components/viewscreen/ViewscreenBoard';
 import { ScienceBoard } from './components/science/ScienceBoard';
 import { SideRail, type RailFilter } from './components/SideRail';
 import { useFit, useFullscreenKey } from './lib/fit';
@@ -108,6 +112,22 @@ export function App() {
             )}
             {ship && board === 'computer' && (
               <ComputerBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
+                onBoard={goBoard} onToast={showToast} />
+            )}
+            {ship && board === 'xo' && (
+              <XoBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
+                onBoard={goBoard} onToast={showToast} />
+            )}
+            {ship && board === 'helm' && (
+              <HelmBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
+                onBoard={goBoard} onToast={showToast} />
+            )}
+            {ship && board === 'nav' && (
+              <NavBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
+                onBoard={goBoard} onToast={showToast} />
+            )}
+            {ship && board === 'viewscreen' && (
+              <ViewscreenBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
                 onBoard={goBoard} onToast={showToast} />
             )}
             {ship && board === 'yeoman' && (

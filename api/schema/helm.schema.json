@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship \u00b7 helm",
+  "description": "Helm's application tracker: job ads, applications and their events, from find to close. live/helm.json from the ship probe reads the tracker's own files (helm/app-tracker/*.csv) once they live on the NAS; without it the board shows this sample. Contact details, salary asks and file paths are never copied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "ads",
+    "applications",
+    "events"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "ads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "found",
+          "company",
+          "role",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^J-\\d{4}$"
+          },
+          "found": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\d$"
+          },
+          "company": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\d$"
+          },
+          "match": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Keyword match with the CV, percent."
+          },
+          "fit": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "found",
+              "shortlisted",
+              "applying",
+              "skipped",
+              "parked"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Job ads, newest found first."
+    },
+    "applications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "job",
+          "company",
+          "role",
+          "status",
+          "created"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^A-\\d{4}$"
+          },
+          "job": {
+            "type": "string",
+            "pattern": "^J-\\d{4}$"
+          },
+          "company": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "drafting",
+              "ready",
+              "applied",
+              "interview",
+              "offer",
+              "rejected",
+              "withdrawn",
+              "ghosted"
+            ]
+          },
+          "created": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\d$"
+          },
+          "applied": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\d$"
+          },
+          "match": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "nextStep": {
+            "type": "string"
+          },
+          "nextDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\d$"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "date",
+          "id",
+          "kind",
+          "text"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\d$"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[JA]-\\d{4}$"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Everything that happened, newest first: found, shortlisted, sent, reply, interview, closed and so on."
+    }
+  }
+}

@@ -61,6 +61,13 @@ newest 200 closed items from `done.csv`, and when the Yeoman's timer last beat (
 Rows whose `source_ord` says test are left out, and the `chat_id` column is never copied. The
 Yeoman's post (Deck 2) and the Captain's PADD read it.
 
+It also writes `deploy/live/helm.json` (schema `api/schema/helm.schema.json`) from Helm's
+application tracker in `helm/app-tracker/` (`HELM_DIR`): the job ads, the applications and the
+newest 200 lines of `application-events.csv`. The contact, salary ask, ad link, ad file, CV and
+letter columns are never read out, and any email address, phone number, salary figure or file path
+in a note becomes `[contact]`, `[salary]` or `[file]`. Without the folder nothing is written and the
+Helm board shows its sample.
+
 It also writes `deploy/live/records.json`, in the same shape: every order on file, in any state,
 for the core terminal on the Computer core board (Deck 3). Nothing drops off it for age. An open
 order that never got a card stays, with a line that says so. The newest `RECORDS_KEEP` (1000)

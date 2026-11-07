@@ -270,6 +270,57 @@ class Yeoman(unittest.TestCase):
         self.assertFalse((self.d / "live" / "yeoman.json").exists())
 
 
+class Helm(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.dir.name)
+        h = self.d / "helm"
+        h.mkdir()
+        (h / "job-ads.csv").write_text(
+            "id,found,company,role,location,source,url,ad_file,deadline,match,match_cv,fit,status,notes\n"
+            "J-9001,2026-10-30,Example Data,Support Engineer,\"Town, on site\",company site,https://example.invalid/jobs,cv/ads/example.txt,,73,example-cv,good,applying,Ask hr@example.invalid or +46 70 123 45 67\n"
+            "J-9002,2026-11-01,Example Data,Network Engineer,Town,company site,,,2026-11-09,28,,no,found,\n"
+            "J-9003,2026-11-01,Bad Row,Nothing,,,,,,,,,maybe,\n")
+        (h / "applications.csv").write_text(
+            "id,job,company,role,status,created,applied,cv,letter,match,salary_ask,contact,next_step,next_date,notes\n"
+            "A-9001,J-9001,Example Data,Support Engineer,drafting,2026-11-01,,cv/example-cv.pdf,cv/letters/example.md,73,\"about 45,000 SEK/month\",hr@example.invalid,\"Proofread cv/letters/example.md, send to hr@example.invalid\",2026-11-02,Ask 45 000 kr\n")
+        (h / "application-events.csv").write_text(
+            "date,id,kind,text\n"
+            "2026-10-30,J-9001,found,Support Engineer\n"
+            "2026-10-30,J-9001,shortlisted,Top of the list\n"
+            "2026-11-01,A-9001,created,Drafting\n")
+
+    def tearDown(self):
+        self.dir.cleanup()
+
+    def run_probe(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            ship_probe.run_once({"ORDERS_CSV": str(self.d / "missing.csv"), "HELM_DIR": str(self.d / "helm"),
+                                 "OUT_DIR": str(self.d / "live")}, scratch, NOW)
+        return json.loads((self.d / "live" / "helm.json").read_text())
+
+    def test_writes_a_file_the_schema_accepts_even_without_the_order_log(self):
+        data = self.run_probe()
+        self.assertIs(data["synthetic"], False)
+        jsonschema.validate(data, schema("helm"))
+        self.assertEqual(["J-9002", "J-9001"], [a["id"] for a in data["ads"]])   # newest found first; the bad row is left out
+        self.assertEqual(("drafting", "2026-11-02", 73), (data["applications"][0]["status"], data["applications"][0]["nextDate"], data["applications"][0]["match"]))
+        self.assertEqual(["A-9001", "J-9001", "J-9001"], [e["id"] for e in data["events"]])
+        self.assertEqual("shortlisted", data["events"][1]["kind"])   # same day: the later line first
+
+    def test_never_copies_contact_details_salary_links_or_file_paths(self):
+        text = json.dumps(self.run_probe(), ensure_ascii=False)
+        for gone in ("hr@example.invalid", "123 45 67", "45,000", "45 000", "SEK", "example.invalid/jobs", "cv/ads", "cv/letters", "example-cv"):
+            self.assertNotIn(gone, text)
+        self.assertIn("Proofread [file], send to [contact]", text)
+
+    def test_without_the_folder_nothing_is_written(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            ship_probe.run_once({"ORDERS_CSV": str(self.d / "missing.csv"), "HELM_DIR": str(self.d / "nope"),
+                                 "OUT_DIR": str(self.d / "live")}, scratch, NOW)
+        self.assertFalse((self.d / "live" / "helm.json").exists())
+
+
 class States(unittest.TestCase):
     def test_words_map_to_the_boards_states(self):
         s = ship_probe.order_state

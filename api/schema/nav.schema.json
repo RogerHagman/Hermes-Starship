@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship \u00b7 nav",
+  "description": "Navigation's calendar, trips and bookings. A sample only: Navigation keeps no files of its own yet. Bookings stop before Confirm for the Captain.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "events",
+    "trips",
+    "bookings"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "start",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "place": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "appointment",
+              "travel",
+              "work",
+              "personal",
+              "hold"
+            ]
+          },
+          "sourceOrd": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$"
+          }
+        }
+      }
+    },
+    "trips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "from",
+          "to",
+          "depart",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "depart": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "back": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "status": {
+            "enum": [
+              "idea",
+              "planned",
+              "booked",
+              "done"
+            ]
+          },
+          "sourceOrd": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$"
+          },
+          "legs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "from",
+                "to",
+                "depart"
+              ],
+              "properties": {
+                "mode": {
+                  "enum": [
+                    "train",
+                    "bus",
+                    "car",
+                    "flight",
+                    "ferry",
+                    "walk",
+                    "bike"
+                  ]
+                },
+                "from": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                },
+                "depart": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+                },
+                "arrive": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "bookings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "what",
+          "when",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "what": {
+            "type": "string"
+          },
+          "when": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "where": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "held",
+              "confirmed",
+              "released"
+            ]
+          },
+          "heldUntil": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "sourceOrd": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$"
+          }
+        }
+      }
+    }
+  }
+}
