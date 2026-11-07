@@ -150,6 +150,17 @@ class Files(unittest.TestCase):
                          (o["ORD-1202"]["openedAt"], o["ORD-1202"]["closedAt"], o["ORD-1202"]["cards"]))
         self.assertEqual(("dashboard", 0), (o["ORD-1203"]["surface"], o["ORD-1203"]["cards"]))   # answered in chat, or not yet
 
+    def test_the_task_clock_has_a_start_and_a_close_when_the_log_has_no_closed_at(self):
+        orders, _ = self.run_probe()
+        o = {x["id"]: x for x in orders}
+        self.assertEqual("2026-11-05T18:01:00Z", o["ORD-1201"]["startedAt"])   # first card claimed
+        self.assertEqual("2026-11-05T18:10:05Z", o["ORD-1202"]["startedAt"])
+        self.assertNotIn("startedAt", o["ORD-1203"])                          # no card, no start
+        # Without closed_at in orders.csv, a done order closes when its last card completed.
+        (self.d / "orders.csv").write_text(HEAD + "ORD-1202,2026-11-05T18:10:00Z,desktop,Number One (router),inbound-message,done,,none\n")
+        orders, _ = self.run_probe()
+        self.assertEqual("2026-11-05T18:20:00Z", next(x for x in orders if x["id"] == "ORD-1202")["closedAt"])
+
     def test_the_records_hold_at_most_records_keep(self):
         self.run_probe(RECORDS_KEEP="2")
         data = json.loads((self.d / "live" / "records.json").read_text())

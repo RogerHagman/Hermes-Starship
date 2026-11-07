@@ -15,6 +15,7 @@ import { Icon } from './Icon';
 import { hasArt } from './StationArt';
 import { StationScene } from './StationScene';
 import { Marked } from './Marked';
+import { TaskClock } from './TaskClock';
 
 /**
  * What the console shows: a station (and maybe one of its orders), or a department's chain
@@ -135,6 +136,7 @@ export function OrderBox({ ship, st, orderId, withReply }: { ship: ShipView; st:
       <span className="idtag">
         {o.id} · {off ? `WAITS, ${off.toUpperCase()}` : o.state.toUpperCase()} · {tierText(o.tier)}
          · {speedText(o.speed, ship.station(o.station)).toUpperCase()} · {age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}
+        <TaskClock ship={ship} order={o} />
       </span>
       <span className="con-order-title">{o.title}</span>
       {o.detail && <span className="con-text">{o.detail}</span>}

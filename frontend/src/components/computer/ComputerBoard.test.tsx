@@ -135,7 +135,8 @@ describe('computer core', () => {
     type(c, 'ORD-9008');
     const facts = screen(c).querySelector('.tfacts')!.textContent!;
     expect(facts).toContain('TELEGRAM');
-    expect(facts).toContain('TOOK 8 MIN');
+    expect(facts).toContain('took 8 min');
+    expect(facts).toContain('EFFECTIVE5 min 00 s');
     expect(facts).toContain('CARDS1');
   });
   it('an order with no speed word says the station\'s default speed was used: its own, else Impulse', () => {
@@ -254,7 +255,7 @@ describe('the core terminal: pages, the manual, the jump key and the settings', 
     const c = board(many());
     type(c, 'settings');
     expect(title(c)).toBe('Terminal settings');
-    expect(screen(c).querySelectorAll('.tset-row').length).toBe(7);
+    expect(screen(c).querySelectorAll('.tset-row').length).toBe(10);
     const choose = (name: string, word: string) => fireEvent.click([...screen(c).querySelectorAll(`.tset-choices[aria-label="${name}"] .tchoice`)]
       .find((b) => b.textContent === word)!);
     choose('Rows per page', '100');
@@ -266,6 +267,14 @@ describe('the core terminal: pages, the manual, the jump key and the settings', 
     type(c, 'set rows 500');
     expect(said(c)).toBe('Rows per page: 500.');
     expect(count(c)).toBe(`${total} SHOWN · OLDEST FIRST`);
+    // the columns: each can be hidden, from the page or with set
+    expect(screen(c).querySelectorAll('.trow .tclock').length).toBe(screen(c).querySelectorAll('.trow').length * 2);
+    type(c, 'set effective off');
+    expect(said(c)).toBe('Effective column: Hidden.');
+    expect(screen(c).querySelectorAll('.trow .tclock').length).toBe(screen(c).querySelectorAll('.trow').length);
+    expect(screen(c).querySelector('.thead')?.textContent).not.toContain('EFFECTIVE');
+    type(c, 'set station hide');
+    expect(screen(c).querySelector('.trow .tst')).toBeNull();
     type(c, 'set phosphor amber');
     expect(screen(c).style.getPropertyValue('--phos')).toBe('#ffc46b');
     type(c, 'set key §');

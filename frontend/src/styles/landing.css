@@ -585,3 +585,9 @@ button.reply-text:hover{color:var(--c,var(--text))}
 .con-reply{display:flex;flex-direction:column;gap:2px;margin-top:4px;padding-top:6px;border-top:1px dashed var(--border)}
 .ocard-replies{color:var(--good)}
 .ocard-pr{margin-left:8px;color:var(--rc);font-family:var(--font-mono);font-size:10px;letter-spacing:.08em}
+/* The task clock: cyan and ticking while an order is open, a quieter cyan once it has closed. Lower case, unlike the labels around it. */
+.taskclock{font-variant-numeric:tabular-nums;white-space:nowrap;text-transform:none;letter-spacing:.02em}
+.taskclock.running{color:var(--clock)}
+.taskclock.done{color:color-mix(in srgb, var(--clock) 55%, var(--text-label))}
+.ocard-sub .taskclock::before,.con-order .taskclock::before{content:" · "}
+dd .taskclock{white-space:normal}

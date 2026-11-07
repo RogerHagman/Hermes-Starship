@@ -625,6 +625,10 @@ export interface OrdersFile {
      */
     openedAt?: string;
     /**
+     * When a crew member first started on it (the first card's started_at). The task clock's 'worked' time counts from here.
+     */
+    startedAt?: string;
+    /**
      * When the order closed. Done orders only.
      */
     closedAt?: string;
