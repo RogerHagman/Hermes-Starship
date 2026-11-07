@@ -12,7 +12,7 @@ The facts folder (all files optional; a missing one means "not found"):
   check.txt, check.rc       check.sh output and exit code
   apply-fix                 "applied" or "built" for /opt/data/patches/patch_B235.diff (the B2-36 fix)
   fast-paths.json           /opt/data/routing/fast-paths.json
-  hook-grep.txt             Hermes code files (not tests) that name fast-paths
+  hook-grep.txt             arrival hook files in /opt/data/hooks (not tests) that name fast-paths
   containers.txt            "<name> <running true|false>" per container
   ship-env.txt              the ship probe's environment, one VAR=value a line
   __version__.py            the Starship checkout's version file
@@ -189,7 +189,7 @@ def item_fast_paths(facts, now):
     if not isinstance(paths, list) or not paths:
         missing.append("/opt/data/routing/fast-paths.json " + (why if data is None else "has no paths"))
     if not hook:
-        missing.append("no Hermes code reads fast-paths.json yet (the hook still uses patch P's words)")
+        missing.append("the arrival hook in /opt/data/hooks does not read fast-paths.json yet (still patch P's words)")
     if missing:
         extra = "" if board_live else "; board shows SAMPLE"
         return NOT_YET, "; ".join(missing) + extra
