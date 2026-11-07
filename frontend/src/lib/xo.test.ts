@@ -75,7 +75,7 @@ describe('a new fast path', () => {
     expect(JSON.parse(fastEntry(d, st('qm')))).toEqual({ words: ['log meal', 'meal'], profile: 'scribe', patch: '<the new letter>', example: 'log meal two eggs and toast' });
     const card = fastPathBrief(d, st('qm'), st('eng'));
     expect(card).toContain('Add one entry to /opt/data/routing/fast-paths.json');
-    expect(card).toContain('B2-34 comes first');
+    expect(card).toContain('B2-35 comes first');
     for (const h of ['## GOAL', '## CONTEXT', '## CONSTRAINTS', '## DONE WHEN']) expect(card).toContain(h);
     expect(card).toContain('one card for forge');
     expect(card).toContain('"log meal" or "meal"');

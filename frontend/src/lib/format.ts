@@ -27,6 +27,7 @@ export function age(asOf: string, iso: string): string {
 }
 
 /** The ship's day an instant falls on, as YYYY-MM-DD. */
+const DAY_KEY = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: TZ });
 export function dayKey(iso: string | Date): string {
-  return new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: TZ }).format(new Date(iso));
+  return DAY_KEY.format(new Date(iso));
 }

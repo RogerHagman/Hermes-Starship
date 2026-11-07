@@ -90,7 +90,7 @@ html:has(.board-computer) body{background-color:#05080d;background-image:var(--s
 .core-screen .linkish:hover{color:#e2f1ff}
 .core-screen .con-icon svg{stroke:var(--phos)}
 .term{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:8px;
-  background:repeating-linear-gradient(180deg, rgba(156,240,184,.025) 0 2px, transparent 2px 4px), #02050a;
+  background:repeating-linear-gradient(180deg, color-mix(in srgb, var(--phos) 2.5%, transparent) 0 2px, transparent 2px 4px), #02050a;
   border:1px solid color-mix(in srgb, var(--phos) 22%, transparent);color:var(--phos);font-family:var(--font-mono)}
 .tchips{display:flex;flex-wrap:wrap;gap:6px}
 .tchip{padding:2px 9px;border-radius:99px;border:1px solid color-mix(in srgb, var(--ts) 55%, transparent);background:transparent;color:var(--ts);
@@ -105,8 +105,8 @@ html:has(.board-computer) body{background-color:#05080d;background-image:var(--s
 .tclear:hover{border-color:var(--phos)}
 .tlist{list-style:none;margin:0;padding:0;flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;border-top:1px dashed color-mix(in srgb, var(--phos) 22%, transparent)}
 .trow{width:100%;display:grid;grid-template-columns:74px 86px 74px minmax(0,1fr) auto;gap:10px;align-items:center;padding:5px 6px;border:none;
-  border-bottom:1px solid rgba(156,240,184,.07);background:transparent;color:var(--text);text-align:left;cursor:pointer;font-size:13px}
-.trow:hover,.trow:focus-visible{background:rgba(156,240,184,.07);outline:none}
+  border-bottom:1px solid color-mix(in srgb, var(--phos) 7%, transparent);background:transparent;color:var(--text);text-align:left;cursor:pointer;font-size:13px}
+.trow:hover,.trow:focus-visible{background:color-mix(in srgb, var(--phos) 7%, transparent);outline:none}
 .trow:focus-visible{box-shadow:inset 2px 0 0 var(--phos)}
 .tid{font-size:11.5px;color:var(--phos)}
 .tst{font-size:10px;letter-spacing:.06em;color:var(--rc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -115,9 +115,21 @@ html:has(.board-computer) body{background-color:#05080d;background-image:var(--s
 .twhen{font-size:10px;color:var(--text-label);white-space:nowrap}
 .tnone{padding:12px 6px;font-size:12px;color:var(--text-label)}
 .tnone b{color:var(--phos)}
-.tcount{margin:0;font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
-.tsaid{color:var(--captain)}
-.tline{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;border:1px solid color-mix(in srgb, var(--phos) 35%, transparent);background:rgba(156,240,184,.04)}
+.tfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:22px}
+.tcount{font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
+.tpager{display:inline-flex;gap:4px}
+.tpage{padding:1px 9px;border-radius:99px;border:1px solid color-mix(in srgb, var(--phos) 40%, transparent);background:transparent;color:var(--phos);
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.05em;cursor:pointer}
+.tpage:hover:not(:disabled){border-color:var(--phos);background:color-mix(in srgb, var(--phos) 8%, transparent)}
+.tpage:disabled{opacity:.3;cursor:default}
+.tsaid{margin:0;font-size:11.5px;color:var(--captain)}
+.tsaid::before{content:'› '}
+.thint{flex-shrink:0;font-size:9.5px;letter-spacing:.06em;color:var(--text-label);white-space:nowrap}
+.core-screen kbd{display:inline-block;min-width:1.5em;padding:0 5px;border-radius:4px;border:1px solid color-mix(in srgb, var(--phos) 45%, transparent);
+  border-bottom-width:2px;color:var(--phos);font-family:var(--font-mono);font-size:10.5px;line-height:1.5;text-align:center}
+.core-screen .tpos{align-self:center;font-size:10px;letter-spacing:.06em;color:var(--text-label);white-space:nowrap}
+.core-screen .tman-btn{font-family:var(--font-mono);font-weight:500}
+.tline{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;border:1px solid color-mix(in srgb, var(--phos) 35%, transparent);background:color-mix(in srgb, var(--phos) 4%, transparent)}
 .tline:focus-within{border-color:var(--phos);box-shadow:0 0 0 1px color-mix(in srgb, var(--phos) 40%, transparent)}
 .tline .tprompt{font-size:12px;white-space:nowrap}
 .tinput{flex:1;min-width:0;border:none;background:transparent;color:var(--phos);font-size:13px;caret-color:var(--phos);outline:none}
@@ -178,6 +190,48 @@ button.tbar-row:hover{background:var(--surface-raised)}
 .tburn li.on .tb-state{color:var(--burn)}
 .tseal{margin:0;padding:10px 12px 10px 28px;border-radius:10px;background:var(--surface-raised);border-left:3px solid var(--captain);display:flex;flex-direction:column;gap:6px;font-size:13.5px;line-height:1.45}
 
+/* ---------- man: the terminal's manual ---------- */
+.tman-index{display:flex;flex-wrap:wrap;align-items:center;gap:5px;padding:2px 0 4px}
+.tman-index .tclear.on{background:var(--phos);color:#03070b}
+.tman-sep{color:var(--text-label)}
+.core-screen .tman{position:relative;gap:14px;padding:10px 14px;border-radius:8px;background:#02050a;border:1px solid color-mix(in srgb, var(--phos) 22%, transparent);
+  color:var(--text);font-size:12.5px;line-height:1.5}
+.tman section{display:flex;flex-direction:column;gap:6px}
+.tman h3{margin:0;font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--phos)}
+.tman p{margin:0 0 0 2ch;max-width:110ch;color:var(--text-muted)}
+.tman p b{color:var(--phos);font-weight:500}
+.tman pre{margin:0 0 0 2ch;font-family:var(--font-mono);font-size:12px;line-height:1.6;color:var(--phos);white-space:pre-wrap}
+.tman dl{margin:0 0 0 2ch;display:flex;flex-direction:column;gap:2px}
+.tman dl > div{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:4px 16px;padding:5px 8px;border-radius:6px}
+.tman dl > div.on,.tman section.on{box-shadow:inset 2px 0 0 var(--phos);background:color-mix(in srgb, var(--phos) 6%, transparent)}
+.tman section.on{padding:6px 8px;border-radius:6px}
+.tman dt{display:flex;flex-direction:column;gap:1px;min-width:0}
+.tman dt code{color:var(--phos);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tman dt kbd{align-self:flex-start}
+.tman dd{margin:0;display:flex;flex-direction:column;gap:5px;color:var(--text-muted)}
+.tman-try{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:9.5px;letter-spacing:.08em;color:var(--text-label)}
+.tman-eg{align-self:flex-start;padding:1px 9px;border-radius:99px;border:1px solid color-mix(in srgb, var(--phos) 40%, transparent);background:color-mix(in srgb, var(--phos) 6%, transparent);
+  color:var(--phos);font-family:var(--font-mono);font-size:11px;letter-spacing:0;cursor:pointer}
+.tman-eg:hover{border-color:var(--phos);background:color-mix(in srgb, var(--phos) 14%, transparent)}
+.tman-now{font-size:10px;letter-spacing:.05em;color:var(--core)}
+
+/* ---------- the terminal's settings ---------- */
+.core-screen .tset{gap:10px}
+.tset-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.tset-row{display:grid;grid-template-columns:minmax(0,128px) minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:14px;align-items:center;
+  padding:5px 12px;border-radius:9px;background:var(--surface-raised)}
+.tset-name{grid-column:1;grid-row:1;font-family:var(--font-display);font-weight:600;font-size:14px;line-height:1.25}
+.tset-cmd{grid-column:1;grid-row:2;font-size:10px;color:var(--text-label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tset-says{grid-column:2;grid-row:1 / 3;font-size:11.5px;line-height:1.35;color:var(--text-muted)}
+.tset-choices{grid-column:3;grid-row:1 / 3;display:inline-flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.tchoice{display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:0 11px;border-radius:99px;border:1px solid color-mix(in srgb, var(--phos) 40%, transparent);
+  background:transparent;color:var(--phos);font-family:var(--font-mono);font-size:11px;cursor:pointer}
+.tchoice:hover{border-color:var(--phos)}
+.tchoice[aria-pressed="true"]{background:var(--phos);border-color:var(--phos);color:#03070b}
+.tswatch{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+.tset-nas{font-size:11.5px}
+.core-screen .con-head .con-back:disabled{opacity:.35;cursor:default}
+
 /* ---------- panels ---------- */
 .core-stations{display:flex;flex-direction:column;min-height:0;flex:1;padding:14px 16px}
 .cst-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;overflow:auto;min-height:0}
@@ -204,7 +258,11 @@ button.tbar-row:hover{background:var(--surface-raised)}
   .rb-word{font-size:7px}
   .rb-n{font-size:16px}
   .trow{grid-template-columns:70px minmax(0,1fr) auto}
-  .trow .tst,.trow .twhen{display:none}
+  .trow .tst,.trow .twhen,.thint{display:none}
+  .tset-row{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .tset-name,.tset-cmd,.tset-says,.tset-choices{grid-column:1;grid-row:auto}
+  .tset-choices{justify-content:flex-start}
+  .tman dl > div{grid-template-columns:minmax(0,1fr)}
   .tfacts{grid-template-columns:repeat(2, minmax(0,1fr))}
   .tkpis{grid-template-columns:repeat(2, minmax(0,1fr))}
   .tstat-cols{grid-template-columns:minmax(0,1fr)}
