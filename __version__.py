@@ -1,4 +1,4 @@
 # __version__.py
 __author__ = "Roger Hagman"
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 __email__ = "rogerhagman@proton.me"

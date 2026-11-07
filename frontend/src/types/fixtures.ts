@@ -681,3 +681,88 @@ export interface StationsFile {
     activeOrder: string | null;
   }[];
 }
+
+/**
+ * The Captain's Yeoman's list: open todos, reminders, waiting-fors and recurring dates, and what closed. live/yeoman.json from the ship probe reads the Yeoman's own files (yeoman/*.csv); without it the boards show this sample. Test rows are left out, and nothing about a chat is copied.
+ */
+export interface YeomanFile {
+  asOf: string;
+  synthetic: boolean;
+  /**
+   * When the Yeoman's timer last beat (.timer-heartbeat). The timer is what fires reminders, in code.
+   */
+  heartbeat?: string;
+  todos: {
+    id: string;
+    text: string;
+    addedAt: string;
+    /**
+     * When it is due. Within 48 hours, or past, it is urgent.
+     */
+    due?: string;
+    /**
+     * The Captain's "!".
+     */
+    important: boolean;
+    /**
+     * The order the Captain gave it in.
+     */
+    sourceOrd?: string;
+  }[];
+  reminders: {
+    id: string;
+    text: string;
+    dueAt: string;
+    status: "open" | "snoozed";
+    /**
+     * Where it fires: telegram, desktop, ...
+     */
+    surface?: string;
+    /**
+     * The order the Captain gave it in.
+     */
+    sourceOrd?: string;
+  }[];
+  waiting: {
+    id: string;
+    what: string;
+    since: string;
+    fromWhom?: string;
+    /**
+     * When the Yeoman nudges the Captain about it.
+     */
+    nudgeAfter?: string;
+    /**
+     * The order the Captain gave it in.
+     */
+    sourceOrd?: string;
+  }[];
+  recurring: {
+    id: string;
+    text: string;
+    /**
+     * daily, weekly:mon, monthly:25, yearly:10-25 (with a time when one was given).
+     */
+    rule: string;
+    nextDue?: string;
+    surface?: string;
+    /**
+     * The order the Captain gave it in.
+     */
+    sourceOrd?: string;
+  }[];
+  done: {
+    id: string;
+    kind: "todo" | "reminder" | "waiting" | "recurring";
+    text: string;
+    closedAt: string;
+    /**
+     * ticked, fired, arrived, cancelled, ...
+     */
+    how: string;
+    /**
+     * The order the Captain gave it in.
+     */
+    sourceOrd?: string;
+  }[];
+}

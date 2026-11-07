@@ -197,6 +197,79 @@ class Files(unittest.TestCase):
         self.assertEqual("blocked", next(x for x in orders if x["id"] == "ORD-1201")["state"])
 
 
+class Yeoman(unittest.TestCase):
+    """The Yeoman's five files, with the headers they have on the NAS (07/11)."""
+
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.dir.name)
+        y = self.d / "yeoman"
+        y.mkdir()
+        (y / "todos.csv").write_text(
+            "id,added_at,text,due_at,source_ord,important,status\n"
+            "todo-2d2891a07f,2026-10-27T19:38:33Z,ORD-1106 6f throwaway todo one,,ORD-1106-6f-test-1,,done\n"
+            "todo-aa01,2026-11-04T10:00:00Z,Write the cover letter,,ORD-1232,,open\n"
+            "todo-aa02,2026-11-03T10:00:00Z,\"Pay the bill, today\",2026-11-05T21:00:00Z,ORD-1230,yes,\n"
+            "todo-aa03,2026-11-01T10:00:00Z,Sorted already,,ORD-1200,,done\n")
+        (y / "reminders.csv").write_text(
+            "id,due_at,text,source_ord,status,surface,chat_id\n"
+            "rem-7cfa5416c1,2026-10-27T12:51:00Z,test,ORD-1110,cancelled,telegram,\n"
+            "rem-bb01,2026-11-06T07:00:00Z,Take the bins out,ORD-1233,open,Telegram,123456789\n"
+            "rem-bb02,2026-11-06T08:00:00Z,Call back,ORD-1234,snoozed,desktop,\n")
+        (y / "waiting.csv").write_text(
+            "id,since,what,from_whom,nudge_after,source_ord,status\n"
+            "wait-cc01,2026-11-01T09:00:00Z,The refund,the shop,2026-11-04T09:00:00Z,ORD-1201,open\n")
+        (y / "recurring.csv").write_text(
+            "id,rule,text,next_due,source_ord,status,surface,chat_id\n"
+            "rec-dd01,monthly:25,Pay the rent,2026-11-25T08:00:00Z,ORD-1202,open,telegram,123456789\n")
+        (y / "done.csv").write_text(
+            "id,kind,text,closed_at,how,source_ord\n"
+            "todo-2d2891a07f,todos,ORD-1106 6f throwaway todo one,2026-10-27T19:40:25Z,ticked,ORD-1106-6f-test-1\n"
+            "rem-ee01,reminders,Take the bins out,2026-11-05T06:00:09Z,fired,ORD-1220\n"
+            "todo-aa03,todos,Sorted already,2026-11-02T10:00:00Z,ticked,ORD-1200\n")
+        (y / ".timer-heartbeat").write_text("2026-11-05T19:59:30Z\n")
+
+    def tearDown(self):
+        self.dir.cleanup()
+
+    def run_probe(self, **over):
+        env = {"ORDERS_CSV": str(self.d / "missing.csv"), "YEOMAN_DIR": str(self.d / "yeoman"), "OUT_DIR": str(self.d / "live"),
+               "ROSTER": str(ROOT / "fixtures" / "stations.json"), **over}
+        with tempfile.TemporaryDirectory() as scratch:
+            ship_probe.run_once(env, scratch, NOW)
+        return json.loads((self.d / "live" / "yeoman.json").read_text())
+
+    def test_writes_a_file_the_schema_accepts_even_without_the_order_log(self):
+        data = self.run_probe()
+        self.assertIs(data["synthetic"], False)
+        jsonschema.validate(data, schema("yeoman"))
+        self.assertEqual("2026-11-05T19:59:30Z", data["heartbeat"])
+
+    def test_only_open_items_and_never_test_rows_or_chat_ids(self):
+        data = self.run_probe()
+        self.assertEqual(["todo-aa02", "todo-aa01"], [t["id"] for t in data["todos"]])   # due first, then the rest
+        t = data["todos"][0]
+        self.assertEqual(("Pay the bill, today", True, "2026-11-05T21:00:00Z", "ORD-1230"), (t["text"], t["important"], t["due"], t["sourceOrd"]))
+        self.assertFalse(data["todos"][1]["important"])
+        self.assertEqual([("rem-bb01", "open", "telegram"), ("rem-bb02", "snoozed", "desktop")],
+                         [(r["id"], r["status"], r["surface"]) for r in data["reminders"]])
+        self.assertEqual(("the shop", "2026-11-04T09:00:00Z"), (data["waiting"][0]["fromWhom"], data["waiting"][0]["nudgeAfter"]))
+        self.assertEqual(("monthly:25", "2026-11-25T08:00:00Z"), (data["recurring"][0]["rule"], data["recurring"][0]["nextDue"]))
+        self.assertNotIn("123456789", json.dumps(data))
+        self.assertNotIn("throwaway", json.dumps(data))
+
+    def test_the_done_log_is_newest_first_with_plain_kinds(self):
+        data = self.run_probe()
+        self.assertEqual([("rem-ee01", "reminder", "fired"), ("todo-aa03", "todo", "ticked")],
+                         [(d["id"], d["kind"], d["how"]) for d in data["done"]])
+
+    def test_without_the_folder_nothing_is_written(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            ship_probe.run_once({"ORDERS_CSV": str(self.d / "missing.csv"), "YEOMAN_DIR": str(self.d / "nope"),
+                                 "OUT_DIR": str(self.d / "live")}, scratch, NOW)
+        self.assertFalse((self.d / "live" / "yeoman.json").exists())
+
+
 class States(unittest.TestCase):
     def test_words_map_to_the_boards_states(self):
         s = ship_probe.order_state

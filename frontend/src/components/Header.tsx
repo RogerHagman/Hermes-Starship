@@ -41,6 +41,11 @@ const BOARD_TEXT: Record<BoardId, { deck: string; title: string; intro: string }
     title: 'Computer core',
     intro: "Every order the ship has taken, in any state, on the core terminal. The Ship's Computer keeps the records; its memory banks stay sealed.",
   },
+  yeoman: {
+    deck: "DECK 2 · YEOMAN'S POST · BY THE CAPTAIN'S DOOR",
+    title: "Yeoman's post",
+    intro: 'Your todos in four boxes and why each one is where it is, the next 48 hours, reminders with proof they fired, what you wait for and what got done. Code works it out, not a model.',
+  },
   science: {
     deck: 'DECK 3 · SCIENCES · SCIENCE LAB',
     title: 'Science lab',

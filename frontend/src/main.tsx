@@ -9,6 +9,7 @@ import './styles/sensors.css';
 import './styles/engineering.css';
 import './styles/ops.css';
 import './styles/computer.css';
+import './styles/yeoman.css';
 import './styles/science.css';
 import { App } from './App';
 

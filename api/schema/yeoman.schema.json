@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship · yeoman",
+  "description": "The Captain's Yeoman's list: open todos, reminders, waiting-fors and recurring dates, and what closed. live/yeoman.json from the ship probe reads the Yeoman's own files (yeoman/*.csv); without it the boards show this sample. Test rows are left out, and nothing about a chat is copied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "todos",
+    "reminders",
+    "waiting",
+    "recurring",
+    "done"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "heartbeat": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$",
+      "description": "When the Yeoman's timer last beat (.timer-heartbeat). The timer is what fires reminders, in code."
+    },
+    "todos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "addedAt",
+          "important"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "due": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$",
+            "description": "When it is due. Within 48 hours, or past, it is urgent."
+          },
+          "important": {
+            "type": "boolean",
+            "description": "The Captain's \"!\"."
+          },
+          "sourceOrd": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$",
+            "description": "The order the Captain gave it in."
+          }
+        }
+      }
+    },
+    "reminders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "dueAt",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "snoozed"
+            ]
+          },
+          "surface": {
+            "type": "string",
+            "description": "Where it fires: telegram, desktop, ..."
+          },
+          "sourceOrd": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$",
+            "description": "The order the Captain gave it in."
+          }
+        }
+      }
+    },
+    "waiting": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "what",
+          "since"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "what": {
+            "type": "string"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "fromWhom": {
+            "type": "string"
+          },
+          "nudgeAfter": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$",
+            "description": "When the Yeoman nudges the Captain about it."
+          },
+          "sourceOrd": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$",
+            "description": "The order the Captain gave it in."
+          }
+        }
+      }
+    },
+    "recurring": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "rule"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string",
+            "description": "daily, weekly:mon, monthly:25, yearly:10-25 (with a time when one was given)."
+          },
+          "nextDue": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "surface": {
+            "type": "string"
+          },
+          "sourceOrd": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$",
+            "description": "The order the Captain gave it in."
+          }
+        }
+      }
+    },
+    "done": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "text",
+          "closedAt",
+          "how"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "todo",
+              "reminder",
+              "waiting",
+              "recurring"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "how": {
+            "type": "string",
+            "description": "ticked, fired, arrived, cancelled, ..."
+          },
+          "sourceOrd": {
+            "type": "string",
+            "pattern": "^ORD-\\d{4}$",
+            "description": "The order the Captain gave it in."
+          }
+        }
+      }
+    }
+  }
+}

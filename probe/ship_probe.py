@@ -12,13 +12,16 @@ Read-only, like the rails probe. It reads four of Hermes' own records and change
 - answers.jsonl (once patch AF is in): every answer the Captain was sent, chat or card.
 - handoff-log.csv: what crossed to a cloud rail, and whether it came back clean (the customs log).
 - The station roster (fixtures/stations.json): which Hermes profile is which station.
+- The Yeoman's five files (yeoman/*.csv) and its timer heartbeat: live/yeoman.json, the Captain's
+  open todos, reminders, waiting-fors and recurring dates, and the newest closed ones. Test rows
+  are left out, and a chat id is never copied.
 
 The files have the shapes of api/schema/orders.schema.json and shiplog.schema.json, with
 "synthetic": false. They are written atomically, so the page never reads half a file. A missing
 or unreadable source never stops the probe: it writes what it can and logs one line. No model
 runs, and nothing leaves the NAS.
 
-Settings come from the environment: ORDERS_CSV, KANBAN_DB, HANDOFF_LOG, ANSWERS, ROSTER, OUT_DIR, SCRATCH
+Settings come from the environment: ORDERS_CSV, KANBAN_DB, HANDOFF_LOG, ANSWERS, ROSTER, YEOMAN_DIR, OUT_DIR, SCRATCH
 (where the database copy goes; never inside OUT_DIR, which nginx serves), INTERVAL (seconds; 0 runs
 once), DAYS (how far back done orders are kept), KEEP (the most orders the file holds) and RECORDS_KEEP
 (the most orders records.json holds: every order on file, any state, for the core terminal).
@@ -393,6 +396,107 @@ def build_orders(rows, cards, names, now, days=7, keep=80, answers=None, archive
     return orders[:keep]
 
 
+# ---------- the Yeoman's list ----------
+
+YEOMAN_KIND = {"todo": "todo", "todos": "todo", "reminder": "reminder", "reminders": "reminder",
+               "waiting": "waiting", "recurring": "recurring"}
+YEOMAN_DONE_KEEP = 200
+CLOSED = {"done", "cancelled", "canceled", "fired", "ticked", "arrived", "deleted", "stopped"}
+
+
+def read_rows(path):
+    """The rows of one of the Yeoman's CSV files, or none when it isn't there."""
+    try:
+        with open(path, newline="", encoding="utf-8") as handle:
+            return [{(k or "").strip(): (v or "").strip() for k, v in row.items()} for row in csv.DictReader(handle)]
+    except FileNotFoundError:
+        return []
+    except OSError as error:
+        log(f"yeoman: {error}")
+        return []
+
+
+def first(row, *names):
+    return next((row[n] for n in names if row.get(n)), "")
+
+
+def yeoman_row(row, closed_ok=False):
+    """Skip test rows (their source_ord says test) and, unless asked, closed ones."""
+    if "test" in row.get("source_ord", "").lower():
+        return False
+    return closed_ok or row.get("status", "").lower() not in CLOSED
+
+
+def with_ord(item, row):
+    """The source order, only when it is a plain ORD number. Nothing about a chat is copied."""
+    if re.fullmatch(r"ORD-\d{4}", row.get("source_ord", "")):
+        item["sourceOrd"] = row["source_ord"]
+    return item
+
+
+def stamped(item, name, value):
+    when = parse_time(value)
+    if when:
+        item[name] = utc_stamp(when)
+    return item
+
+
+def read_yeoman(folder):
+    """The Yeoman's list from its five files: what is open, and the newest closed. None without the folder."""
+    base = Path(folder)
+    if not base.is_dir():
+        return None
+    out = {"todos": [], "reminders": [], "waiting": [], "recurring": [], "done": []}
+    for row in read_rows(base / "todos.csv"):
+        added = parse_time(first(row, "added_at", "added_at_utc"))
+        if yeoman_row(row) and row.get("id") and added:
+            item = {"id": row["id"], "text": row.get("text", ""), "addedAt": utc_stamp(added),
+                    "important": row.get("important", "").lower() in ("yes", "true", "1", "!")}
+            out["todos"].append(with_ord(stamped(item, "due", first(row, "due_at", "due_utc", "due")), row))
+    for row in read_rows(base / "reminders.csv"):
+        due = parse_time(first(row, "due_at", "due_at_utc"))
+        if yeoman_row(row) and row.get("id") and due:
+            item = {"id": row["id"], "text": row.get("text", ""), "dueAt": utc_stamp(due),
+                    "status": "snoozed" if row.get("status", "").lower() == "snoozed" else "open"}
+            if row.get("surface"):
+                item["surface"] = row["surface"].lower()
+            out["reminders"].append(with_ord(item, row))
+    for row in read_rows(base / "waiting.csv"):
+        since = parse_time(first(row, "since", "since_utc"))
+        if yeoman_row(row) and row.get("id") and since:
+            item = {"id": row["id"], "what": row.get("what", ""), "since": utc_stamp(since)}
+            if row.get("from_whom"):
+                item["fromWhom"] = row["from_whom"]
+            out["waiting"].append(with_ord(stamped(item, "nudgeAfter", first(row, "nudge_after", "nudge_after_utc")), row))
+    for row in read_rows(base / "recurring.csv"):
+        if yeoman_row(row) and row.get("id") and row.get("rule"):
+            rule = row["rule"] + (f" {row['time_local']}" if row.get("time_local") else "")
+            item = stamped({"id": row["id"], "text": row.get("text", ""), "rule": rule}, "nextDue", first(row, "next_due", "next_due_utc"))
+            if row.get("surface"):
+                item["surface"] = row["surface"].lower()
+            out["recurring"].append(with_ord(item, row))
+    for row in read_rows(base / "done.csv"):
+        closed = parse_time(first(row, "closed_at", "closed_at_utc"))
+        kind = YEOMAN_KIND.get(row.get("kind", "").lower())
+        if yeoman_row(row, closed_ok=True) and row.get("id") and closed and kind:
+            item = {"id": row["id"], "kind": kind, "text": row.get("text", ""), "closedAt": utc_stamp(closed),
+                    "how": row.get("how", "").lower() or "closed"}
+            out["done"].append(with_ord(item, row))
+    out["todos"].sort(key=lambda t: (t.get("due") or "9999", t["addedAt"]))
+    out["reminders"].sort(key=lambda r: r["dueAt"])
+    out["waiting"].sort(key=lambda w: w["since"])
+    out["recurring"].sort(key=lambda r: r.get("nextDue") or "9999")
+    out["done"].sort(key=lambda d: d["closedAt"], reverse=True)
+    out["done"] = out["done"][:YEOMAN_DONE_KEEP]
+    beat = base / ".timer-heartbeat"
+    try:
+        when = parse_time(beat.read_text(encoding="utf-8").strip()) or datetime.fromtimestamp(beat.stat().st_mtime, UTC)
+        out["heartbeat"] = utc_stamp(when)
+    except OSError:
+        pass
+    return out
+
+
 # ---------- the ship's log ----------
 
 def read_customs(path):
@@ -455,6 +559,11 @@ def atomic_write(out_dir, data, name):
 
 def run_once(env, scratch, now=None):
     now = now or datetime.now(UTC)
+    out = env.get("OUT_DIR", ".")
+    # The Yeoman's list stands on its own: it is written even without the order log.
+    yeoman = read_yeoman(env["YEOMAN_DIR"]) if env.get("YEOMAN_DIR") else None
+    if yeoman is not None:
+        atomic_write(out, {"asOf": utc_stamp(now), "synthetic": False, **yeoman}, "yeoman.json")
     names = read_roster(env.get("ROSTER", "/srv/fixtures/stations.json"))
     rows = read_orders_csv(env.get("ORDERS_CSV", "/data/handoff/orders.csv"))
     if rows is None:   # no order log: write nothing, so the boards keep the last file (or the samples)
@@ -464,7 +573,6 @@ def run_once(env, scratch, now=None):
     orders = build_orders(rows, cards, names, now, int(env.get("DAYS", "7")), int(env.get("KEEP", "80")), answers)
     entries = build_log(rows, orders, read_customs(env.get("HANDOFF_LOG", "/data/handoff/handoff-log.csv")), names)
     stamp = utc_stamp(now)
-    out = env.get("OUT_DIR", ".")
     atomic_write(out, {"asOf": stamp, "synthetic": False, "orders": orders}, "orders.json")
     atomic_write(out, {"asOf": stamp, "synthetic": False, "entries": entries}, "shiplog.json")
     # Every order on file, any state, for the core terminal (same shape as orders.json).

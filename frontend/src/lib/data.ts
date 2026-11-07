@@ -1,8 +1,8 @@
 // Loads the fixture files, and the live rails and rail log when the NAS probe writes them. Moving around
 // never calls a model: these are local files only, served by the page's own nginx.
-import type { Fixtures, LogEntry, NasFile, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station } from '../types';
+import type { Fixtures, LogEntry, NasFile, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station, YeomanFile } from '../types';
 
-const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops'] as const;
+const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops', 'yeoman'] as const;
 
 declare global {
   interface Window { FIXTURES?: Fixtures }   // set only in the single-file preview build
@@ -27,18 +27,21 @@ export interface Live {
   shiplog: ShipLogFile | null;
   nas?: NasFile | null;
   records?: OrdersFile | null;
+  yeoman?: YeomanFile | null;
 }
 
 export async function loadLive(): Promise<Live> {
-  const [rails, raillog, orders, shiplog, nas, records] = await Promise.all([loadLiveRails(), loadLiveRailLog(), loadLiveOrders(), loadLiveShipLog(), loadLiveNas(), loadLiveRecords()]);
-  return { rails, raillog, orders, shiplog, nas, records };
+  const [rails, raillog, orders, shiplog, nas, records, yeoman] = await Promise.all([
+    loadLiveRails(), loadLiveRailLog(), loadLiveOrders(), loadLiveShipLog(), loadLiveNas(), loadLiveRecords(), loadLiveYeoman()]);
+  return { rails, raillog, orders, shiplog, nas, records, yeoman };
 }
 
 /** The sample data with each live part in place of its sample. */
 export function withLive(base: Fixtures, live: Live): Fixtures {
   const data = live.rails ? { ...base, rails: live.rails } : base;
   const out = withLiveNas(withLiveDuty(withLiveOrders(data, live.orders, live.shiplog), live.raillog), live.nas ?? null);
-  return live.records ? { ...out, records: live.records } : out;
+  const withRecords = live.records ? { ...out, records: live.records } : out;
+  return live.yeoman ? { ...withRecords, yeoman: live.yeoman } : withRecords;
 }
 
 /** A live file, or null when there is none or it doesn't look like a real reading. */
@@ -58,6 +61,8 @@ async function loadLiveFile<T extends { synthetic: boolean; asOf: string }>(name
 export const loadLiveOrders = () => loadLiveFile<OrdersFile>('orders', (f) => Array.isArray(f.orders));
 /** live/records.json from the ship probe: every order on file, in any state, for the core terminal. */
 export const loadLiveRecords = () => loadLiveFile<OrdersFile>('records', (f) => Array.isArray(f.orders));
+/** live/yeoman.json from the ship probe: the Captain's real list, from the Yeoman's own files. */
+export const loadLiveYeoman = () => loadLiveFile<YeomanFile>('yeoman', (f) => ['todos', 'reminders', 'waiting', 'recurring', 'done'].every((k) => Array.isArray((f as never)[k])));
 /** live/shiplog.json from the ship probe: orders opening and closing, and the customs log. */
 export const loadLiveShipLog = () => loadLiveFile<ShipLogFile>('shiplog', (f) => Array.isArray(f.entries));
 
