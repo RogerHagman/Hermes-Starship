@@ -50,7 +50,19 @@ export function ClockRow({ ship, order }: { ship: ShipView; order: Order }) {
       <div><dt>CLOCK</dt><dd><span className={cls} title="From the order coming in to now, or to its close">{clock.main}</span></dd></div>
       <div><dt>EFFECTIVE</dt><dd>{clock.effective
         ? <span className={cls} title="From a crew member starting on it (the first card claimed) to now, or to its close">{clock.effective}</span>
-        : <span className="taskclock done" title="No card was claimed: answered in chat, or not started yet">{order.state === 'done' ? 'no card' : 'not started'}</span>}</dd></div>
+        : <span className="taskclock done" title={noStartWhy(order)}>{noStartWord(order)}</span>}</dd></div>
     </>
   );
+}
+
+/** What EFFECTIVE says when there is no start time: no card at all, a card not yet claimed, or a card with no start on file. */
+export function noStartWord(o: Order): string {
+  if (!o.cards) return o.state === 'done' ? 'no card' : 'not started';
+  return o.state === 'queued' ? 'not started' : 'no start time';
+}
+
+function noStartWhy(o: Order): string {
+  if (!o.cards) return 'No card was filed: answered in chat, or not picked up yet';
+  if (o.state === 'queued') return 'The card is waiting for a crew member to claim it';
+  return 'The card has no start time on file (the ship probe writes it from the card’s started_at)';
 }

@@ -250,9 +250,13 @@ def read_cards(db_path, scratch):
                 if match:
                     cards.setdefault(f"ORD-{match.group(1)}", []).append(card)
             said = read_replies(con)
+            ran = run_starts(con)
             for theirs in cards.values():
                 for card in theirs:
                     card["replies"] = said.get(str(card.get("id")), [])
+                    # The task clock's start: the card's own started_at, else its first run's start.
+                    started = parse_time(card.get("started")) or ran.get(str(card.get("id")))
+                    card["started"] = started
         finally:
             con.close()
     except (OSError, sqlite3.Error) as error:
@@ -262,6 +266,19 @@ def read_cards(db_path, scratch):
 
 def columns_of(con, table):
     return {row[1] for row in con.execute(f'pragma table_info("{table}")')}
+
+
+def run_starts(con):
+    """{card id: when its first run started}, from task_runs, for cards whose own started_at is empty."""
+    tables = {name for (name,) in con.execute("select name from sqlite_master where type = 'table'")}
+    if "task_runs" not in tables or not {"task_id", "started_at"} <= columns_of(con, "task_runs"):
+        return {}
+    starts = {}
+    for task, at in con.execute("select task_id, started_at from task_runs"):
+        when = parse_time(at)
+        if when and (str(task) not in starts or when < starts[str(task)]):
+            starts[str(task)] = when
+    return starts
 
 
 def read_replies(con):
