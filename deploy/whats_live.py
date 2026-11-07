@@ -10,7 +10,6 @@ item is live, 1 when one is not, 2 when the facts folder is missing.
 The facts folder (all files optional; a missing one means "not found"):
   now                       epoch seconds on the NAS when the facts were gathered
   check.txt, check.rc       check.sh output and exit code
-  apply-wb.txt              apply.sh lines that name W_b
   b236-report               "yes" when /opt/data/handoff/engineering/b236-report.md exists
   fast-paths.json           /opt/data/routing/fast-paths.json
   hook-grep.txt             Hermes code files (not tests) that name fast-paths
@@ -112,16 +111,13 @@ def item_patches(facts, now):
 
 
 def item_apply_wb(facts, now):
+    # B2-36 is done when forge has written its report. apply.sh can't be judged by its words: B2-31
+    # already gave W_b an "already applied under later overlays" line, and that rule still fails.
+    # The proof is the next apply.sh run ending without an error.
     report = (text(facts, "b236-report") or "").strip() == "yes"
-    lines = [l for l in (text(facts, "apply-wb.txt") or "").splitlines() if l.strip()]
-    overlay = [l for l in lines if re.search(r"overla|later patch|covered|superseded", l, re.I)]
-    if report and overlay:
-        return LIVE, "b236-report.md on file and apply.sh has an overlay rule for W_b (proof: the next apply.sh run ends without an error)"
     if report:
-        return CHECK, "b236-report.md on file, but no W_b overlay line found in apply.sh: review the report"
-    if overlay:
-        return CHECK, "apply.sh names W_b with an overlay rule, but no b236-report.md"
-    return NOT_YET, "no b236-report.md and no W_b overlay rule in apply.sh (brief B2-36 not done)"
+        return LIVE, "b236-report.md on file (proof: the next apply.sh run ends without an error)"
+    return NOT_YET, "no b236-report.md yet (brief B2-36 not done; apply.sh still stops at W_b)"
 
 
 def item_core_terminal(facts, now):

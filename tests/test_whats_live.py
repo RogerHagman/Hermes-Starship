@@ -28,7 +28,6 @@ def all_live(folder):
     write(folder, "now", str(NOW))
     write(folder, "containers.txt", "hermes true\nhermes-starship true\nhermes-starship-ship true\nhermes-starship-meters true\n")
     write(folder, "check.txt", "A: OK\nW_b: OK\nAH: OK\nAI: OK\nOK through AI\n")
-    write(folder, "apply-wb.txt", "88:# W_b: overlaid by AA and AF, presence by overlay\n")
     write(folder, "b236-report", "yes\n")
     write(folder, "fast-paths.json", {"paths": [{"words": ["remind"], "profile": "yeoman"},
                                                 {"words": ["todo", "todo!"], "profile": "yeoman"}]})
@@ -83,12 +82,13 @@ class Judge(unittest.TestCase):
 
     def test_apply_wb_not_done(self):
         (self.f / "b236-report").unlink()
-        write(self.f, "apply-wb.txt", "40:apply_one patch_W_b.diff\n")
         self.assertEqual(states(self.f)["apply.sh past W_b (B2-36)"][0], "NOT YET")
 
-    def test_apply_wb_report_without_rule(self):
-        write(self.f, "apply-wb.txt", "40:apply_one patch_W_b.diff\n")
-        self.assertEqual(states(self.f)["apply.sh past W_b (B2-36)"][0], "CHECK")
+    def test_apply_wb_old_overlay_line_is_not_enough(self):
+        # B2-31's line, live on 07/11, which still fails at W_b.
+        (self.f / "b236-report").unlink()
+        write(self.f, "apply-wb.txt", "179:        printf '%s\\n' 'patch_W_b.diff already applied under later overlays'\n")
+        self.assertEqual(states(self.f)["apply.sh past W_b (B2-36)"][0], "NOT YET")
 
     def test_old_version(self):
         write(self.f, "__version__.py", '__version__ = "0.2.8"\n')
@@ -154,7 +154,6 @@ case "$1" in
   exec)
     case "$*" in
       *check.sh*) printf 'AI: OK\nOK through AI\n' ;;
-      *apply.sh*) echo '90:# W_b overlaid by AF' ;;
       *"test -f"*) exit 0 ;;
       *fast-paths.json*) exit 1 ;;
       *grep\ -rl*) exit 1 ;;

@@ -31,10 +31,9 @@ for name in "$HERMES" hermes-starship hermes-starship-ship hermes-starship-meter
   echo "$name $state" >> "$FACTS/containers.txt"
 done
 
-# Hermes: patches, the apply.sh W_b rule, the fast-path file and whether the hook reads it.
+# Hermes: patches, the B2-36 report, the fast-path file and whether the hook reads it.
 $DOCKER exec -u root "$HERMES" sh /opt/data/patches/check.sh > "$FACTS/check.txt" 2>&1
 echo $? > "$FACTS/check.rc"
-$DOCKER exec "$HERMES" grep -n -i 'W_b' /opt/data/patches/apply.sh > "$FACTS/apply-wb.txt" 2>/dev/null
 if $DOCKER exec "$HERMES" test -f /opt/data/handoff/engineering/b236-report.md 2>/dev/null; then
   echo yes > "$FACTS/b236-report"
 fi
