@@ -4,7 +4,7 @@
 // (standing orders), the shelf (the reading year), or a station picked from the duty roster.
 // Nothing here sends anything: Approve, Deny and Write open with orders in H4.
 import { useEffect, useMemo, useState } from 'react';
-import { byTier, RAIL, railColor, tierText, tierVar } from '../../lib/lookups';
+import { byTier, RAIL, railColor, speedText, tierText, tierVar } from '../../lib/lookups';
 import { age, clockTime, dateLine, dayAndTime } from '../../lib/format';
 import { ROOM_ICONS, greeting, localHM, nights, stardate } from '../../lib/quarters';
 import { canRelieve, type ShipView } from '../../lib/ship';
@@ -176,7 +176,7 @@ function ChairView({ ship, hail, onScreen, onBack }: { ship: ShipView; hail?: st
             <span className="idtag">{o.id}</span>
             <span className="railpill" style={css({ '--c': railColor(st?.rail ?? 'mixed') })}>{(st?.short ?? o.station).toUpperCase()}</span>
             <span className="tierpill" style={css({ '--c': tierVar(o.tier) })}>{tierText(o.tier)}</span>
-            {o.speed && <span className="idtag">{o.speed.toUpperCase()}</span>}
+            <span className="idtag">{speedText(o.speed, st).toUpperCase()}</span>
             {mission && <span className="idtag">{mission.id} · {mission.name.toUpperCase()}</span>}
             <span className="idtag">{age(ship.data.orders.asOf, o.updatedAt).toUpperCase()}</span>
           </div>

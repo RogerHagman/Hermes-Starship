@@ -1,6 +1,6 @@
 // The computer core (Deck 3), where the Ship's Computer lives. The room is the hero, like Ops:
-// the memory banks, the core itself, the records racks, the terminal desk, the minutes reader and
-// the dilithium chamber each open a view on the core terminal in place. The terminal's records are
+// the memory banks, the core itself, the records racks (the numbers), the terminal desk (the
+// records), the minutes reader and the dilithium chamber each open a view on the core terminal in place. The terminal's records are
 // every order the ship has taken, in any state, with a command line to find one. The records board
 // on the table has a count per state. Around the room: orders by station, the records keepers and
 // the rails on the right, the order log and the minutes below, the comm badge at the bottom.
@@ -33,7 +33,7 @@ const Art = memo(function Art() {
 
 /** What each thing in the room opens on the terminal. */
 const VIEW_OF: Partial<Record<CoreObject, Screen>> = {
-  records: { view: 'ease' }, desk: { view: 'ease' }, minutes: { view: 'minutes' }, burn: { view: 'burn' }, memory: { view: 'memory' },
+  records: { view: 'stats' }, desk: { view: 'ease' }, minutes: { view: 'minutes' }, burn: { view: 'burn' }, memory: { view: 'memory' },
 };
 
 export function ComputerBoard({ ship, drills, target, onTarget, onBoard, onToast }: Props) {
@@ -56,7 +56,7 @@ export function ComputerBoard({ ship, drills, target, onTarget, onBoard, onToast
   };
 
   const on: CoreObject | null = screen.view === 'station' ? (screen.id === 'computer' ? 'core' : null)
-    : screen.view === 'ease' || screen.view === 'record' ? 'records'
+    : screen.view === 'ease' || screen.view === 'record' ? 'desk' : screen.view === 'stats' ? 'records'
     : screen.view === 'minutes' ? 'minutes' : screen.view === 'burn' ? 'burn' : screen.view === 'memory' ? 'memory' : null;
   const computer = ship.station('computer');
   const burning = ship.data.rails.rails.some((r) => r.burn?.active);

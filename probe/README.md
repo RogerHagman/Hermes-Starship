@@ -51,6 +51,10 @@ What drops off the boards: done orders older than `DAYS` (7), and open orders th
 card and are over a day old (Number One answered them in chat). The newest `KEEP` (80) orders
 are kept.
 
+Each order also says when it came in (`openedAt`), when it closed (`closedAt`, done orders only),
+where the Captain gave it (`surface`) and how many Kanban cards were filed for it (`cards`; 0 means
+it was answered in chat, or not picked up yet). The Computer core's numbers are worked out from them.
+
 It also writes `deploy/live/records.json`, in the same shape: every order on file, in any state,
 for the core terminal on the Computer core board (Deck 3). Nothing drops off it for age. An open
 order that never got a card stays, with a line that says so. The newest `RECORDS_KEEP` (1000)

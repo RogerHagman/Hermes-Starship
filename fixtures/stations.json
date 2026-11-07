@@ -19,6 +19,7 @@
         "hermes"
       ],
       "model": "qwen3.8 27b",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Captain",
       "needs": [
         "local"
@@ -89,6 +90,7 @@
         "navigation"
       ],
       "model": "qwen",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Number One",
       "needs": [
         "local"
@@ -113,6 +115,7 @@
         "helm"
       ],
       "model": "qwen",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Number One",
       "needs": [
         "local"
@@ -138,6 +141,7 @@
         "systems"
       ],
       "model": "qwen",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Number One",
       "needs": [
         "local"
@@ -213,6 +217,7 @@
         "remind"
       ],
       "model": "qwen \u00b7 thinking off",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Captain, with orders routed by Number One",
       "needs": [
         "local"
@@ -261,6 +266,7 @@
         "records"
       ],
       "model": "qwen \u00b7 hindsight",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Number One",
       "needs": [
         "local"
@@ -286,6 +292,7 @@
         "library"
       ],
       "model": "qwen",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Number One",
       "needs": [
         "local"
@@ -485,6 +492,7 @@
         "security"
       ],
       "model": "local scripts + review",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Captain (suggested, so it can check everyone)",
       "needs": [
         "local"
@@ -511,6 +519,7 @@
         "supply"
       ],
       "model": "qwen",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Number One",
       "needs": [
         "local"
@@ -560,6 +569,7 @@
         "away"
       ],
       "model": "ssh \u00b7 terra \u00b7 sonnet",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Number One",
       "needs": [
         "local"
@@ -585,6 +595,7 @@
         "chief"
       ],
       "model": "codex top model",
+      "defaultSpeed": "Full Impulse",
       "answersTo": "Number One",
       "needs": [
         "codex"
@@ -657,6 +668,7 @@
         "none, cards come from the head"
       ],
       "model": "codex mid model",
+      "defaultSpeed": "Full Impulse",
       "answersTo": "The Chief Engineer, or whoever has Engineering",
       "needs": [
         "codex"
@@ -681,6 +693,7 @@
         "none, cards come from the head"
       ],
       "model": "codex small model",
+      "defaultSpeed": "Full Impulse",
       "answersTo": "Whoever has Engineering",
       "needs": [
         "codex"

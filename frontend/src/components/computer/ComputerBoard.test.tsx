@@ -94,8 +94,8 @@ describe('computer core', () => {
   it('each thing in the room opens its view, and again puts the records back; the turbolift goes to the Bridge', () => {
     const went: string[] = [];
     const c = board(data, (b) => went.push(b));
-    const want: [string, RegExp][] = [['minutes', /^Briefing minutes$/], ['burn', /^Dilithium Burn · /], ['memory', /^Memory banks · sealed$/],
-      ['core', /Computer/]];
+    const want: [string, RegExp][] = [['records', /^Records · the numbers$/], ['minutes', /^Briefing minutes$/], ['burn', /^Dilithium Burn · /],
+      ['memory', /^Memory banks · sealed$/], ['core', /Computer/]];
     for (const [spot, name] of want) {
       fireEvent.click(c.querySelector(`.cspot-${spot}`)!);
       expect(title(c)).toMatch(name);
@@ -105,6 +105,35 @@ describe('computer core', () => {
     }
     fireEvent.click(c.querySelector('.cspot-bridge')!);
     expect(went).toEqual(['bridge']);
+  });
+  it('the numbers: opened from the terminal or the racks, and a station\'s bar shows its done orders', () => {
+    const c = board();
+    type(c, 'stats');
+    expect(title(c)).toBe('Records · the numbers');
+    expect(screen(c).querySelectorAll('.tdays li').length).toBe(14);
+    expect(screen(c).querySelector('.tkpis')?.textContent).toContain('45 min');
+    fireEvent.click([...screen(c).querySelectorAll('button.tbar-row')].find((b) => b.textContent?.includes('Navigation'))!);
+    expect(title(c)).toBe('Core terminal · records');
+    expect(rows(c).sort()).toEqual(['ORD-9004', 'ORD-9005']);
+    fireEvent.click(screen(c).querySelector('.tstats')!);
+    expect(title(c)).toBe('Records · the numbers');
+  });
+  it('a record says when it opened, where from, when it closed and how long it took', () => {
+    const c = board();
+    type(c, 'ORD-9008');
+    const facts = screen(c).querySelector('.tfacts')!.textContent!;
+    expect(facts).toContain('TELEGRAM');
+    expect(facts).toContain('TOOK 8 MIN');
+    expect(facts).toContain('CARDS1');
+  });
+  it('an order with no speed word says the station\'s default speed was used: its own, else Impulse', () => {
+    const plain = { ...data, orders: { ...data.orders, orders: data.orders.orders.map((o) => (['ORD-9008', 'ORD-9010'].includes(o.id) ? { ...o, speed: undefined } : o)) } };
+    const c = board(plain as Fixtures);
+    type(c, 'ORD-9008');   // the Yeoman runs at Thrusters
+    expect(screen(c).querySelector('.tfacts')!.textContent).toContain('SPEEDThrusters · default');
+    fireEvent.click([...screen(c).querySelectorAll('.con-back')].find((b) => b.textContent === '‹ Records')!);
+    type(c, 'ORD-9010');   // Cartography has no default of its own
+    expect(screen(c).querySelector('.tfacts')!.textContent).toContain('SPEEDImpulse · default');
   });
   it('the order log opens a record by its number', () => {
     const c = board();

@@ -6,7 +6,7 @@ import rails from '../../../fixtures/rails.json';
 import orders from '../../../fixtures/orders.json';
 import shiplog from '../../../fixtures/shiplog.json';
 import type { Fixtures, OrdersFile } from '../types';
-import { ALL, counts, echo, find, logOf, minutes, parseCommand, records, recordsFile, stationOf } from './computer';
+import { ALL, counts, echo, find, logOf, minutes, parseCommand, records, recordsFile, span, stationOf, stats, took } from './computer';
 import { makeShipView } from './ship';
 
 const data = { ship, stations, rails, orders, shiplog } as unknown as Fixtures;
@@ -82,5 +82,43 @@ describe('the log and the minutes', () => {
     const list = minutes(data);
     expect(list.length).toBe(data.shiplog.entries.filter((e) => e.kind === 'briefing').length);
     expect(list[0].at >= list[list.length - 1].at).toBe(true);
+  });
+});
+
+describe('the numbers', () => {
+  const at = (id: string) => records(data).find((o) => o.id === id)!;
+  it('time to close is from opening to closing, for done orders only', () => {
+    expect(took(at('ORD-9008'))).toBe(8);
+    expect(took(at('ORD-9016'))).toBeNull();   // still running
+    expect(took({ ...at('ORD-9008'), openedAt: undefined })).toBeNull();
+  });
+  it('spans read short', () => {
+    expect([span(0.2), span(45), span(89), span(210), span(60 * 30), span(60 * 60)]).toEqual(['1 MIN', '45 MIN', '89 MIN', '3.5 H', '30 H', '2.5 DAYS']);
+  });
+  it('counts orders per ship\'s day, the last 14 ending on the file\'s day', () => {
+    const s = stats(records(data), data.orders.asOf);
+    expect(s.days.length).toBe(14);
+    expect(s.days[13].key).toBe('2026-11-04');
+    expect(s.days[13].label).toBe('WED 4 NOV');
+    expect(s.days[0].key).toBe('2026-10-22');
+    expect(s.days.reduce((n, d) => n + d.opened, 0)).toBe(data.orders.orders.length);
+    expect(s.days.reduce((n, d) => n + d.closed, 0)).toBe(data.orders.orders.filter((o) => o.state === 'done').length);
+    expect(s.week).toEqual({ opened: 18, closed: 9 });
+  });
+  it('a late-evening order counts on the Stockholm day it came in', () => {
+    const late = { id: 'ORD-1', title: 't', station: 'xo', state: 'queued', updatedAt: '2026-11-03T23:30:00Z', openedAt: '2026-11-03T23:30:00Z' } as const;
+    const s = stats([late], '2026-11-04T10:00:00Z', 3);
+    expect(s.days.map((d) => d.opened)).toEqual([0, 0, 1]);   // 00:30 on the 4th in Stockholm
+  });
+  it('gives the median time to close per station, slowest first, the surfaces and chat or card', () => {
+    const s = stats(records(data), data.orders.asOf);
+    expect(s.timed).toBe(9);
+    expect(s.median).toBe(45);
+    expect(s.stations[0]).toEqual({ id: 'nav', done: 2, median: (35 + 1260) / 2 });
+    expect(s.stations.map((x) => x.median)).toEqual([...s.stations.map((x) => x.median)].sort((a, b) => b - a));
+    expect(s.surfaces).toEqual([{ id: 'desktop', n: 7 }, { id: 'telegram', n: 7 }, { id: 'dashboard', n: 4 }]);
+    expect([s.card, s.chat]).toEqual([18, 0]);
+    const chat = stats([{ ...at('ORD-9008'), cards: 0 }, { ...at('ORD-9009'), cards: undefined }], data.orders.asOf);
+    expect([chat.card, chat.chat]).toEqual([0, 1]);   // an older record that doesn't say counts as neither
   });
 });
