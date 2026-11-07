@@ -135,7 +135,7 @@ describe('computer core', () => {
     type(c, 'ORD-9008');
     const facts = screen(c).querySelector('.tfacts')!.textContent!;
     expect(facts).toContain('TELEGRAM');
-    expect(facts).toContain('TOOK 8 MIN');
+    expect(facts).toContain('took 8 min');
     expect(facts).toContain('CARDS1');
   });
   it('an order with no speed word says the station\'s default speed was used: its own, else Impulse', () => {

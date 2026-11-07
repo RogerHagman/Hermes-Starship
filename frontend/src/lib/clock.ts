@@ -13,15 +13,15 @@ export function clockNow(file: { synthetic: boolean; asOf: string }, now = Date.
   return Number.isFinite(asOf) ? Math.max(now, asOf) : now;
 }
 
-/** A length of time to the second while it is short: 34 S, 3 MIN 12 S, 1 H 05 MIN, 2 D 3 H. */
+/** A length of time to the second while it is short: 34 s, 3 min 12 s, 1 h 05 min, 2 d 3 h. */
 export function duration(ms: number): string {
   const s = Math.max(0, Math.floor(ms / S));
-  if (s < 60) return `${s} S`;
+  if (s < 60) return `${s} s`;
   const m = Math.floor(s / 60);
-  if (m < 60) return `${m} MIN ${String(s % 60).padStart(2, '0')} S`;
+  if (m < 60) return `${m} min ${String(s % 60).padStart(2, '0')} s`;
   const h = Math.floor(m / 60);
-  if (h < 48) return `${h} H ${String(m % 60).padStart(2, '0')} MIN`;
-  return `${Math.floor(h / 24)} D ${h % 24} H`;
+  if (h < 48) return `${h} h ${String(m % 60).padStart(2, '0')} min`;
+  return `${Math.floor(h / 24)} d ${h % 24} h`;
 }
 
 export interface Clock {
@@ -31,9 +31,9 @@ export interface Clock {
   total: number;
   /** Milliseconds a crew member worked on it: from the first card's start to the close (or now). */
   worked?: number;
-  /** The line the boards show: "TOOK 34 S · WORKED 30 S", "RUNNING 3 MIN 12 S". */
+  /** The line the boards show: "took 34 s · worked 30 s", "running 3 min 12 s". */
   text: string;
-  /** Just the total, for a narrow column: "34 S". */
+  /** Just the total, for a narrow column: "34 s". */
   short: string;
 }
 
@@ -51,7 +51,7 @@ export function taskClock(o: Order, now: number): Clock | null {
   if (total === undefined) return null;
   const worked = between(o.startedAt, end);
   // Only worth a second number when the order waited a noticeable while before anyone started.
-  const extra = worked !== undefined && total - worked >= 5 * S ? ` · WORKED ${duration(worked)}` : '';
-  const word = done ? 'TOOK' : o.state === 'running' ? 'RUNNING' : 'OPEN';
+  const extra = worked !== undefined && total - worked >= 5 * S ? ` · worked ${duration(worked)}` : '';
+  const word = done ? 'took' : o.state === 'running' ? 'running' : 'open';
   return { kind: done ? 'done' : 'running', total, worked, text: `${word} ${duration(total)}${extra}`, short: duration(total) };
 }
