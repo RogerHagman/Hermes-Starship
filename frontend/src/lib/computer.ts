@@ -51,11 +51,15 @@ export function counts(list: Order[]): Record<State, number> {
   return out;
 }
 
-/** What the terminal is showing: a state (or all, or every open one), a station, and words to find. */
+/** What the terminal is showing: a state (or all, or every open one), a station, days, and words to find. */
 export interface Query {
   state: State | 'all' | 'open';
   station: string | null;
   words: string;
+  /** Only orders opened on or after this ship's day (YYYY-MM-DD). */
+  since?: string;
+  /** Only orders opened before this ship's day (YYYY-MM-DD). */
+  before?: string;
 }
 export const ALL: Query = { state: 'all', station: null, words: '' };
 
@@ -63,28 +67,77 @@ const ORD = /^ord-(\d{4})$/i;
 
 /**
  * What the Captain typed on the command line. "ORD-1232" opens that record; "state blocked" (or
- * "open", "done") and "station eng" set the filters; anything else is words to find. Words are
- * matched in the id, title, body, detail and replies, all of them, in any order.
+ * "open", "done"), "station eng", "since 20/10" and "before 25/10" set the filters; anything else
+ * is words to find. Words are matched in the id, title, body, detail and replies, all of them, in
+ * any order. A line in double quotes is only words, so a command word can be found too.
  */
-export function parseCommand(line: string, ship: ShipView, q: Query): { query: Query; open?: string } {
+export function parseCommand(line: string, ship: ShipView, q: Query): { query: Query; open?: string; said?: string } {
   const text = line.trim();
   const ord = ORD.exec(text);
   if (ord) return { query: q, open: `ORD-${ord[1]}` };
+  const quoted = /^"([^"]*)"?$/.exec(text);
+  if (quoted) return { query: { ...q, words: quoted[1].trim() } };
   const words: string[] = [];
-  let { state, station } = q;
+  const said: string[] = [];
+  let { state, station, since, before } = q;
+  const asOf = recordsFile(ship.data).asOf;
   const parts = text.split(/\s+/).filter(Boolean);
   for (let i = 0; i < parts.length; i++) {
     const p = parts[i].toLowerCase();
     const next = parts[i + 1]?.toLowerCase();
-    if ((p === 'state' || p === 'status') && next) { state = stateOf(next) ?? state; i++; continue; }
-    if (p === 'station' && next) { station = stationOf(ship, next) ?? station; i++; continue; }
-    if (p === 'all' || p === 'clear' || p === 'reset') { state = 'all'; station = null; continue; }
+    if ((p === 'state' || p === 'status') && next) {
+      const s = stateOf(next);
+      if (s) state = s; else said.push(`state: no state called ${next}. The states: ${STATE_NAMES}.`);
+      i++; continue;
+    }
+    if (p === 'station' && next) {
+      const s = stationOf(ship, next);
+      if (s) station = s; else said.push(`station: no station called ${next}.`);
+      i++; continue;
+    }
+    if ((p === 'since' || p === 'before') && next) {
+      const d = next === 'any' ? null : dayOf(next, asOf);
+      if (d === undefined) said.push(`${p}: ${next} is not a day. Try 24/10, 24/10/2026 or 2026-10-24.`);
+      else if (p === 'since') since = d ?? undefined;
+      else before = d ?? undefined;
+      i++; continue;
+    }
+    if (p === 'all' || p === 'clear' || p === 'reset') { state = 'all'; station = null; since = undefined; before = undefined; continue; }
     if (p === 'open') { state = 'open'; continue; }
     const s = stateOf(p);
     if (s && parts.length === 1) { state = s; continue; }
     words.push(parts[i]);
   }
-  return { query: { state, station, words: words.join(' ') } };
+  const query: Query = { state, station, words: words.join(' ') };
+  if (since) query.since = since;
+  if (before) query.before = before;
+  return said.length ? { query, said: said.join(' ') } : { query };
+}
+
+const STATE_NAMES = 'queued, running, review, awaiting, blocked, done, open';
+
+/**
+ * A day typed on the command line, as the ship's YYYY-MM-DD: 2026-10-24, 24/10/2026, 24/10 (the
+ * last 24 October on or before the records' day), today or yesterday. Undefined if it isn't a day.
+ */
+export function dayOf(word: string, asOf: string): string | undefined {
+  const today = dayKey(asOf);
+  const [ty, tm, td] = today.split('-').map(Number);
+  const key = (y: number, m: number, d: number) => {
+    const t = new Date(Date.UTC(y, m - 1, d));
+    if (t.getUTCFullYear() !== y || t.getUTCMonth() !== m - 1 || t.getUTCDate() !== d) return undefined;
+    return t.toISOString().slice(0, 10);
+  };
+  const w = word.toLowerCase();
+  if (w === 'today') return today;
+  if (w === 'yesterday') return new Date(Date.UTC(ty, tm - 1, td - 1)).toISOString().slice(0, 10);
+  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(w);
+  if (m) return key(+m[1], +m[2], +m[3]);
+  m = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2}|\d{4}))?$/.exec(w);
+  if (!m) return undefined;
+  if (m[3]) return key(m[3].length === 2 ? 2000 + +m[3] : +m[3], +m[2], +m[1]);
+  const k = key(ty, +m[2], +m[1]);
+  return k && k > today ? key(ty - 1, +m[2], +m[1]) : k;
 }
 
 function stateOf(word: string): State | 'open' | undefined {
@@ -100,14 +153,23 @@ export function stationOf(ship: ShipView, word: string): string | undefined {
     || s.name.toLowerCase() === w || (s.aliases ?? []).some((a) => a.toLowerCase() === w) || s.profile?.toLowerCase() === w)?.id;
 }
 
-/** The orders a query shows, newest first. */
-export function find(list: Order[], q: Query): Order[] {
+/** The day an order counts as opened on: its opening time, or without one its last update. */
+export const openedDay = (o: Order) => dayKey(o.openedAt ?? o.updatedAt);
+
+/** The orders a query shows, in the list's order. Words look in everything, or in titles only. */
+export function find(list: Order[], q: Query, look: 'all' | 'titles' = 'all'): Order[] {
   const words = q.words.toLowerCase().split(/\s+/).filter(Boolean);
   return list.filter((o) => {
     if (q.state === 'open' ? o.state === 'done' : q.state !== 'all' && o.state !== q.state) return false;
     if (q.station && o.station !== q.station) return false;
+    if (q.since || q.before) {
+      const d = openedDay(o);
+      if (q.since && d < q.since) return false;
+      if (q.before && d >= q.before) return false;
+    }
     if (!words.length) return true;
-    const hay = [o.id, o.title, o.body ?? '', o.detail ?? '', ...(o.replies ?? []).map((r) => r.text)].join('\n').toLowerCase();
+    const hay = (look === 'titles' ? [o.id, o.title]
+      : [o.id, o.title, o.body ?? '', o.detail ?? '', ...(o.replies ?? []).map((r) => r.text)]).join('\n').toLowerCase();
     return words.every((w) => hay.includes(w));
   });
 }
@@ -117,12 +179,11 @@ export function echo(q: Query, ship: ShipView): string {
   const parts = ['records'];
   if (q.state !== 'all') parts.push(`--state ${q.state}`);
   if (q.station) parts.push(`--station ${ship.station(q.station)?.short.toLowerCase() ?? q.station}`);
+  if (q.since) parts.push(`--since ${q.since}`);
+  if (q.before) parts.push(`--before ${q.before}`);
   if (q.words) parts.push(JSON.stringify(q.words));
   return parts.join(' ');
 }
-
-/** The most the terminal lists at once. More than this, and it asks for a narrower search. */
-export const LIST_MAX = 150;
 
 /** The ship's log lines about one order: when it opened, split, crossed customs, closed. */
 export function logOf(data: Fixtures, id: string) {
@@ -222,8 +283,10 @@ export function stats(list: Order[], asOf: string, days = 14): Stats {
 }
 
 /** 24 x 24 line icons for the room's things. */
-export const CORE_ICONS: Record<CoreObject | 'ease' | 'record' | 'station' | 'stats', string> = {
+export const CORE_ICONS: Record<CoreObject | 'ease' | 'record' | 'station' | 'stats' | 'man' | 'settings', string> = {
   stats: 'M4 20h16 M7 20v-6 M11 20V8 M15 20v-9 M19 20V5',
+  man: 'M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4z M20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z',
+  settings: 'M4 7h9 M17 7h3 M4 17h3 M11 17h9 M15 5v4 M9 15v4',
   ease: 'M4 5h16v11H4z M8 20h8 M12 16v4 M7 9l2 2-2 2 M11 13h4',
   record: 'M6 3h9l3 3v15H6z M9 9h6 M9 13h6 M9 17h4',
   records: 'M5 4h14v4H5z M5 10h14v4H5z M5 16h14v4H5z M8 6h.01 M8 12h.01 M8 18h.01',

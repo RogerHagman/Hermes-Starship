@@ -4,11 +4,13 @@
 // every order the ship has taken, in any state, with a command line to find one. The records board
 // on the table has a count per state. Around the room: orders by station, the records keepers and
 // the rails on the right, the order log and the minutes below, the comm badge at the bottom.
-// Reading only: nothing here reaches Hermes.
-import { memo, useCallback, useMemo, useState } from 'react';
+// The jump key (/ unless the settings say otherwise) takes the cursor to the command line from
+// anywhere on the board. Reading only: nothing here reaches Hermes.
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import art from '../../assets/computer.svg?raw';
 import type { BoardId } from '../../lib/board';
 import { ALL, ROOM, SCREEN, SPOTS, counts, pct, records, recordsFile, type CoreObject, type Query } from '../../lib/computer';
+import { isJumpKey, keyWord, loadSettings, saveSettings, type CoreSettings } from '../../lib/terminal';
 import type { Drills, ShipView } from '../../lib/ship';
 import { CommBadge } from '../CommBadge';
 import { RailsPanel } from '../Panels';
@@ -38,9 +40,34 @@ const VIEW_OF: Partial<Record<CoreObject, Screen>> = {
 
 export function ComputerBoard({ ship, drills, target, onTarget, onBoard, onToast }: Props) {
   const [screen, setScreen] = useState<Screen>({ view: 'ease' });
-  const [query, setQuery] = useState<Query>(ALL);
+  const [settings, keepSettings] = useState<CoreSettings>(loadSettings);
+  const [query, keepQuery] = useState<Query>(() => ({ ...ALL, state: settings.start }));
+  const [page, setPage] = useState(0);
+  const [jump, setJump] = useState(0);
   const [hot, setHot] = useState<CoreObject | null>(null);
   const n = useMemo(() => counts(records(ship.data)), [ship]);
+
+  // A new search starts again on the first page, and so does a new page size, order or search.
+  const setQuery = useCallback((q: Query) => { keepQuery(q); setPage(0); }, []);
+  const setSettings = (s: CoreSettings) => {
+    if (s.rows !== settings.rows || s.order !== settings.order || s.search !== settings.search) setPage(0);
+    keepSettings(s);
+    saveSettings(s);
+  };
+
+  // The jump key: back to the records, with the cursor on the command line.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!isJumpKey(e, settings.key)) return;
+      const el = e.target as HTMLElement | null;
+      if (settings.key !== 'ctrl+k' && el?.closest?.('input, textarea, select, [contenteditable]')) return;
+      e.preventDefault();
+      setScreen({ view: 'ease' });
+      setJump((j) => j + 1);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [settings.key]);
 
   // Picking the thing that is already on screen puts the records back.
   const show = useCallback((x: Screen) => setScreen((cur) => (JSON.stringify(cur) === JSON.stringify(x) ? { view: 'ease' } : x)), []);
@@ -56,7 +83,7 @@ export function ComputerBoard({ ship, drills, target, onTarget, onBoard, onToast
   };
 
   const on: CoreObject | null = screen.view === 'station' ? (screen.id === 'computer' ? 'core' : null)
-    : screen.view === 'ease' || screen.view === 'record' ? 'desk' : screen.view === 'stats' ? 'records'
+    : screen.view === 'ease' || screen.view === 'record' || screen.view === 'man' || screen.view === 'settings' ? 'desk' : screen.view === 'stats' ? 'records'
     : screen.view === 'minutes' ? 'minutes' : screen.view === 'burn' ? 'burn' : screen.view === 'memory' ? 'memory' : null;
   const computer = ship.station('computer');
   const burning = ship.data.rails.rails.some((r) => r.burn?.active);
@@ -77,7 +104,7 @@ export function ComputerBoard({ ship, drills, target, onTarget, onBoard, onToast
       <section className="room" aria-label="Computer core">
         <div className="hero-top">
           <p className="mono hero-label">DECK 3 · COMPUTER CORE · TYPE ON THE TERMINAL, OR PICK SOMETHING IN THE ROOM</p>
-          <p className="mono hero-label room-hint">{file.synthetic ? 'SAMPLE RECORDS · ' : ''}READ ONLY · {n.blocked} BLOCKED · ESC RETURNS THE SCREEN</p>
+          <p className="mono hero-label room-hint">{file.synthetic ? 'SAMPLE RECORDS · ' : ''}READ ONLY · {n.blocked} BLOCKED · {keyWord(settings.key)} TO TYPE · ESC RETURNS THE SCREEN</p>
         </div>
         <div className="room-wrap">
           <div className="room-pic core-pic" data-hot={hot ?? ''} data-on={on ?? ''} data-burn={burning ? 'on' : 'off'}
@@ -101,7 +128,8 @@ export function ComputerBoard({ ship, drills, target, onTarget, onBoard, onToast
           <div className="wall-slot" style={{
             '--x': pct(SCREEN.x, ROOM.w), '--y': pct(SCREEN.y, ROOM.h), '--w': pct(SCREEN.w, ROOM.w), '--h': pct(SCREEN.h, ROOM.h),
           } as React.CSSProperties}>
-            <ComputerScreen ship={ship} screen={screen} onScreen={setScreen} query={query} onQuery={setQuery} />
+            <ComputerScreen ship={ship} screen={screen} onScreen={setScreen} query={query} onQuery={setQuery} page={page} onPage={setPage}
+              settings={settings} onSettings={setSettings} jump={jump} />
           </div>
         </div>
       </section>

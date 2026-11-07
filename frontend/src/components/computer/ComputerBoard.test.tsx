@@ -25,7 +25,19 @@ const type = (c: HTMLElement, line: string) => {
   fireEvent.submit(input.closest('form')!);
 };
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); localStorage.clear(); });
+
+/** 450 done orders from the probe, one an hour back from the samples, so the list runs to three pages. */
+const many = (): Fixtures => {
+  const old = Array.from({ length: 450 }, (_, i) => ({
+    id: `ORD-${2000 + i}`, title: i === 449 ? 'The oldest on file' : `Old order ${i}`, station: i % 2 ? 'nav' : 'yeoman', state: 'done',
+    updatedAt: new Date(Date.parse('2026-10-31T12:00:00Z') - i * 3_600_000).toISOString(),
+  }));
+  return { ...data, records: { asOf: '2026-11-05T20:00:00Z', synthetic: false, orders: [...data.orders.orders, ...old] } as OrdersFile };
+};
+const count = (c: HTMLElement) => screen(c).querySelector('.tcount')?.textContent;
+const said = (c: HTMLElement) => screen(c).querySelector('.tsaid')?.textContent;
+const pager = (c: HTMLElement, word: string) => [...screen(c).querySelectorAll('.tpage')].find((b) => b.textContent?.includes(word)) as HTMLButtonElement;
 
 describe('computer core', () => {
   it('the terminal lists every order on file, newest first, with a count per state', () => {
@@ -152,5 +164,120 @@ describe('computer core', () => {
     expect(rows(c)).toContain('ORD-1100');
     expect(screen(c).textContent).toContain('LIVE FROM THE SHIP PROBE');
     expect(c.querySelector('.cspot-records')?.getAttribute('aria-label')).toBe(`Records, ${records.orders.length} ON FILE`);
+  });
+});
+
+describe('the core terminal: pages, the manual, the jump key and the settings', () => {
+  const total = data.orders.orders.length + 450;
+  it('lists 200 a page and every order is on a page: a narrower search reaches further back', () => {
+    const c = board(many());
+    expect(rows(c)).toHaveLength(200);
+    expect(count(c)).toBe(`1–200 OF ${total} · PAGE 1 OF 3`);
+    fireEvent.click(pager(c, 'OLDER'));
+    expect(count(c)).toBe(`201–400 OF ${total} · PAGE 2 OF 3`);
+    fireEvent.click(pager(c, 'LAST'));
+    expect(rows(c)).toContain('ORD-2449');
+    expect(pager(c, 'OLDER').disabled).toBe(true);
+    type(c, 'first');
+    expect(count(c)).toContain('PAGE 1 OF 3');
+    type(c, 'page 2');
+    expect(count(c)).toContain('PAGE 2 OF 3');
+    type(c, 'page 9');
+    expect(said(c)).toBe('page: there are 3 pages.');
+    // a new search starts again on page 1; a narrower one fits on one page and reaches the oldest order
+    type(c, 'station nav');
+    expect(count(c)).toMatch(/OF \d+ · PAGE 1 OF 2$/);
+    type(c, 'oldest on file');
+    expect(rows(c)).toEqual(['ORD-2449']);
+    type(c, 'all');
+    type(c, 'before 20/10');
+    // the 20th starts at 22:00 UTC on the 19th: 278 hours before the newest old order
+    expect(rows(c)).toHaveLength(171);
+    expect(rows(c)[0]).toBe('ORD-2279');
+    expect(screen(c).querySelector('.techo')?.textContent).toContain('--before 2026-10-20');
+  });
+  it('back from a record goes to the page it is on; the record says where it is in the list', () => {
+    const c = board(many());
+    type(c, 'last');
+    fireEvent.click([...screen(c).querySelectorAll('.trow')].find((r) => r.textContent?.includes('ORD-2449'))!);
+    expect(screen(c).querySelector('.tpos')?.textContent).toBe(`${total} / ${total}`);
+    fireEvent.click([...screen(c).querySelectorAll('.stepper button')][0]);   // ‹ Newer, still on page 3
+    fireEvent.click([...screen(c).querySelectorAll('.con-back')].find((b) => b.textContent === '‹ Records')!);
+    expect(count(c)).toContain('PAGE 3 OF 3');
+  });
+  it('man opens the manual; man <command> opens it at that command; a line in it runs', () => {
+    const c = board();
+    type(c, 'man');
+    expect(title(c)).toBe("man core · the terminal's manual");
+    for (const h of ['NAME', 'SYNOPSIS', 'DESCRIPTION', 'COMMANDS', 'KEYS', 'SETTINGS', 'FILES']) expect(screen(c).querySelector('.tman')?.textContent).toContain(h);
+    expect(screen(c).querySelectorAll('.tman-cmds > div').length).toBe(11);
+    fireEvent.click([...screen(c).querySelectorAll('.con-back')].find((b) => b.textContent === '‹ Records')!);
+    type(c, 'help before');
+    expect(screen(c).querySelector('#man-since')?.className).toBe('on');
+    fireEvent.click([...screen(c).querySelectorAll('.tman-eg')].find((b) => b.textContent === 'state blocked')!);
+    expect(title(c)).toBe('Core terminal · records');
+    expect(screen(c).querySelector('.techo')?.textContent).toContain('--state blocked');
+    type(c, 'man overboard');
+    expect(said(c)).toBe('man: no entry for overboard. Type man for the whole manual.');
+    fireEvent.click([...screen(c).querySelectorAll('.con-back')].find((b) => b.textContent === 'man')!);
+    expect(title(c)).toMatch(/^man core/);
+  });
+  it('the jump key takes the cursor to the command line from anywhere on the board, but not from another field', () => {
+    const c = board();
+    type(c, 'ORD-9012');
+    expect(title(c)).toMatch(/^ORD-9012/);
+    fireEvent.keyDown(document.body, { key: '/' });
+    expect(title(c)).toBe('Core terminal · records');
+    expect(document.activeElement?.id).toBe('core-cmd');
+    const other = document.createElement('input');
+    document.body.appendChild(other);
+    other.focus();
+    fireEvent.keyDown(other, { key: '/' });
+    expect(document.activeElement).toBe(other);
+    other.remove();
+  });
+  it('the up arrow brings back earlier lines, and Esc clears the line', () => {
+    const c = board();
+    type(c, 'state review');
+    type(c, 'dentist');
+    const input = c.querySelector('#core-cmd') as HTMLInputElement;
+    fireEvent.keyDown(input, { key: 'ArrowUp' });
+    expect(input.value).toBe('dentist');
+    fireEvent.keyDown(input, { key: 'ArrowUp' });
+    expect(input.value).toBe('state review');
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(input.value).toBe('dentist');
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(input.value).toBe('');
+  });
+  it('the settings page and set change the terminal, and this browser keeps them', () => {
+    const c = board(many());
+    type(c, 'settings');
+    expect(title(c)).toBe('Terminal settings');
+    expect(screen(c).querySelectorAll('.tset-row').length).toBe(7);
+    const choose = (name: string, word: string) => fireEvent.click([...screen(c).querySelectorAll(`.tset-choices[aria-label="${name}"] .tchoice`)]
+      .find((b) => b.textContent === word)!);
+    choose('Rows per page', '100');
+    choose('Order', 'Oldest first');
+    fireEvent.click([...screen(c).querySelectorAll('.con-back')].find((b) => b.textContent === '‹ Records')!);
+    expect(count(c)).toBe(`1–100 OF ${total} · PAGE 1 OF 5 · OLDEST FIRST`);
+    expect(rows(c)[0]).toBe('ORD-2449');
+    expect(pager(c, 'NEWER ›')).toBeTruthy();
+    type(c, 'set rows 500');
+    expect(said(c)).toBe('Rows per page: 500.');
+    expect(count(c)).toBe(`${total} SHOWN · OLDEST FIRST`);
+    type(c, 'set phosphor amber');
+    expect(screen(c).style.getPropertyValue('--phos')).toBe('#ffc46b');
+    type(c, 'set key §');
+    expect(JSON.parse(localStorage.getItem('hermes.coreTerminal')!)).toMatchObject({ rows: 500, order: 'oldest', phosphor: 'amber', key: '§' });
+    fireEvent.keyDown(document.body, { key: '§' });
+    expect(document.activeElement?.id).toBe('core-cmd');
+    cleanup();
+    // a new visit starts with what this browser kept; On start picks the first list
+    localStorage.setItem('hermes.coreTerminal', JSON.stringify({ start: 'awaiting-captain' }));
+    const d = board();
+    expect(screen(d).querySelector('.tchip.ts-awaiting-captain')?.getAttribute('aria-pressed')).toBe('true');
+    type(d, 'set defaults');
+    expect(said(d)).toBe('Settings back to their defaults.');
   });
 });
