@@ -6,6 +6,8 @@ import { progress, untilLabel } from '../../lib/sensors';
 import type { ShipView } from '../../lib/ship';
 import type { RailFilter } from '../SideRail';
 import { byNextScan } from './SensorScreen';
+import { Marked } from '../Marked';
+import { Src } from '../Src';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const up = (s: string) => s.toUpperCase();
@@ -18,6 +20,7 @@ export function WatchesPanel({ ship, filter, now, picked, onOpen }: {
     <section className="panel watch-panel" aria-labelledby="watch-title">
       <div className="panel-head">
         <h2 className="panel-title" id="watch-title">Watches</h2>
+        <Src ids={['sensors']} />
         <span className="mono panel-meta">{ws.length} · SOONEST SCAN FIRST · TRACKED, NEVER CAPPED</span>
       </div>
       <ul className="wlist">
@@ -50,6 +53,7 @@ export function AsksPanel({ ship, onOpen }: { ship: ShipView; onOpen: () => void
     <section className="panel asks-panel" aria-labelledby="asks-title">
       <div className="panel-head">
         <h2 className="panel-title" id="asks-title">Asks</h2>
+        <Src ids={['sensors']} />
         <span className="mono panel-meta">{changed ? `${changed} NOT WORD FOR WORD` : 'ALL WORD FOR WORD'}</span>
         <button type="button" className="foldall" onClick={onOpen}>OPEN</button>
       </div>
@@ -72,7 +76,8 @@ export function FindingsPanel({ ship, picked, onOpen }: { ship: ShipView; picked
     <section className="panel log-table-panel" aria-labelledby="find-title">
       <div className="panel-head">
         <h2 className="panel-title" id="find-title">Findings</h2>
-        <span className="mono panel-meta">{rows.length} · {rows.filter((f) => !f.seen).length} NEW · EVERY ONE CITED · SAMPLE</span>
+        <Src ids={['sensors']} />
+        <span className="mono panel-meta"><Marked>{rows.length} · {rows.filter((f) => !f.seen).length} NEW · EVERY ONE CITED · SAMPLE</Marked></span>
       </div>
       <div className="olog-scroll">
         <table className="olog">
@@ -113,6 +118,7 @@ export function ArrayLog({ ship }: { ship: ShipView }) {
     <section className="panel array-log" aria-labelledby="alog-title">
       <div className="panel-head">
         <h2 className="panel-title" id="alog-title">Array log</h2>
+        <Src ids={['sensors']} />
         <span className="mono panel-meta">SCANS, HOLDS AND DUTY · NEWEST FIRST</span>
       </div>
       <ol className="alog">

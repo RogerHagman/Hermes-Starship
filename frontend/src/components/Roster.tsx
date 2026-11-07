@@ -4,6 +4,7 @@ import { clockTime, dayLine } from '../lib/format';
 import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import type { RailFilter } from './SideRail';
+import { Src } from './Src';
 
 /** Collar pips for a rank: full ones, then a hollow one for the half grades. Enlisted crew wear none. */
 export function Pips({ rank }: { rank: Station['rank'] }) {
@@ -73,6 +74,7 @@ export function LogPanel({ ship }: { ship: ShipView }) {
   return (
     <section className="panel log-panel" aria-labelledby="log-title">
       <div className="panel-head"><h2 className="panel-title" id="log-title">Ship's log</h2></div>
+      <Src ids={['orders']} />
       <ol className="log">
         {ship.data.shiplog.entries.map((e, i, all) => {
           // Entries from an earlier day get that day's name above them.

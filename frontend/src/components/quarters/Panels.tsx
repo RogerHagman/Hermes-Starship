@@ -7,6 +7,8 @@ import { canRelieve, type ShipView } from '../../lib/ship';
 import type { Order } from '../../types';
 import { Pips } from '../Roster';
 import type { RailFilter } from '../SideRail';
+import { Marked } from '../Marked';
+import { Src } from '../Src';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 
@@ -40,6 +42,7 @@ export function DutyPanel({ ship, filter, picked, onOpen, onRelieve }: {
     <section className="panel duty-panel" aria-labelledby="duty-title">
       <div className="panel-head">
         <h2 className="panel-title" id="duty-title">Duty roster</h2>
+        <Src ids={['duty']} />
         <span className="mono panel-meta">{relieved ? `${relieved} RELIEVED · ` : ''}SCREEN ONLY, LIKE A DRILL</span>
       </div>
       <p className="help">Relieve a station and the next officer by rank acts as head. Enlisted crew and the Computer never command.</p>
@@ -84,7 +87,8 @@ export function CampaignsPanel({ ship, scope, onScope }: { ship: ShipView; scope
     <section className="panel camp-panel" aria-labelledby="camp-title">
       <div className="panel-head">
         <h2 className="panel-title" id="camp-title">Campaigns</h2>
-        <span className="mono panel-meta">LONG-TERM GOALS · ONLY YOU OPEN OR CLOSE ONE · SAMPLE</span>
+        <Src ids={['quarters']} />
+        <span className="mono panel-meta"><Marked>LONG-TERM GOALS · ONLY YOU OPEN OR CLOSE ONE · SAMPLE</Marked></span>
       </div>
       <div className="camps">
         {q.campaigns.map((c) => {
@@ -158,6 +162,7 @@ export function OrderLog({ ship, filter, scope, onScope, picked, onOpen }: {
     <section className="panel log-table-panel" aria-labelledby="olog-title">
       <div className="panel-head">
         <h2 className="panel-title" id="olog-title">Order log</h2>
+        <Src ids={['orders']} />
         <div className="olog-filters" role="group" aria-label="Show orders">
           {FILTERS.map((f) => (
             <button key={f.id} type="button" className="chip" aria-pressed={show === f.id} onClick={() => setShow(f.id)}>{f.label}</button>

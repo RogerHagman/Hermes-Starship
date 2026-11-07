@@ -10,6 +10,7 @@ import { Pips } from '../Roster';
 import type { RailFilter } from '../SideRail';
 import { stationColour } from '../ShipConsole';
 import { leadOf } from './HoloScreen';
+import { Src } from '../Src';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const PLACES = SHIP_MAP.places as Record<string, { x: number; y: number; w: number }>;
@@ -149,6 +150,7 @@ export function DeckOrders({ ship, picked, onOpen }: { ship: ShipView; picked?: 
     <section className="panel holo-orders" aria-labelledby="hord-title">
       <div className="panel-head">
         <h2 className="panel-title" id="hord-title">On the deck</h2>
+        <Src ids={['orders']} />
         <span className="mono panel-meta">ORDERS FOR THE HOLODECK CREW · {rows.length}</span>
       </div>
       {rows.length === 0 && <p className="help">No orders for the Holodeck crew.</p>}

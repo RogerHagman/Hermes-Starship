@@ -17,6 +17,7 @@ import { RailsPanel } from '../Panels';
 import type { RailFilter } from '../SideRail';
 import { ComputerScreen, type Screen } from './ComputerScreen';
 import { CoreCrewPanel, MinutesPanel, OrderLog, RecordsBoard, StationsPanel } from './Panels';
+import { Marked } from '../Marked';
 
 interface Props {
   ship: ShipView;
@@ -104,7 +105,7 @@ export function ComputerBoard({ ship, drills, target, onTarget, onBoard, onToast
       <section className="room" aria-label="Computer core">
         <div className="hero-top">
           <p className="mono hero-label">DECK 3 · COMPUTER CORE · TYPE ON THE TERMINAL, OR PICK SOMETHING IN THE ROOM</p>
-          <p className="mono hero-label room-hint">{file.synthetic ? 'SAMPLE RECORDS · ' : ''}READ ONLY · {n.blocked} BLOCKED · {keyWord(settings.key)} TO TYPE · ESC RETURNS THE SCREEN</p>
+          <p className="mono hero-label room-hint"><Marked>{file.synthetic ? 'SAMPLE RECORDS · ' : ''}READ ONLY · {n.blocked} BLOCKED · {keyWord(settings.key)} TO TYPE · ESC RETURNS THE SCREEN</Marked></p>
         </div>
         <div className="room-wrap">
           <div className="room-pic core-pic" data-hot={hot ?? ''} data-on={on ?? ''} data-burn={burning ? 'on' : 'off'}

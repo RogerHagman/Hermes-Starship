@@ -17,6 +17,7 @@ import type { RailFilter } from '../SideRail';
 import { PostRoom } from '../post/PostRoom';
 import { DayBars, DeskTiles, Kpis, OrdersPanel, css, sourceWord, up } from '../post/Parts';
 import { ViewscreenScreen, type Screen } from './ViewscreenScreen';
+import { Src } from '../Src';
 
 interface Props {
   ship: ShipView;
@@ -100,6 +101,7 @@ function SessionsPanel({ ship, onOpen }: { ship: ShipView; onOpen: (id: string) 
     <section className="panel grow" aria-labelledby="vsess-title">
       <div className="panel-head">
         <h2 className="panel-title" id="vsess-title">Sessions</h2>
+        <Src ids={['viewscreen']} />
         <span className="mono panel-meta">{list.length} IN THE LOG · NEWEST FIRST</span>
       </div>
       <ul className="plist">
@@ -127,6 +129,7 @@ function AskingPanel({ ship, onOpen }: { ship: ShipView; onOpen: (id: string) =>
     <section className="panel" aria-labelledby="vask-title">
       <div className="panel-head">
         <h2 className="panel-title" id="vask-title">Waiting for your OK</h2>
+        <Src ids={['viewscreen']} />
         <span className="mono panel-meta">{list.length} · NEVER YOLO</span>
       </div>
       <ul className="plist">
@@ -154,6 +157,7 @@ function WeekPanel({ ship }: { ship: ShipView }) {
     <section className="panel" aria-labelledby="vweek-title">
       <div className="panel-head">
         <h2 className="panel-title" id="vweek-title">This week</h2>
+        <Src ids={['viewscreen']} />
         <span className="mono panel-meta">ACTIONS PER DAY · LAST 7 DAYS</span>
       </div>
       <div className="pweek-body">

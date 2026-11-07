@@ -18,6 +18,7 @@ import type { RailFilter } from '../SideRail';
 import { PostRoom } from '../post/PostRoom';
 import { DayBars, DeskTiles, Kpis, OrdersPanel, css, sourceWord, up } from '../post/Parts';
 import { NavScreen, type Screen } from './NavScreen';
+import { Src } from '../Src';
 
 interface Props {
   ship: ShipView;
@@ -104,6 +105,7 @@ function ComingPanel({ ship, onAll }: { ship: ShipView; onAll: () => void }) {
     <section className="panel grow" aria-labelledby="ncoming-title">
       <div className="panel-head">
         <h2 className="panel-title" id="ncoming-title">Coming up</h2>
+        <Src ids={['nav']} />
         <span className="mono panel-meta">{list.length} ON THE CALENDAR · SOONEST FIRST</span>
       </div>
       <ul className="plist">
@@ -129,6 +131,7 @@ function HeldPanel({ ship, onOpen }: { ship: ShipView; onOpen: () => void }) {
     <section className="panel" aria-labelledby="nheld-title">
       <div className="panel-head">
         <h2 className="panel-title" id="nheld-title">Held for you</h2>
+        <Src ids={['nav']} />
         <span className="mono panel-meta">{list.length} · CONFIRM IS YOURS</span>
       </div>
       <ul className="plist">
@@ -157,6 +160,7 @@ function AheadPanel({ ship }: { ship: ShipView }) {
     <section className="panel" aria-labelledby="nahead-title">
       <div className="panel-head">
         <h2 className="panel-title" id="nahead-title">The week ahead</h2>
+        <Src ids={['nav']} />
         <span className="mono panel-meta">EVENTS PER DAY · THE NEXT 7 DAYS</span>
       </div>
       <div className="pweek-body">

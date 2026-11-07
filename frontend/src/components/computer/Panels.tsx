@@ -6,6 +6,7 @@ import { ROOM, STATES, STATE_WORD, TABLE, counts, minutes, pct, records, type Qu
 import type { ShipView } from '../../lib/ship';
 import type { Station } from '../../types';
 import { Pips } from '../Roster';
+import { Src } from '../Src';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const up = (s: string) => s.toUpperCase();
@@ -50,6 +51,7 @@ export function StationsPanel({ ship, query, onQuery }: { ship: ShipView; query:
     <section className="panel core-stations" aria-labelledby="cst-title">
       <div className="panel-head">
         <h2 className="panel-title" id="cst-title">Orders by station</h2>
+        <Src ids={['records']} />
         <span className="mono panel-meta">{all.length} ON FILE · {rows.length} STATIONS · PICK ONE TO FILTER</span>
       </div>
       <ul className="cst-list">
@@ -115,6 +117,7 @@ export function OrderLog({ ship, onOpen }: { ship: ShipView; onOpen: (id: string
     <section className="panel array-log" aria-labelledby="corder-title">
       <div className="panel-head">
         <h2 className="panel-title" id="corder-title">Order log</h2>
+        <Src ids={['orders']} />
         <span className="mono panel-meta">{lines.length} LINES · OPENED, SPLIT, CUSTOMS, CLOSED · NEWEST FIRST</span>
       </div>
       <ol className="alog">
@@ -144,6 +147,7 @@ export function MinutesPanel({ ship, onOpen }: { ship: ShipView; onOpen: () => v
     <section className="panel core-minutes" aria-labelledby="cmin-title">
       <div className="panel-head">
         <h2 className="panel-title" id="cmin-title">Minutes</h2>
+        <Src ids={['orders']} />
         <span className="mono panel-meta">{list.length} BRIEFINGS · KEPT BY THE COMPUTER</span>
       </div>
       <ol className="cmin-list">

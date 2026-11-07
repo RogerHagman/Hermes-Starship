@@ -16,6 +16,7 @@ import { RailsPanel } from '../Panels';
 import type { RailFilter } from '../SideRail';
 import { DonePanel, MatrixBoard, NextPanel, WaitingPanel, WeekPanel } from './Panels';
 import { YeomanScreen, sourceWord, type Screen } from './YeomanScreen';
+import { Marked } from '../Marked';
 
 interface Props {
   ship: ShipView;
@@ -96,7 +97,7 @@ export function YeomanBoard({ ship, drills, target, onTarget, onBoard, onToast }
       <section className="room" aria-label="Yeoman's post">
         <div className="hero-top">
           <p className="mono hero-label">DECK 2 · YEOMAN'S POST · BY YOUR DOOR · PICK SOMETHING IN THE ROOM, OR A BOX ON THE DESK</p>
-          <p className="mono hero-label room-hint">{sourceWord(ship)} · {m.first.length} DO FIRST · READ ONLY · ESC RETURNS THE SCREEN</p>
+          <p className="mono hero-label room-hint"><Marked>{sourceWord(ship)} · {m.first.length} DO FIRST · READ ONLY · ESC RETURNS THE SCREEN</Marked></p>
         </div>
         <div className="room-wrap">
           <div className="room-pic yeo-pic" data-hot={hot ?? ''} data-on={on ?? ''}

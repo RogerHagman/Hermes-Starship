@@ -4,6 +4,7 @@ import type { BoardId } from '../lib/board';
 import { clockTime, dateLine } from '../lib/format';
 import type { ShipView } from '../lib/ship';
 import { RAIL_IDS } from '../lib/ship';
+import { boardSources } from '../lib/sources';
 
 const BOARD_TEXT: Record<BoardId, { deck: string; title: string; intro: string }> = {
   bridge: {
@@ -100,9 +101,7 @@ export function Header({ ship, board, error }: { ship: ShipView | null; board: B
           <span className="lamp" /><span className="mono">CONDITION {level.toUpperCase()}</span>
         </div>
         <Clock />
-        {ship && !ship.data.orders.synthetic
-          ? <span className="pill pill-fixture live mono" title="Orders and the log are read from Hermes by the ship probe on the NAS. Nothing on this screen calls a model.">LIVE ORDERS · NO MODEL CALLS</span>
-          : <span className="pill pill-fixture mono" title="Synthetic data from fixtures/. Nothing on this screen calls a model.">FIXTURES · NO MODEL CALLS</span>}
+        {ship && <Sources board={board} ship={ship} />}
       </div>
     </div>
   );
@@ -118,6 +117,31 @@ function Clock() {
     <div className="clock">
       <span className="clock-time">{clockTime(now)}</span>
       <span className="mono clock-sub">{dateLine(now)} · STOCKHOLM</span>
+    </div>
+  );
+}
+
+/**
+ * What this board reads, one chip per part: solid green when it is live from a probe on the NAS,
+ * dashed yellow when it is still the sample, so it is plain what still needs a live read.
+ * Nothing on any board calls a model.
+ */
+function Sources({ board, ship }: { board: BoardId; ship: ShipView }) {
+  const parts = boardSources(board, ship.data);
+  const sample = parts.filter((p) => p.state === 'sample').length;
+  const down = parts.filter((p) => p.state === 'stale').length;
+  return (
+    <div className="sources" aria-label="What this board reads">
+      <span className="mono sources-label" title="Nothing on this screen calls a model.">
+        {down ? `${down} DOWN · ` : ''}{sample ? `${sample} OF ${parts.length} SAMPLE` : down ? '' : 'ALL LIVE'}{sample || !down ? ' · ' : ''}NO MODEL CALLS
+      </span>
+      <span className="sources-chips">
+        {parts.map((p) => (
+          <span key={p.id} className={`src-chip mono src-${p.state}`} title={p.why}>
+            {p.state === 'live' ? 'LIVE' : p.state === 'stale' ? 'DOWN' : 'SAMPLE'} · {p.label}
+          </span>
+        ))}
+      </span>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import type { RailFilter } from '../SideRail';
 import { PostRoom } from '../post/PostRoom';
 import { DayBars, DeskTiles, Kpis, OrdersPanel, css, sourceWord, up } from '../post/Parts';
 import { HelmScreen, type Screen } from './HelmScreen';
+import { Src } from '../Src';
 
 interface Props {
   ship: ShipView;
@@ -96,6 +97,7 @@ function GatesPanel({ ship, onOpen, onAll }: { ship: ShipView; onOpen: (id: stri
     <section className="panel grow" aria-labelledby="hgate-title">
       <div className="panel-head">
         <h2 className="panel-title" id="hgate-title">Waiting at your gates</h2>
+        <Src ids={['helm']} />
         <span className="mono panel-meta">{list.length} · TRIAGE, REVIEW, SEND, CLOSE</span>
       </div>
       <ul className="plist">
@@ -124,6 +126,7 @@ function DuePanel({ ship, onOpen }: { ship: ShipView; onOpen: (id: string) => vo
     <section className="panel" aria-labelledby="hdue-title">
       <div className="panel-head">
         <h2 className="panel-title" id="hdue-title">Due now</h2>
+        <Src ids={['helm']} />
         <span className="mono panel-meta">{n ? `${n} · FOLLOW-UPS AND DEADLINES` : 'NOTHING DUE'}</span>
       </div>
       <ul className="plist">
@@ -159,6 +162,7 @@ function SearchPanel({ ship }: { ship: ShipView }) {
     <section className="panel" aria-labelledby="hsearch-title">
       <div className="panel-head">
         <h2 className="panel-title" id="hsearch-title">The search so far</h2>
+        <Src ids={['helm']} />
         <span className="mono panel-meta">TRACKER LINES PER DAY · LAST 14 DAYS</span>
       </div>
       <div className="pweek-body">

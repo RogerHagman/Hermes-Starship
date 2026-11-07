@@ -4,6 +4,8 @@ import { clockTime, dayAndTime } from '../../lib/format';
 import { CHAMBER, ROOM, RUN_KIND, byNewest, modelName, modelOf, pct } from '../../lib/science';
 import type { ShipView } from '../../lib/ship';
 import { Measured, TrackRow, type Screen } from './LabScreen';
+import { Marked } from '../Marked';
+import { Src } from '../Src';
 
 const up = (s: string) => s.toUpperCase();
 type Go = (s: Screen) => void;
@@ -41,6 +43,7 @@ export function StudyPanel({ ship, picked, onScreen }: { ship: ShipView; picked?
     <section className="panel study-panel" aria-labelledby="study-title">
       <div className="panel-head">
         <h2 className="panel-title" id="study-title">Study bench</h2>
+        <Src ids={['science']} />
         <span className="mono panel-meta">{lessons.filter((l) => l.done).length} OF {lessons.length} LESSONS · {s.study.length} TRACKS</span>
         <button type="button" className="foldall" onClick={() => onScreen({ view: 'study' })}>OPEN</button>
       </div>
@@ -57,6 +60,7 @@ export function ServingPanel({ ship, onScreen }: { ship: ShipView; onScreen: Go 
     <section className="panel serving-panel" aria-labelledby="serve-title">
       <div className="panel-head">
         <h2 className="panel-title" id="serve-title">Serving</h2>
+        <Src ids={['science']} />
         <span className="mono panel-meta">TOKENS A SECOND · ONE USER</span>
         <button type="button" className="foldall" onClick={() => onScreen({ view: 'serving' })}>OPEN</button>
       </div>
@@ -80,7 +84,8 @@ export function EvalsTable({ ship, onScreen }: { ship: ShipView; onScreen: Go })
     <section className="panel log-table-panel" aria-labelledby="evals-title">
       <div className="panel-head">
         <h2 className="panel-title" id="evals-title">Evals</h2>
-        <span className="mono panel-meta">{rows.length} · EVERY SCORE WITH ITS RUN · SAMPLE</span>
+        <Src ids={['science']} />
+        <span className="mono panel-meta"><Marked>{rows.length} · EVERY SCORE WITH ITS RUN · SAMPLE</Marked></span>
       </div>
       <div className="olog-scroll">
         <table className="olog">
@@ -121,6 +126,7 @@ export function RunLogPanel({ ship, onScreen }: { ship: ShipView; onScreen: Go }
     <section className="panel array-log" aria-labelledby="rlog-title">
       <div className="panel-head">
         <h2 className="panel-title" id="rlog-title">Run log</h2>
+        <Src ids={['science']} />
         <span className="mono panel-meta">{s.runs.length} RUNS · NEWEST FIRST · PICK ONE FOR ITS LOG</span>
       </div>
       <ol className="alog">

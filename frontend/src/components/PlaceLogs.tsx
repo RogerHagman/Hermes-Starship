@@ -7,6 +7,7 @@ import { clockTime, dayAndTime } from '../lib/format';
 import { railColor } from '../lib/lookups';
 import type { ShipView } from '../lib/ship';
 import { cabinOf, crewed } from './CrewTokens';
+import { Marked } from './Marked';
 
 const css = (vars: Record<string, string>) => vars as React.CSSProperties;
 const cabinTag = (n: number) => `05-${String(n).padStart(2, '0')}`;
@@ -37,7 +38,7 @@ export function DutyLog({ ship }: { ship: ShipView }) {
         </ul>
       )}
       <span className="cchair-count mono">
-        CHECK-INS AND CHECK-OUTS · {lines.length || 'NONE YET'} · {ship.data.raillog ? 'FROM THE RAILS PROBE' : 'SAMPLE'}
+        CHECK-INS AND CHECK-OUTS · {lines.length || 'NONE YET'} · <Marked>{ship.data.raillog ? 'FROM THE RAILS PROBE' : 'SAMPLE'}</Marked>
       </span>
       {lines.length > 0 && (
         <ol className="svc-log place-log">

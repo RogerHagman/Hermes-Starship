@@ -10,6 +10,7 @@ import type { Fixtures, RailId } from './types';
 import { BridgeBoard } from './components/BridgeBoard';
 import { Frame } from './components/Frame';
 import { Header } from './components/Header';
+import { SrcData } from './components/Src';
 import { QuartersBoard } from './components/quarters/QuartersBoard';
 import { HolodeckBoard } from './components/holodeck/HolodeckBoard';
 import { SensorsBoard } from './components/sensors/SensorsBoard';
@@ -86,6 +87,7 @@ export function App() {
     <>
       <div className={`stage board-${board}` + (fit.fit ? ' fit' : '')}
         style={fit.fit ? { transform: `scale(${fit.scale})`, left: fit.left, top: fit.top } : undefined}>
+        <SrcData.Provider value={ship?.data ?? null}>
         <Frame ship={ship} board={board} side={
           <SideRail registry={data?.ship.registry ?? 'HX-01'} board={board} onBoard={goBoard}
             filter={filter} onFilter={setFilter} drills={drills} onDrill={drill} onToast={showToast} />
@@ -146,6 +148,7 @@ export function App() {
             )}
           </main>
         </Frame>
+        </SrcData.Provider>
       </div>
       <div className={'toast' + (toast ? ' show' : '')} role="status" aria-live="polite">{toast}</div>
     </>

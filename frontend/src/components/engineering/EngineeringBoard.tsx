@@ -14,6 +14,7 @@ import { RailsPanel } from '../Panels';
 import type { RailFilter } from '../SideRail';
 import { EngScreen, inCharge, type Screen } from './EngScreen';
 import { EngCrewPanel, EngLog, InFlightPanel, PatchLine, PatchesTable } from './Panels';
+import { Marked } from '../Marked';
 
 interface Props {
   ship: ShipView;
@@ -67,7 +68,7 @@ export function EngineeringBoard({ ship, drills, target, onTarget, onBoard, onTo
       <section className="room" aria-label="Main Engineering">
         <div className="hero-top">
           <p className="mono hero-label">DECK 7 · MAIN ENGINEERING · PICK A PATCH ON THE TABLE, OR SOMETHING IN THE ROOM</p>
-          <p className="mono hero-label room-hint">{e.synthetic ? 'SAMPLE PATCHES · ' : ''}ESC RETURNS THE WORK SCREEN</p>
+          <p className="mono hero-label room-hint"><Marked>{e.synthetic ? 'SAMPLE PATCHES · ' : ''}ESC RETURNS THE WORK SCREEN</Marked></p>
         </div>
         <div className="room-wrap">
           <div className="room-pic eng-pic" data-hot={hot ?? ''} data-on={on ?? ''} data-core={core}>

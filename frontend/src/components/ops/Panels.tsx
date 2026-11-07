@@ -7,6 +7,8 @@ import type { ShipView } from '../../lib/ship';
 import type { Station } from '../../types';
 import { Pips } from '../Roster';
 import { HealthPill } from './OpsScreen';
+import { Marked } from '../Marked';
+import { Src } from '../Src';
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const up = (s: string) => s.toUpperCase();
@@ -62,6 +64,7 @@ export function LookPanel({ list, onOpen }: { list: Area[]; onOpen: (v: OpsView)
     <section className="panel look-panel" aria-labelledby="look-title">
       <div className="panel-head">
         <h2 className="panel-title" id="look-title">Needs a look</h2>
+        <Src ids={['nas', 'ops']} />
         <span className="mono panel-meta">{rows.length ? `${rows.length} OF ${list.reduce((n, a) => n + a.checks.length, 0)} CHECKS · WORST FIRST` : 'ALL CHECKS OK'}</span>
       </div>
       <ul className="look-list">
@@ -121,7 +124,8 @@ export function ScheduleTable({ ship, onOpen }: { ship: ShipView; onOpen: () => 
     <section className="panel log-table-panel" aria-labelledby="sched-title">
       <div className="panel-head">
         <h2 className="panel-title" id="sched-title">Schedule</h2>
-        <span className="mono panel-meta">{o.jobs.length} JOBS · SHIP'S TIME{o.synthetic ? ' · SAMPLE' : ''}</span>
+        <Src ids={['ops']} />
+        <span className="mono panel-meta"><Marked>{o.jobs.length} JOBS · SHIP'S TIME{o.synthetic ? ' · SAMPLE' : ''}</Marked></span>
       </div>
       <div className="olog-scroll">
         <table className="olog">
@@ -161,6 +165,7 @@ export function OpsLog({ ship }: { ship: ShipView }) {
     <section className="panel array-log" aria-labelledby="olog-title">
       <div className="panel-head">
         <h2 className="panel-title" id="olog-title">Ops log</h2>
+        <Src ids={['ops']} />
         <span className="mono panel-meta">JOBS, BACKUPS AND DUTY · NEWEST FIRST</span>
       </div>
       <ol className="alog">

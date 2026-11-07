@@ -16,6 +16,7 @@ import { RailsPanel } from '../Panels';
 import type { RailFilter } from '../SideRail';
 import { OpsScreen, type Screen } from './OpsScreen';
 import { LookPanel, OpsCrewPanel, OpsLog, ScheduleTable, StatusBoard, UsageDesk } from './Panels';
+import { Marked } from '../Marked';
 
 interface Props {
   ship: ShipView;
@@ -92,7 +93,7 @@ export function OpsBoard({ ship, drills, target, onTarget, onBoard, onToast }: P
       <section className="room" aria-label="Ops">
         <div className="hero-top">
           <p className="mono hero-label">DECK 1 · OPS · PICK SOMETHING IN THE ROOM, OR A CHECK ON THE STATUS BOARD</p>
-          <p className="mono hero-label room-hint">{READINGS[nasSource(ship.data)]}OPS ONLY READS · ESC RETURNS THE SCREEN</p>
+          <p className="mono hero-label room-hint"><Marked>{READINGS[nasSource(ship.data)]}OPS ONLY READS · ESC RETURNS THE SCREEN</Marked></p>
         </div>
         <div className="room-wrap">
           <div className="room-pic ops-pic" data-hot={hot ?? ''} data-on={on ?? ''} data-gpu={ship.rail('local')}
