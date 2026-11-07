@@ -1,0 +1,89 @@
+# The holo Action: what happens when the Holodeck Officer (holo) pushes a holo/ branch.
+# 1. Holodeck paths only: every changed file must sit under a prefix in .github/holo-paths.txt,
+#    read from main (never from the branch).
+# 2. The same checks as the Bridge workflow: fixtures, probes, types and logic tests.
+# 3. Build frontend/dist and commit it to the branch, so holo never needs Node.
+# 4. Open the PR (or update its text), with holo's report holodeck/reports/<ORD>.md as the body.
+# Roger reviews in the Review bay on the Holodeck board and merges on GitHub. Main takes PRs only.
+# Pushes made here with the workflow's own sign-in don't start another run, so there is no loop.
+name: holo
+on:
+  push:
+    branches: ['holo/**']
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: holo-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  holo:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the branch
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Holodeck paths only
+        run: |
+          git fetch -q origin main
+          git show origin/main:.github/holo-paths.txt | grep -v '^#' | grep -v '^$' > /tmp/paths
+          out=""
+          for f in $(git diff --name-only origin/main...HEAD); do
+            ok=""
+            while read -r p; do case "$f" in "$p"*) ok=1;; esac; done < /tmp/paths
+            [ -n "$ok" ] || out="$out  $f\n"
+          done
+          if [ -n "$out" ]; then
+            echo "Holodeck paths only: these files are outside the Holodeck's paths:"
+            printf "$out"
+            echo "The Holodeck Officer changes the front end, fixtures, the schema and the design only."
+            exit 1
+          fi
+          echo "Every changed file is inside the Holodeck's paths."
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - name: Fixtures and probes (Python)
+        run: |
+          pip install -q jsonschema==4.26.0
+          python -m unittest discover -s tests
+          python -m unittest discover -s probe
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - name: Install (npm ci)
+        working-directory: frontend
+        run: npm ci
+      - name: Types, logic tests
+        working-directory: frontend
+        run: npm run check
+      - name: Build dist
+        working-directory: frontend
+        run: npm run build
+      - name: Commit dist
+        run: |
+          if [ -z "$(git status --porcelain -- frontend/dist)" ]; then echo "dist is current"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A frontend/dist
+          git commit -q -m "Build dist for ${GITHUB_REF_NAME}"
+          git push -q origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Open or update the PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="${GITHUB_REF_NAME}"
+          ord="${branch#holo/}"
+          report="holodeck/reports/${ord}.md"
+          if [ -f "$report" ]; then
+            title="$(head -n 1 "$report" | sed 's/^# *//')"
+            cp "$report" /tmp/body.md
+          else
+            title="$(git log --format=%s origin/main..HEAD | tail -n 1)"
+            echo "holo wrote no report for ${ord}." > /tmp/body.md
+          fi
+          printf '\n\n---\nOpened by the holo Action from `%s`. Review it in the Review bay on the Holodeck board.\n' "$branch" >> /tmp/body.md
+          num="$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')"
+          if [ -n "$num" ]; then
+            gh pr edit "$num" --title "$title" --body-file /tmp/body.md
+          else
+            gh pr create --base main --head "$branch" --title "$title" --body-file /tmp/body.md
+          fi

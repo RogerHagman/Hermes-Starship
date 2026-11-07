@@ -7,13 +7,14 @@ import rails from '../../../../fixtures/rails.json';
 import orders from '../../../../fixtures/orders.json';
 import shiplog from '../../../../fixtures/shiplog.json';
 import quarters from '../../../../fixtures/quarters.json';
+import holo from '../../../../fixtures/holo.json';
 import type { Fixtures } from '../../types';
 import { makeShipView } from '../../lib/ship';
 import { ASSETS, DECK_ROWS, draftBrief, loadDrafts, overlaps, type Draft } from '../../lib/holodeck';
 import { SHIP_MAP } from '../../lib/shipmap';
 import { HolodeckBoard } from './HolodeckBoard';
 
-const data = { ship, stations, rails, orders, shiplog, quarters } as unknown as Fixtures;
+const data = { ship, stations, rails, orders, shiplog, quarters, holo } as unknown as Fixtures;
 const noop = () => {};
 const board = (onBoard: (b: string) => void = noop, toasts: string[] = []) => render(
   <HolodeckBoard ship={makeShipView(data, {}, new Set())} filter="all" drills={{}} target={null} onTarget={noop}
@@ -94,5 +95,27 @@ describe('drafts', () => {
     expect(overlaps({ x: 1200, y: 434, w: 200 })).toBe(true);          // Cartography
     expect(overlaps({ x: 1450, y: 434, w: 100 }, [d])).toBe(true);
     expect(overlaps({ x: 1450, y: 434, w: 100 }, [d], 'DRAFT-1')).toBe(false);
+  });
+
+  it('the Review bay lists holo\'s work, and shows a run, its files and diff, and the report', () => {
+    const c = board();
+    const panel = c.querySelector('.holo-review') as HTMLElement;
+    expect([...panel.querySelectorAll('.rv-row .rv-ord')].map((e) => e.textContent)).toEqual(['ORD-9019', 'ORD-9020', 'ORD-9021', 'ORD-9022']);
+    fireEvent.click(button(panel, /ORD-9019/));
+    const s = screen(c);
+    expect(s.querySelector('.con-title')?.textContent).toBe('Review bay');
+    expect(s.querySelector('.rv-step.failed')?.textContent).toContain('Holodeck paths only');
+    expect(s.querySelector('.rv-log')?.textContent).toContain('deploy/compose.yaml');
+    expect(s.querySelector('.rv-file.oob')?.textContent).toContain('deploy/compose.yaml');
+    fireEvent.click(button(s, /ORD-9020/));
+    expect(s.querySelector('.rv-links a')?.getAttribute('href')).toMatch(/\/pull\/931$/);
+    expect(s.querySelector('.rv-report')?.textContent).toContain('HOLODECK LEADS THE DECK');
+    expect(s.querySelector('.rv-diff')?.textContent).toContain('+      "status": "live",');
+    expect([...s.querySelectorAll('.rv-step')].every((e) => e.classList.contains('ok'))).toBe(true);
+  });
+
+  it('the Ready screen has a Review bay tile with the counts', () => {
+    const c = board();
+    expect(screen(c).textContent).toContain('1 READY · 1 FAILED · 1 BUILDING · SAMPLE');
   });
 });

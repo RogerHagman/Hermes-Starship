@@ -30,7 +30,7 @@ export const SCREEN = { x: 880, y: 46, w: 560, h: 458 };
 export const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
 
 /** 24 x 24 line icons for the room's things (same style as the station icons). */
-export const HOLO_ICONS: Record<HoloObject | 'ease' | 'room' | 'draft', string> = {
+export const HOLO_ICONS: Record<HoloObject | 'ease' | 'room' | 'draft' | 'review', string> = {
   ease: 'M4 4h16v16H4z M4 9.3h16 M4 14.7h16 M9.3 4v16 M14.7 4v16',
   ship: 'M3 13c4-1 6-4 9-4s5 3 9 4c-4 1-6 3-9 3s-5-2-9-3z M12 9V5 M8 16l-2 3 M16 16l2 3',
   room: 'M4 7h16v10H4z M8 7V4h8v3 M8 12h8',
@@ -40,6 +40,7 @@ export const HOLO_ICONS: Record<HoloObject | 'ease' | 'room' | 'draft', string> 
   safety: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z M9 12l2 2 4-4',
   programs: 'M5 21V9a7 7 0 0 1 14 0v12 M12 2v19 M8 12h1 M15 12h1',
   bridge: 'M12 3l7 18-7-4-7 4z',
+  review: 'M6 3v12 M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M18 9c0 6-12 3-12 6',
 };
 
 // ---------- the assets: every picture the boards draw ----------

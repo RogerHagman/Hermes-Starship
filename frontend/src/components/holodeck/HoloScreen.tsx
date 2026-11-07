@@ -15,6 +15,8 @@ import type { ShipView } from '../../lib/ship';
 import type { Station } from '../../types';
 import { ConHead, StationPills, stationColour, stationSub, useEscape } from '../ShipConsole';
 import { StationArt, hasArt } from '../StationArt';
+import { ReviewView } from './Review';
+import { REVIEW_STATE, reviewCounts, reviewIsSample, reviewItems } from '../../lib/review';
 
 export type Screen =
   | { view: 'ease' }
@@ -24,7 +26,8 @@ export type Screen =
   | { view: 'new' }
   | { view: 'draft'; id: string }
   | { view: 'programs' }
-  | { view: 'safety' };
+  | { view: 'safety' }
+  | { view: 'review'; branch?: string };
 
 /** What a new section needs before it can be placed on the hologram. */
 export type DraftFields = Pick<Draft, 'name' | 'short' | 'kind' | 'deck' | 'dept' | 'rail' | 'duty' | 'w'>;
@@ -70,6 +73,7 @@ export function HoloScreen(p: Props) {
     }
     case 'programs': body = <ProgramsView onBoard={p.onBoard} onBack={back} />; break;
     case 'safety': body = <SafetyView onBack={back} />; break;
+    case 'review': body = <ReviewView ship={ship} branch={screen.branch} onPick={(branch) => onScreen({ view: 'review', branch })} onBack={back} />; break;
   }
   if (!body) body = <Ready ship={ship} drafts={p.drafts} assets={p.assets} onScreen={onScreen} />;
   return (
@@ -87,6 +91,8 @@ function Ready({ ship, drafts, assets, onScreen }: { ship: ShipView; drafts: Dra
   const built = BOARDS.filter((b) => b.built);
   const lead = leadOf(ship);
   const kb = assets.reduce((n, a) => n + a.kb, 0);
+  const rv = reviewCounts(ship.data);
+  const top = reviewItems(ship.data)[0];
   return (
     <>
       <ConHead icon={HOLO_ICONS.ease} title="Holodeck ready"
@@ -104,10 +110,9 @@ function Ready({ ship, drafts, assets, onScreen }: { ship: ShipView; drafts: Dra
             text={`Boards built: ${built.map((b) => b.label).join(', ')}.`} foot={`NEXT · ${BOARDS.find((b) => !b.built)?.label.toUpperCase() ?? 'NONE'}`} />
           <Tile icon="safety" label="SAFETY PANEL · PROTOCOLS" figure="On" onClick={() => onScreen({ view: 'safety' })}
             text={PROTOCOLS[1]} foot={`${PROTOCOLS.length} PROTOCOLS · ${PIPELINE.length} BUILD STEPS`} />
-          <Tile icon="room" label="BUILD QUEUE" figure={String(notBuilt.length + drafts.length)}
-            onClick={() => onScreen(notBuilt[0] ? { view: 'room', id: notBuilt[0].id } : { view: 'ship' })}
-            text={notBuilt.slice(0, 3).map((s) => s.short).join(', ') + (notBuilt.length > 3 ? ' and more.' : '.')}
-            foot="APPROVED, PROPOSED AND RESERVED" />
+          <Tile icon="review" label="REVIEW BAY · HOLO'S PRS" figure={String(rv.open)} onClick={() => onScreen({ view: 'review' })}
+            text={top ? `${top.order ?? top.branch}: ${top.title}, ${REVIEW_STATE[top.state].label.toLowerCase()}.` : 'Nothing from the Holodeck Officer yet.'}
+            foot={`${rv.ready} READY · ${rv.failed} FAILED · ${rv.building} BUILDING${reviewIsSample(ship.data) ? ' · SAMPLE' : ''}`} />
         </div>
       </div>
     </>

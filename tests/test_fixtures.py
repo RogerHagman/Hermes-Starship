@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
 NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops", "nas", "yeoman",
-         "helm", "nav", "viewscreen", "fastpaths", "meters"]
+         "helm", "nav", "viewscreen", "fastpaths", "meters", "holo"]
 
 
 def load(path):
@@ -379,3 +379,41 @@ class BridgePostsAgree(unittest.TestCase):
             times = [a["at"] for a in s["actions"]]
             self.assertEqual(times, sorted(times), s["id"])
             self.assertTrue(all(t >= s["start"] for t in times), s["id"])
+
+
+class HoloAgree(unittest.TestCase):
+    """The Review bay sample: holo branches, their runs and PRs."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.h = load(FIX / "holo.json")
+        lines = (ROOT / ".github" / "holo-paths.txt").read_text(encoding="utf-8").splitlines()
+        cls.paths = [l for l in lines if l and not l.startswith("#")]
+
+    def test_branches_unique_and_orders_are_samples(self):
+        branches = [i["branch"] for i in self.h["items"]]
+        self.assertEqual(len(branches), len(set(branches)))
+        for i in self.h["items"]:
+            with self.subTest(branch=i["branch"]):
+                self.assertTrue(i["order"].startswith("ORD-9"), i["order"])
+                self.assertEqual(i["branch"], f"holo/{i['order']}")
+
+    def test_states_agree_with_runs_and_prs(self):
+        for i in self.h["items"]:
+            with self.subTest(branch=i["branch"]):
+                run, pr = i["run"], i["pr"]
+                if i["state"] == "failed":
+                    self.assertEqual(run["status"], "failed")
+                    self.assertTrue(any(s["state"] == "failed" for s in run["steps"]))
+                    self.assertTrue(run.get("failLog"))
+                if i["state"] == "building":
+                    self.assertIn(run["status"], ("queued", "running"))
+                if i["state"] in ("ready", "merged"):
+                    self.assertEqual(run["status"], "passed")
+                    self.assertEqual(pr["state"], "open" if i["state"] == "ready" else "merged")
+
+    def test_bounds_flag_matches_the_paths_file(self):
+        for i in self.h["items"]:
+            for f in i["files"]:
+                with self.subTest(path=f["path"]):
+                    self.assertEqual(f["inBounds"], any(f["path"].startswith(p) for p in self.paths))

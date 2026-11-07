@@ -1,5 +1,6 @@
 // The side panels: rails, hails awaiting the Captain, orders in flight.
 import { useState } from 'react';
+import { REVIEW_STATE, reviewFor } from '../lib/review';
 import { byTier, railColor, SPEEDS_NOTE, speedText, tierText, tierVar } from '../lib/lookups';
 import { age, clockTime, dayAndTime } from '../lib/format';
 import { railsSource } from '../lib/data';
@@ -133,6 +134,13 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
   const rows: Order[] = parents.flatMap((p) => [p, ...kids(p.id).filter((c) => !folded.has(p.id) || c.id === picked)])
     .filter((o) => filter === 'all' || ship.station(o.station)?.rail === filter);
   const shown = new Set(rows.map((o) => o.id));
+  // Holodeck work: the order's branch and PR state, from the Review bay (holo's GitHub work).
+  const pr = (id: string) => {
+    const r = reviewFor(ship.data, id);
+    if (!r) return null;
+    return <span className="ocard-pr" style={{ '--rc': REVIEW_STATE[r.state].colour } as React.CSSProperties} title={REVIEW_STATE[r.state].what}>
+      {r.pr ? `PR #${r.pr.number}` : 'BRANCH'} · {REVIEW_STATE[r.state].label}</span>;
+  };
   const allRead = rows.length > 0 && rows.every((o) => read.has(o.id));
 
   const flip = (set: typeof setRead, id: string) => set((f) => {
@@ -180,6 +188,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
                 <span className="ocard-sub">
                   {st?.short ?? o.station} · {speedText(o.speed, st)} · {age(ship.data.orders.asOf, o.updatedAt)}
                   {o.replies && <span className="ocard-replies">{o.replies.length} {o.replies.length === 1 ? 'REPLY' : 'REPLIES'}</span>}
+                  {pr(o.id)}
                   {subs.length > 0 && (
                     <button type="button" className="subfold" aria-expanded={!isFolded}
                       onClick={(e) => { e.stopPropagation(); flip(setFolded, o.id); }}>

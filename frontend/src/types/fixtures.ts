@@ -142,6 +142,95 @@ export interface HelmFile {
 }
 
 /**
+ * The Holodeck Officer's work on GitHub, for the Review bay: each holo/ branch it pushed, the holo Action's run on it (step by step), the pull request the Action opened, the files it changes and the report it wrote. live/holo.json from the holo probe reads it from GitHub (GET only); without it the board shows this sample.
+ */
+export interface HoloFile {
+  asOf: string;
+  synthetic: boolean;
+  /**
+   * owner/name on GitHub.
+   */
+  repo: string;
+  /**
+   * Newest first: open work first, then the last merged or closed ones.
+   *
+   * @maxItems 40
+   */
+  items: {
+    branch: string;
+    /**
+     * The ORD from the branch name, or null when the branch has none.
+     */
+    order: string | null;
+    /**
+     * The PR title, or the newest commit's first line before there is a PR.
+     */
+    title: string;
+    /**
+     * pushed: no run yet. building: the Action is running. failed: a check failed. ready: checks passed and the PR is open. merged and closed: done.
+     */
+    state: "pushed" | "building" | "failed" | "ready" | "merged" | "closed";
+    updatedAt: string;
+    /**
+     * The version the branch bumps __version__.py to, when it does.
+     */
+    version?: string | null;
+    /**
+     * The branch head, short.
+     */
+    sha?: string;
+    pr: {
+      number: number;
+      url: string;
+      state: "open" | "merged" | "closed";
+      draft?: boolean;
+    } | null;
+    /**
+     * The newest holo Action run on the branch head.
+     */
+    run: {
+      status: "queued" | "running" | "passed" | "failed" | "cancelled";
+      url: string;
+      startedAt?: string | null;
+      seconds?: number | null;
+      /**
+       * @maxItems 40
+       */
+      steps: {
+        name: string;
+        state: "waiting" | "running" | "ok" | "failed" | "skipped";
+        seconds?: number | null;
+      }[];
+      /**
+       * The last lines of the failing step's log.
+       *
+       * @maxItems 40
+       */
+      failLog?: string[];
+    } | null;
+    /**
+     * What the branch changes against main. A file outside the Holodeck's paths is flagged out of bounds.
+     *
+     * @maxItems 100
+     */
+    files: {
+      path: string;
+      add: number;
+      del: number;
+      inBounds: boolean;
+      /**
+       * The unified diff of this file, cut to a few hundred lines. Missing for built and binary files.
+       */
+      patch?: string;
+    }[];
+    /**
+     * holodeck/reports/<ORD>.md from the branch, or null.
+     */
+    report: string | null;
+  }[];
+}
+
+/**
  * The Science lab's meters: what the crew spends (tokens, and dollars where Hermes knows a price) by rail, station and time window, from Hermes' own session records; how fast each cloud rail works, from the hand-off log; the weekly leak share, from leak-kpis.csv; and the speed trials on the local rail (time to first token and tokens a second). live/meters.json from the meter probe replaces the sample.
  */
 export interface MetersFile {

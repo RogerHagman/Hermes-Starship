@@ -1,12 +1,13 @@
 // Friendly names for the generated fixture types.
-import type { EngineeringFile, FastPathsFile, HelmFile, MetersFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile } from './fixtures';
+import type { EngineeringFile, FastPathsFile, HelmFile, HoloFile, MetersFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile } from './fixtures';
 
-export type { EngineeringFile, FastPathsFile, HelmFile, MetersFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile };
+export type { EngineeringFile, FastPathsFile, HelmFile, HoloFile, MetersFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile };
 export type Station = StationsFile['stations'][number];
 export type Rail = RailsFile['rails'][number];
 export type RailId = Rail['id'];
 export type Order = OrdersFile['orders'][number];
 export type FastPath = FastPathsFile['paths'][number];
+export type HoloItem = HoloFile['items'][number];
 export type LogEntry = ShipLogFile['entries'][number];
 export type RailColour = Station['rail'];
 export type Campaign = QuartersFile['campaigns'][number];
@@ -73,6 +74,8 @@ export interface Fixtures {
   fastpaths: FastPathsFile;
   /** The Science lab's meters (spend, speed, leak share): the sample, or live/meters.json from the meter probe. */
   meters: MetersFile;
+  /** The Holodeck Officer's work on GitHub for the Review bay: the sample, or live/holo.json from the holo probe. */
+  holo: HoloFile;
   /** live/rail-log.json from the rails probe, when there is one. Its duty lines replace the samples. */
   raillog?: RailLogFile;
   /** live/nas.json from the Ops probe, when there is one. Its NAS and disks replace the sample ones in ops. */
