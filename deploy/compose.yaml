@@ -48,6 +48,11 @@ services:
       # asks Anthropic for the 5 h and weekly use with it at most every CLAUDE_EVERY seconds.
       CLAUDE_SIGNIN: /data/claude/.credentials.json
       CLAUDE_EVERY: "300"
+      # Codex: forge calls Codex through Hermes, which writes no Codex session logs, so the probe
+      # asks OpenAI for the 5 h and weekly use (what Codex's /status shows) with the Codex sign-in
+      # Hermes keeps in its auth.json, read-only, at most every CLAUDE_EVERY seconds. The logs stay
+      # as the fallback.
+      CODEX_SIGNIN: /data/hermes
       OUT_DIR: /out
       INTERVAL: "60"
     volumes:
@@ -57,6 +62,10 @@ services:
       # The folder, not the file: when Claude Code renews the sign-in it replaces the file, and a
       # mount of the file alone would keep showing the old one.
       - ${CLAUDE_HOME_HOST:-/DATA/AppData/hermes/home/.claude}:/data/claude:ro
+      # Hermes' folder for its auth.json files (the root one, each profile's, and the Codex CLI's).
+      # The folder, not the files: Hermes replaces auth.json when it renews the sign-in. Read-only,
+      # and the probe opens only the auth.json files in it.
+      - ${HERMES_DATA_HOST:-/DATA/AppData/hermes}:/data/hermes:ro
       - ./live:/out
       - ../probe/rails_probe.py:/app/rails_probe.py:ro
     command: python -u /app/rails_probe.py
