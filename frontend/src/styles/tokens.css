@@ -29,6 +29,7 @@
   --tier-2:var(--rail-codex);
   --tier-3:#ff5050;
   --good:#7fd8a8;
+  --clock:#6fe3f2;   /* the task clock */
   --bad:#f08a7a;
   /* Sample data that still needs a live read: dashed, so it never passes for live. */
   --sample:#ffd84d;

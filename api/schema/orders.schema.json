@@ -80,6 +80,12 @@
             "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$",
             "description": "When the order came in (orders.csv received_at, else its first card)."
           },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$",
+            "description": "When a crew member first started on it (the first card's started_at). The task clock's 'worked' time counts from here."
+          },
           "closedAt": {
             "type": "string",
             "format": "date-time",

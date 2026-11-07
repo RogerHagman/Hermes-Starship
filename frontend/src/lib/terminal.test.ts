@@ -99,6 +99,9 @@ describe('the settings', () => {
     expect(applySet(DEFAULTS, 'colour', 'ice').settings.phosphor).toBe('blue');
     expect(applySet(DEFAULTS, 'start', 'awaiting').settings.start).toBe('awaiting-captain');
     expect(applySet(DEFAULTS, 'key', '§').settings.key).toBe('§');
+    expect(applySet(DEFAULTS, 'clock', 'off')).toEqual({ settings: { ...DEFAULTS, clock: 'off' }, said: 'Clock column: Hidden.' });
+    expect(applySet(DEFAULTS, 'worked', 'hide').settings.effective).toBe('off');
+    expect(applySet(DEFAULTS, 'dates', 'none').settings.dates).toBe('off');
     expect(applySet(DEFAULTS, 'rows').said).toBe('Rows per page: 200. Choose 50, 100, 200, 500.');
     expect(applySet(DEFAULTS, 'rows', '7')).toEqual({ settings: DEFAULTS, said: 'Rows per page: 7 is not a choice. Choose 50, 100, 200, 500.' });
     expect(applySet(DEFAULTS, 'up', 'the printer').said).toContain('no setting called up');

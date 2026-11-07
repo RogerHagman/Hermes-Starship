@@ -183,6 +183,8 @@ CARD_COLUMNS = {
     "worker": ("assignee", "profile", "assigned_to", "worker", "agent", "owner"),
     "created": ("created_at", "created", "inserted_at"),
     "result": ("result", "output", "answer"),
+    "started": ("started_at", "claimed_at"),
+    "completed": ("completed_at", "finished_at"),
 }
 # Every time column a card may have; the newest of them is when the card last moved.
 TIME_COLUMNS = ("updated_at", "modified_at", "completed_at", "started_at", "last_heartbeat_at", "created_at")
@@ -379,8 +381,16 @@ def build_orders(rows, cards, names, now, days=7, keep=80, answers=None, archive
         opened = parse_time(row.get("received_at")) or min((t for t in (parse_time(c.get("created")) for c in theirs) if t), default=None)
         if opened:
             order["openedAt"] = utc_stamp(opened)
+        # The task clock: when work started (first card claimed), and when it closed. A done order
+        # closes at orders.csv's closed_at, else its last card's completion, else its last answer.
+        started = min((t for t in (parse_time(c.get("started")) for c in theirs) if t), default=None)
+        if started:
+            order["startedAt"] = utc_stamp(started)
         if state == "done":
-            order["closedAt"] = utc_stamp(parse_time(row.get("closed_at")) or when)
+            completed = [parse_time(c.get("completed")) for c in theirs]
+            last_card = max(completed) if completed and all(completed) else None
+            last_answer = max((a["at"] for a in said if a.get("at")), default=None)
+            order["closedAt"] = utc_stamp(parse_time(row.get("closed_at")) or last_card or last_answer or when)
         if row.get("from_surface"):
             order["surface"] = row["from_surface"].lower()
         order["cards"] = len(theirs)

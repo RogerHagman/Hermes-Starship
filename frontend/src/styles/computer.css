@@ -104,7 +104,7 @@ html:has(.board-computer) body{background-color:#05080d;background-image:var(--s
 .tclear{padding:0 7px;border-radius:99px;border:1px solid color-mix(in srgb, var(--phos) 40%, transparent);background:transparent;color:var(--phos);font-family:var(--font-mono);font-size:10px;cursor:pointer}
 .tclear:hover{border-color:var(--phos)}
 .tlist{list-style:none;margin:0;padding:0;flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;border-top:1px dashed color-mix(in srgb, var(--phos) 22%, transparent)}
-.trow{width:100%;display:grid;grid-template-columns:74px 86px 74px minmax(0,1fr) auto;gap:10px;align-items:center;padding:5px 6px;border:none;
+.trow,.thead{width:100%;display:grid;grid-template-columns:var(--cols,74px 86px 74px minmax(0,1fr) 92px 84px auto);gap:10px;align-items:center;padding:5px 6px;border:none;
   border-bottom:1px solid color-mix(in srgb, var(--phos) 7%, transparent);background:transparent;color:var(--text);text-align:left;cursor:pointer;font-size:13px}
 .trow:hover,.trow:focus-visible{background:color-mix(in srgb, var(--phos) 7%, transparent);outline:none}
 .trow:focus-visible{box-shadow:inset 2px 0 0 var(--phos)}
@@ -113,6 +113,9 @@ html:has(.board-computer) body{background-color:#05080d;background-image:var(--s
 .ttitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trow.ts-done .ttitle{color:var(--text-muted)}
 .twhen{font-size:10px;color:var(--text-label);white-space:nowrap}
+.tclock{font-size:11px;text-align:right;white-space:nowrap}
+.thead{cursor:default;position:sticky;top:0;z-index:1;align-items:center;padding:3px 6px;background:var(--bg);font-size:9.5px;letter-spacing:.1em;color:var(--text-label);border-bottom:1px solid color-mix(in srgb, var(--phos) 14%, transparent)}
+.thead .tclock,.thead .tst,.thead .twhen{font-size:9.5px;color:var(--text-label)}
 .tnone{padding:12px 6px;font-size:12px;color:var(--text-label)}
 .tnone b{color:var(--phos)}
 .tfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:22px}
@@ -257,8 +260,8 @@ button.tbar-row:hover{background:var(--surface-raised)}
 @container board (max-width: 760px){
   .rb-word{font-size:7px}
   .rb-n{font-size:16px}
-  .trow{grid-template-columns:70px minmax(0,1fr) auto}
-  .trow .tst,.trow .twhen,.thint{display:none}
+  .trow,.thead{grid-template-columns:70px auto minmax(0,1fr) auto auto}
+  .trow .tst,.trow .twhen,.thint,.thead .tst,.thead .twhen{display:none}
   .tset-row{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
   .tset-name,.tset-cmd,.tset-says,.tset-choices{grid-column:1;grid-row:auto}
   .tset-choices{justify-content:flex-start}

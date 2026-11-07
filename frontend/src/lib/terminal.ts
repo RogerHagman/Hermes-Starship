@@ -12,16 +12,23 @@ export interface CoreSettings {
   order: 'newest' | 'oldest';
   /** Where typed words are looked for. */
   search: 'all' | 'titles';
-  /** The date at the end of each row: the day, or the day and the time. */
-  dates: 'day' | 'time';
+  /** The date at the end of each row: the day, the day and the time, or none. */
+  dates: 'day' | 'time' | 'off';
   /** What the list shows when the board opens. */
   start: 'all' | 'open' | 'awaiting-captain';
   /** The key that jumps to the command line from anywhere on the board. */
   key: '/' | '§' | 'ctrl+k';
   phosphor: 'green' | 'amber' | 'blue';
+  /** Which of the list's own columns show (the order, its state and its title always do). */
+  station: Shown;
+  clock: Shown;
+  effective: Shown;
 }
 
-export const DEFAULTS: CoreSettings = { rows: 200, order: 'newest', search: 'all', dates: 'day', start: 'all', key: '/', phosphor: 'green' };
+export type Shown = 'on' | 'off';
+const SHOWN = (what: string): Choice[] => [{ v: 'on', word: 'Shown', also: ['show', 'yes', what] }, { v: 'off', word: 'Hidden', also: ['hide', 'no', 'none'] }];
+
+export const DEFAULTS: CoreSettings = { rows: 200, order: 'newest', search: 'all', dates: 'day', start: 'all', key: '/', phosphor: 'green', station: 'on', clock: 'on', effective: 'on' };
 
 type Value = CoreSettings[keyof CoreSettings];
 export interface Choice { v: Value; word: string; also?: string[] }
@@ -39,8 +46,15 @@ export const SETTINGS: Setting[] = [
     says: 'Where the words you type are looked for: the whole record, or only the order number and title.',
     choices: [{ v: 'all', word: 'Everything', also: ['everything', 'body'] }, { v: 'titles', word: 'Titles only', also: ['title'] }] },
   { id: 'dates', name: 'Dates on rows', also: ['date', 'time'],
-    says: 'The end of each row: the day of the last update, or the day and the time.',
-    choices: [{ v: 'day', word: 'Day', also: ['days'] }, { v: 'time', word: 'Day and time', also: ['times'] }] },
+    says: 'The end of each row: the day of the last update, the day and the time, or no date column.',
+    choices: [{ v: 'day', word: 'Day', also: ['days'] }, { v: 'time', word: 'Day and time', also: ['times'] },
+      { v: 'off', word: 'Hidden', also: ['hide', 'none', 'no'] }] },
+  { id: 'station', name: 'Station column', also: ['stations', 'crew'],
+    says: 'The station working the order, in its rail colour.', choices: SHOWN('station') },
+  { id: 'clock', name: 'Clock column', also: ['clocks', 'took', 'total'],
+    says: 'The task clock: from the order coming in to now, or to its close. Ticks while the order is open.', choices: SHOWN('clock') },
+  { id: 'effective', name: 'Effective column', also: ['worked', 'work'],
+    says: 'The effective time: from a crew member starting on it (the first card claimed). A dash when no card was claimed.', choices: SHOWN('effective') },
   { id: 'start', name: 'On start', also: ['startup', 'begin'],
     says: 'What the list shows when the board opens. all, clear and reset still show every order.',
     choices: [{ v: 'all', word: 'All orders' }, { v: 'open', word: 'Open orders' },

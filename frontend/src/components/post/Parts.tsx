@@ -3,10 +3,11 @@
 import type { ReactNode } from 'react';
 import { dayAndTime, dayLine } from '../../lib/format';
 import { speedText } from '../../lib/lookups';
-import { STATE_WORD, SURFACE_WORD, logOf, records, span, took } from '../../lib/computer';
+import { STATE_WORD, SURFACE_WORD, logOf, records } from '../../lib/computer';
 import { ROOM, TABLE, openedOf, pct } from '../../lib/post';
 import type { ShipView } from '../../lib/ship';
 import type { Order } from '../../types';
+import { ClockRow } from '../TaskClock';
 import { CardBody, Replies } from '../Panels';
 import { ConHead } from '../ShipConsole';
 import { StatePill } from '../computer/ComputerScreen';
@@ -67,10 +68,11 @@ export function OrderView({ ship, id, back, onBack, icon }: { ship: ShipView; id
       <div className="con-body pbody">
         <dl className="pfacts mono">
           <div><dt>STATE</dt><dd><StatePill state={o.state} /></dd></div>
+          <ClockRow ship={ship} order={o} />
           <div><dt>STATION</dt><dd>{st?.name ?? o.station}</dd></div>
           <div><dt>SPEED</dt><dd>{speedText(o.speed, st)}</dd></div>
           {o.openedAt && <div><dt>OPENED</dt><dd>{when(o.openedAt)}{o.surface ? ` · ${up(SURFACE_WORD[o.surface] ?? o.surface)}` : ''}</dd></div>}
-          {o.closedAt && <div><dt>CLOSED</dt><dd>{when(o.closedAt)}{took(o) !== null ? ` · TOOK ${span(took(o)!)}` : ''}</dd></div>}
+          {o.closedAt && <div><dt>CLOSED</dt><dd>{when(o.closedAt)}</dd></div>}
           {o.cards !== undefined && <div><dt>CARDS</dt><dd>{o.cards === 0 ? 'NONE · ANSWERED IN CHAT' : o.cards}</dd></div>}
           {o.parent && <div><dt>PART OF</dt><dd>{o.parent}</dd></div>}
           {o.detail && <div className="wide"><dt>NOTE</dt><dd>{o.detail}</dd></div>}
