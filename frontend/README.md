@@ -12,6 +12,11 @@ standing in for the Holodeck Officer.
   or the bookshelf, and its view comes up on the wall screen. Around the room: hails, rails, the duty roster with
   Relieve and Recall, campaigns with their missions, and the order log. The ship model on the desk goes back to the
   Bridge. Approve, Deny, Write and new log entries stay on the screen until orders open in H4.
+- **The Bridge posts** (Deck 1): Number One's post (`#/xo`: the routing table, comm channels, fast path, rail
+  rules), Helm (`#/helm`: the career course from the application tracker, your gates, follow-ups, the method),
+  Navigation (`#/nav`: the next 7 days, trips, bookings held for you, slots for the Yeoman's Schedule box) and the
+  Main Viewscreen (`#/viewscreen`: what is on screen, the tape of actions, what waits for your OK). One room, one set of
+  parts and one stylesheet for all four (`components/post`, `lib/post.ts`, `styles/posts.css`), each with its own accent.
 
 ## Reading the code
 
@@ -34,6 +39,9 @@ takes props (its inputs) and returns the markup it draws.
 | `src/styles/` | Tokens from the design system, the Bridge styles (`landing.css`), the warmer Quarters theme (`quarters.css`), the mess-hall animation |
 | `src/assets/ship.svg` | Ship art from DeckPlanV4 (`tools/make_ship_svg.py`). To redraw the ship, swap this file and `shipmap.ts` |
 | `src/assets/quarters.svg` | The Captain's Quarters picture, drawn by `tools/make_quarters_svg.py` (`python3 frontend/tools/make_quarters_svg.py`). Move something there, then move its box in `lib/quarters.ts` |
+| `src/lib/xo.ts`, `helm.ts`, `nav.ts`, `viewscreen.ts` | Each Bridge post's things in the room and its plain functions (stages, follow-ups, free slots, the tape). Tested next to them |
+| `src/components/post/` | `PostRoom` (the picture, its buttons, the desk and the wall screen) and `Parts` (desk tiles, order rows, one order, number tiles, day bars) the four posts share |
+| `src/assets/xo.svg`, `helm.svg`, `nav.svg`, `viewscreen.svg` | The four Bridge post rooms, drawn by `tools/make_bridge_posts_svg.py`. Move something there, then move its box in that post's lib file |
 | `src/assets/bridge-chair.svg` | The Captain's chair on the Bridge, drawn by `tools/make_bridge_chair_svg.py` from the same chair as the Quarters |
 | `dist/` | The built page that the NAS serves. Committed, and CI checks it matches a fresh build |
 
