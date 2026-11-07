@@ -1,0 +1,403 @@
+{
+  "asOf": "2026-11-07T19:42:00Z",
+  "synthetic": true,
+  "repo": "RogerHagman/Hermes-Starship",
+  "items": [
+    {
+      "branch": "holo/ORD-9021",
+      "order": "ORD-9021",
+      "title": "Ops board: legend in two columns",
+      "state": "building",
+      "updatedAt": "2026-11-07T19:41:00Z",
+      "version": "0.2.16",
+      "sha": "4e1c9a2",
+      "pr": null,
+      "run": {
+        "status": "running",
+        "url": "https://github.com/RogerHagman/Hermes-Starship/actions/runs/9021",
+        "startedAt": "2026-11-07T19:40:12Z",
+        "seconds": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "state": "ok",
+            "seconds": 2
+          },
+          {
+            "name": "Check out the branch",
+            "state": "ok",
+            "seconds": 3
+          },
+          {
+            "name": "Holodeck paths only",
+            "state": "ok",
+            "seconds": 1
+          },
+          {
+            "name": "Fixtures and probes (Python)",
+            "state": "ok",
+            "seconds": 8
+          },
+          {
+            "name": "Install (npm ci)",
+            "state": "ok",
+            "seconds": 22
+          },
+          {
+            "name": "Types, logic tests",
+            "state": "running",
+            "seconds": null
+          },
+          {
+            "name": "Build dist",
+            "state": "waiting",
+            "seconds": null
+          },
+          {
+            "name": "Commit dist",
+            "state": "waiting",
+            "seconds": null
+          },
+          {
+            "name": "Open or update the PR",
+            "state": "waiting",
+            "seconds": null
+          }
+        ]
+      },
+      "files": [
+        {
+          "path": "frontend/src/components/ops/Panels.tsx",
+          "add": 6,
+          "del": 3,
+          "inBounds": true,
+          "patch": "@@ -88,9 +88,12 @@ export function CrewPanel({ ship }: { ship: ShipView }) {\n   return (\n     <section className=\"panel ops-crew\" aria-labelledby=\"ocrew-title\">\n-      <ul className=\"legend\">\n+      {/* Two columns, so the legend fits beside the crew list at 2560 wide. */}\n+      <ul className=\"legend legend-2col\">\n         {LEGEND.map((l) => (\n-          <li key={l.id}>{l.text}</li>\n+          <li key={l.id}>\n+            <span className=\"dot\" style={{ background: l.colour }} />{l.text}\n+          </li>\n         ))}\n       </ul>"
+        },
+        {
+          "path": "frontend/src/styles/ops.css",
+          "add": 4,
+          "del": 0,
+          "inBounds": true,
+          "patch": "@@ -212,3 +212,7 @@\n .legend li { display: flex; gap: 6px; }\n+.legend-2col {\n+  display: grid;\n+  grid-template-columns: 1fr 1fr;\n+}"
+        },
+        {
+          "path": "__version__.py",
+          "add": 1,
+          "del": 1,
+          "inBounds": true,
+          "patch": "@@ -1,3 +1,3 @@\n # __version__.py\n-__version__ = \"0.2.15\"\n+__version__ = \"0.2.16\""
+        },
+        {
+          "path": "holodeck/reports/ORD-9021.md",
+          "add": 9,
+          "del": 0,
+          "inBounds": true
+        }
+      ],
+      "report": "# ORD-9021 · Ops board legend in two columns\n\n**What changed:** the crew legend on the Ops board is a two-column grid, each line with its colour dot.\n\n**Look at:** the Ops board, right column, under the crew list. At 2560 wide the legend should end level with the crew rows.\n\n**Open questions:** none."
+    },
+    {
+      "branch": "holo/ORD-9020",
+      "order": "ORD-9020",
+      "title": "Holodeck Officer reports aboard",
+      "state": "ready",
+      "updatedAt": "2026-11-07T18:12:00Z",
+      "version": "0.2.16",
+      "sha": "9b07d3e",
+      "pr": {
+        "number": 931,
+        "url": "https://github.com/RogerHagman/Hermes-Starship/pull/931",
+        "state": "open",
+        "draft": false
+      },
+      "run": {
+        "status": "passed",
+        "url": "https://github.com/RogerHagman/Hermes-Starship/actions/runs/9020",
+        "startedAt": "2026-11-07T18:09:40Z",
+        "seconds": 95,
+        "steps": [
+          {
+            "name": "Set up job",
+            "state": "ok",
+            "seconds": 2
+          },
+          {
+            "name": "Check out the branch",
+            "state": "ok",
+            "seconds": 3
+          },
+          {
+            "name": "Holodeck paths only",
+            "state": "ok",
+            "seconds": 1
+          },
+          {
+            "name": "Fixtures and probes (Python)",
+            "state": "ok",
+            "seconds": 9
+          },
+          {
+            "name": "Install (npm ci)",
+            "state": "ok",
+            "seconds": 21
+          },
+          {
+            "name": "Types, logic tests",
+            "state": "ok",
+            "seconds": 38
+          },
+          {
+            "name": "Build dist",
+            "state": "ok",
+            "seconds": 14
+          },
+          {
+            "name": "Commit dist",
+            "state": "ok",
+            "seconds": 3
+          },
+          {
+            "name": "Open or update the PR",
+            "state": "ok",
+            "seconds": 4
+          }
+        ]
+      },
+      "files": [
+        {
+          "path": "fixtures/stations.json",
+          "add": 3,
+          "del": 3,
+          "inBounds": true,
+          "patch": "@@ -385,12 +385,12 @@\n       \"rail\": \"claude\",\n-      \"status\": \"approved\",\n+      \"status\": \"live\",\n       \"rank\": \"ltcmdr\",\n       \"dept\": \"holo\",\n       \"deck\": 4,\n-      \"profile\": \"holo (not created)\",\n+      \"profile\": \"holo\",\n@@ -401,3 +401,3 @@\n       \"duty\": \"Builds the ship's own interface, the dashboard front end, from these canvas boards. The Chief Engineer owns the backend.\",\n-      \"note\": \"Approved, not built. Until then the Stellar Cartographer leads the department.\",\n+      \"note\": \"Builds from design files, the API schema and fixtures only.\","
+        },
+        {
+          "path": "__version__.py",
+          "add": 1,
+          "del": 1,
+          "inBounds": true,
+          "patch": "@@ -1,3 +1,3 @@\n # __version__.py\n-__version__ = \"0.2.15\"\n+__version__ = \"0.2.16\""
+        },
+        {
+          "path": "frontend/package.json",
+          "add": 1,
+          "del": 1,
+          "inBounds": true,
+          "patch": "@@ -1,6 +1,6 @@\n {\n   \"name\": \"hermes-starship\",\n-  \"version\": \"0.2.15\",\n+  \"version\": \"0.2.16\","
+        },
+        {
+          "path": "frontend/package-lock.json",
+          "add": 2,
+          "del": 2,
+          "inBounds": true
+        },
+        {
+          "path": "holodeck/reports/ORD-9020.md",
+          "add": 11,
+          "del": 0,
+          "inBounds": true
+        },
+        {
+          "path": "frontend/dist/assets/index-Ab12Cd34.js",
+          "add": 1,
+          "del": 0,
+          "inBounds": true
+        },
+        {
+          "path": "frontend/dist/index.html",
+          "add": 1,
+          "del": 1,
+          "inBounds": true
+        }
+      ],
+      "report": "# ORD-9020 · Holodeck Officer reports aboard\n\n**What changed:** my station in fixtures/stations.json is live, profile holo, with a new note. No component change was needed: leadOf() picks me up once I'm live.\n\n**Look at:**\n- the Holodeck board's Ready screen: the header should read HOLODECK LEADS THE DECK.\n- the Ops board's crew count: one more at the post.\n\n**Open questions:** none."
+    },
+    {
+      "branch": "holo/ORD-9019",
+      "order": "ORD-9019",
+      "title": "Yeoman's post: box headers in caps",
+      "state": "failed",
+      "updatedAt": "2026-11-07T16:30:00Z",
+      "version": "0.2.16",
+      "sha": "c3d4e5f",
+      "pr": null,
+      "run": {
+        "status": "failed",
+        "url": "https://github.com/RogerHagman/Hermes-Starship/actions/runs/9019",
+        "startedAt": "2026-11-07T16:28:51Z",
+        "seconds": 7,
+        "steps": [
+          {
+            "name": "Set up job",
+            "state": "ok",
+            "seconds": 2
+          },
+          {
+            "name": "Check out the branch",
+            "state": "ok",
+            "seconds": 3
+          },
+          {
+            "name": "Holodeck paths only",
+            "state": "failed",
+            "seconds": 1
+          },
+          {
+            "name": "Fixtures and probes (Python)",
+            "state": "skipped",
+            "seconds": null
+          },
+          {
+            "name": "Install (npm ci)",
+            "state": "skipped",
+            "seconds": null
+          },
+          {
+            "name": "Types, logic tests",
+            "state": "skipped",
+            "seconds": null
+          },
+          {
+            "name": "Build dist",
+            "state": "skipped",
+            "seconds": null
+          },
+          {
+            "name": "Commit dist",
+            "state": "skipped",
+            "seconds": null
+          },
+          {
+            "name": "Open or update the PR",
+            "state": "skipped",
+            "seconds": null
+          }
+        ],
+        "failLog": [
+          "Holodeck paths only: these files are outside the Holodeck's paths:",
+          "  deploy/compose.yaml",
+          "The Holodeck Officer changes the front end, fixtures, the schema and the design only.",
+          "Error: Process completed with exit code 1."
+        ]
+      },
+      "files": [
+        {
+          "path": "frontend/src/components/yeoman/Panels.tsx",
+          "add": 4,
+          "del": 4,
+          "inBounds": true,
+          "patch": "@@ -41,7 +41,7 @@ function Box({ box }: { box: YeomanBox }) {\n       <div className=\"panel-head\">\n-        <h2 className=\"panel-title\">{box.title}</h2>\n+        <h2 className=\"panel-title\">{box.title.toUpperCase()}</h2>"
+        },
+        {
+          "path": "deploy/compose.yaml",
+          "add": 1,
+          "del": 0,
+          "inBounds": false,
+          "patch": "@@ -90,3 +90,4 @@\n       HELM_DIR: /hermes/helm/app-tracker\n       FAST_PATHS: /hermes/routing/fast-paths.json\n+      YEOMAN_CAPS: \"1\""
+        },
+        {
+          "path": "__version__.py",
+          "add": 1,
+          "del": 1,
+          "inBounds": true
+        },
+        {
+          "path": "holodeck/reports/ORD-9019.md",
+          "add": 8,
+          "del": 0,
+          "inBounds": true
+        }
+      ],
+      "report": "# ORD-9019 · Yeoman box headers in caps\n\n**What changed:** the four box headers on the Yeoman's post are upper case.\n\n**Open questions:** I added a switch in deploy/compose.yaml so the old look can come back. That's outside my paths: drop it if it isn't wanted."
+    },
+    {
+      "branch": "holo/ORD-9022",
+      "order": "ORD-9022",
+      "title": "Science lab: meter labels under the bars",
+      "state": "merged",
+      "updatedAt": "2026-11-06T21:05:00Z",
+      "version": "0.2.14",
+      "sha": "a1b2c3d",
+      "pr": {
+        "number": 930,
+        "url": "https://github.com/RogerHagman/Hermes-Starship/pull/930",
+        "state": "merged",
+        "draft": false
+      },
+      "run": {
+        "status": "passed",
+        "url": "https://github.com/RogerHagman/Hermes-Starship/actions/runs/9022",
+        "startedAt": "2026-11-06T20:31:02Z",
+        "seconds": 101,
+        "steps": [
+          {
+            "name": "Set up job",
+            "state": "ok",
+            "seconds": 2
+          },
+          {
+            "name": "Check out the branch",
+            "state": "ok",
+            "seconds": 3
+          },
+          {
+            "name": "Holodeck paths only",
+            "state": "ok",
+            "seconds": 1
+          },
+          {
+            "name": "Fixtures and probes (Python)",
+            "state": "ok",
+            "seconds": 9
+          },
+          {
+            "name": "Install (npm ci)",
+            "state": "ok",
+            "seconds": 21
+          },
+          {
+            "name": "Types, logic tests",
+            "state": "ok",
+            "seconds": 38
+          },
+          {
+            "name": "Build dist",
+            "state": "ok",
+            "seconds": 14
+          },
+          {
+            "name": "Commit dist",
+            "state": "ok",
+            "seconds": 3
+          },
+          {
+            "name": "Open or update the PR",
+            "state": "ok",
+            "seconds": 4
+          }
+        ]
+      },
+      "files": [
+        {
+          "path": "frontend/src/components/science/Meters.tsx",
+          "add": 5,
+          "del": 5,
+          "inBounds": true
+        },
+        {
+          "path": "__version__.py",
+          "add": 1,
+          "del": 1,
+          "inBounds": true
+        },
+        {
+          "path": "holodeck/reports/ORD-9022.md",
+          "add": 7,
+          "del": 0,
+          "inBounds": true
+        }
+      ],
+      "report": "# ORD-9022 · Meter labels under the bars\n\n**What changed:** each meter's label sits under its bar instead of beside it."
+    }
+  ]
+}

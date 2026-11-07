@@ -1,0 +1,15 @@
+# The paths the Holodeck Officer (holo) may change on a holo/ branch, one prefix per line.
+# The holo Action reads this file from main (never from the branch), and the holo probe keeps
+# the same list (tests check they agree). Anything else on a holo branch fails the
+# "Holodeck paths only" step and shows as OUT OF BOUNDS in the Review bay.
+__version__.py
+api/schema/
+design-system/
+fixtures/
+frontend/dist/
+frontend/package-lock.json
+frontend/package.json
+frontend/public/
+frontend/src/
+frontend/tools/
+holodeck/

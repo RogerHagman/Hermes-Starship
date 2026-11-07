@@ -2,7 +2,7 @@
 // hero, like the Captain's Quarters: the ship floats over the emitter as a hologram (pick a
 // room on it), and the pattern buffer, the new-section console, the safety panel and the
 // arch each open a view on the work screen in place. Around the room: the Holodeck crew,
-// the build queue and the rails on the right, every room on the ship and the deck's orders
+// the Review bay (holo's PRs), the build queue and the rails on the right, every room on the ship and the deck's orders
 // below, the comm badge at the bottom. Drafts of new sections stay in this browser.
 import { memo, useCallback, useEffect, useState } from 'react';
 import art from '../../assets/holodeck.svg?raw';
@@ -18,6 +18,7 @@ import type { RailFilter } from '../SideRail';
 import { Hologram, type Ghost } from './Hologram';
 import { HoloScreen, type DraftFields, type Screen } from './HoloScreen';
 import { CrewPanel, DeckOrders, QueuePanel, RegisterPanel } from './Panels';
+import { ReviewPanel } from './Review';
 
 interface Props {
   ship: ShipView;
@@ -119,7 +120,8 @@ export function HolodeckBoard({ ship, filter, drills, target, onTarget, onBoard,
                 onPick={openRoom} onPlace={place} />
             </div>
           </div>
-          <div className="wall-slot" style={{
+          {/* The Review bay needs room for diffs and logs: it takes the whole room while it is open. */}
+          <div className={'wall-slot' + (screen.view === 'review' ? ' wall-wide' : '')} style={{
             '--x': pct(SCREEN.x, ROOM.w), '--y': pct(SCREEN.y, ROOM.h), '--w': pct(SCREEN.w, ROOM.w), '--h': pct(SCREEN.h, ROOM.h),
           } as React.CSSProperties}>
             <HoloScreen ship={ship} screen={screen} drafts={drafts} assets={ASSETS} placing={!!placing}
@@ -130,6 +132,8 @@ export function HolodeckBoard({ ship, filter, drills, target, onTarget, onBoard,
       </section>
       <aside className="side qside">
         <CrewPanel ship={ship} picked={picked ?? undefined} onOpen={openRoom} />
+        <ReviewPanel ship={ship} picked={screen.view === 'review' ? screen.branch : undefined}
+          onOpen={(branch) => setScreen({ view: 'review', branch })} />
         <QueuePanel ship={ship} drafts={drafts} picked={picked ?? undefined} onRoom={openRoom}
           onDraft={(id) => show({ view: 'draft', id })} onNew={() => setScreen({ view: 'new' })} />
         <RailsPanel ship={ship} drills={drills} compact />

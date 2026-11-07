@@ -165,3 +165,19 @@ sudo docker compose -f deploy/compose.yaml run --rm speed-trial
 Time to first token on the cloud rails isn't measured: it would take a paid call each time.
 
 Tests: `python -m unittest discover -s probe`.
+
+# Holo probe
+
+`holo_probe.py` writes `deploy/live/holo.json` every 2 minutes for the **Review bay** on the
+Holodeck board: the Holodeck Officer's `holo/` branches, the holo Action's run on each (step by
+step, with the last log lines when a step failed), the PR the Action opened, the files each
+branch changes against main with their diffs (each flagged when it is outside
+`.github/holo-paths.txt`), holo's report `holodeck/reports/<ORD>.md` and the version it bumps to.
+
+GET only, to `api.github.com`, with a read-only GitHub sign-in for this one repo (`GITHUB_READ` in
+`deploy/.env`). The sign-in is sent only to GitHub (never on to a redirect, such as a log
+download), and it is never logged or written. It reads none of Hermes' data. Merged and closed
+work is fetched once and kept in memory, so a quiet repo costs two calls a cycle.
+
+It runs as the `holo-probe` service: `python:3.12-alpine`, read-only, no capabilities, 32 MB.
+Without `GITHUB_READ` it logs one line, writes nothing, and the Review bay keeps its sample.

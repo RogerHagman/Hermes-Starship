@@ -1,8 +1,8 @@
 // Loads the fixture files, and the live rails and rail log when the NAS probe writes them. Moving around
 // never calls a model: these are local files only, served by the page's own nginx.
-import type { FastPathsFile, Fixtures, HelmFile, LogEntry, MetersFile, NasFile, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station, YeomanFile } from '../types';
+import type { FastPathsFile, Fixtures, HelmFile, HoloFile, LogEntry, MetersFile, NasFile, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station, YeomanFile } from '../types';
 
-const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops', 'yeoman', 'helm', 'nav', 'viewscreen', 'fastpaths', 'meters'] as const;
+const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops', 'yeoman', 'helm', 'nav', 'viewscreen', 'fastpaths', 'meters', 'holo'] as const;
 
 declare global {
   interface Window { FIXTURES?: Fixtures }   // set only in the single-file preview build
@@ -31,13 +31,14 @@ export interface Live {
   helm?: HelmFile | null;
   fastpaths?: FastPathsFile | null;
   meters?: MetersFile | null;
+  holo?: HoloFile | null;
 }
 
 export async function loadLive(): Promise<Live> {
-  const [rails, raillog, orders, shiplog, nas, records, yeoman, helm, fastpaths, meters] = await Promise.all([
+  const [rails, raillog, orders, shiplog, nas, records, yeoman, helm, fastpaths, meters, holo] = await Promise.all([
     loadLiveRails(), loadLiveRailLog(), loadLiveOrders(), loadLiveShipLog(), loadLiveNas(), loadLiveRecords(), loadLiveYeoman(), loadLiveHelm(),
-    loadLiveFastPaths(), loadLiveMeters()]);
-  return { rails, raillog, orders, shiplog, nas, records, yeoman, helm, fastpaths, meters };
+    loadLiveFastPaths(), loadLiveMeters(), loadLiveHolo()]);
+  return { rails, raillog, orders, shiplog, nas, records, yeoman, helm, fastpaths, meters, holo };
 }
 
 /** The sample data with each live part in place of its sample. */
@@ -48,7 +49,8 @@ export function withLive(base: Fixtures, live: Live): Fixtures {
   const withYeoman = live.yeoman ? { ...withRecords, yeoman: live.yeoman } : withRecords;
   const withHelm = live.helm ? { ...withYeoman, helm: live.helm } : withYeoman;
   const withFast = live.fastpaths ? { ...withHelm, fastpaths: live.fastpaths } : withHelm;
-  return live.meters ? { ...withFast, meters: live.meters } : withFast;
+  const withMeters = live.meters ? { ...withFast, meters: live.meters } : withFast;
+  return live.holo ? { ...withMeters, holo: live.holo } : withMeters;
 }
 
 /** A live file, or null when there is none or it doesn't look like a real reading. */
@@ -76,6 +78,8 @@ export const loadLiveHelm = () => loadLiveFile<HelmFile>('helm', (f) => ['ads', 
 export const loadLiveFastPaths = () => loadLiveFile<FastPathsFile>('fastpaths', (f) => Array.isArray(f.paths));
 /** live/meters.json from the meter probe: spend by rail and station, hand-off speed, the leak share and the speed trials. */
 export const loadLiveMeters = () => loadLiveFile<MetersFile>('meters', (f) => ['spend', 'stations', 'handoffs', 'trials'].every((k) => Array.isArray((f as never)[k])) && !!f.leak && !!f.sources);
+/** live/holo.json from the holo probe: the Holodeck Officer's branches, runs and PRs on GitHub, for the Review bay. */
+export const loadLiveHolo = () => loadLiveFile<HoloFile>('holo', (f) => Array.isArray(f.items));
 /** live/shiplog.json from the ship probe: orders opening and closing, and the customs log. */
 export const loadLiveShipLog = () => loadLiveFile<ShipLogFile>('shiplog', (f) => Array.isArray(f.entries));
 

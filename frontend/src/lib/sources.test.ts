@@ -4,7 +4,7 @@ import { BUILT_BOARDS } from './board';
 import { BOARD_SOURCES, boardSources, panelSource, splitSample } from './sources';
 
 const NAMES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops',
-  'yeoman', 'helm', 'nav', 'viewscreen', 'fastpaths', 'meters'];
+  'yeoman', 'helm', 'nav', 'viewscreen', 'fastpaths', 'meters', 'holo'];
 
 async function sample(): Promise<Fixtures> {
   const parts = await Promise.all(NAMES.map(async (n) => [n, (await import(`../../../fixtures/${n}.json`)).default] as const));

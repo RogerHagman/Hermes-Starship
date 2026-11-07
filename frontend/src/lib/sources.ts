@@ -6,7 +6,7 @@ import { nasSource, railsSource } from './data';
 
 /** The parts a board can read. Each is one file in fixtures/, or one in live/ from a probe. */
 export type SourceId = 'orders' | 'records' | 'rails' | 'duty' | 'nas' | 'ops' | 'quarters' | 'sensors' | 'engineering'
-  | 'science' | 'meters' | 'yeoman' | 'helm' | 'nav' | 'viewscreen' | 'fastpaths';
+  | 'science' | 'meters' | 'yeoman' | 'helm' | 'nav' | 'viewscreen' | 'fastpaths' | 'holo';
 
 export type SourceState = 'live' | 'stale' | 'sample';
 
@@ -15,7 +15,7 @@ export interface Source { id: SourceId; label: string; state: SourceState; why: 
 const LABEL: Record<SourceId, string> = {
   orders: 'ORDERS', records: 'RECORDS', rails: 'RAILS', duty: 'DUTY LOG', nas: 'NAS', ops: 'NETWORK · GPU · JOBS',
   quarters: 'QUARTERS', sensors: 'WATCHES', engineering: 'PATCHES', science: 'MODEL SCORES', meters: 'METERS',
-  yeoman: 'TODO LIST', helm: 'TRACKER', nav: 'CHARTS', viewscreen: 'SESSIONS', fastpaths: 'FAST PATHS',
+  yeoman: 'TODO LIST', helm: 'TRACKER', nav: 'CHARTS', viewscreen: 'SESSIONS', fastpaths: 'FAST PATHS', holo: 'REVIEW BAY',
 };
 
 /** Where a live part comes from, or what it waits for. Shown as the chip's tooltip. */
@@ -36,13 +36,14 @@ const FROM: Record<SourceId, string> = {
   nav: 'no probe yet: Navigation keeps no files of its own',
   viewscreen: 'no probe yet: waits for computer use',
   fastpaths: "the ship probe (Hermes' routing/fast-paths.json)",
+  holo: "the holo probe (holo's branches, runs and PRs on GitHub)",
 };
 
 /** The parts each board reads, most important first. */
 export const BOARD_SOURCES: Record<BoardId, SourceId[]> = {
   bridge: ['orders', 'rails', 'duty'],
   quarters: ['quarters', 'orders', 'yeoman'],
-  holodeck: ['orders'],
+  holodeck: ['holo', 'orders'],
   sensors: ['sensors', 'orders'],
   engineering: ['engineering', 'orders', 'rails'],
   science: ['meters', 'science'],
@@ -61,6 +62,7 @@ function stateOf(id: SourceId, data: Fixtures, now: number): SourceState {
     case 'nas': return nasSource(data, now);
     case 'duty': return data.raillog ? 'live' : 'sample';
     case 'records': return data.records && !data.records.synthetic ? 'live' : 'sample';
+    case 'holo': return data.holo && !data.holo.synthetic ? 'live' : 'sample';
     default: return data[id].synthetic ? 'sample' : 'live';
   }
 }

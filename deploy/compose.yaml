@@ -158,6 +158,31 @@ services:
       - ../probe/meter_probe.py:/app/meter_probe.py:ro
     command: python -u /app/meter_probe.py
 
+  # The holo probe: the Holodeck Officer's work on GitHub for the Review bay (live/holo.json).
+  # GET only, to api.github.com, with a read-only sign-in for this one repo (GITHUB_READ in
+  # deploy/.env). It sees none of Hermes' data and writes only ./live/holo.json. Without the
+  # sign-in it writes nothing and the Review bay keeps its sample.
+  holo-probe:
+    image: python:3.12-alpine
+    container_name: hermes-starship-holo
+    restart: unless-stopped
+    mem_limit: 32m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      GITHUB_READ: ${GITHUB_READ:-}
+      REPO: RogerHagman/Hermes-Starship
+      HOLO_PATHS: /app/holo-paths.txt
+      OUT_DIR: /out
+      INTERVAL: "120"
+      KEEP_DONE: "10"
+    volumes:
+      - ./live:/out
+      - ../.github/holo-paths.txt:/app/holo-paths.txt:ro
+      - ../probe/holo_probe.py:/app/holo_probe.py:ro
+    command: python -u /app/holo_probe.py
+
   # A speed trial on the local rail, run by hand (never on its own: it is in the "trial" profile):
   #   sudo docker compose -f deploy/compose.yaml run --rm speed-trial
   # The same short prompt three times to the model Ollama already has loaded: time to first token

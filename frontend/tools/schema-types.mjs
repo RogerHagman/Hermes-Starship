@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 
 const schemaDir = resolve(import.meta.dirname, '../../api/schema');
 const out = resolve(import.meta.dirname, '../src/types/fixtures.ts');
-const names = { stations: 'StationsFile', rails: 'RailsFile', orders: 'OrdersFile', shiplog: 'ShipLogFile', ship: 'ShipFile', quarters: 'QuartersFile', raillog: 'RailLogFile', sensors: 'SensorsFile', engineering: 'EngineeringFile', science: 'ScienceFile', ops: 'OpsFile', nas: 'NasFile', yeoman: 'YeomanFile', helm: 'HelmFile', nav: 'NavFile', viewscreen: 'ViewscreenFile', fastpaths: 'FastPathsFile', meters: 'MetersFile' };
+const names = { stations: 'StationsFile', rails: 'RailsFile', orders: 'OrdersFile', shiplog: 'ShipLogFile', ship: 'ShipFile', quarters: 'QuartersFile', raillog: 'RailLogFile', sensors: 'SensorsFile', engineering: 'EngineeringFile', science: 'ScienceFile', ops: 'OpsFile', nas: 'NasFile', yeoman: 'YeomanFile', helm: 'HelmFile', nav: 'NavFile', viewscreen: 'ViewscreenFile', fastpaths: 'FastPathsFile', meters: 'MetersFile', holo: 'HoloFile' };
 
 let text = '// Generated from api/schema by `npm run types`. Do not edit by hand.\n/* eslint-disable */\n';
 for (const file of readdirSync(schemaDir).filter((f) => f.endsWith('.schema.json')).sort()) {
