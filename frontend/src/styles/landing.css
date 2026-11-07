@@ -584,3 +584,9 @@ button.reply-text:hover{color:var(--c,var(--text))}
 .reply-text.clamped{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
 .con-reply{display:flex;flex-direction:column;gap:2px;margin-top:4px;padding-top:6px;border-top:1px dashed var(--border)}
 .ocard-replies{color:var(--good)}
+/* The task clock: amber and ticking while an order is open, plain once it has closed. */
+.taskclock{font-variant-numeric:tabular-nums;white-space:nowrap}
+.taskclock.running{color:var(--c-gold,#f2b45a)}
+.taskclock.done{color:var(--text-label)}
+.ocard-sub .taskclock::before,.con-order .taskclock::before{content:" · "}
+dd .taskclock{white-space:normal}

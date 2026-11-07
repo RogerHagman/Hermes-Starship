@@ -8,7 +8,7 @@ import { dayAndTime, dayLine } from '../../lib/format';
 import { railColor, speedText } from '../../lib/lookups';
 import {
   ALL, CORE_ICONS, STATES, STATE_WORD, SURFACE_WORD, counts, echo, logOf, minutes, records, recordsFile,
-  span, stats, took, type Query, type State,
+  span, stats, type Query, type State,
 } from '../../lib/computer';
 import {
   DEFAULTS, MAN_SECTIONS, PHOSPHOR, SETTINGS, applySet, command, keyWord, listOf, manCommands, manTopic, pageAt, turn, wordOf,
@@ -17,6 +17,7 @@ import {
 import type { ShipView } from '../../lib/ship';
 import { RAIL_IDS } from '../../lib/ship';
 import type { Order } from '../../types';
+import { ClockRow, TaskClock } from '../TaskClock';
 import { CardBody, Replies } from '../Panels';
 import { ConHead, StationDetail, useEscape } from '../ShipConsole';
 
@@ -256,6 +257,7 @@ function Row({ ship, o, times, onOpen }: { ship: ShipView; o: Order; times: bool
         <StatePill state={o.state} />
         <span className="tst mono">{up(st?.short ?? o.station)}</span>
         <span className="ttitle">{o.title}</span>
+        <span className="tclock mono"><TaskClock ship={ship} order={o} short /></span>
         <span className="twhen mono">{o.replies?.length ? `${o.replies.length} ↩ · ` : ''}{times ? when(o.updatedAt) : dayLine(o.updatedAt)}</span>
       </button>
     </li>
@@ -294,13 +296,14 @@ function RecordView({ ship, id, list, oldest, onScreen, onBack }: {
         <dl className="tfacts mono">
           <div><dt>ORDER</dt><dd>{o.id}</dd></div>
           <div><dt>STATE</dt><dd><StatePill state={o.state} /></dd></div>
+          <ClockRow ship={ship} order={o} />
           <div><dt>STATION</dt><dd>{st
             ? <button type="button" className="linkish" onClick={() => onScreen({ view: 'station', id: st.id })}>{st.name}</button>
             : o.station}</dd></div>
           <div><dt>SPEED</dt><dd>{speedText(o.speed, st)}</dd></div>
           <div><dt>TIER</dt><dd>{o.tier === undefined ? 'NO TIER' : `TIER ${o.tier}`}</dd></div>
           {o.openedAt && <div><dt>OPENED</dt><dd>{when(o.openedAt)}{o.surface ? ` · ${up(SURFACE_WORD[o.surface] ?? o.surface)}` : ''}</dd></div>}
-          {o.closedAt && <div><dt>CLOSED</dt><dd>{when(o.closedAt)}{took(o) !== null ? ` · TOOK ${span(took(o)!)}` : ''}</dd></div>}
+          {o.closedAt && <div><dt>CLOSED</dt><dd>{when(o.closedAt)}</dd></div>}
           <div><dt>UPDATED</dt><dd>{when(o.updatedAt)}</dd></div>
           {o.cards !== undefined && <div><dt>CARDS</dt><dd>{o.cards === 0 ? 'NONE · ANSWERED IN CHAT' : o.cards}</dd></div>}
           {o.parent && <div><dt>PART OF</dt><dd><button type="button" className="linkish" onClick={() => go(o.parent!)}>{o.parent}</button></dd></div>}

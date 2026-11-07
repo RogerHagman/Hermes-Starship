@@ -7,6 +7,7 @@ import type { Drills, ShipView } from '../lib/ship';
 import type { Order } from '../types';
 import type { RailFilter } from './SideRail';
 import { Src } from './Src';
+import { TaskClock } from './TaskClock';
 
 const SOURCE_NOTE = {
   sample: 'Sample numbers: the rails probe is not running yet.',
@@ -179,6 +180,7 @@ export function OrdersPanel({ ship, filter, picked, onOpen }: { ship: ShipView; 
                 </button>
                 <span className="ocard-sub">
                   {st?.short ?? o.station} · {speedText(o.speed, st)} · {age(ship.data.orders.asOf, o.updatedAt)}
+                  <TaskClock ship={ship} order={o} />
                   {o.replies && <span className="ocard-replies">{o.replies.length} {o.replies.length === 1 ? 'REPLY' : 'REPLIES'}</span>}
                   {subs.length > 0 && (
                     <button type="button" className="subfold" aria-expanded={!isFolded}
