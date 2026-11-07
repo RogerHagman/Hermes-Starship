@@ -23,7 +23,7 @@ W, H = 1600, 740
 ASSETS = Path(__file__).resolve().parent.parent / "src" / "assets"
 TABLE = (392, 600, 640, 100)   # the desk top (each board's lib file)
 SCREEN = (536, 40, 716, 456)   # the wall screen (each board's lib file)
-GOLD, PAPER, LOCAL = "#e8c37a", "#e9e1cf", "#3fc1a5"
+GOLD, PAPER, LOCAL, CODEX, CLAUDE = "#e8c37a", "#e9e1cf", "#3fc1a5", "#f0a948", "#e889b6"
 
 
 def f(v):
@@ -50,6 +50,7 @@ class Room:
 <linearGradient id="{p}-desk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b222c"/><stop offset="1" stop-color="#0c1016"/></linearGradient>
 <linearGradient id="{p}-cork" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2c1e"/><stop offset="1" stop-color="#2a1f15"/></linearGradient>
 <linearGradient id="{p}-brass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5e2c"/><stop offset=".45" stop-color="#e8c37a"/><stop offset="1" stop-color="#6b5326"/></linearGradient>
+<linearGradient id="{p}-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d2030"/><stop offset="1" stop-color="#07101c"/></linearGradient>
 <radialGradient id="{p}-shadow"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
 <radialGradient id="{p}-space" cx=".5" cy=".5" r=".7"><stop offset="0" stop-color="#0c1630"/><stop offset="1" stop-color="#03050a"/></radialGradient>
 <radialGradient id="{p}-vignette" cx=".5" cy=".45" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>
@@ -112,6 +113,37 @@ class Room:
             out.append(f'<rect x="{cx0 + 18}" y="{f(y + 10 + i * 11 - i * .8)}" width="{self.rnd.randint(60, 128)}" height="4" rx="2" fill="{self.a}" opacity=".55"/>')
         out.append(f'<rect class="{self.p}-lamp" x="{cx0 + 130}" y="{y + 52}" width="20" height="4" rx="2" fill="{LOCAL}"/>')
         out.append(self.label(cx0 + 86, y + 100, name))
+        return "\n".join(out)
+
+    def router(self, name, cx0=1068):
+        """Number One's console: the routing display from its station art (station-xo.svg). Number One
+        sits at the hub, with a line out to each station on the arc; a dot runs out along each line."""
+        y = TABLE[1]
+        px, py, pw, ph = cx0 + 2, y - 12, 166, 90
+        hub = (px + pw / 2, py + ph - 16)
+        colours = [LOCAL, LOCAL, CODEX, LOCAL, CLAUDE, LOCAL, CODEX, LOCAL, LOCAL]
+        out = [
+            # the stand it sits on, down into the desk
+            f'<path d="M{f(hub[0] - 14)} {py + ph} L{f(hub[0] + 14)} {py + ph} L{f(hub[0] + 22)} {y + 88} L{f(hub[0] - 22)} {y + 88} Z" fill="#0b1018" stroke="#2a3340"/>',
+            f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="11" fill="#081220" stroke="{self.a}" stroke-opacity=".55" stroke-width="1.6"/>',
+            f'<rect x="{px + 4}" y="{py + 4}" width="{pw - 8}" height="{ph - 8}" rx="8" fill="url(#{self.p}-glass)"/>',
+            f'<rect x="{px + 10}" y="{py + 9}" width="34" height="3.5" rx="1.75" fill="{GOLD}" opacity=".7"/>',
+        ]
+        for i, c in enumerate(colours):
+            a = math.radians(200 + i * 17.5)
+            x, yy = hub[0] + 68 * math.cos(a), hub[1] + 56 * math.sin(a)
+            line = f'M{f(hub[0])} {f(hub[1])} L{f(x)} {f(yy)}'
+            out.append(f'<path d="{line}" stroke="{c}" stroke-width="1.2" opacity=".5"/>')
+            out.append(f'<path class="{self.p}-route" d="{line}" stroke="{c}" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" '
+                       f'style="animation-delay:-{f(i * .43)}s"/>')
+            out.append(f'<circle cx="{f(x)}" cy="{f(yy)}" r="4" fill="#0b1220" stroke="{c}" stroke-width="1.4"/>')
+        out += [
+            f'<circle cx="{f(hub[0])}" cy="{f(hub[1])}" r="10" fill="{LOCAL}" opacity=".18"/>',
+            f'<circle cx="{f(hub[0])}" cy="{f(hub[1])}" r="5.5" fill="{LOCAL}"/>',
+            f'<circle class="{self.p}-ping" cx="{f(hub[0])}" cy="{f(hub[1])}" r="5.5" fill="none" stroke="{LOCAL}" '
+            f'style="transform-origin:{f(hub[0])}px {f(hub[1])}px"/>',
+            self.label(cx0 + 86, y + 100, name),
+        ]
         return "\n".join(out)
 
     def highlights(self, spots):
@@ -217,7 +249,7 @@ def xo():
                    f'transform="rotate({f(r.rnd.uniform(-5, 5))} {tx + 62} {ty + 14})"/>')
     out.append(f'<rect x="{tx + 30}" y="{ty - 10}" width="58" height="10" rx="2" fill="#f08a7a" opacity=".6"/>')
     out.append(r.label(tx + 66, ty + 86, "NOT DONE"))
-    out.append(r.console("NUMBER ONE"))
+    out.append(r.router("NUMBER ONE"))
     return r.svg("xo-art", out, XO_SPOTS)
 
 

@@ -38,6 +38,8 @@ html:has(.board-xo) body,html:has(.board-helm) body,html:has(.board-nav) body,ht
 .room-art [class$="-lamp"]{animation:qarm 3.2s ease-in-out infinite}
 .room-art .x-blink{animation:pblink 1.8s steps(2, jump-none) infinite}
 .room-art .x-hail{transition:opacity .4s ease}
+.room-art .x-route{animation:pxroute 2.6s linear infinite}
+.room-art .x-ping{animation:pxping 2.6s ease-out infinite}
 .x-pic[data-hails="0"] .room-art .x-hail{opacity:.15}
 .x-pic[data-hails="on"] .room-art .x-hail{animation:qarm 2s ease-in-out infinite}
 .room-art .h-hand{animation:yhand 90s linear infinite}
@@ -50,6 +52,8 @@ html:has(.board-xo) body,html:has(.board-helm) body,html:has(.board-nav) body,ht
 .room-art .v-knob{transition:transform .4s ease, opacity .4s ease}
 .v-pic[data-asking="on"] .room-art .v-ask{animation:qarm 1.4s ease-in-out infinite}
 @keyframes pblink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pxroute{from{stroke-dashoffset:4}to{stroke-dashoffset:-92}}
+@keyframes pxping{from{transform:scale(1);opacity:.8}to{transform:scale(2.2);opacity:0}}
 @keyframes pdash{to{stroke-dashoffset:-110}}
 @keyframes pwave{0%,100%{opacity:.15}50%{opacity:.85}}
 @keyframes yhand{to{transform:rotate(360deg)}}
@@ -185,7 +189,7 @@ button.plist-row:hover,button.plist-row:focus-visible{background:var(--surface-s
   .pweek-body{grid-template-columns:minmax(0,1fr)}
 }
 @media (prefers-reduced-motion: reduce){
-  .room-art [class$="-lamp"],.room-art .x-blink,.room-art .x-hail,.room-art .h-hand,.room-art .n-course,.room-art .v-wave,.v-pic .room-art .v-ask{animation:none}
+  .room-art [class$="-lamp"],.room-art .x-blink,.room-art .x-hail,.room-art .x-route,.room-art .x-ping,.room-art .h-hand,.room-art .n-course,.room-art .v-wave,.v-pic .room-art .v-ask{animation:none}
 }
 
 /* ---------- Helm: the course, by stage ---------- */

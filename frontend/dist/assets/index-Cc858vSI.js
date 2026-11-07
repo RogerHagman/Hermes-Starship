@@ -4920,6 +4920,7 @@ Error generating stack: `+e.message+`
 <linearGradient id="h-desk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b222c"/><stop offset="1" stop-color="#0c1016"/></linearGradient>
 <linearGradient id="h-cork" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2c1e"/><stop offset="1" stop-color="#2a1f15"/></linearGradient>
 <linearGradient id="h-brass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5e2c"/><stop offset=".45" stop-color="#e8c37a"/><stop offset="1" stop-color="#6b5326"/></linearGradient>
+<linearGradient id="h-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d2030"/><stop offset="1" stop-color="#07101c"/></linearGradient>
 <radialGradient id="h-shadow"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
 <radialGradient id="h-space" cx=".5" cy=".5" r=".7"><stop offset="0" stop-color="#0c1630"/><stop offset="1" stop-color="#03050a"/></radialGradient>
 <radialGradient id="h-vignette" cx=".5" cy=".45" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>
@@ -5497,6 +5498,7 @@ Error generating stack: `+e.message+`
 <linearGradient id="n-desk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b222c"/><stop offset="1" stop-color="#0c1016"/></linearGradient>
 <linearGradient id="n-cork" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2c1e"/><stop offset="1" stop-color="#2a1f15"/></linearGradient>
 <linearGradient id="n-brass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5e2c"/><stop offset=".45" stop-color="#e8c37a"/><stop offset="1" stop-color="#6b5326"/></linearGradient>
+<linearGradient id="n-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d2030"/><stop offset="1" stop-color="#07101c"/></linearGradient>
 <radialGradient id="n-shadow"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
 <radialGradient id="n-space" cx=".5" cy=".5" r=".7"><stop offset="0" stop-color="#0c1630"/><stop offset="1" stop-color="#03050a"/></radialGradient>
 <radialGradient id="n-vignette" cx=".5" cy=".45" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>
@@ -7133,6 +7135,7 @@ Error generating stack: `+e.message+`
 <linearGradient id="v-desk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b222c"/><stop offset="1" stop-color="#0c1016"/></linearGradient>
 <linearGradient id="v-cork" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2c1e"/><stop offset="1" stop-color="#2a1f15"/></linearGradient>
 <linearGradient id="v-brass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5e2c"/><stop offset=".45" stop-color="#e8c37a"/><stop offset="1" stop-color="#6b5326"/></linearGradient>
+<linearGradient id="v-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d2030"/><stop offset="1" stop-color="#07101c"/></linearGradient>
 <radialGradient id="v-shadow"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
 <radialGradient id="v-space" cx=".5" cy=".5" r=".7"><stop offset="0" stop-color="#0c1630"/><stop offset="1" stop-color="#03050a"/></radialGradient>
 <radialGradient id="v-vignette" cx=".5" cy=".45" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>
@@ -7260,6 +7263,7 @@ Error generating stack: `+e.message+`
 <linearGradient id="x-desk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b222c"/><stop offset="1" stop-color="#0c1016"/></linearGradient>
 <linearGradient id="x-cork" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2c1e"/><stop offset="1" stop-color="#2a1f15"/></linearGradient>
 <linearGradient id="x-brass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5e2c"/><stop offset=".45" stop-color="#e8c37a"/><stop offset="1" stop-color="#6b5326"/></linearGradient>
+<linearGradient id="x-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d2030"/><stop offset="1" stop-color="#07101c"/></linearGradient>
 <radialGradient id="x-shadow"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
 <radialGradient id="x-space" cx=".5" cy=".5" r=".7"><stop offset="0" stop-color="#0c1630"/><stop offset="1" stop-color="#03050a"/></radialGradient>
 <radialGradient id="x-vignette" cx=".5" cy=".45" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>
@@ -7381,13 +7385,40 @@ Error generating stack: `+e.message+`
 <rect x="232" y="596" width="92" height="24" rx="3" fill="#e9e1cf" opacity=".7" transform="rotate(-3.6 268 618)"/>
 <rect x="236" y="594" width="58" height="10" rx="2" fill="#f08a7a" opacity=".6"/>
 <text x="272" y="690" text-anchor="middle" font-family="monospace" font-size="10" letter-spacing="2" fill="#f0a35e" opacity="1">NOT DONE</text>
-<path d="M1068 606 L1238 594 L1230 666 L1076 674 Z" fill="#06090d" stroke="#f0a35e" stroke-opacity=".5"/>
-<rect x="1086" y="610" width="98" height="4" rx="2" fill="#f0a35e" opacity=".55"/>
-<rect x="1086" y="620.2" width="115" height="4" rx="2" fill="#f0a35e" opacity=".55"/>
-<rect x="1086" y="630.4" width="94" height="4" rx="2" fill="#f0a35e" opacity=".55"/>
-<rect x="1086" y="640.6" width="111" height="4" rx="2" fill="#f0a35e" opacity=".55"/>
-<rect x="1086" y="650.8" width="124" height="4" rx="2" fill="#f0a35e" opacity=".55"/>
-<rect class="x-lamp" x="1198" y="652" width="20" height="4" rx="2" fill="#3fc1a5"/>
+<path d="M1139 678 L1167 678 L1175 688 L1131 688 Z" fill="#0b1018" stroke="#2a3340"/>
+<rect x="1070" y="588" width="166" height="90" rx="11" fill="#081220" stroke="#f0a35e" stroke-opacity=".55" stroke-width="1.6"/>
+<rect x="1074" y="592" width="158" height="82" rx="8" fill="url(#x-glass)"/>
+<rect x="1080" y="597" width="34" height="3.5" rx="1.75" fill="#e8c37a" opacity=".7"/>
+<path d="M1153 662 L1089.1 642.8" stroke="#3fc1a5" stroke-width="1.2" opacity=".5"/>
+<path class="x-route" d="M1153 662 L1089.1 642.8" stroke="#3fc1a5" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" style="animation-delay:-0s"/>
+<circle cx="1089.1" cy="642.8" r="4" fill="#0b1220" stroke="#3fc1a5" stroke-width="1.4"/>
+<path d="M1153 662 L1099.1 627.9" stroke="#3fc1a5" stroke-width="1.2" opacity=".5"/>
+<path class="x-route" d="M1153 662 L1099.1 627.9" stroke="#3fc1a5" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" style="animation-delay:-0.4s"/>
+<circle cx="1099.1" cy="627.9" r="4" fill="#0b1220" stroke="#3fc1a5" stroke-width="1.4"/>
+<path d="M1153 662 L1114 616.1" stroke="#f0a948" stroke-width="1.2" opacity=".5"/>
+<path class="x-route" d="M1153 662 L1114 616.1" stroke="#f0a948" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" style="animation-delay:-0.9s"/>
+<circle cx="1114" cy="616.1" r="4" fill="#0b1220" stroke="#f0a948" stroke-width="1.4"/>
+<path d="M1153 662 L1132.6 608.6" stroke="#3fc1a5" stroke-width="1.2" opacity=".5"/>
+<path class="x-route" d="M1153 662 L1132.6 608.6" stroke="#3fc1a5" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" style="animation-delay:-1.3s"/>
+<circle cx="1132.6" cy="608.6" r="4" fill="#0b1220" stroke="#3fc1a5" stroke-width="1.4"/>
+<path d="M1153 662 L1153 606" stroke="#e889b6" stroke-width="1.2" opacity=".5"/>
+<path class="x-route" d="M1153 662 L1153 606" stroke="#e889b6" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" style="animation-delay:-1.7s"/>
+<circle cx="1153" cy="606" r="4" fill="#0b1220" stroke="#e889b6" stroke-width="1.4"/>
+<path d="M1153 662 L1173.4 608.6" stroke="#3fc1a5" stroke-width="1.2" opacity=".5"/>
+<path class="x-route" d="M1153 662 L1173.4 608.6" stroke="#3fc1a5" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" style="animation-delay:-2.1s"/>
+<circle cx="1173.4" cy="608.6" r="4" fill="#0b1220" stroke="#3fc1a5" stroke-width="1.4"/>
+<path d="M1153 662 L1192 616.1" stroke="#f0a948" stroke-width="1.2" opacity=".5"/>
+<path class="x-route" d="M1153 662 L1192 616.1" stroke="#f0a948" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" style="animation-delay:-2.6s"/>
+<circle cx="1192" cy="616.1" r="4" fill="#0b1220" stroke="#f0a948" stroke-width="1.4"/>
+<path d="M1153 662 L1206.9 627.9" stroke="#3fc1a5" stroke-width="1.2" opacity=".5"/>
+<path class="x-route" d="M1153 662 L1206.9 627.9" stroke="#3fc1a5" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" style="animation-delay:-3s"/>
+<circle cx="1206.9" cy="627.9" r="4" fill="#0b1220" stroke="#3fc1a5" stroke-width="1.4"/>
+<path d="M1153 662 L1216.9 642.8" stroke="#3fc1a5" stroke-width="1.2" opacity=".5"/>
+<path class="x-route" d="M1153 662 L1216.9 642.8" stroke="#3fc1a5" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 120" style="animation-delay:-3.4s"/>
+<circle cx="1216.9" cy="642.8" r="4" fill="#0b1220" stroke="#3fc1a5" stroke-width="1.4"/>
+<circle cx="1153" cy="662" r="10" fill="#3fc1a5" opacity=".18"/>
+<circle cx="1153" cy="662" r="5.5" fill="#3fc1a5"/>
+<circle class="x-ping" cx="1153" cy="662" r="5.5" fill="none" stroke="#3fc1a5" style="transform-origin:1153px 662px"/>
 <text x="1154" y="700" text-anchor="middle" font-family="monospace" font-size="10" letter-spacing="2" fill="#f0a35e" opacity="1">NUMBER ONE</text>
 <rect id="x-hl-bridge" class="x-hl" x="14" y="140" width="126" height="424" rx="10" fill="none" stroke="#fff2d8" stroke-width="3" filter="url(#x-blur)"/>
 <rect id="x-hl-channels" class="x-hl" x="160" y="56" width="176" height="430" rx="10" fill="none" stroke="#fff2d8" stroke-width="3" filter="url(#x-blur)"/>
