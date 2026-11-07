@@ -9,8 +9,9 @@ import { RANK, railColor } from '../../lib/lookups';
 import { minutes, records, recordsFile } from '../../lib/computer';
 import { openedOf } from '../../lib/post';
 import type { ShipView } from '../../lib/ship';
+import type { Live } from '../../lib/data';
 import {
-  FAST_RULES, FAST_WORDS, RAIL_RULES, SURFACE_COLOUR, TRY_THESE, XO_ICONS, asks, channels, fastCheck, fastPathBrief, fastTargets, routeOf, surfaceWord,
+  FAST_RULES, RAIL_RULES, SURFACE_COLOUR, TRY_THESE, XO_ICONS, asks, channels, fastCheck, fastPathBrief, fastPaths, fastSource, fastTargets, routeOf, surfaceWord,
   type FastDraft, type Route,
 } from '../../lib/xo';
 import { Pager } from '../Pager';
@@ -24,9 +25,10 @@ export type Screen =
 
 interface Props {
   ship: ShipView; screen: Screen; onScreen: (s: Screen) => void; route: Route; onRoute: (r: Route) => void; onToast: (text: string) => void;
+  onResync?: () => Promise<Live>;
 }
 
-export function XoScreen({ ship, screen, onScreen, route, onRoute, onToast }: Props) {
+export function XoScreen({ ship, screen, onScreen, route, onRoute, onToast, onResync }: Props) {
   const back = () => onScreen({ view: 'ease' });
   useEscape(screen.view !== 'ease', screen.view === 'order' && screen.from ? () => onScreen(screen.from!) : back);
   const open = (from?: Screen) => (id: string) => onScreen({ view: 'order', id, from });
@@ -35,7 +37,7 @@ export function XoScreen({ ship, screen, onScreen, route, onRoute, onToast }: Pr
     case 'order': body = <OrderView ship={ship} id={screen.id} icon={XO_ICONS.order}
       back={screen.from ? '‹ Back' : '‹ Routing'} onBack={() => onScreen(screen.from ?? { view: 'ease' })} />; break;
     case 'channels': body = <ChannelsView ship={ship} onRoute={(r) => { onRoute(r); back(); }} onBack={back} />; break;
-    case 'fastpath': body = <FastPathView ship={ship} page={screen.page ?? 0} onScreen={onScreen} onToast={onToast} onBack={back} />; break;
+    case 'fastpath': body = <FastPathView ship={ship} page={screen.page ?? 0} onScreen={onScreen} onToast={onToast} onResync={onResync} onBack={back} />; break;
     case 'rules': body = <RulesView onBack={back} />; break;
     case 'hails': body = <ListView ship={ship} title="Hails · waiting for you" icon={XO_ICONS.hails} state="awaiting-captain"
       none="Nothing waits for you." onOpen={open(screen)} onBack={back}
@@ -81,7 +83,7 @@ function RoutingPager({ page, onScreen }: { page: number; onScreen: (s: Screen) 
 /** Type a message and see where it would go: the speed word, the fast path, Number One, the station. Nothing is sent. */
 function TryView({ ship, onScreen, onBack }: { ship: ShipView; onScreen: (s: Screen) => void; onBack: () => void }) {
   const [text, setText] = useState('');
-  const g = routeOf(text, ship.data.stations.stations);
+  const g = routeOf(text, ship.data.stations.stations, fastPaths(ship.data));
   const typed = text.trim().length > 0;
   const pickId = g.coded?.to ?? g.named[0]?.id;
   const pick = pickId ? ship.station(pickId) : undefined;
@@ -94,7 +96,7 @@ function TryView({ ship, onScreen, onBack }: { ship: ShipView; onScreen: (s: Scr
     : 'No station is named, so Number One decides from the routing rules. If no station fits, it fails the task rather than doing it itself.';
   const steps: { label: string; value: string; sub: string; on: boolean; colour?: string }[] = [
     { label: 'SPEED WORD', value: g.speed ?? 'None', sub: g.speed ? 'READ FIRST, BEFORE THE COLON OR COMMA' : "THE STATION'S DEFAULT SPEED", on: !!g.speed },
-    { label: 'FAST PATH', value: g.coded ? `“${g.coded.word}”` : 'No match', sub: g.coded ? `IN CODE · PATCH ${g.coded.patch}` : 'NOT A CODED FIRST WORD', on: !!g.coded, colour: 'var(--good)' },
+    { label: 'FAST PATH', value: g.coded ? `“${g.coded.word}”` : 'No match', sub: g.coded ? `IN CODE${g.coded.patch ? ` · PATCH ${g.coded.patch}` : ''}` : 'NOT A CODED FIRST WORD', on: !!g.coded, colour: 'var(--good)' },
     { label: 'NUMBER ONE', value: g.coded ? 'Receipt only' : names.length ? `Finds ${names.length === 1 ? names[0] : `${names.length} names`}` : 'Finds no name',
       sub: g.coded ? 'FILES NOTHING, DECIDES NOTHING' : names.length ? 'MATCHES THE STATION NAMES' : 'DECIDES FROM THE ROUTING RULES', on: typed && !g.coded, colour: '#3fc1a5' },
     { label: 'STATION', value: pick?.name ?? (typed ? 'Number One decides' : '—'), sub: pick ? `${up(pick.rail)} RAIL${pick.status !== 'live' ? ` · ${up(pick.status)}` : ''}` : typed ? 'BY THE RAIL RULES' : '',
@@ -180,14 +182,21 @@ function ChannelsView({ ship, onRoute, onBack }: { ship: ShipView; onRoute: (r: 
 const FAST_PAGES = ['First words', 'Station names', 'New fast path'];
 
 /** The fast path, three pages: the first words that go by code, the names Number One matches, and a new fast path to draft. */
-function FastPathView({ ship, page, onScreen, onToast, onBack }: {
-  ship: ShipView; page: number; onScreen: (s: Screen) => void; onToast: (text: string) => void; onBack: () => void;
+function FastPathView({ ship, page, onScreen, onToast, onResync, onBack }: {
+  ship: ShipView; page: number; onScreen: (s: Screen) => void; onToast: (text: string) => void; onResync?: () => Promise<Live>; onBack: () => void;
 }) {
+  const paths = fastPaths(ship.data);
+  const resync = () => {
+    if (!onResync) { onToast('No core to re-sync with here: this is the sample.'); return; }
+    onResync().then((live) => onToast(live.fastpaths
+      ? `Re-synced with the core: ${live.fastpaths.paths.length} fast paths from Hermes.`
+      : 'Re-synced: the core has no fast-path file yet, so the sample (patch P) stays.'), () => onToast('Could not reach the core.'));
+  };
   const crew = ship.data.stations.stations.filter((s) => s.aliases.length && s.id !== 'captain')
     .sort((a, b) => (RANK[a.rank]?.order ?? 99) - (RANK[b.rank]?.order ?? 99) || a.name.localeCompare(b.name));
   const go = (n: number) => onScreen({ view: 'fastpath', page: n });
   const subs = [
-    `FIRST WORDS THAT GO STRAIGHT TO A STATION · ${FAST_WORDS.length} IN CODE`,
+    `${paths.length} FIRST WORDS IN CODE, STRAIGHT TO A STATION · ${fastSource(ship.data)}`,
     `ANYTHING ELSE, NUMBER ONE MATCHES BY THESE NAMES · ${crew.length} STATIONS`,
     'DRAFT ONE HERE · THE CHIEF ENGINEER CODES IT · YOU APPLY THE PATCH',
   ];
@@ -199,13 +208,14 @@ function FastPathView({ ship, page, onScreen, onToast, onBack }: {
       {page === 0 && (
         <div className="con-body pbody xfp">
           <ul className="xfp-words">
-            {FAST_WORDS.map((w) => (
+            {paths.length === 0 && <li className="empty">The fast-path file is empty: Number One reads every message first.</li>}
+            {paths.map((w) => (
               <li key={w.say} className="xfp-word" style={css({ '--pc': railColor(ship.station(w.to)?.rail ?? 'local') })}>
                 <span className="xfp-say">“{w.say}”</span>
                 <span className="xfp-arrow" aria-hidden="true">→</span>
-                <span className="xfp-to">{ship.station(w.to)?.name ?? w.to}</span>
-                <span className="xfp-eg">“{w.eg}” files a card for {ship.station(w.to)?.short ?? w.to}, word for word.</span>
-                <span className="xfp-how mono">IN CODE · PATCH {w.patch}</span>
+                <span className="xfp-to">{ship.station(w.to)?.name ?? `${w.profile} (no station)`}</span>
+                <span className="xfp-eg">{w.eg ? `“${w.eg}” files a card for ${ship.station(w.to)?.short ?? w.profile}, word for word.` : `Files a card for ${ship.station(w.to)?.short ?? w.profile}, word for word.`}</span>
+                <span className="xfp-how mono">IN CODE{w.patch ? ` · PATCH ${w.patch}` : ''} · {up(w.profile)}</span>
               </li>
             ))}
           </ul>
@@ -214,8 +224,8 @@ function FastPathView({ ship, page, onScreen, onToast, onBack }: {
           </ol>
           <div className="wall-actions">
             <button type="button" className="btn btn-gold" onClick={() => go(2)}>New fast path</button>
-            <button type="button" className="btn btn-ghost" onClick={() => go(1)}>Station names</button>
-            <span className="con-hint">Anything without a fast path, Number One matches to a station by name.</span>
+            <button type="button" className="btn btn-ghost" onClick={resync} title="Read Hermes' routing/fast-paths.json again now">Re-sync with the core</button>
+            <span className="con-hint">The core is read every minute anyway. Anything without a fast path, Number One matches by name.</span>
           </div>
         </div>
       )}
@@ -245,9 +255,9 @@ function FastPathView({ ship, page, onScreen, onToast, onBack }: {
 function NewFastPath({ ship, onToast }: { ship: ShipView; onToast: (text: string) => void }) {
   const stations = ship.data.stations.stations;
   const targets = fastTargets(stations);
-  const [d, setD] = useState<FastDraft>({ words: '', to: '', avoid: '' });
+  const [d, setD] = useState<FastDraft>({ words: '', to: '', avoid: '', example: '' });
   const set = (k: keyof FastDraft) => (e: { target: { value: string } }) => setD((x) => ({ ...x, [k]: e.target.value }));
-  const check = fastCheck(d, stations);
+  const check = fastCheck(d, stations, fastPaths(ship.data));
   const st = ship.station(d.to);
   const chief = ship.station('eng');
   const ready = check.stop.length === 0 && !!st;
@@ -270,6 +280,10 @@ function NewFastPath({ ship, onToast }: { ship: ShipView; onToast: (text: string
             <option value="">Pick a station</option>
             {targets.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.profile})</option>)}
           </select>
+        </label>
+        <label className="hf"><span className="mono">EXAMPLE</span>
+          <input value={d.example} maxLength={120} placeholder="log meal two eggs and toast" onChange={set('example')} />
+          <small className="con-hint">Optional. A message that should take this path; it becomes the first test.</small>
         </label>
         <label className="hf"><span className="mono">MUST NOT MATCH</span>
           <input value={d.avoid} maxLength={160} placeholder="the meal plan" onChange={set('avoid')} />

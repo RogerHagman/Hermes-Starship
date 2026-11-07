@@ -1,0 +1,9 @@
+{
+  "asOf": "2026-11-07T08:00:00Z",
+  "synthetic": true,
+  "paths": [
+    { "words": ["remind"], "profile": "yeoman", "patch": "P", "example": "remind me in 2 minutes to test" },
+    { "words": ["todo", "todo!"], "profile": "yeoman", "patch": "P", "example": "Todo! book tyres" },
+    { "words": ["yeoman"], "profile": "yeoman", "patch": "P", "example": "yeoman: what's on my list?" }
+  ]
+}

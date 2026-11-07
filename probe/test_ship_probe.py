@@ -321,6 +321,48 @@ class Helm(unittest.TestCase):
         self.assertFalse((self.d / "live" / "helm.json").exists())
 
 
+class FastPaths(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.dir.name)
+
+    def tearDown(self):
+        self.dir.cleanup()
+
+    def run_probe(self, text):
+        (self.d / "fast-paths.json").write_text(text)
+        with tempfile.TemporaryDirectory() as scratch:
+            ship_probe.run_once({"ORDERS_CSV": str(self.d / "missing.csv"), "FAST_PATHS": str(self.d / "fast-paths.json"),
+                                 "OUT_DIR": str(self.d / "live")}, scratch, NOW)
+        out = self.d / "live" / "fastpaths.json"
+        return json.loads(out.read_text()) if out.exists() else None
+
+    def test_copies_the_fast_paths_in_the_schema_shape(self):
+        data = self.run_probe(json.dumps({"paths": [
+            {"words": ["Remind"], "profile": "yeoman", "patch": "P", "example": "remind me at 21:00", "owner": "forge"},
+            {"words": ["todo", "todo!", "todo"], "profile": "yeoman", "patch": "P"},
+            {"words": "log meal", "profile": "scribe"},
+        ]}))
+        jsonschema.validate(data, schema("fastpaths"))
+        self.assertIs(data["synthetic"], False)
+        self.assertEqual([["remind"], ["todo", "todo!"], ["log meal"]], [p["words"] for p in data["paths"]])
+        self.assertNotIn("owner", data["paths"][0])   # only the known fields are copied
+
+    def test_leaves_out_entries_that_do_not_fit(self):
+        data = self.run_probe(json.dumps({"paths": [
+            {"words": ["ok"], "profile": "yeoman"}, {"words": [], "profile": "yeoman"}, {"words": ["x"], "profile": "Not A Profile"},
+            {"profile": "yeoman"}, "junk", {"words": ["<script>"], "profile": "yeoman"},
+        ]}))
+        self.assertEqual([["ok"]], [p["words"] for p in data["paths"]])
+
+    def test_a_missing_or_broken_file_writes_nothing(self):
+        self.assertIsNone(self.run_probe("{not json"))
+        with tempfile.TemporaryDirectory() as scratch:
+            ship_probe.run_once({"ORDERS_CSV": str(self.d / "missing.csv"), "FAST_PATHS": str(self.d / "nope.json"),
+                                 "OUT_DIR": str(self.d / "live2")}, scratch, NOW)
+        self.assertFalse((self.d / "live2" / "fastpaths.json").exists())
+
+
 class States(unittest.TestCase):
     def test_words_map_to_the_boards_states(self):
         s = ship_probe.order_state

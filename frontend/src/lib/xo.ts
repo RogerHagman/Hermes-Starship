@@ -4,7 +4,7 @@
 // orders); the fast path is each station's aliases; the rail rules are hermes/routing-rules.md.
 import { SURFACE_WORD, records } from './computer';
 import { inLastDays, openedOf, type Spot } from './post';
-import type { Fixtures, Order, Station } from '../types';
+import type { FastPath, Fixtures, Order, Station } from '../types';
 
 export type XoObject = 'bridge' | 'channels' | 'fastpath' | 'rules' | 'hails' | 'lounge' | 'blocked' | 'desk';
 
@@ -96,12 +96,27 @@ export const RAIL_RULES: { n: string; name: string; rail: 'local' | 'codex' | 'c
   { n: '9', name: 'Cross-rail review', rail: 'mixed', text: 'A review normally goes to a different rail than the one that made the work.' },
 ];
 
-/** The first words that go straight to a station, without Number One deciding: code files the card. */
-export const FAST_WORDS: { say: string; to: string; patch: string; eg: string }[] = [
-  { say: 'remind me…', to: 'yeoman', patch: 'P', eg: 'remind me in 2 minutes to test' },
-  { say: 'todo… / todo!…', to: 'yeoman', patch: 'P', eg: 'Todo! book tyres' },
-  { say: 'yeoman…', to: 'yeoman', patch: 'P', eg: "yeoman: what's on my list?" },
-];
+/** A coded fast path as the board shows it: its first words, the station whose profile it files to, the patch, an example. */
+export interface FastRoute { words: string[]; say: string; to: string; profile: string; patch?: string; eg?: string }
+
+/** The coded fast paths: Hermes' routing/fast-paths.json through the ship probe, else the sample (patch P's words). */
+export function fastPaths(data: Pick<Fixtures, 'fastpaths' | 'stations'>): FastRoute[] {
+  const stations = data.stations.stations;
+  return data.fastpaths.paths.map((p: FastPath) => ({
+    words: p.words, say: p.words.map((w) => `${w}…`).join(' / '), profile: p.profile, patch: p.patch, eg: p.example,
+    to: stations.find((s) => s.profile === p.profile)?.id ?? p.profile,
+  }));
+}
+/** Where the fast paths came from, for the line under the title. */
+export const fastSource = (data: Pick<Fixtures, 'fastpaths'>) => (data.fastpaths.synthetic
+  ? "SAMPLE · NO FILE FROM HERMES YET"
+  : `FROM HERMES' FAST-PATHS.JSON · AS OF ${data.fastpaths.asOf.slice(11, 16)} UTC`);
+/** The phrase at the very start of the words that a fast path takes, longest first, or undefined. */
+function codedAt(lower: string, paths: FastRoute[]): { word: string; route: FastRoute } | undefined {
+  const all = paths.flatMap((route) => route.words.map((word) => ({ word, route }))).sort((a, b) => b.word.length - a.word.length);
+  return all.find(({ word }) => new RegExp(`^${esc(word)}(?=$|[^a-z0-9])`).test(lower));
+}
+
 /** How a coded fast path behaves (patches K and P). */
 export const FAST_RULES: string[] = [
   'The words are matched at the very start of your typed message, case-insensitive, as whole words. A speed word before them still counts as the start.',
@@ -114,10 +129,7 @@ export const FAST_RULES: string[] = [
 
 /** Speed words (patch K) come before a fast path's words, so a fast path can't start with one. */
 const SPEED_WORDS = ['thrusters', 'quarter', 'half', 'full', 'impulse', 'warp', 'maximum'];
-/** The first word of each coded fast path, and where it goes. */
-const CODED: Record<string, { to: string; patch: string }> = { remind: { to: 'yeoman', patch: 'P' }, todo: { to: 'yeoman', patch: 'P' }, yeoman: { to: 'yeoman', patch: 'P' } };
-
-export interface FastDraft { words: string; to: string; avoid: string }
+export interface FastDraft { words: string; to: string; avoid: string; example: string }
 
 /** Comma-separated text, cleaned: lower case, single spaces, no quotes or end punctuation, no repeats. */
 export function fastWords(s: string): string[] {
@@ -134,7 +146,7 @@ export function fastTargets(stations: Station[]): Station[] {
 }
 
 /** What stops a draft (stop), and what is worth knowing before you send it (note). */
-export function fastCheck(d: FastDraft, stations: Station[]): { stop: string[]; note: string[] } {
+export function fastCheck(d: FastDraft, stations: Station[], paths: FastRoute[]): { stop: string[]; note: string[] } {
   const words = fastWords(d.words);
   const stop: string[] = [];
   const note: string[] = [];
@@ -142,10 +154,16 @@ export function fastCheck(d: FastDraft, stations: Station[]): { stop: string[]; 
   if (!fastTargets(stations).some((s) => s.id === d.to)) stop.push('Pick the station it goes to.');
   for (const w of words) {
     const first = w.split(' ')[0];
+    const taken = codedAt(w, paths) ?? paths.flatMap((r) => r.words.map((word) => ({ word, route: r }))).find((x) => x.word.startsWith(`${w} `));
     if (SPEED_WORDS.includes(first)) stop.push(`"${w}" starts with a speed word, and a speed word always comes first.`);
-    else if (CODED[first]) stop.push(`"${first}" already has a fast path to the Captain's Yeoman.`);
+    else if (taken) stop.push(`"${taken.word}" already has a fast path to ${stations.find((s) => s.id === taken.route.to)?.short ?? taken.route.profile}.`);
+    if (!/^[a-z0-9][a-z0-9 !'-]{0,39}$/.test(w)) stop.push(`"${w}": letters, digits, spaces, ! ' and - only, up to 40.`);
     const owner = stations.find((s) => s.id !== d.to && s.aliases.includes(w));
     if (owner) note.push(`"${w}" is also ${owner.short}'s name. In code, the fast path wins.`);
+  }
+  const eg = d.example.trim();
+  if (eg && words.length && !codedAt(routeOf(eg, [], []).rest.toLowerCase(), [{ words, say: '', to: d.to, profile: '' }])) {
+    stop.push('The example must start with one of the first words (a speed word before them is fine).');
   }
   if (words.some((w) => w.length < 3)) note.push('A very short word matches more than you might mean.');
   return { stop, note };
@@ -156,6 +174,13 @@ const orList = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const quote = (s: string) => `"${s}"`;
 
+/** The entry the new fast path adds to Hermes' routing/fast-paths.json. */
+export function fastEntry(d: FastDraft, st: Station): string {
+  const entry: Record<string, unknown> = { words: fastWords(d.words), profile: st.profile ?? st.id, patch: '<the new letter>' };
+  if (d.example.trim()) entry.example = d.example.trim().slice(0, 120);
+  return JSON.stringify(entry);
+}
+
 /** The card for the Chief Engineer, in the house brief format (GOAL, CONTEXT, CONSTRAINTS, DONE WHEN). */
 export function fastPathBrief(d: FastDraft, st: Station, chief: Station | undefined): string {
   const words = fastWords(d.words);
@@ -163,10 +188,11 @@ export function fastPathBrief(d: FastDraft, st: Station, chief: Station | undefi
   const by = chief?.profile ?? 'forge';
   const prof = st.profile ?? st.id;
   const slug = words[0].replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'new';
-  const yes = [...words.map((w) => quote(`${cap(w)} test`)), quote(`Warp: ${words[0]} test`)];
+  const eg = d.example.trim();
+  const yes = [...(eg ? [quote(eg)] : []), ...words.map((w) => quote(`${cap(w)} test`)), quote(`Warp: ${words[0]} test`)];
   const no = [quote(`tell me about ${words[0]}`), ...fastWords(d.avoid).map(quote)];
   return [
-    `# New fast path · ${said} goes to ${st.name} in code (${by}, solo)`,
+    `# New fast path · ${said} goes to ${st.name} (${by}, solo)`,
     '',
     `Paste to Number One as one card for ${by}. ${cap(by)} works this card alone: no child cards.`,
     '',
@@ -174,22 +200,21 @@ export function fastPathBrief(d: FastDraft, st: Station, chief: Station | undefi
     `When the Captain's message starts with ${said}, code files the card to the ${prof} profile (${st.name}) with the Captain's words unchanged. Number One only sends the receipt.`,
     '',
     '## CONTEXT',
-    '- Patch P does this for the Captain\'s Yeoman: "remind", "todo" and "yeoman" at the very start of the typed text are matched in the arrival hook, and code files the card. A speed word before them (patch K) still counts as the start.',
-    `- This adds ${said} to the same path, for the ${prof} profile. The Captain drafted it on Number One's board, on the fast path.`,
-    '- Prompt rules don\'t hold on qwen; code does.',
+    '- The arrival hook reads the coded fast paths from /opt/data/routing/fast-paths.json (B2-34): first words at the very start of the typed text, matched as whole words, case-insensitive, a speed word before them still counting as the start. Code files the card for the entry\'s profile. Patch P\'s words ("remind", "todo", "yeoman") were the first entries.',
+    `- This adds ${said} for the ${prof} profile. The Captain drafted it on Number One's board, on the fast path; the board reads the same file through the ship probe.`,
     '',
     '## CONSTRAINTS',
-    `- Match at the very start of the Captain's typed text, case-insensitive, as whole words: ${said}. A speed word before it still counts as the start. The words anywhere else are not a match.`,
-    `- On a match, code creates the Kanban card itself: assignee ${prof}, title with the ORD, body = the Captain's words exactly. It then tells Number One the card is already filed (card ID and ORD), so Number One replies with the receipt only and files nothing.`,
-    '- If code can\'t create the card, nothing is lost: Number One gets the message as today.',
-    '- Change only what this needs, next to patch P\'s words. Write patches and scripts only. Never edit a live file under /opt/hermes or the live profiles. The Captain applies the patch.',
-    '- Name the patch with the next free letter. Add it to apply.sh and check.sh with a "present under overlay" check, as B2-31 did.',
+    '- Add one entry to /opt/data/routing/fast-paths.json and change nothing else in it:',
+    `  \`${fastEntry(d, st)}\``,
+    '- If the arrival hook doesn\'t read that file yet, stop and report: B2-34 comes first.',
+    '- The patch adds the entry; it never edits the live file directly. Write patches and scripts only. Never edit a live file under /opt/hermes or the live profiles. The Captain applies the patch.',
+    '- Name the patch with the next free letter, and put that letter in the entry\'s "patch". Add it to apply.sh and check.sh with a "present under overlay" check, as B2-31 did.',
     '- Test on scratch copies only, with fake messages and an empty test board, and delete them when done. No real cards and no real messages.',
     '- Never sleep, wait or poll. When done, report and finish.',
     '- Manual steps in the report use the NAS-host docker form, for example `sudo docker exec -u root hermes sh /opt/data/patches/apply.sh`, under "## Manual steps for Roger (NAS host)", numbered, one code block each, with the expected output. Rollback goes in its own section after the steps.',
     '',
     '## DONE WHEN',
-    `- Tests pass: ${yes.join(', ')} each create one ${prof} card with the exact words. ${cap(orList(no))} create${no.length > 1 ? '' : 's'} none. A card-creation failure falls back to normal routing. The tests for K and P still pass.`,
+    `- Tests pass: ${yes.join(', ')} each create one ${prof} card with the exact words. ${cap(orList(no))} create${no.length > 1 ? '' : 's'} none. The tests for the other fast paths still pass.`,
     '- apply.sh and check.sh know the new patch, and check.sh says "OK through" it on the scratch copy.',
     `- /opt/data/handoff/engineering/fast-path-${slug}-report.md holds the change, the test output, the manual steps, and a live test for the Captain: send ${yes[0]} from the desktop app, then check that the newest card is on ${prof}'s board with those words.`,
     `- ${cap(by)}'s final report says plainly whether each item was done.`,
@@ -222,15 +247,15 @@ export interface RouteGuess {
   speed?: string;
   /** The words after it. */
   rest: string;
-  /** A coded fast path the first word matches: code files the card. */
-  coded?: { word: string; to: string; patch: string };
+  /** A coded fast path the first words match: code files the card. */
+  coded?: { word: string; to: string; patch?: string };
   /** Stations the words name, the first named first. */
   named: { id: string; alias: string }[];
 }
 
 /** Where a message would go, by the same rules: a speed word first, then the coded fast path (exact, it is code),
  *  then the station names in the words (what Number One usually goes by). */
-export function routeOf(text: string, stations: Station[]): RouteGuess {
+export function routeOf(text: string, stations: Station[], paths: FastRoute[]): RouteGuess {
   let rest = text.trim();
   let speed: string | undefined;
   for (const w of SPEED_START) {
@@ -238,9 +263,8 @@ export function routeOf(text: string, stations: Station[]): RouteGuess {
     if (m) { speed = w.split(' ').map(cap).join(' '); rest = rest.slice(m[0].length); break; }
   }
   const lower = rest.toLowerCase();
-  const first = lower.match(/^[a-z]+/)?.[0];
-  const hit = first ? CODED[first] : undefined;
-  const coded = hit && first ? { word: first, ...hit } : undefined;
+  const hit = codedAt(lower, paths);
+  const coded = hit ? { word: hit.word, to: hit.route.to, patch: hit.route.patch } : undefined;
   const named: { id: string; alias: string; at: number }[] = [];
   for (const st of stations) {
     let best: { alias: string; at: number } | undefined;

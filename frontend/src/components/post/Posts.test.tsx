@@ -11,6 +11,7 @@ import yeoman from '../../../../fixtures/yeoman.json';
 import helm from '../../../../fixtures/helm.json';
 import nav from '../../../../fixtures/nav.json';
 import viewscreen from '../../../../fixtures/viewscreen.json';
+import fastpaths from '../../../../fixtures/fastpaths.json';
 import type { Fixtures } from '../../types';
 import { makeShipView } from '../../lib/ship';
 import { XoBoard } from '../xo/XoBoard';
@@ -18,7 +19,7 @@ import { HelmBoard } from '../helm/HelmBoard';
 import { NavBoard } from '../nav/NavBoard';
 import { ViewscreenBoard } from '../viewscreen/ViewscreenBoard';
 
-const data = { ship, stations, rails, orders, shiplog, yeoman, helm, nav, viewscreen } as unknown as Fixtures;
+const data = { ship, stations, rails, orders, shiplog, yeoman, helm, nav, viewscreen, fastpaths } as unknown as Fixtures;
 const noop = () => {};
 type Board = typeof XoBoard;
 const mount = (B: Board, onBoard: (b: string) => void = noop, d: Fixtures = data) => render(
@@ -112,13 +113,24 @@ describe("Number One's post", () => {
   it('the fast path has three pages: the coded first words, the station names, and a new fast path', () => {
     const c = mount(XoBoard);
     fireEvent.click(spot(c, 'xspot-fastpath'));
-    expect([...c.querySelectorAll('.xfp-say')].map((x) => x.textContent)).toEqual(['“remind me…”', '“todo… / todo!…”', '“yeoman…”']);
+    expect([...c.querySelectorAll('.xfp-say')].map((x) => x.textContent)).toEqual(['“remind…”', '“todo… / todo!…”', '“yeoman…”']);
+    expect(c.querySelector('.post-screen .con-sub')?.textContent).toContain('SAMPLE · NO FILE FROM HERMES YET');
     expect(c.querySelector('.xfp-names')).toBeNull();
     fireEvent.click(dots(c)[1]);
     expect(c.querySelectorAll('.xfp-names .prow')).toHaveLength(27);
     expect(c.querySelector('.xfp-say')).toBeNull();
     fireEvent.click(dots(c)[2]);
     expect(c.querySelector('.xfp-form')).not.toBeNull();
+  });
+  it('Re-sync with the core reads the fast-path file again and says what it found', async () => {
+    const toast = vi.fn();
+    const live = { ...(fastpaths as object), synthetic: false, paths: [...fastpaths.paths, { words: ['log meal'], profile: 'scribe' }] };
+    const resync = vi.fn(async () => ({ fastpaths: live }) as never);
+    const c = render(<XoBoard ship={makeShipView(data, {}, new Set())} filter="all" drills={{}} target={null} onTarget={noop} onBoard={noop}
+      onToast={toast} onResync={resync} />).container;
+    fireEvent.click(spot(c, 'xspot-fastpath'));
+    fireEvent.click([...c.querySelectorAll('.xfp .btn')].find((b) => b.textContent === 'Re-sync with the core')!);
+    await vi.waitFor(() => expect(toast).toHaveBeenCalledWith('Re-synced with the core: 4 fast paths from Hermes.'));
   });
   it('a new fast path builds the card for the Chief Engineer as you type, and stops on a speed word', () => {
     const c = mount(XoBoard);
@@ -132,7 +144,7 @@ describe("Number One's post", () => {
     expect(copy.disabled).toBe(false);
     const card = c.querySelector('.xfp-draft')?.textContent ?? '';
     expect(card).toContain('## GOAL');
-    expect(card).toContain('assignee scribe');
+    expect(card).toContain('"profile":"scribe"');
     fireEvent.change(words, { target: { value: 'warp' } });
     expect(copy.disabled).toBe(true);
     expect(c.querySelector('.xfp-check .stop')?.textContent).toContain('speed word');

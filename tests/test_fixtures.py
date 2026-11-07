@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
 NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops", "nas", "yeoman",
-         "helm", "nav", "viewscreen"]
+         "helm", "nav", "viewscreen", "fastpaths"]
 
 
 def load(path):

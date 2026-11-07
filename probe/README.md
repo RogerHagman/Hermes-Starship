@@ -68,6 +68,12 @@ letter columns are never read out, and any email address, phone number, salary f
 in a note becomes `[contact]`, `[salary]` or `[file]`. Without the folder nothing is written and the
 Helm board shows its sample.
 
+It also writes `deploy/live/fastpaths.json` (schema `api/schema/fastpaths.schema.json`) from Hermes'
+`routing/fast-paths.json` (`FAST_PATHS`): the coded fast paths, the first words the arrival hook
+routes straight to a profile before Number One reads the message. Only `words`, `profile`, `patch`
+and `example` are copied, and an entry that doesn't fit is left out. Without the file nothing is
+written and Number One's post shows the sample (patch P's words).
+
 It also writes `deploy/live/records.json`, in the same shape: every order on file, in any state,
 for the core terminal on the Computer core board (Deck 3). Nothing drops off it for age. An open
 order that never got a card stays, with a line that says so. The newest `RECORDS_KEEP` (1000)

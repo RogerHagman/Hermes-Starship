@@ -1,11 +1,12 @@
 // Friendly names for the generated fixture types.
-import type { EngineeringFile, HelmFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile } from './fixtures';
+import type { EngineeringFile, FastPathsFile, HelmFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile } from './fixtures';
 
-export type { EngineeringFile, HelmFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile };
+export type { EngineeringFile, FastPathsFile, HelmFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile };
 export type Station = StationsFile['stations'][number];
 export type Rail = RailsFile['rails'][number];
 export type RailId = Rail['id'];
 export type Order = OrdersFile['orders'][number];
+export type FastPath = FastPathsFile['paths'][number];
 export type LogEntry = ShipLogFile['entries'][number];
 export type RailColour = Station['rail'];
 export type Campaign = QuartersFile['campaigns'][number];
@@ -62,6 +63,8 @@ export interface Fixtures {
   nav: NavFile;
   /** The Away Team's sessions on the Main Viewscreen. Sample only until computer use is fitted. */
   viewscreen: ViewscreenFile;
+  /** The coded fast paths: the sample (patch P's words), or live/fastpaths.json from the ship probe (Hermes' routing/fast-paths.json). */
+  fastpaths: FastPathsFile;
   /** live/rail-log.json from the rails probe, when there is one. Its duty lines replace the samples. */
   raillog?: RailLogFile;
   /** live/nas.json from the Ops probe, when there is one. Its NAS and disks replace the sample ones in ops. */

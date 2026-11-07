@@ -2,7 +2,7 @@
 // who is relieved, who the comm badge speaks to), and shows the Bridge or one of the deck boards:
 // the Captain's Quarters, Ops, the Holodeck, the Sensor array, Main Engineering or the Science lab.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LIVE_EVERY_MS, loadLive, loadSample, withLive } from './lib/data';
+import { LIVE_EVERY_MS, loadLive, loadSample, withLive, type Live } from './lib/data';
 import { useBoard } from './lib/board';
 import { DEPTS, RAIL } from './lib/lookups';
 import { makeShipView, type Drills, type Relieved } from './lib/ship';
@@ -41,6 +41,12 @@ export function App() {
   const sample = useRef<Fixtures | null>(null);
   useEffect(() => {
     loadSample().then(async (base) => { sample.current = base; setData(withLive(base, await loadLive())); }, (e: Error) => setError(e.message));
+  }, []);
+  // Read the probes' files now, on a button (Number One's "Re-sync with the core"), not only every minute.
+  const resync = useCallback(async (): Promise<Live> => {
+    const live = await loadLive();
+    if (sample.current) setData(withLive(sample.current, live));
+    return live;
   }, []);
   // Live data: read the probes' files again every minute while the page is open.
   useEffect(() => {
@@ -116,7 +122,7 @@ export function App() {
             )}
             {ship && board === 'xo' && (
               <XoBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
-                onBoard={goBoard} onToast={showToast} />
+                onBoard={goBoard} onToast={showToast} onResync={resync} />
             )}
             {ship && board === 'helm' && (
               <HelmBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}

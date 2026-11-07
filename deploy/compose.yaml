@@ -86,6 +86,7 @@ services:
       RECORDS_KEEP: "1000"
       YEOMAN_DIR: /hermes/yeoman
       HELM_DIR: /hermes/helm/app-tracker
+      FAST_PATHS: /hermes/routing/fast-paths.json
     volumes:
       - ${HERMES_DATA_HOST:-/DATA/AppData/hermes}:/hermes:ro
       - ../fixtures/stations.json:/srv/fixtures/stations.json:ro

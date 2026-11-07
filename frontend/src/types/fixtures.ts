@@ -53,6 +53,46 @@ export interface EngineeringFile {
 }
 
 /**
+ * The coded fast paths: first words that code routes straight to a station's profile, before Number One reads the message. Hermes keeps them in routing/fast-paths.json, which the arrival hook reads; live/fastpaths.json from the ship probe copies it for the board. Without it the board shows this sample (patch P's words).
+ */
+export interface FastPathsFile {
+  asOf: string;
+  synthetic: boolean;
+  /**
+   * @maxItems 100
+   */
+  paths: {
+    /**
+     * First words, lower case, matched at the very start of the typed text as whole words. A speed word before them still counts as the start.
+     *
+     * @minItems 1
+     * @maxItems 8
+     */
+    words:
+      | [string]
+      | [string, string]
+      | [string, string, string]
+      | [string, string, string, string]
+      | [string, string, string, string, string]
+      | [string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string];
+    /**
+     * The Hermes profile code files the card for.
+     */
+    profile: string;
+    /**
+     * The patch that added it.
+     */
+    patch?: string;
+    /**
+     * A message that takes this path.
+     */
+    example?: string;
+  }[];
+}
+
+/**
  * Helm's application tracker: job ads, applications and their events, from find to close. live/helm.json from the ship probe reads the tracker's own files (helm/app-tracker/*.csv) once they live on the NAS; without it the board shows this sample. Contact details, salary asks and file paths are never copied.
  */
 export interface HelmFile {

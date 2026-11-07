@@ -12,10 +12,11 @@ import type { BoardId } from '../../lib/board';
 import { STATE_WORD, records, recordsFile } from '../../lib/computer';
 import { inLastDays, lastDays, openedOf } from '../../lib/post';
 import type { Drills, ShipView } from '../../lib/ship';
+import type { Live } from '../../lib/data';
 import { dayAndTime, dayKey } from '../../lib/format';
 import { railColor } from '../../lib/lookups';
 import {
-  EVERY, FAST_WORDS, SCREEN, SPOTS, SURFACES, SURFACE_COLOUR, asks, channels, routed, surfaceWord, type Route, type XoObject,
+  EVERY, SCREEN, SPOTS, SURFACES, SURFACE_COLOUR, asks, channels, fastPaths, routed, surfaceWord, type Route, type XoObject,
 } from '../../lib/xo';
 import { CommBadge } from '../CommBadge';
 import { RailsPanel } from '../Panels';
@@ -32,6 +33,8 @@ interface Props {
   onTarget: (id: string) => void;
   onBoard: (b: BoardId) => void;
   onToast: (text: string) => void;
+  /** Read the probes' files now (the fast path's "Re-sync with the core"). */
+  onResync?: () => Promise<Live>;
 }
 
 const SHORT = { telegram: 'Telegram', desktop: 'Desktop', dashboard: 'Dashboard' } as const;
@@ -44,7 +47,7 @@ const LIT: Partial<Record<Screen['view'], XoObject>> = {
   channels: 'channels', fastpath: 'fastpath', rules: 'rules', hails: 'hails', lounge: 'lounge', blocked: 'blocked',
 };
 
-export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Props) {
+export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast, onResync }: Props) {
   const [screen, setScreen] = useState<Screen>({ view: 'ease' });
   const [route, setRoute] = useState<Route>(EVERY);
   const show = useCallback((x: Screen) => setScreen((cur) => (JSON.stringify(cur) === JSON.stringify(x) ? { view: 'ease' } : x)), []);
@@ -67,7 +70,7 @@ export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Pr
   const labels: Record<XoObject, { name: string; meta?: string }> = {
     bridge: { name: 'Turbolift', meta: 'TO THE BRIDGE' },
     channels: { name: 'Comm channels', meta: `${ch.reduce((n, c) => n + c.week, 0)} THIS WEEK` },
-    fastpath: { name: 'Fast path', meta: `${FAST_WORDS.length} IN CODE` },
+    fastpath: { name: 'Fast path', meta: `${fastPaths(ship.data).length} IN CODE` },
     rules: { name: 'Rail rules', meta: '0 TO 9' },
     hails: { name: 'Hails', meta: hails ? `${hails} FOR YOU` : 'NONE' },
     lounge: { name: 'Briefing room', meta: 'MINUTES' },
@@ -92,7 +95,7 @@ export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Pr
           { id: 'speed', name: 'Speed words', n: kept, sub: `OF ${total} KEPT WITH THE ORDER`, colour: 'var(--good)', label: `Speed words, ${kept} of ${total} kept`,
             pressed: screen.view === 'channels', onClick: () => show({ view: 'channels' }) },
         ]} />}>
-        <XoScreen ship={ship} screen={screen} onScreen={setScreen} route={route} onRoute={routeTo} onToast={onToast} />
+        <XoScreen ship={ship} screen={screen} onScreen={setScreen} route={route} onRoute={routeTo} onToast={onToast} onResync={onResync} />
       </PostRoom>
       <aside className="side qside">
         {/* a new pick starts on the first page */}
