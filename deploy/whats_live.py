@@ -10,7 +10,7 @@ item is live, 1 when one is not, 2 when the facts folder is missing.
 The facts folder (all files optional; a missing one means "not found"):
   now                       epoch seconds on the NAS when the facts were gathered
   check.txt, check.rc       check.sh output and exit code
-  b236-report               "yes" when /opt/data/handoff/engineering/b236-report.md exists
+  apply-fix                 "applied" or "built" for /opt/data/patches/patch_B235.diff (the B2-36 fix)
   fast-paths.json           /opt/data/routing/fast-paths.json
   hook-grep.txt             Hermes code files (not tests) that name fast-paths
   containers.txt            "<name> <running true|false>" per container
@@ -111,13 +111,15 @@ def item_patches(facts, now):
 
 
 def item_apply_wb(facts, now):
-    # B2-36 is done when forge has written its report. apply.sh can't be judged by its words: B2-31
-    # already gave W_b an "already applied under later overlays" line, and that rule still fails.
-    # The proof is the next apply.sh run ending without an error.
-    report = (text(facts, "b236-report") or "").strip() == "yes"
-    if report:
-        return LIVE, "b236-report.md on file (proof: the next apply.sh run ends without an error)"
-    return NOT_YET, "no b236-report.md yet (brief B2-36 not done; apply.sh still stops at W_b)"
+    # The B2-36 fix is patch_B235.diff (forge filed it under the B2-35 number): it changes only
+    # apply.sh, so it is live when it reverse-checks. apply.sh's own words can't tell: B2-31 already
+    # had an "under later overlays" line for W_b that failed. Proof: apply.sh ends without an error.
+    fix = (text(facts, "apply-fix") or "").strip()
+    if fix == "applied":
+        return LIVE, "patch_B235.diff is applied to apply.sh (proof: the next apply.sh run ends without an error)"
+    if fix == "built":
+        return NOT_YET, "patch_B235.diff is built but not applied to apply.sh"
+    return NOT_YET, "no patch_B235.diff yet (brief B2-36 not done; apply.sh still stops at W_b)"
 
 
 def item_core_terminal(facts, now):

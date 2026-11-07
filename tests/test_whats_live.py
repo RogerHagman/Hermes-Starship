@@ -28,7 +28,7 @@ def all_live(folder):
     write(folder, "now", str(NOW))
     write(folder, "containers.txt", "hermes true\nhermes-starship true\nhermes-starship-ship true\nhermes-starship-meters true\n")
     write(folder, "check.txt", "A: OK\nW_b: OK\nAH: OK\nAI: OK\nOK through AI\n")
-    write(folder, "b236-report", "yes\n")
+    write(folder, "apply-fix", "applied\n")
     write(folder, "fast-paths.json", {"paths": [{"words": ["remind"], "profile": "yeoman"},
                                                 {"words": ["todo", "todo!"], "profile": "yeoman"}]})
     write(folder, "hook-grep.txt", "/opt/hermes/gateway/arrival.py\n")
@@ -81,14 +81,14 @@ class Judge(unittest.TestCase):
         self.assertEqual(states(self.f)["Patches AG, AH, AI"][0], "CHECK")
 
     def test_apply_wb_not_done(self):
-        (self.f / "b236-report").unlink()
+        (self.f / "apply-fix").unlink()
         self.assertEqual(states(self.f)["apply.sh past W_b (B2-36)"][0], "NOT YET")
 
-    def test_apply_wb_old_overlay_line_is_not_enough(self):
-        # B2-31's line, live on 07/11, which still fails at W_b.
-        (self.f / "b236-report").unlink()
-        write(self.f, "apply-wb.txt", "179:        printf '%s\\n' 'patch_W_b.diff already applied under later overlays'\n")
-        self.assertEqual(states(self.f)["apply.sh past W_b (B2-36)"][0], "NOT YET")
+    def test_apply_wb_built_not_applied(self):
+        write(self.f, "apply-fix", "built\n")
+        state, note = states(self.f)["apply.sh past W_b (B2-36)"]
+        self.assertEqual(state, "NOT YET")
+        self.assertIn("not applied", note)
 
     def test_old_version(self):
         write(self.f, "__version__.py", '__version__ = "0.2.8"\n')
@@ -155,6 +155,7 @@ case "$1" in
     case "$*" in
       *check.sh*) printf 'AI: OK\nOK through AI\n' ;;
       *"test -f"*) exit 0 ;;
+      *patch_B235*) exit 0 ;;
       *fast-paths.json*) exit 1 ;;
       *grep\ -rl*) exit 1 ;;
     esac ;;
