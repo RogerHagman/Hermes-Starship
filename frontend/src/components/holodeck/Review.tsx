@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { dayAndTime } from '../../lib/format';
 import { HOLO_ICONS } from '../../lib/holodeck';
-import { REVIEW_STATE, STEP_MARK, diffLines, outOfBounds, reviewCounts, reviewIsSample, reviewItems, runTime } from '../../lib/review';
+import { REVIEW_STATE, STEP_MARK, diffLines, mainUnreviewed, outOfBounds, reviewCounts, reviewIsSample, reviewItems, runTime } from '../../lib/review';
 import type { ShipView } from '../../lib/ship';
 import type { HoloItem } from '../../types';
 import { ConHead } from '../ShipConsole';
@@ -18,6 +18,41 @@ const css = (vars: Record<string, string | number>) => vars as React.CSSProperti
 export function ReviewPill({ item }: { item: HoloItem }) {
   const s = REVIEW_STATE[item.state];
   return <span className="rv-pill mono" style={css({ '--rc': s.colour })} title={s.what}>{s.label}</span>;
+}
+
+// ---------- the main watch ----------
+
+/** One line in the panel: main is clean, or how many commits came in without a PR. */
+function MainLine({ ship }: { ship: ShipView }) {
+  const main = ship.data.holo?.main;
+  if (!main) return null;
+  const bad = main.unreviewed;
+  return (
+    <p className={'rv-main mono' + (bad.length ? ' bad' : '')}
+      title="GitHub doesn't enforce main's rules on this private repo, so the holo probe checks every commit on main came in through a merged PR.">
+      {bad.length ? `MAIN · ${bad.length} WITHOUT A PR · CONDITION RED` : `MAIN CLEAN · ${main.checked} COMMITS CHECKED, ALL THROUGH PRS`}
+    </p>
+  );
+}
+
+/** In the Review bay view: every commit on main without a merged PR, each with its link. */
+function MainBanner({ ship }: { ship: ShipView }) {
+  const bad = mainUnreviewed(ship.data);
+  if (bad.length === 0) return null;
+  return (
+    <div className="rv-main-banner" role="alert">
+      <span className="rv-cap mono">ON MAIN WITHOUT A MERGED PR · LOOK BEFORE YOU PULL ON THE NAS · CLEAR WITH MAIN_OK IN DEPLOY/.ENV</span>
+      <ul>
+        {bad.map((c) => (
+          <li key={c.sha}>
+            <a href={c.url} target="_blank" rel="noreferrer" className="mono">{c.sha.slice(0, 7)}</a>
+            <span>{c.title}</span>
+            <span className="mono rv-when">{c.author}{c.at ? ` · ${dayAndTime(c.at)}` : ''}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 // ---------- the side panel ----------
@@ -33,6 +68,7 @@ export function ReviewPanel({ ship, picked, onOpen }: { ship: ShipView; picked?:
         <span className="mono panel-meta">{n.ready} READY · {n.failed} FAILED · {n.building} BUILDING</span>
         <button type="button" className="foldall" onClick={() => onOpen()}>OPEN</button>
       </div>
+      <MainLine ship={ship} />
       <ul className="rv-list">
         {items.length === 0 && <li className="empty">Nothing from the Holodeck Officer yet.</li>}
         {items.slice(0, 4).map((i) => (
@@ -63,6 +99,7 @@ export function ReviewView({ ship, branch, onPick, onBack }: {
     <>
       <ConHead icon={HOLO_ICONS.review} title="Review bay" back="‹ Ready" onBack={onBack}
         sub={`${sample}THE HOLODECK OFFICER'S WORK ON GITHUB · ${n.open} OPEN · ${n.ready} READY TO REVIEW`} />
+      <MainBanner ship={ship} />
       <div className="con-body rv-body">
         <ul className="rv-items">
           {items.map((i) => (

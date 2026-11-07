@@ -228,6 +228,23 @@ export interface HoloFile {
      */
     report: string | null;
   }[];
+  /**
+   * The main watch: commits on main since 'since' that did not come in through a merged PR. GitHub doesn't enforce rulesets on this private repo, so this is how a push straight to main shows. Any unreviewed commit sets the boards to CONDITION RED.
+   */
+  main?: {
+    since: string;
+    checked: number;
+    /**
+     * @maxItems 30
+     */
+    unreviewed: {
+      sha: string;
+      title: string;
+      author: string;
+      at: string | null;
+      url: string;
+    }[];
+  };
 }
 
 /**

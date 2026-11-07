@@ -1,14 +1,29 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Hermes Starship \u00b7 holo",
+  "title": "Hermes Starship · holo",
   "description": "The Holodeck Officer's work on GitHub, for the Review bay: each holo/ branch it pushed, the holo Action's run on it (step by step), the pull request the Action opened, the files it changes and the report it wrote. live/holo.json from the holo probe reads it from GitHub (GET only); without it the board shows this sample.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["asOf", "synthetic", "repo", "items"],
+  "required": [
+    "asOf",
+    "synthetic",
+    "repo",
+    "items"
+  ],
   "properties": {
-    "asOf": {"type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"},
-    "synthetic": {"type": "boolean"},
-    "repo": {"description": "owner/name on GitHub.", "type": "string", "pattern": "^[A-Za-z0-9_.-]{1,40}/[A-Za-z0-9_.-]{1,100}$"},
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "repo": {
+      "description": "owner/name on GitHub.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]{1,40}/[A-Za-z0-9_.-]{1,100}$"
+    },
     "items": {
       "description": "Newest first: open work first, then the last merged or closed ones.",
       "type": "array",
@@ -16,54 +31,178 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["branch", "order", "title", "state", "updatedAt", "pr", "run", "files", "report"],
+        "required": [
+          "branch",
+          "order",
+          "title",
+          "state",
+          "updatedAt",
+          "pr",
+          "run",
+          "files",
+          "report"
+        ],
         "properties": {
-          "branch": {"type": "string", "pattern": "^holo/[A-Za-z0-9._-]{1,60}$"},
-          "order": {"description": "The ORD from the branch name, or null when the branch has none.", "type": ["string", "null"], "pattern": "^ORD-\\d{3,6}$"},
-          "title": {"description": "The PR title, or the newest commit's first line before there is a PR.", "type": "string", "maxLength": 200},
+          "branch": {
+            "type": "string",
+            "pattern": "^holo/[A-Za-z0-9._-]{1,60}$"
+          },
+          "order": {
+            "description": "The ORD from the branch name, or null when the branch has none.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^ORD-\\d{3,6}$"
+          },
+          "title": {
+            "description": "The PR title, or the newest commit's first line before there is a PR.",
+            "type": "string",
+            "maxLength": 200
+          },
           "state": {
             "description": "pushed: no run yet. building: the Action is running. failed: a check failed. ready: checks passed and the PR is open. merged and closed: done.",
-            "enum": ["pushed", "building", "failed", "ready", "merged", "closed"]
+            "enum": [
+              "pushed",
+              "building",
+              "failed",
+              "ready",
+              "merged",
+              "closed"
+            ]
           },
-          "updatedAt": {"type": "string", "format": "date-time"},
-          "version": {"description": "The version the branch bumps __version__.py to, when it does.", "type": ["string", "null"], "pattern": "^\\d+\\.\\d+\\.\\d+$"},
-          "sha": {"description": "The branch head, short.", "type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "description": "The version the branch bumps __version__.py to, when it does.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "sha": {
+            "description": "The branch head, short.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{7,40}$"
+          },
           "pr": {
-            "type": ["object", "null"],
+            "type": [
+              "object",
+              "null"
+            ],
             "additionalProperties": false,
-            "required": ["number", "url", "state"],
+            "required": [
+              "number",
+              "url",
+              "state"
+            ],
             "properties": {
-              "number": {"type": "integer", "minimum": 1},
-              "url": {"type": "string", "pattern": "^https://github\\.com/"},
-              "state": {"enum": ["open", "merged", "closed"]},
-              "draft": {"type": "boolean"}
+              "number": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https://github\\.com/"
+              },
+              "state": {
+                "enum": [
+                  "open",
+                  "merged",
+                  "closed"
+                ]
+              },
+              "draft": {
+                "type": "boolean"
+              }
             }
           },
           "run": {
             "description": "The newest holo Action run on the branch head.",
-            "type": ["object", "null"],
+            "type": [
+              "object",
+              "null"
+            ],
             "additionalProperties": false,
-            "required": ["status", "url", "steps"],
+            "required": [
+              "status",
+              "url",
+              "steps"
+            ],
             "properties": {
-              "status": {"enum": ["queued", "running", "passed", "failed", "cancelled"]},
-              "url": {"type": "string", "pattern": "^https://github\\.com/"},
-              "startedAt": {"type": ["string", "null"], "format": "date-time"},
-              "seconds": {"type": ["integer", "null"], "minimum": 0},
+              "status": {
+                "enum": [
+                  "queued",
+                  "running",
+                  "passed",
+                  "failed",
+                  "cancelled"
+                ]
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https://github\\.com/"
+              },
+              "startedAt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
               "steps": {
                 "type": "array",
                 "maxItems": 40,
                 "items": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": ["name", "state"],
+                  "required": [
+                    "name",
+                    "state"
+                  ],
                   "properties": {
-                    "name": {"type": "string", "maxLength": 120},
-                    "state": {"enum": ["waiting", "running", "ok", "failed", "skipped"]},
-                    "seconds": {"type": ["integer", "null"], "minimum": 0}
+                    "name": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "state": {
+                      "enum": [
+                        "waiting",
+                        "running",
+                        "ok",
+                        "failed",
+                        "skipped"
+                      ]
+                    },
+                    "seconds": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 0
+                    }
                   }
                 }
               },
-              "failLog": {"description": "The last lines of the failing step's log.", "type": "array", "maxItems": 40, "items": {"type": "string", "maxLength": 400}}
+              "failLog": {
+                "description": "The last lines of the failing step's log.",
+                "type": "array",
+                "maxItems": 40,
+                "items": {
+                  "type": "string",
+                  "maxLength": 400
+                }
+              }
             }
           },
           "files": {
@@ -73,17 +212,104 @@
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["path", "add", "del", "inBounds"],
+              "required": [
+                "path",
+                "add",
+                "del",
+                "inBounds"
+              ],
               "properties": {
-                "path": {"type": "string", "maxLength": 300},
-                "add": {"type": "integer", "minimum": 0},
-                "del": {"type": "integer", "minimum": 0},
-                "inBounds": {"type": "boolean"},
-                "patch": {"description": "The unified diff of this file, cut to a few hundred lines. Missing for built and binary files.", "type": "string", "maxLength": 60000}
+                "path": {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                "add": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "del": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "inBounds": {
+                  "type": "boolean"
+                },
+                "patch": {
+                  "description": "The unified diff of this file, cut to a few hundred lines. Missing for built and binary files.",
+                  "type": "string",
+                  "maxLength": 60000
+                }
               }
             }
           },
-          "report": {"description": "holodeck/reports/<ORD>.md from the branch, or null.", "type": ["string", "null"], "maxLength": 20000}
+          "report": {
+            "description": "holodeck/reports/<ORD>.md from the branch, or null.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20000
+          }
+        }
+      }
+    },
+    "main": {
+      "description": "The main watch: commits on main since 'since' that did not come in through a merged PR. GitHub doesn't enforce rulesets on this private repo, so this is how a push straight to main shows. Any unreviewed commit sets the boards to CONDITION RED.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "since",
+        "checked",
+        "unreviewed"
+      ],
+      "properties": {
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "checked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unreviewed": {
+          "type": "array",
+          "maxItems": 30,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sha",
+              "title",
+              "author",
+              "at",
+              "url"
+            ],
+            "properties": {
+              "sha": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{7,40}$"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "author": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https://github\\.com/"
+              }
+            }
+          }
         }
       }
     }
