@@ -213,8 +213,16 @@ function Terminal({ ship, all, list, query, onQuery, page, onPage, settings, sai
           <button type="button" className="tclear tstats" onClick={() => onScreen({ view: 'stats' })}>the numbers ›</button>
         </p>
         <ol ref={ol} className="tlist" aria-label={p.pages > 1 ? `Orders, page ${p.at + 1} of ${p.pages}` : 'Orders'}>
+          {list.length > 0 && (
+            <li className="thead mono" aria-hidden="true" style={css({ '--cols': colsOf(settings) })}>
+              <span>ORDER</span><span>STATE</span>{settings.station === 'on' && <span className="tst">STATION</span>}<span>TITLE</span>
+              {settings.clock === 'on' && <span className="tclock">CLOCK</span>}
+              {settings.effective === 'on' && <span className="tclock">EFFECTIVE</span>}
+              {settings.dates !== 'off' && <span className="twhen">UPDATED</span>}
+            </li>
+          )}
           {list.length === 0 && <li className="tnone mono">No order matches. Type <b>all</b> to see every record, or <b>man</b> for help.</li>}
-          {shown.map((o) => <Row key={o.id} ship={ship} o={o} times={settings.dates === 'time'} onOpen={onOpen} />)}
+          {shown.map((o) => <Row key={o.id} ship={ship} o={o} settings={settings} onOpen={onOpen} />)}
         </ol>
         <div className="tfoot mono">
           <span className="tcount">
@@ -248,17 +256,28 @@ function sourceWord(ship: ShipView): string {
   return ship.data.records ? 'LIVE FROM THE SHIP PROBE' : 'LIVE ORDERS · LAST 7 DAYS';
 }
 
-function Row({ ship, o, times, onOpen }: { ship: ShipView; o: Order; times: boolean; onOpen: (id: string) => void }) {
+/** The list's grid: the columns the settings show, in their order. */
+function colsOf(s: CoreSettings): string {
+  return ['74px', '86px', s.station === 'on' && '74px', 'minmax(0,1fr)', s.clock === 'on' && '92px',
+    s.effective === 'on' && '84px', s.dates !== 'off' && 'auto'].filter(Boolean).join(' ');
+}
+
+function Row({ ship, o, settings, onOpen }: { ship: ShipView; o: Order; settings: CoreSettings; onOpen: (id: string) => void }) {
   const st = ship.station(o.station);
+  const says = o.replies?.length ? `${o.replies.length} ↩` : '';
   return (
     <li>
-      <button type="button" className={`trow ts-${o.state}`} onClick={() => onOpen(o.id)} style={css({ '--rc': railColor(st?.rail ?? 'mixed') })}>
+      <button type="button" className={`trow ts-${o.state}`} onClick={() => onOpen(o.id)}
+        style={css({ '--rc': railColor(st?.rail ?? 'mixed'), '--cols': colsOf(settings) })}>
         <span className="tid mono">{o.id}</span>
         <StatePill state={o.state} />
-        <span className="tst mono">{up(st?.short ?? o.station)}</span>
+        {settings.station === 'on' && <span className="tst mono">{up(st?.short ?? o.station)}</span>}
         <span className="ttitle">{o.title}</span>
-        <span className="tclock mono"><TaskClock ship={ship} order={o} short /></span>
-        <span className="twhen mono">{o.replies?.length ? `${o.replies.length} ↩ · ` : ''}{times ? when(o.updatedAt) : dayLine(o.updatedAt)}</span>
+        {settings.clock === 'on' && <span className="tclock mono"><TaskClock ship={ship} order={o} short /></span>}
+        {settings.effective === 'on' && <span className="tclock mono"><TaskClock ship={ship} order={o} effective /></span>}
+        {settings.dates !== 'off'
+          ? <span className="twhen mono">{says ? `${says} · ` : ''}{settings.dates === 'time' ? when(o.updatedAt) : dayLine(o.updatedAt)}</span>
+          : says && <span className="twhen mono">{says}</span>}
       </button>
     </li>
   );

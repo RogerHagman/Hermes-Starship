@@ -18,9 +18,16 @@ export function useClock(ship: ShipView, o: Order | undefined) {
 }
 
 /** The clock as a short tag; nothing when the order has no opening time. */
-export function TaskClock({ ship, order, className = 'taskclock', short = false }: { ship: ShipView; order: Order; className?: string; short?: boolean }) {
+export function TaskClock({ ship, order, className = 'taskclock', short = false, effective = false }: {
+  ship: ShipView; order: Order; className?: string; short?: boolean; effective?: boolean;
+}) {
   const clock = useClock(ship, order);
   if (!clock) return null;
+  // The worked time alone, for the terminal's EFFECTIVE column: a dash when no card was claimed.
+  if (effective) {
+    return <span className={`${className} ${clock.effective ? clock.kind : 'done'}`}
+      title={clock.effective ? `Effective: worked ${clock.effective}` : 'No card was claimed'}>{clock.effective ?? '–'}</span>;
+  }
   return (
     <span className={`${className} ${clock.kind}`} title={short ? clock.text : clock.kind === 'done'
       ? 'Task clock: from the order coming in to it closing'
@@ -30,9 +37,20 @@ export function TaskClock({ ship, order, className = 'taskclock', short = false 
   );
 }
 
-/** The clock as a row of an order's record ("CLOCK  TOOK 34 S"); nothing without an opening time. */
+/**
+ * The clock as two fields of an order's record: CLOCK (from the order coming in) and EFFECTIVE
+ * (from a crew member starting on it). Nothing without an opening time.
+ */
 export function ClockRow({ ship, order }: { ship: ShipView; order: Order }) {
   const clock = useClock(ship, order);
   if (!clock) return null;
-  return <div><dt>CLOCK</dt><dd><TaskClock ship={ship} order={order} /></dd></div>;
+  const cls = `taskclock ${clock.kind}`;
+  return (
+    <>
+      <div><dt>CLOCK</dt><dd><span className={cls} title="From the order coming in to now, or to its close">{clock.main}</span></dd></div>
+      <div><dt>EFFECTIVE</dt><dd>{clock.effective
+        ? <span className={cls} title="From a crew member starting on it (the first card claimed) to now, or to its close">{clock.effective}</span>
+        : <span className="taskclock done" title="No card was claimed: answered in chat, or not started yet">{order.state === 'done' ? 'no card' : 'not started'}</span>}</dd></div>
+    </>
+  );
 }

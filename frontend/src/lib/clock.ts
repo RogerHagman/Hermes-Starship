@@ -35,6 +35,10 @@ export interface Clock {
   text: string;
   /** Just the total, for a narrow column: "34 s". */
   short: string;
+  /** The total with its word and no worked part, for a field of its own: "took 34 s". */
+  main: string;
+  /** The worked time alone ("30 s"), when a card was claimed; else undefined. */
+  effective?: string;
 }
 
 const between = (from?: string, to?: number) => {
@@ -53,5 +57,6 @@ export function taskClock(o: Order, now: number): Clock | null {
   // Only worth a second number when the order waited a noticeable while before anyone started.
   const extra = worked !== undefined && total - worked >= 5 * S ? ` · worked ${duration(worked)}` : '';
   const word = done ? 'took' : o.state === 'running' ? 'running' : 'open';
-  return { kind: done ? 'done' : 'running', total, worked, text: `${word} ${duration(total)}${extra}`, short: duration(total) };
+  return { kind: done ? 'done' : 'running', total, worked, text: `${word} ${duration(total)}${extra}`, short: duration(total),
+    main: `${word} ${duration(total)}`, effective: worked === undefined ? undefined : duration(worked) };
 }
