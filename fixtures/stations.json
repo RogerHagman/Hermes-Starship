@@ -19,6 +19,7 @@
         "hermes"
       ],
       "model": "qwen3.8 27b",
+      "defaultSpeed": "Thrusters",
       "answersTo": "Captain",
       "needs": [
         "local"
