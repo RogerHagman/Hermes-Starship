@@ -44,15 +44,15 @@ export function ClockRow({ ship, order }: { ship: ShipView; order: Order }) {
   const cls = `taskclock ${clock.kind}`;
   return (
     <>
-      <div><dt>TOTAL TIME</dt><dd><span className={cls} title="From the order coming in to now, or to its close">{clock.main}</span></dd></div>
-      <div><dt>WORK TIME</dt><dd><span className={cls} title={EFFECTIVE_WHY[clock.effectiveFrom]}>{clock.effective}</span></dd></div>
+      <div><dt>TOTAL TIME</dt><dd><span className={cls} title="Total time: from the order coming in to now, or to its close">{clock.short}</span></dd></div>
+      <div><dt>EFFECTIVE TIME</dt><dd><span className={cls} title={EFFECTIVE_WHY[clock.effectiveFrom]}>{clock.effective}</span></dd></div>
     </>
   );
 }
 
 /** Where the effective time comes from, for its tooltip. */
 const EFFECTIVE_WHY: Record<Clock['effectiveFrom'], string> = {
-  start: 'Work time: from a crew member starting on it (the first card claimed) to now, or to its close',
-  waiting: 'Work time: 0 s, no crew member has started on it yet',
-  whole: 'Work time: the whole clock, no card start on file (answered in chat, or the card has no start time)',
+  start: 'Effective time: from a crew member starting on it (the first card claimed) to now, or to its close',
+  waiting: 'Effective time: 0 s, no crew member has started on it yet',
+  whole: 'Effective time: the whole clock, no card start on file (answered in chat, or the card has no start time)',
 };
