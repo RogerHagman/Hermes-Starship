@@ -31,7 +31,7 @@ def all_live(folder):
     write(folder, "apply-fix", "applied\n")
     write(folder, "fast-paths.json", {"paths": [{"words": ["remind"], "profile": "yeoman"},
                                                 {"words": ["todo", "todo!"], "profile": "yeoman"}]})
-    write(folder, "hook-grep.txt", "/opt/hermes/gateway/arrival.py\n")
+    write(folder, "hook-grep.txt", "/opt/data/hooks/ord-ack/handler.py\n")
     write(folder, "ship-env.txt", "FAST_PATHS=/hermes/routing/fast-paths.json\nHELM_DIR=/x\nRECORDS_KEEP=1000\n")
     write(folder, "__version__.py", '__version__ = "0.2.10"\n')
     write(folder, "dist.txt", "frontend/dist/assets/index.js\n")

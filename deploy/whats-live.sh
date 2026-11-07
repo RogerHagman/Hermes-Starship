@@ -45,7 +45,9 @@ if $DOCKER exec "$HERMES" test -f /opt/data/patches/patch_B235.diff 2>/dev/null;
 fi
 $DOCKER exec "$HERMES" cat /opt/data/routing/fast-paths.json > "$FACTS/fast-paths.json" 2>/dev/null \
   || rm -f "$FACTS/fast-paths.json"
-$DOCKER exec "$HERMES" grep -rl --include='*.py' --exclude-dir=site-packages --exclude-dir=node_modules --exclude-dir=.venv 'fast-paths' /opt/hermes 2>/dev/null \
+# The arrival hook lives in /opt/data/hooks (ord-ack). Other Hermes code may name fast-paths for
+# other reasons, so only the hooks count.
+$DOCKER exec "$HERMES" grep -rl --include='*.py' 'fast-paths' /opt/data/hooks 2>/dev/null \
   | grep -v -e '/tests/' -e '/test/' -e '/test_' > "$FACTS/hook-grep.txt"
 
 # The ship probe's settings (new ones need a compose up, not only a pull).
