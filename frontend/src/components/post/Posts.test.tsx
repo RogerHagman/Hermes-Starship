@@ -30,9 +30,51 @@ const tile = (c: HTMLElement, name: string) => [...c.querySelectorAll('.pdesk-ti
 afterEach(cleanup);
 
 describe("Number One's post", () => {
-  it('starts on the routing table, and the room opens the comm channels, fast path and rules', () => {
+  const fanNode = (c: HTMLElement, name: string) => [...c.querySelectorAll('.xf-node')].find((g) => g.querySelector('.xf-name')?.textContent === name) as Element;
+  const listed = (c: HTMLElement) => [...c.querySelectorAll('.xf-rows .pl-meta')].map((x) => x.textContent ?? '');
+
+  it('starts on the routing fan: your channels in, a node per station that took an ask, every ask beside it', () => {
     const c = mount(XoBoard);
-    expect(title(c)).toBe('Routing table');
+    expect(title(c)).toBe('Routing');
+    expect([...c.querySelectorAll('.xf-inlet .xf-in')].map((t) => t.textContent)).toEqual(['TELEGRAM 7', 'DESKTOP APP 5', 'WEB DASHBOARD 4']);
+    expect(c.querySelectorAll('.xf-node').length).toBe(11);
+    expect(c.querySelector('.xf-title')?.textContent).toBe('Every ask');
+    expect(listed(c)).toHaveLength(16);
+  });
+  it('picking a station node lists the asks routed to it, and picking it again shows them all', () => {
+    const c = mount(XoBoard);
+    fireEvent.click(fanNode(c, 'Engineering'));
+    expect(c.querySelector('.xf-title')?.textContent).toBe('Routed to Engineering');
+    expect(listed(c).length).toBe(2);
+    expect(listed(c).every((t) => !t.includes('→') && t.includes('· FROM '))).toBe(true);
+    expect(fanNode(c, 'Ops').getAttribute('class')).toContain('dim');
+    // the inlets show where Engineering's asks came in
+    expect([...c.querySelectorAll('.xf-inlet .xf-in')].map((t) => t.textContent)).toEqual(['TELEGRAM 0', 'DESKTOP APP 2', 'WEB DASHBOARD 0']);
+    expect(c.querySelectorAll('.xf-inlet')[0].getAttribute('class')).toContain('dim');
+    fireEvent.keyDown(fanNode(c, 'Engineering'), { key: 'Enter' });
+    expect(c.querySelector('.xf-title')?.textContent).toBe('Every ask');
+  });
+  it('a routed ask opens its order, and Esc comes back to the fan with the station still picked', () => {
+    const c = mount(XoBoard);
+    fireEvent.click(fanNode(c, 'Engineering'));
+    fireEvent.click(c.querySelector('.xf-rows .plist-row')!);
+    expect(title(c)).toMatch(/^ORD-\d{4} · /);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(c.querySelector('.xf-title')?.textContent).toBe('Routed to Engineering');
+  });
+  it('a channel tile on the desk, or a channel on the fan, shows only what came in there', () => {
+    const c = mount(XoBoard);
+    fireEvent.click(tile(c, 'Telegram'));
+    expect(c.querySelector('.xf-title')?.textContent).toBe('From Telegram');
+    expect(listed(c)).toHaveLength(7);
+    expect(listed(c).every((t) => /^ORD-\d{4} → .+ · TELEGRAM · /.test(t))).toBe(true);
+    fireEvent.click(c.querySelectorAll('.xf-inlet')[0]);
+    expect(listed(c)).toHaveLength(16);
+  });
+  it('the Captain on the fan opens the hails; the room opens the comm channels, fast path and rules', () => {
+    const c = mount(XoBoard);
+    fireEvent.click([...c.querySelectorAll('.xf-side')].find((g) => g.textContent?.includes('CAPTAIN'))!);
+    expect(title(c)).toBe('Hails · waiting for you · 3');
     fireEvent.click(spot(c, 'xspot-channels'));
     expect(title(c)).toBe('Comm channels');
     expect(spot(c, 'x-pic').dataset.on).toBe('channels');
@@ -42,16 +84,7 @@ describe("Number One's post", () => {
     expect(title(c)).toBe('Rail rules');
     expect(c.querySelectorAll('.post-screen .prow')).toHaveLength(10);
     fireEvent.click(spot(c, 'xspot-rules'));
-    expect(title(c)).toBe('Routing table');
-  });
-  it('a channel tile on the desk filters the routing table to that surface', () => {
-    const c = mount(XoBoard);
-    const all = c.querySelectorAll('.post-screen .porder').length;
-    fireEvent.click(tile(c, 'Telegram'));
-    const shown = [...c.querySelectorAll('.post-screen .porder .po-st')].map((x) => x.textContent);
-    expect(shown.length).toBeGreaterThan(0);
-    expect(shown.length).toBeLessThan(all);
-    expect(shown.every((t) => t?.startsWith('TELEGRAM'))).toBe(true);
+    expect(title(c)).toBe('Routing');
   });
   it('the turbolift goes to the bridge', () => {
     const go = vi.fn();

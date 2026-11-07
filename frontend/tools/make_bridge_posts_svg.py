@@ -2,8 +2,9 @@
 
     python3 frontend/tools/make_bridge_posts_svg.py
 
-    src/assets/xo.svg          Number One's post: the comm channels, the fast-path plaque, the rail
-                               rules, the hails and station lights, the briefing room door.
+    src/assets/xo.svg          Number One's post: the comm channels, the fast-path plaque, the hails,
+                               the rail-rules cabinet, the briefing room door, and a wider wall screen
+                               for the routing fan.
     src/assets/helm.svg        Helm: the job-ad board, the gates, the follow-up chronometer, the method.
     src/assets/nav.svg         Navigation: the star chart (trips), the week grid, the booking terminal,
                                the slot board for the Yeoman's Schedule box, the door to Helm.
@@ -85,8 +86,8 @@ class Room:
             f'<rect class="{p}-lamp" x="{x1 + 2}" y="330" width="6" height="30" rx="3" fill="{LOCAL}"/>',
         ])
 
-    def screen(self):
-        x, y, w, h = SCREEN
+    def screen(self, box=SCREEN):
+        x, y, w, h = box
         return "\n".join([
             f'<rect x="{x - 14}" y="{y - 12}" width="{w + 28}" height="{h + 26}" rx="16" fill="#10161e" stroke="#2a3340" stroke-width="2"/>',
             f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="10" fill="#04070b"/>',
@@ -185,9 +186,13 @@ class Room:
 
 
 # ============ Number One's post ============
+# Number One's wall screen is wider than the other posts': it carries the routing fan (the display
+# on the First Officer's station art, grown to fill the wall). The comm channels and the fast path
+# share the left wall; the hails and the rail rules the right.
+XO_SCREEN = (356, 40, 896, 456)   # lib/xo.ts SCREEN
 XO_SPOTS = {
-    "bridge": (14, 140, 126, 424), "channels": (160, 56, 176, 430), "fastpath": (346, 70, 176, 270),
-    "rules": (346, 356, 176, 136), "hails": (1272, 64, 116, 198), "stations": (1266, 290, 128, 274),
+    "bridge": (14, 140, 126, 424), "channels": (160, 56, 176, 260), "fastpath": (160, 322, 176, 176),
+    "hails": (1272, 64, 116, 198), "rules": (1266, 290, 128, 274),
     "lounge": (1400, 96, 188, 468), "blocked": (194, 580, 166, 130), "desk": (1056, 580, 196, 140),
 }
 
@@ -197,48 +202,43 @@ def xo():
     a = r.a
     out = [r.room(), r.turbolift()]
     # the comm channels: one lit slot per surface the Captain writes from
-    x, y, w, h = 170, 70, 156, 400
+    x, y, w, h = 170, 70, 156, 236
     out.append(r.panel(x, y, w, h))
     for i, (name, col) in enumerate((("TELEGRAM", "#5aa7f0"), ("DESKTOP", a), ("DASHBOARD", "#b9a6f5"))):
-        cy = y + 22 + i * 126
-        out.append(f'<rect x="{x + 14}" y="{cy}" width="{w - 28}" height="104" rx="8" fill="#06090d" stroke="{col}" stroke-opacity=".5"/>')
-        for k in range(4):
-            out.append(f'<rect x="{x + 26}" y="{cy + 16 + k * 14}" width="{r.rnd.randint(50, 100)}" height="4" rx="2" fill="{col}" opacity=".5"/>')
-        out.append(f'<circle class="x-blink" cx="{x + w - 30}" cy="{cy + 18}" r="5" fill="{col}"/>')
-        out.append(f'<text x="{x + w / 2}" y="{cy + 92}" text-anchor="middle" font-family="monospace" font-size="9" letter-spacing="1.5" fill="{col}">{name}</text>')
-    out.append(r.label(x + w / 2, y - 12, "COMM CHANNELS"))
+        cy = y + 14 + i * 74
+        out.append(f'<rect x="{x + 12}" y="{cy}" width="{w - 24}" height="64" rx="7" fill="#06090d" stroke="{col}" stroke-opacity=".5"/>')
+        for k in range(2):
+            out.append(f'<rect x="{x + 24}" y="{cy + 14 + k * 12}" width="{r.rnd.randint(50, 90)}" height="4" rx="2" fill="{col}" opacity=".5"/>')
+        out.append(f'<circle class="x-blink" cx="{x + w - 28}" cy="{cy + 16}" r="5" fill="{col}"/>')
+        out.append(f'<text x="{x + w / 2}" y="{cy + 54}" text-anchor="middle" font-family="monospace" font-size="9" letter-spacing="1.5" fill="{col}">{name}</text>')
     # the fast-path plaque: first words that go straight to a station
-    x, y, w, h = 356, 84, 156, 246
+    x, y, w, h = 170, 336, 156, 150
     out.append(r.panel(x, y, w, h))
-    for i in range(7):
-        yy = y + 22 + i * 31
+    for i in range(4):
+        yy = y + 22 + i * 30
         out.append(f'<rect x="{x + 14}" y="{yy}" width="{r.rnd.randint(36, 54)}" height="6" rx="3" fill="{PAPER}" opacity=".55"/>')
         out.append(f'<path d="M{x + 76} {yy + 3} h20 m-6 -4 l6 4 l-6 4" fill="none" stroke="{a}" stroke-opacity=".7" stroke-width="1.5"/>')
         out.append(f'<rect x="{x + 104}" y="{yy}" width="{r.rnd.randint(28, 40)}" height="6" rx="3" fill="{a}" opacity=".6"/>')
-    out.append(r.label(x + w / 2, y - 12, "FAST PATH"))
-    # the rail rules: a binder on a shelf
-    x, y = 356, 380
-    out.append(f'<rect x="{x - 6}" y="{y + 96}" width="168" height="8" rx="2" fill="#1e2733"/>')
-    for i, col in enumerate((LOCAL, "#f5a83a", "#f2a6d0", LOCAL, "#7a8696", "#f5a83a", "#7a8696")):
-        hh = r.rnd.randint(70, 92)
-        out.append(f'<rect x="{x + 6 + i * 21}" y="{y + 96 - hh}" width="17" height="{hh}" rx="2" fill="{col}" opacity=".55" stroke="#0a0d12"/>')
-    out.append(r.label(x + 78, y - 10, "RAIL RULES"))
-    out.append(r.screen())
+    out.append(r.screen(XO_SCREEN))
     # the hails: gold lamps for orders waiting on the Captain
     x, y, w, h = 1280, 84, 100, 168
     out.append(r.panel(x, y, w, h, "HAILS"))
     for i in range(3):
         out.append(f'<circle class="x-hail" cx="{x + w / 2}" cy="{y + 34 + i * 48}" r="14" fill="{GOLD}" opacity=".85"/>')
         out.append(f'<circle cx="{x + w / 2}" cy="{y + 34 + i * 48}" r="20" fill="none" stroke="{GOLD}" stroke-opacity=".3"/>')
-    # the station lights: one per post
+    # the rail rules: binders in a cabinet, one per rule, in their rail's colour
     x, y, w, h = 1278, 318, 104, 240
     out.append(r.shadow(x, w, y + h + 4))
     out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="url(#x-metal)" stroke="#36414f" stroke-width="2"/>')
-    for i in range(12):
-        cx, cy = x + 22 + (i % 3) * 30, y + 26 + (i // 3) * 54
-        col = r.rnd.choice((LOCAL, LOCAL, "#f5a83a", "#f2a6d0", LOCAL))
-        out.append(f'<rect x="{cx - 10}" y="{cy - 8}" width="20" height="16" rx="3" fill="#0a0d12"/><circle class="x-lamp" cx="{cx}" cy="{cy}" r="5" fill="{col}"/>')
-    out.append(r.label(x + w / 2, y - 14, "STATIONS"))
+    rails = (LOCAL, CODEX, CLAUDE, LOCAL, "#7a8696", "#7a8696", LOCAL, "#7a8696", LOCAL, "#7a8696")
+    for row in range(2):
+        shelf = y + 112 + row * 110
+        out.append(f'<rect x="{x + 8}" y="{shelf}" width="{w - 16}" height="5" rx="2" fill="#2a3340"/>')
+        for i in range(5):
+            col = rails[row * 5 + i]
+            hh = r.rnd.randint(70, 92)
+            out.append(f'<rect x="{x + 12 + i * 17}" y="{shelf - hh}" width="14" height="{hh}" rx="2" fill="{col}" opacity=".55" stroke="#0a0d12"/>')
+            out.append(f'<rect x="{x + 15 + i * 17}" y="{shelf - hh + 8}" width="8" height="3" rx="1.5" fill="#0a0d12" opacity=".6"/>')
     out.append(r.door(1418, 1570, 124, "BRIEFING ROOM", ("BRIEFING", "ROOM"), a))
     out.append(r.desk("WHERE THE ORDERS CAME FROM · LAST 7 DAYS"))
     # the not-done tray: orders no station could take

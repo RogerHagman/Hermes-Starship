@@ -1,8 +1,9 @@
 // Number One's post (Deck 1), beside the Captain's chair. The room is the hero: the comm channels
-// (where asks come in), the fast-path plaque, the rail rules, the hails, the station lights, the
-// briefing room door and the not-done tray each open a view on the wall screen; the screen starts on
-// the routing table. On the desk, a tile per surface filters the table. Around the room: where the
-// orders went and what waits for you on the side, Number One's own orders and the week below.
+// (where asks come in), the fast-path plaque, the hails, the rail-rules cabinet, the briefing room
+// door and the not-done tray each open a view on the wall screen. The wall screen is wider here and
+// starts on the routing fan: your channels in, the stations out; pick a station and its asks list
+// beside it. On the desk, a tile per surface filters the fan. Around the room: where the orders went
+// and what waits for you on the side, Number One's own orders and the week below.
 // Reading only: nothing here reaches Hermes.
 import { useCallback, useState } from 'react';
 import art from '../../assets/xo.svg?raw';
@@ -13,7 +14,7 @@ import type { Drills, ShipView } from '../../lib/ship';
 import { dayKey } from '../../lib/format';
 import { railColor } from '../../lib/lookups';
 import {
-  EVERY, SPOTS, SURFACES, SURFACE_COLOUR, asks, channels, destinations, surfaceWord, type Route, type XoObject,
+  EVERY, SCREEN, SPOTS, SURFACES, SURFACE_COLOUR, asks, channels, destinations, surfaceWord, type Route, type XoObject,
 } from '../../lib/xo';
 import { CommBadge } from '../CommBadge';
 import { RailsPanel } from '../Panels';
@@ -36,10 +37,10 @@ const SHORT = { telegram: 'Telegram', desktop: 'Desktop', dashboard: 'Dashboard'
 
 const VIEW_OF: Partial<Record<XoObject, Screen>> = {
   channels: { view: 'channels' }, fastpath: { view: 'fastpath' }, rules: { view: 'rules' }, hails: { view: 'hails' },
-  stations: { view: 'stations' }, lounge: { view: 'lounge' }, blocked: { view: 'blocked' }, desk: { view: 'station', id: 'xo' },
+  lounge: { view: 'lounge' }, blocked: { view: 'blocked' }, desk: { view: 'station', id: 'xo' },
 };
 const LIT: Partial<Record<Screen['view'], XoObject>> = {
-  channels: 'channels', fastpath: 'fastpath', rules: 'rules', hails: 'hails', stations: 'stations', lounge: 'lounge', blocked: 'blocked',
+  channels: 'channels', fastpath: 'fastpath', rules: 'rules', hails: 'hails', lounge: 'lounge', blocked: 'blocked',
 };
 
 export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Props) {
@@ -68,7 +69,6 @@ export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Pr
     fastpath: { name: 'Fast path', meta: 'FIRST WORDS' },
     rules: { name: 'Rail rules', meta: '0 TO 9' },
     hails: { name: 'Hails', meta: hails ? `${hails} FOR YOU` : 'NONE' },
-    stations: { name: 'Stations', meta: `${destinations(all, f.asOf).length} TOOK ORDERS` },
     lounge: { name: 'Briefing room', meta: 'MINUTES' },
     blocked: { name: 'Not done', meta: blocked ? `${blocked} BLOCKED` : 'NONE' },
     desk: { name: 'Number One', meta: xo ? (ship.off(xo) ? 'OFF DUTY' : xo.activeOrder ?? 'ROUTING') : '' },
@@ -78,7 +78,7 @@ export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Pr
 
   return (
     <div className="qgrid pgrid">
-      <PostRoom name="Number One's post" art={art} prefix="x" spots={SPOTS} labels={labels} on={on} onPick={pick}
+      <PostRoom name="Number One's post" art={art} prefix="x" spots={SPOTS} labels={labels} on={on} onPick={pick} screen={SCREEN}
         hero="DECK 1 · NUMBER ONE'S POST · BESIDE YOUR CHAIR · PICK SOMETHING IN THE ROOM, OR A CHANNEL ON THE DESK"
         hint={`${sourceWord(f.synthetic, f.asOf)} · ONLY ROUTES · READ ONLY · ESC RETURNS THE SCREEN`}
         attrs={{ hails: hails ? 'on' : '0' }}

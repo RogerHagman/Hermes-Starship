@@ -30,9 +30,11 @@ interface Props<T extends string> {
   desk?: ReactNode;
   /** The view on the wall screen. */
   children: ReactNode;
+  /** Where the wall screen sits, when the room has its own (Number One's is wider). */
+  screen?: { x: number; y: number; w: number; h: number };
 }
 
-export function PostRoom<T extends string>({ name, art, prefix, spots, labels, on, onPick, hero, hint, attrs, desk, children }: Props<T>) {
+export function PostRoom<T extends string>({ name, art, prefix, spots, labels, on, onPick, hero, hint, attrs, desk, children, screen = SCREEN }: Props<T>) {
   const [hot, setHot] = useState<T | null>(null);
   // Light the picked thing, and the one under the pointer brighter. The ids come from the picture.
   const light = spots.map(({ id }) =>
@@ -64,7 +66,7 @@ export function PostRoom<T extends string>({ name, art, prefix, spots, labels, o
           {desk}
         </div>
         <div className="wall-slot" style={{
-          '--x': pct(SCREEN.x, ROOM.w), '--y': pct(SCREEN.y, ROOM.h), '--w': pct(SCREEN.w, ROOM.w), '--h': pct(SCREEN.h, ROOM.h),
+          '--x': pct(screen.x, ROOM.w), '--y': pct(screen.y, ROOM.h), '--w': pct(screen.w, ROOM.w), '--h': pct(screen.h, ROOM.h),
         } as React.CSSProperties}>
           {children}
         </div>

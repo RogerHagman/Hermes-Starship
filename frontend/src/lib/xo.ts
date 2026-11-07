@@ -6,19 +6,21 @@ import { SURFACE_WORD, records } from './computer';
 import { inLastDays, openedOf, type Spot } from './post';
 import type { Fixtures, Order } from '../types';
 
-export type XoObject = 'bridge' | 'channels' | 'fastpath' | 'rules' | 'hails' | 'stations' | 'lounge' | 'blocked' | 'desk';
+export type XoObject = 'bridge' | 'channels' | 'fastpath' | 'rules' | 'hails' | 'lounge' | 'blocked' | 'desk';
 
 export const SPOTS: Spot<XoObject>[] = [
   { id: 'bridge',   box: [14, 140, 126, 424],  label: [77, 590] },
-  { id: 'channels', box: [160, 56, 176, 430],  label: [248, 504] },
-  { id: 'fastpath', box: [346, 70, 176, 270],  label: [434, 44] },
-  { id: 'rules',    box: [346, 356, 176, 136], label: [434, 510] },
+  { id: 'channels', box: [160, 56, 176, 260],  label: [248, 40] },
+  { id: 'fastpath', box: [160, 322, 176, 176], label: [248, 508] },
   { id: 'hails',    box: [1272, 64, 116, 198], label: [1330, 40] },
-  { id: 'stations', box: [1266, 290, 128, 274], label: [1330, 584] },
+  { id: 'rules',    box: [1266, 290, 128, 274], label: [1330, 584] },
   { id: 'lounge',   box: [1400, 96, 188, 468], label: [1494, 500] },
   { id: 'blocked',  box: [194, 580, 166, 130], label: [276, 566] },
   { id: 'desk',     box: [1056, 580, 196, 140], label: [1154, 566] },
 ];
+
+/** Number One's wall screen is wider than the other posts': the routing fan fills it. */
+export const SCREEN = { x: 356, y: 40, w: 896, h: 456 };
 
 /** The surfaces the Captain writes from, in the order the comm channels show them. */
 export const SURFACES = ['telegram', 'desktop', 'dashboard'] as const;
@@ -60,6 +62,34 @@ export function destinations(list: Order[], asOf: string): { id: string; week: n
   return [...by.values()].sort((a, b) => b.week - a.week || b.all - a.all || a.id.localeCompare(b.id));
 }
 
+/** A station on the routing fan: its asks on file and this week, and how many are open, running, blocked or waiting on you. */
+export interface FanNode { id: string; all: number; week: number; open: number; running: number; blocked: number; hails: number }
+
+/** The routing fan: one node per station that took an ask, in the roster's order. */
+export function fan(list: Order[], asOf: string, roster: string[]): FanNode[] {
+  const by = new Map<string, FanNode>();
+  for (const o of list) {
+    const n = by.get(o.station) ?? { id: o.station, all: 0, week: 0, open: 0, running: 0, blocked: 0, hails: 0 };
+    n.all += 1;
+    if (inLastDays(openedOf(o), asOf)) n.week += 1;
+    if (o.state !== 'done') n.open += 1;
+    if (o.state === 'running') n.running += 1;
+    if (o.state === 'blocked') n.blocked += 1;
+    if (o.state === 'awaiting-captain') n.hails += 1;
+    by.set(o.station, n);
+  }
+  const at = (id: string) => (roster.includes(id) ? roster.indexOf(id) : roster.length);
+  return [...by.values()].sort((a, b) => at(a.id) - at(b.id) || a.id.localeCompare(b.id));
+}
+
+/** n points on the upper arc of an ellipse, left to right, from one angle to another (degrees, 180 = left, 270 = top). */
+export function arc(n: number, cx: number, cy: number, rx: number, ry: number, from = 196, to = 344): { x: number; y: number; dx: number; dy: number }[] {
+  return Array.from({ length: n }, (_, i) => {
+    const a = ((n === 1 ? 270 : from + ((to - from) * i) / (n - 1)) * Math.PI) / 180;
+    return { x: cx + rx * Math.cos(a), y: cy + ry * Math.sin(a), dx: Math.cos(a), dy: Math.sin(a) };
+  });
+}
+
 /** What the routing table shows: one surface, one station, or everything. */
 export interface Route { surface: Surface | null; station: string | null }
 export const EVERY: Route = { surface: null, station: null };
@@ -87,7 +117,7 @@ export const FAST_WORDS: { say: string; to: string }[] = [
 ];
 
 /** 24 x 24 line icons for the room's things. */
-export const XO_ICONS: Record<XoObject | 'ease' | 'order', string> = {
+export const XO_ICONS: Record<XoObject | 'ease' | 'order' | 'stations', string> = {
   ease: 'M4 6h16 M4 12h10 M4 18h7 M17 12l3 3-3 3 M14 15h6',
   order: 'M6 3h9l3 3v15H6z M9 9h6 M9 13h6 M9 17h4',
   bridge: 'M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16 M12 3v18',

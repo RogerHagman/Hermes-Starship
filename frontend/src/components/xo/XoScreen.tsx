@@ -1,6 +1,6 @@
-// Number One's wall screen. One view at a time, in place: the routing table (every ask, where it came
-// from and which station took it), one order, the comm channels, the fast path, the rail rules, the
-// hails, where the orders went, what was not done, the briefing minutes and Number One's card.
+// Number One's wall screen. One view at a time, in place: the routing fan (your channels in, the
+// stations out, and the asks routed to the one you pick), one order, the comm channels, the fast path,
+// the rail rules, the hails, what was not done, the briefing minutes and Number One's card.
 import type { ReactNode } from 'react';
 import { dayAndTime, dayLine } from '../../lib/format';
 import { RANK, railColor } from '../../lib/lookups';
@@ -8,16 +8,15 @@ import { minutes, records, recordsFile } from '../../lib/computer';
 import { openedOf } from '../../lib/post';
 import type { ShipView } from '../../lib/ship';
 import {
-  EVERY, FAST_WORDS, RAIL_RULES, SURFACES, SURFACE_COLOUR, XO_ICONS, asks, channels, destinations, routed, surfaceWord, type Route,
+  FAST_WORDS, RAIL_RULES, SURFACE_COLOUR, XO_ICONS, asks, channels, surfaceWord, type Route,
 } from '../../lib/xo';
 import { ConHead, StationDetail, useEscape } from '../ShipConsole';
-import { Kpis, OrderRow, OrderView, css, sourceWord, up } from '../post/Parts';
+import { RouteFan } from './RouteFan';
+import { Kpis, OrderView, css, sourceWord, up } from '../post/Parts';
 
 export type Screen =
   | { view: 'ease' } | { view: 'order'; id: string; from?: Screen } | { view: 'channels' } | { view: 'fastpath' } | { view: 'rules' }
-  | { view: 'hails' } | { view: 'stations' } | { view: 'blocked' } | { view: 'lounge' } | { view: 'station'; id: string };
-
-const LIST_MAX = 150;
+  | { view: 'hails' } | { view: 'blocked' } | { view: 'lounge' } | { view: 'station'; id: string };
 
 interface Props { ship: ShipView; screen: Screen; onScreen: (s: Screen) => void; route: Route; onRoute: (r: Route) => void }
 
@@ -28,7 +27,7 @@ export function XoScreen({ ship, screen, onScreen, route, onRoute }: Props) {
   let body: ReactNode;
   switch (screen.view) {
     case 'order': body = <OrderView ship={ship} id={screen.id} icon={XO_ICONS.order}
-      back={screen.from ? '‹ Back' : '‹ Routing table'} onBack={() => onScreen(screen.from ?? { view: 'ease' })} />; break;
+      back={screen.from ? '‹ Back' : '‹ Routing'} onBack={() => onScreen(screen.from ?? { view: 'ease' })} />; break;
     case 'channels': body = <ChannelsView ship={ship} onRoute={(r) => { onRoute(r); back(); }} onBack={back} />; break;
     case 'fastpath': body = <FastPathView ship={ship} onScreen={onScreen} onBack={back} />; break;
     case 'rules': body = <RulesView onBack={back} />; break;
@@ -38,15 +37,24 @@ export function XoScreen({ ship, screen, onScreen, route, onRoute }: Props) {
     case 'blocked': body = <ListView ship={ship} title="Not done · blocked" icon={XO_ICONS.blocked} state="blocked"
       none="Nothing is blocked." onOpen={open(screen)} onBack={back}
       sub="NUMBER ONE FAILS A TASK RATHER THAN DOING IT ITSELF · EACH ONE SAYS WHY" />; break;
-    case 'stations': body = <StationsView ship={ship} onRoute={(r) => { onRoute(r); back(); }} onBack={back} />; break;
     case 'lounge': body = <LoungeView ship={ship} onBack={back} />; break;
     case 'station': {
       const st = ship.station(screen.id);
-      if (st) body = <StationDetail ship={ship} st={st} back="‹ Routing table" onBack={back} here="xo" />;
+      if (st) body = <StationDetail ship={ship} st={st} back="‹ Routing" onBack={back} here="xo" />;
       break;
     }
   }
-  if (!body) body = <RoutingTable ship={ship} route={route} onRoute={onRoute} onOpen={open()} />;
+  if (!body) {
+    const f = recordsFile(ship.data);
+    body = (
+      <>
+        <ConHead icon={XO_ICONS.ease} title="Routing"
+          sub={`${asks(ship.data).length} ASKS ON FILE · YOUR CHANNELS IN, THE STATIONS OUT · LINES AS THICK AS THEIR WEEK · ${source(ship)}`} />
+        <RouteFan ship={ship} asOf={f.asOf} route={route} onRoute={onRoute} onOpen={open()}
+          onHails={() => onScreen({ view: 'hails' })} onBlocked={() => onScreen({ view: 'blocked' })} />
+      </>
+    );
+  }
   return (
     <section className="console wall post-screen" role="region" aria-label="Number One's screen" style={css({ '--c': 'var(--acc)' })}>
       {body}
@@ -60,42 +68,6 @@ function source(ship: ShipView) {
   return sourceWord(f.synthetic, f.asOf).replace('SAMPLE', 'SAMPLE ORDERS');
 }
 
-// ---------- the routing table ----------
-
-function RoutingTable({ ship, route, onRoute, onOpen }: { ship: ShipView; route: Route; onRoute: (r: Route) => void; onOpen: (id: string) => void }) {
-  const all = asks(ship.data);
-  const shown = routed(all, route);
-  const st = route.station ? ship.station(route.station) : undefined;
-  return (
-    <>
-      <ConHead icon={XO_ICONS.ease} title="Routing table"
-        sub={`${all.length} ASKS ON FILE · WHERE EACH CAME FROM AND WHICH STATION TOOK IT · ${source(ship)}`} />
-      <div className="pchips" role="group" aria-label="Show asks from a surface">
-        <button type="button" className="pchip" aria-pressed={!route.surface} onClick={() => onRoute({ ...route, surface: null })}>ALL <b>{all.length}</b></button>
-        {SURFACES.map((s) => (
-          <button key={s} type="button" className="pchip" style={css({ '--pc': SURFACE_COLOUR[s] })} aria-pressed={route.surface === s}
-            onClick={() => onRoute({ ...route, surface: route.surface === s ? null : s })}>
-            {up(surfaceWord(s))} <b>{all.filter((o) => o.surface === s).length}</b>
-          </button>
-        ))}
-        {st && <button type="button" className="pchip" aria-pressed onClick={() => onRoute({ ...route, station: null })}>× {up(st.short)}</button>}
-      </div>
-      <ol className="porders" aria-label="Asks">
-        {shown.length === 0 && <li className="pnote">No ask matches. <button type="button" className="linkish" onClick={() => onRoute(EVERY)}>Show them all</button></li>}
-        {shown.slice(0, LIST_MAX).map((o) => {
-          const to = ship.station(o.station);
-          const col = o.surface && o.surface in SURFACE_COLOUR ? SURFACE_COLOUR[o.surface as keyof typeof SURFACE_COLOUR] : 'var(--text-label)';
-          return (
-            <OrderRow key={o.id} ship={ship} o={o} onOpen={onOpen}
-              extra={<span className="po-st mono"><span style={{ color: col }}>{up(o.surface ?? '?')}</span> → {up(to?.short ?? o.station)}</span>} />
-          );
-        })}
-      </ol>
-      <p className="pnote mono" style={{ fontSize: 10 }}>{shown.length > LIST_MAX ? `${LIST_MAX} OF ${shown.length} SHOWN` : `${shown.length} SHOWN`} · NEWEST FIRST</p>
-    </>
-  );
-}
-
 // ---------- the comm channels ----------
 
 function ChannelsView({ ship, onRoute, onBack }: { ship: ShipView; onRoute: (r: Route) => void; onBack: () => void }) {
@@ -107,7 +79,7 @@ function ChannelsView({ ship, onRoute, onBack }: { ship: ShipView; onRoute: (r: 
   const total = ch.reduce((n, c) => n + c.all, 0);
   return (
     <>
-      <ConHead icon={XO_ICONS.channels} title="Comm channels" back="‹ Routing table" onBack={onBack}
+      <ConHead icon={XO_ICONS.channels} title="Comm channels" back="‹ Routing" onBack={onBack}
         sub={`WHERE YOUR ASKS COME IN · ${source(ship)}`} />
       <div className="con-body pbody">
         <Kpis items={[...ch.map((c) => ({ n: c.week as number | string, label: `${up(surfaceWord(c.id))} · LAST 7 DAYS` })), { n: `${kept}/${total}`, label: 'KEPT A SPEED WORD' }]} />
@@ -142,7 +114,7 @@ function FastPathView({ ship, onScreen, onBack }: { ship: ShipView; onScreen: (s
     .sort((a, b) => (RANK[a.rank]?.order ?? 99) - (RANK[b.rank]?.order ?? 99) || a.name.localeCompare(b.name));
   return (
     <>
-      <ConHead icon={XO_ICONS.fastpath} title="The fast path" back="‹ Routing table" onBack={onBack}
+      <ConHead icon={XO_ICONS.fastpath} title="The fast path" back="‹ Routing" onBack={onBack}
         sub={`FIRST WORDS THAT GO STRAIGHT TO A STATION · ${crew.length} STATIONS BY NAME`} />
       <div className="con-body pbody">
         <ul className="prows">
@@ -175,7 +147,7 @@ function FastPathView({ ship, onScreen, onBack }: { ship: ShipView; onScreen: (s
 function RulesView({ onBack }: { onBack: () => void }) {
   return (
     <>
-      <ConHead icon={XO_ICONS.rules} title="Rail rules" back="‹ Routing table" onBack={onBack}
+      <ConHead icon={XO_ICONS.rules} title="Rail rules" back="‹ Routing" onBack={onBack}
         sub="WHICH RAIL A JOB GOES TO · CHECKED IN ORDER · THE FIRST MATCH WINS" />
       <div className="con-body pbody">
         <p className="pnote">
@@ -204,7 +176,7 @@ function ListView({ ship, title, sub, icon, state, none, onOpen, onBack }: {
   const list = records(ship.data).filter((o) => o.state === state);
   return (
     <>
-      <ConHead icon={icon} title={`${title} · ${list.length}`} back="‹ Routing table" onBack={onBack} sub={sub} />
+      <ConHead icon={icon} title={`${title} · ${list.length}`} back="‹ Routing" onBack={onBack} sub={sub} />
       <div className="con-body pbody">
         {list.length === 0 && <p className="pnote">{none}</p>}
         <ul className="prows">
@@ -227,36 +199,6 @@ function ListView({ ship, title, sub, icon, state, none, onOpen, onBack }: {
   );
 }
 
-// ---------- where the orders went ----------
-
-function StationsView({ ship, onRoute, onBack }: { ship: ShipView; onRoute: (r: Route) => void; onBack: () => void }) {
-  const f = recordsFile(ship.data);
-  const rows = destinations(asks(ship.data), f.asOf);
-  const most = Math.max(1, ...rows.map((r) => r.all));
-  return (
-    <>
-      <ConHead icon={XO_ICONS.stations} title="Where the orders went" back="‹ Routing table" onBack={onBack}
-        sub={`${rows.length} STATIONS · ON FILE, THIS WEEK AND STILL OPEN · PICK ONE TO SEE ITS ASKS`} />
-      <div className="con-body pbody">
-        <ul className="pbars">
-          {rows.map((r) => {
-            const st = ship.station(r.id);
-            return (
-              <li key={r.id}>
-                <button type="button" className="pbar-row" style={css({ '--pc': railColor(st?.rail ?? 'mixed') })} onClick={() => onRoute({ surface: null, station: r.id })}>
-                  <span className="pb-label">{st?.short ?? r.id}</span>
-                  <span className="pb-track"><b style={{ width: `${(r.all / most) * 100}%` }} /></span>
-                  <span className="pb-v mono">{r.all} ON FILE · {r.week} THIS WEEK{r.open ? ` · ${r.open} OPEN` : ''}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </>
-  );
-}
-
 // ---------- the briefing room ----------
 
 function LoungeView({ ship, onBack }: { ship: ShipView; onBack: () => void }) {
@@ -264,7 +206,7 @@ function LoungeView({ ship, onBack }: { ship: ShipView; onBack: () => void }) {
   const name = (id: string) => ship.station(id)?.short ?? id;
   return (
     <>
-      <ConHead icon={XO_ICONS.lounge} title="Briefing room" back="‹ Routing table" onBack={onBack}
+      <ConHead icon={XO_ICONS.lounge} title="Briefing room" back="‹ Routing" onBack={onBack}
         sub={`NUMBER ONE CHAIRS THE BRIEFINGS · ${list.length} MINUTED · NEWEST FIRST`} />
       <div className="con-body pbody">
         {list.length === 0 && <p className="pnote">No briefing has been minuted yet.</p>}
