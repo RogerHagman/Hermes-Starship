@@ -20,7 +20,7 @@ export const SPOTS: Spot<XoObject>[] = [
 ];
 
 /** Number One's wall screen is wider than the other posts': the routing fan fills it. */
-export const SCREEN = { x: 356, y: 40, w: 896, h: 456 };
+export const SCREEN = { x: 356, y: 24, w: 896, h: 500 };
 
 /** The surfaces the Captain writes from, in the order the comm channels show them. */
 export const SURFACES = ['telegram', 'desktop', 'dashboard'] as const;
@@ -47,19 +47,6 @@ export function channels(list: Order[], asOf: string): Channel[] {
       card: mine.filter((o) => (o.cards ?? 0) > 0).length,
     };
   });
-}
-
-/** Where the orders went: per station, the last 7 days and on file, and how many are still open. */
-export function destinations(list: Order[], asOf: string): { id: string; week: number; all: number; open: number }[] {
-  const by = new Map<string, { id: string; week: number; all: number; open: number }>();
-  for (const o of list) {
-    const c = by.get(o.station) ?? { id: o.station, week: 0, all: 0, open: 0 };
-    c.all += 1;
-    if (inLastDays(openedOf(o), asOf)) c.week += 1;
-    if (o.state !== 'done') c.open += 1;
-    by.set(o.station, c);
-  }
-  return [...by.values()].sort((a, b) => b.week - a.week || b.all - a.all || a.id.localeCompare(b.id));
 }
 
 /** A station on the routing fan: its asks on file and this week, and how many are open, running, blocked or waiting on you. */

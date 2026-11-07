@@ -277,53 +277,55 @@ button.plist-row:hover,button.plist-row:focus-visible{background:var(--surface-s
 @media (prefers-reduced-motion: reduce){ .vs-lamp.on,.vact.asking .va-dec::before{animation:none} }
 
 /* ---------- Number One: the routing fan ---------- */
-.xfan{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px}
-.xf-svg{width:100%;height:100%;min-height:0;display:block;overflow:visible}
-.xf-guide{fill:none;stroke:color-mix(in srgb, var(--acc) 22%, transparent);stroke-width:1;stroke-dasharray:2 5}
+.xfan{flex:1;min-height:0;display:flex}
+.xf-svg{flex:1;width:100%;height:100%;min-height:0;display:block;overflow:visible}
+.xf-guide{fill:none;stroke:color-mix(in srgb, var(--acc) 22%, transparent);stroke-width:1.2;stroke-dasharray:2 6}
 .xf-svg [role="button"]{cursor:pointer;outline:none}
-.xf-svg g.dim{opacity:.28}
+.xf-svg g.dim{opacity:.26}
 .xf-svg g{transition:opacity .2s ease}
-.xf-line{fill:none;stroke:var(--pc);stroke-width:1;opacity:.35}
+.xf-line{fill:none;stroke:var(--pc);stroke-width:1.3;opacity:.35}
 .xf-week{fill:none;stroke:var(--pc);stroke-linecap:round;opacity:.55}
-.xf-run{fill:none;stroke:var(--pc);stroke-width:3;stroke-linecap:round;stroke-dasharray:3 400;animation:xfrun 2.4s linear infinite}
+.xf-run{fill:none;stroke:var(--pc);stroke-width:4;stroke-linecap:round;stroke-dasharray:4 600;animation:xfrun 2.4s linear infinite}
 .xf-node:hover .xf-week,.xf-node:focus-visible .xf-week,.xf-node.on .xf-week{opacity:.95}
 .xf-node:hover .xf-line,.xf-node.on .xf-line{opacity:.8}
-.xf-dot{fill:#0b1220;stroke:var(--pc);stroke-width:2}
+.xf-dot{fill:#0b1220;stroke:var(--pc);stroke-width:2.5}
 .xf-node:hover .xf-dot,.xf-node:focus-visible .xf-dot{fill:color-mix(in srgb, var(--pc) 30%, #0b1220)}
 .xf-node.on .xf-dot{fill:var(--pc)}
-.xf-node:focus-visible .xf-dot{stroke:var(--focus);stroke-width:3}
-.xf-hail{fill:none;stroke:var(--captain);stroke-width:1.5;stroke-dasharray:3 3;animation:qarm 2s ease-in-out infinite}
-.xf-block{fill:var(--bad);stroke:#0b1220;stroke-width:1.5}
-.xf-name{font-family:var(--font-display);font-weight:600;font-size:14px;fill:var(--text)}
-.xf-count{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.06em;fill:var(--text-label)}
+.xf-node:focus-visible .xf-dot{stroke:var(--focus);stroke-width:3.5}
+.xf-hail{fill:none;stroke:var(--captain);stroke-width:2;stroke-dasharray:4 4;animation:qarm 2s ease-in-out infinite}
+.xf-block{fill:var(--bad);stroke:#0b1220;stroke-width:2}
+.xf-name{font-family:var(--font-display);font-weight:600;font-size:16px;fill:var(--text)}
+.xf-count{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;fill:var(--text-label)}
 .xf-pipe{fill:none;stroke:var(--pc);stroke-linecap:round;opacity:.35}
-.xf-flow{fill:none;stroke:var(--pc);stroke-width:3;stroke-linecap:round;stroke-dasharray:3 46;animation:xfflow 1.8s linear infinite}
-.xf-hit{fill:none;stroke:transparent;stroke-width:22}
+.xf-flow{fill:none;stroke:var(--pc);stroke-width:4;stroke-linecap:round;stroke-dasharray:4 60;animation:xfflow 1.8s linear infinite}
+.xf-hit{fill:none;stroke:transparent;stroke-width:26}
 .xf-hitdot{fill:transparent}
 .xf-inlet:hover .xf-pipe,.xf-inlet[aria-pressed="true"] .xf-pipe{opacity:.7}
 .xf-inlet:focus-visible .xf-pipe{opacity:.9}
-.xf-in{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;fill:var(--text-label)}
+.xf-in{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;fill:var(--text-label)}
 .xf-inlet[aria-pressed="true"] .xf-in{fill:var(--text)}
 .xf-n{fill:var(--text);font-weight:600}
-.xf-sidebox{fill:#0b1220;stroke:var(--pc);stroke-width:1.5}
+.xf-sidebox{fill:#0b1220;stroke:var(--pc);stroke-width:2}
 .xf-side.lit .xf-sidebox{fill:color-mix(in srgb, var(--pc) 35%, #0b1220)}
-.xf-side:hover .xf-sidebox,.xf-side:focus-visible .xf-sidebox{stroke-width:2.5}
-.xf-hub{fill:#3fc1a5;stroke:#0b1220;stroke-width:2}
-.xf-ping{fill:none;stroke:#3fc1a5;stroke-width:1.5;transform-box:view-box;animation:xfping 2.6s ease-out infinite}
-.xf-hubn{font-family:var(--font-display);font-weight:600;font-size:14px;fill:#05080b}
-.xf-hubl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;fill:var(--acc)}
-@keyframes xfrun{from{stroke-dashoffset:3}to{stroke-dashoffset:-260}}
-@keyframes xfflow{to{stroke-dashoffset:-49}}
+.xf-side:hover .xf-sidebox,.xf-side:focus-visible .xf-sidebox{stroke-width:3}
+.xf-hub{fill:#3fc1a5;stroke:#0b1220;stroke-width:2.5}
+.xf-ping{fill:none;stroke:#3fc1a5;stroke-width:2;transform-box:view-box;animation:xfping 2.6s ease-out infinite}
+.xf-hubn{font-family:var(--font-display);font-weight:600;font-size:17px;fill:#05080b}
+.xf-hubl{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;fill:var(--acc);paint-order:stroke;stroke:#0b1220;stroke-width:4px}
+.xf-key text{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;fill:var(--text-label)}
+.xf-keyline{fill:none;stroke:var(--text-muted);stroke-width:6;stroke-linecap:round;opacity:.6}
+.xf-keydot{fill:#0b1220;stroke:var(--text-muted);stroke-width:2}
+.xf-keyrun{fill:none;stroke:var(--text-muted);stroke-width:1.3;opacity:.6}
+.xf-keyrunner{fill:var(--text)}
+.xf-keyhail{fill:none;stroke:var(--captain);stroke-width:1.5;stroke-dasharray:3 3}
+@keyframes xfrun{from{stroke-dashoffset:4}to{stroke-dashoffset:-380}}
+@keyframes xfflow{to{stroke-dashoffset:-64}}
 @keyframes xfping{from{transform:scale(1);opacity:.8}to{transform:scale(2.4);opacity:0}}
-.xf-list{min-width:0;min-height:0;display:flex;flex-direction:column;gap:4px;padding:8px 10px;border-radius:10px;background:rgba(5,8,11,.55);border:1px solid var(--border)}
-.xf-head{display:flex;align-items:center;gap:8px}
-.xf-title{font-family:var(--font-display);font-weight:600;font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.xf-total{font-family:var(--font-display);font-size:18px;font-weight:600}
-.xf-sub{margin:0;font-size:9px;letter-spacing:.07em;color:var(--text-label)}
-.xf-rows{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;overflow:auto;min-height:0}
-.xf-rows .plist-row{padding:5px 8px}
-.xf-rows .pl-main{font-size:13px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.xf-rows .pl-meta{white-space:normal}
-.xf-rows .plist-row.ts-done .pl-main{color:var(--text-muted)}
-@container board (max-width: 760px){ .xfan{grid-template-columns:minmax(0,1fr)} }
+/* the side console: the asks routed, a page at a time */
+.xroute .xr-rows{margin-top:8px}
+.xroute .xr-rows .plist-row{padding:6px 10px}
+.xroute .xr-rows .plist-row.ts-done .pl-main{color:var(--text-muted)}
+.xr-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.xr-at{font-size:10px;letter-spacing:.08em;color:var(--text-label)}
+.xr-foot .pchip:disabled{opacity:.35;cursor:default}
 @media (prefers-reduced-motion: reduce){ .xf-run,.xf-flow,.xf-ping,.xf-hail{animation:none} }

@@ -187,9 +187,9 @@ class Room:
 
 # ============ Number One's post ============
 # Number One's wall screen is wider than the other posts': it carries the routing fan (the display
-# on the First Officer's station art, grown to fill the wall). The comm channels and the fast path
+# on the First Officer's station art, grown to fill the wall, top to bottom). The comm channels and the fast path
 # share the left wall; the hails and the rail rules the right.
-XO_SCREEN = (356, 40, 896, 456)   # lib/xo.ts SCREEN
+XO_SCREEN = (356, 24, 896, 500)   # lib/xo.ts SCREEN
 XO_SPOTS = {
     "bridge": (14, 140, 126, 424), "channels": (160, 56, 176, 260), "fastpath": (160, 322, 176, 176),
     "hails": (1272, 64, 116, 198), "rules": (1266, 290, 128, 274),

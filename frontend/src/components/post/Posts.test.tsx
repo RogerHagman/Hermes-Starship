@@ -31,45 +31,67 @@ afterEach(cleanup);
 
 describe("Number One's post", () => {
   const fanNode = (c: HTMLElement, name: string) => [...c.querySelectorAll('.xf-node')].find((g) => g.querySelector('.xf-name')?.textContent === name) as Element;
-  const listed = (c: HTMLElement) => [...c.querySelectorAll('.xf-rows .pl-meta')].map((x) => x.textContent ?? '');
+  const listed = (c: HTMLElement) => [...c.querySelectorAll('.xr-rows .pl-meta')].map((x) => x.textContent ?? '');
+  const side = (c: HTMLElement) => c.querySelector('#xroute-title')?.textContent;
+  const sideMeta = (c: HTMLElement) => c.querySelector('.xroute .panel-meta')?.textContent ?? '';
 
-  it('starts on the routing fan: your channels in, a node per station that took an ask, every ask beside it', () => {
+  it('starts on the routing fan: your channels in, a node per station that took an ask; every ask on the side console', () => {
     const c = mount(XoBoard);
     expect(title(c)).toBe('Routing');
     expect([...c.querySelectorAll('.xf-inlet .xf-in')].map((t) => t.textContent)).toEqual(['TELEGRAM 7', 'DESKTOP APP 5', 'WEB DASHBOARD 4']);
     expect(c.querySelectorAll('.xf-node').length).toBe(11);
-    expect(c.querySelector('.xf-title')?.textContent).toBe('Every ask');
-    expect(listed(c)).toHaveLength(16);
+    expect(c.querySelector('.xf-rows')).toBeNull();
+    expect(side(c)).toBe('Every ask');
+    expect(sideMeta(c)).toMatch(/^16 · /);
+  });
+  it('the side console shows twelve asks a page, newest first', () => {
+    const c = mount(XoBoard);
+    expect(listed(c)).toHaveLength(12);
+    expect(c.querySelector('.xr-at')?.textContent).toBe('1–12 OF 16');
+    const [newer, older] = [...c.querySelectorAll('.xr-foot .pchip')] as HTMLButtonElement[];
+    expect(newer.disabled).toBe(true);
+    const first = listed(c)[0];
+    fireEvent.click(older);
+    expect(listed(c)).toHaveLength(4);
+    expect(c.querySelector('.xr-at')?.textContent).toBe('13–16 OF 16');
+    expect(older.disabled).toBe(true);
+    fireEvent.click(newer);
+    expect(listed(c)[0]).toBe(first);
   });
   it('picking a station node lists the asks routed to it, and picking it again shows them all', () => {
     const c = mount(XoBoard);
+    fireEvent.click(c.querySelectorAll('.xr-foot .pchip')[1]);
     fireEvent.click(fanNode(c, 'Engineering'));
-    expect(c.querySelector('.xf-title')?.textContent).toBe('Routed to Engineering');
+    expect(side(c)).toBe('Routed to Engineering');
     expect(listed(c).length).toBe(2);
+    expect(c.querySelector('.xr-foot')).toBeNull();
     expect(listed(c).every((t) => !t.includes('→') && t.includes('· FROM '))).toBe(true);
     expect(fanNode(c, 'Ops').getAttribute('class')).toContain('dim');
     // the inlets show where Engineering's asks came in
     expect([...c.querySelectorAll('.xf-inlet .xf-in')].map((t) => t.textContent)).toEqual(['TELEGRAM 0', 'DESKTOP APP 2', 'WEB DASHBOARD 0']);
     expect(c.querySelectorAll('.xf-inlet')[0].getAttribute('class')).toContain('dim');
     fireEvent.keyDown(fanNode(c, 'Engineering'), { key: 'Enter' });
-    expect(c.querySelector('.xf-title')?.textContent).toBe('Every ask');
+    expect(side(c)).toBe('Every ask');
+    expect(c.querySelector('.xr-at')?.textContent).toBe('1–12 OF 16');
   });
   it('a routed ask opens its order, and Esc comes back to the fan with the station still picked', () => {
     const c = mount(XoBoard);
     fireEvent.click(fanNode(c, 'Engineering'));
-    fireEvent.click(c.querySelector('.xf-rows .plist-row')!);
+    fireEvent.click(c.querySelector('.xr-rows .plist-row')!);
     expect(title(c)).toMatch(/^ORD-\d{4} · /);
     fireEvent.keyDown(document, { key: 'Escape' });
-    expect(c.querySelector('.xf-title')?.textContent).toBe('Routed to Engineering');
+    expect(title(c)).toBe('Routing');
+    expect(side(c)).toBe('Routed to Engineering');
   });
   it('a channel tile on the desk, or a channel on the fan, shows only what came in there', () => {
     const c = mount(XoBoard);
     fireEvent.click(tile(c, 'Telegram'));
-    expect(c.querySelector('.xf-title')?.textContent).toBe('From Telegram');
+    expect(side(c)).toBe('From Telegram');
     expect(listed(c)).toHaveLength(7);
     expect(listed(c).every((t) => /^ORD-\d{4} → .+ · TELEGRAM · /.test(t))).toBe(true);
     fireEvent.click(c.querySelectorAll('.xf-inlet')[0]);
-    expect(listed(c)).toHaveLength(16);
+    expect(side(c)).toBe('Every ask');
+    expect(sideMeta(c)).toMatch(/^16 · /);
   });
   it('the Captain on the fan opens the hails; the room opens the comm channels, fast path and rules', () => {
     const c = mount(XoBoard);

@@ -1,20 +1,20 @@
 // Number One's post (Deck 1), beside the Captain's chair. The room is the hero: the comm channels
 // (where asks come in), the fast-path plaque, the hails, the rail-rules cabinet, the briefing room
 // door and the not-done tray each open a view on the wall screen. The wall screen is wider here and
-// starts on the routing fan: your channels in, the stations out; pick a station and its asks list
-// beside it. On the desk, a tile per surface filters the fan. Around the room: where the orders went
-// and what waits for you on the side, Number One's own orders and the week below.
+// the routing fan fills it: your channels in, the stations out. Pick a station or a channel and the
+// side console lists those asks, a page at a time. On the desk, a tile per surface filters the fan.
+// Around the room: the side console and what waits for you, Number One's own orders and the week.
 // Reading only: nothing here reaches Hermes.
 import { useCallback, useState } from 'react';
 import art from '../../assets/xo.svg?raw';
 import type { BoardId } from '../../lib/board';
-import { records, recordsFile } from '../../lib/computer';
+import { STATE_WORD, records, recordsFile } from '../../lib/computer';
 import { inLastDays, lastDays, openedOf } from '../../lib/post';
 import type { Drills, ShipView } from '../../lib/ship';
-import { dayKey } from '../../lib/format';
+import { dayAndTime, dayKey } from '../../lib/format';
 import { railColor } from '../../lib/lookups';
 import {
-  EVERY, SCREEN, SPOTS, SURFACES, SURFACE_COLOUR, asks, channels, destinations, surfaceWord, type Route, type XoObject,
+  EVERY, SCREEN, SPOTS, SURFACES, SURFACE_COLOUR, asks, channels, routed, surfaceWord, type Route, type XoObject,
 } from '../../lib/xo';
 import { CommBadge } from '../CommBadge';
 import { RailsPanel } from '../Panels';
@@ -94,7 +94,8 @@ export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Pr
         <XoScreen ship={ship} screen={screen} onScreen={setScreen} route={route} onRoute={routeTo} />
       </PostRoom>
       <aside className="side qside">
-        <WentPanel ship={ship} route={route} onRoute={routeTo} />
+        {/* a new pick starts on the first page */}
+        <RoutedPanel key={`${route.surface ?? ''}|${route.station ?? ''}`} ship={ship} route={route} onRoute={routeTo} onOpen={(id) => setScreen({ view: 'order', id })} />
         <HailsPanel ship={ship} onOpen={(id) => setScreen({ view: 'order', id, from: { view: 'hails' } })} />
         <RailsPanel ship={ship} drills={drills} compact />
       </aside>
@@ -107,33 +108,49 @@ export function XoBoard({ ship, drills, target, onTarget, onBoard, onToast }: Pr
   );
 }
 
-/** Where the orders went this week, the busiest station first. Each one filters the routing table. */
-function WentPanel({ ship, route, onRoute }: { ship: ShipView; route: Route; onRoute: (r: Route) => void }) {
-  const f = recordsFile(ship.data);
-  const rows = destinations(asks(ship.data), f.asOf).filter((r) => r.week > 0);
-  const most = Math.max(1, ...rows.map((r) => r.week));
+const PAGE = 12;
+
+/** The side console: every ask, or the ones from the station or channel picked on the fan, newest first, a page at a time. */
+function RoutedPanel({ ship, route, onRoute, onOpen }: { ship: ShipView; route: Route; onRoute: (r: Route) => void; onOpen: (id: string) => void }) {
+  const list = routed(asks(ship.data), route);
+  const st = route.station ? ship.station(route.station) : undefined;
+  const [pg, setPg] = useState(0);
+  const pages = Math.max(1, Math.ceil(list.length / PAGE));
+  const page = Math.min(pg, pages - 1);
+  const shown = list.slice(page * PAGE, (page + 1) * PAGE);
+  const from = route.surface ? up(surfaceWord(route.surface)) : '';
+  const title = st ? `Routed to ${st.short}` : route.surface ? `From ${surfaceWord(route.surface)}` : 'Every ask';
+  const sub = st ? `${up(st.name)}${from ? ` · FROM ${from}` : ''}` : route.surface ? 'EVERY STATION' : 'PICK A STATION ON THE FAN';
   return (
-    <section className="panel grow" aria-labelledby="xwent-title">
+    <section className="panel grow xroute" aria-labelledby="xroute-title">
       <div className="panel-head">
-        <h2 className="panel-title" id="xwent-title">Where they went</h2>
-        <span className="mono panel-meta">LAST 7 DAYS · {rows.length} STATIONS · PICK ONE TO FILTER</span>
+        <h2 className="panel-title" id="xroute-title">{title}</h2>
+        <span className="mono panel-meta">{list.length} · {sub} · NEWEST FIRST</span>
+        {(route.station || route.surface) && <button type="button" className="pchip" onClick={() => onRoute(EVERY)}>× ALL</button>}
       </div>
-      <ul className="pbars" style={{ marginTop: 10 }}>
-        {rows.length === 0 && <li className="empty">No orders in the last 7 days.</li>}
-        {rows.map((r) => {
-          const st = ship.station(r.id);
+      <ol className="plist xr-rows">
+        {list.length === 0 && <li className="empty">Nothing routed here.</li>}
+        {shown.map((o) => {
+          const to = ship.station(o.station);
           return (
-            <li key={r.id}>
-              <button type="button" className="pbar-row" aria-pressed={route.station === r.id} style={css({ '--pc': railColor(st?.rail ?? 'mixed') })}
-                onClick={() => onRoute({ surface: null, station: route.station === r.id ? null : r.id })}>
-                <span className="pb-label">{st?.short ?? r.id}</span>
-                <span className="pb-track"><b style={{ width: `${(r.week / most) * 100}%` }} /></span>
-                <span className="pb-v mono">{r.week}{r.open ? ` · ${r.open} OPEN` : ''}</span>
+            <li key={o.id}>
+              <button type="button" className={`plist-row ts-${o.state}`} style={css({ '--pc': railColor(to?.rail ?? 'mixed') })} onClick={() => onOpen(o.id)}>
+                <span className="pl-main">{o.title}</span>
+                <span className="pl-meta mono">
+                  {st ? `${o.id} · ${STATE_WORD[o.state]} · FROM ${up(o.surface ?? '?')}` : `${o.id} → ${up(to?.short ?? o.station)} · ${STATE_WORD[o.state]} · ${up(o.surface ?? '?')}`} · {up(dayAndTime(openedOf(o)))}
+                </span>
               </button>
             </li>
           );
         })}
-      </ul>
+      </ol>
+      {pages > 1 && (
+        <div className="xr-foot">
+          <button type="button" className="pchip" disabled={page === 0} onClick={() => setPg(page - 1)}>‹ NEWER</button>
+          <span className="xr-at mono">{page * PAGE + 1}–{page * PAGE + shown.length} OF {list.length}</span>
+          <button type="button" className="pchip" disabled={page === pages - 1} onClick={() => setPg(page + 1)}>OLDER ›</button>
+        </div>
+      )}
     </section>
   );
 }

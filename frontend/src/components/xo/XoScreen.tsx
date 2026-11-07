@@ -1,5 +1,5 @@
 // Number One's wall screen. One view at a time, in place: the routing fan (your channels in, the
-// stations out, and the asks routed to the one you pick), one order, the comm channels, the fast path,
+// stations out; what you pick lists on the side console), one order, the comm channels, the fast path,
 // the rail rules, the hails, what was not done, the briefing minutes and Number One's card.
 import type { ReactNode } from 'react';
 import { dayAndTime, dayLine } from '../../lib/format';
@@ -49,8 +49,8 @@ export function XoScreen({ ship, screen, onScreen, route, onRoute }: Props) {
     body = (
       <>
         <ConHead icon={XO_ICONS.ease} title="Routing"
-          sub={`${asks(ship.data).length} ASKS ON FILE · YOUR CHANNELS IN, THE STATIONS OUT · LINES AS THICK AS THEIR WEEK · ${source(ship)}`} />
-        <RouteFan ship={ship} asOf={f.asOf} route={route} onRoute={onRoute} onOpen={open()}
+          sub={`${asks(ship.data).length} ASKS ON FILE · PICK A STATION OR A CHANNEL, ITS ASKS LIST ON THE SIDE CONSOLE · ${source(ship)}`} />
+        <RouteFan ship={ship} asOf={f.asOf} route={route} onRoute={onRoute}
           onHails={() => onScreen({ view: 'hails' })} onBlocked={() => onScreen({ view: 'blocked' })} />
       </>
     );
