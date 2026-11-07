@@ -1,8 +1,8 @@
 // Loads the fixture files, and the live rails and rail log when the NAS probe writes them. Moving around
 // never calls a model: these are local files only, served by the page's own nginx.
-import type { FastPathsFile, Fixtures, HelmFile, LogEntry, NasFile, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station, YeomanFile } from '../types';
+import type { FastPathsFile, Fixtures, HelmFile, LogEntry, MetersFile, NasFile, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station, YeomanFile } from '../types';
 
-const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops', 'yeoman', 'helm', 'nav', 'viewscreen', 'fastpaths'] as const;
+const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops', 'yeoman', 'helm', 'nav', 'viewscreen', 'fastpaths', 'meters'] as const;
 
 declare global {
   interface Window { FIXTURES?: Fixtures }   // set only in the single-file preview build
@@ -30,13 +30,14 @@ export interface Live {
   yeoman?: YeomanFile | null;
   helm?: HelmFile | null;
   fastpaths?: FastPathsFile | null;
+  meters?: MetersFile | null;
 }
 
 export async function loadLive(): Promise<Live> {
-  const [rails, raillog, orders, shiplog, nas, records, yeoman, helm, fastpaths] = await Promise.all([
+  const [rails, raillog, orders, shiplog, nas, records, yeoman, helm, fastpaths, meters] = await Promise.all([
     loadLiveRails(), loadLiveRailLog(), loadLiveOrders(), loadLiveShipLog(), loadLiveNas(), loadLiveRecords(), loadLiveYeoman(), loadLiveHelm(),
-    loadLiveFastPaths()]);
-  return { rails, raillog, orders, shiplog, nas, records, yeoman, helm, fastpaths };
+    loadLiveFastPaths(), loadLiveMeters()]);
+  return { rails, raillog, orders, shiplog, nas, records, yeoman, helm, fastpaths, meters };
 }
 
 /** The sample data with each live part in place of its sample. */
@@ -46,7 +47,8 @@ export function withLive(base: Fixtures, live: Live): Fixtures {
   const withRecords = live.records ? { ...out, records: live.records } : out;
   const withYeoman = live.yeoman ? { ...withRecords, yeoman: live.yeoman } : withRecords;
   const withHelm = live.helm ? { ...withYeoman, helm: live.helm } : withYeoman;
-  return live.fastpaths ? { ...withHelm, fastpaths: live.fastpaths } : withHelm;
+  const withFast = live.fastpaths ? { ...withHelm, fastpaths: live.fastpaths } : withHelm;
+  return live.meters ? { ...withFast, meters: live.meters } : withFast;
 }
 
 /** A live file, or null when there is none or it doesn't look like a real reading. */
@@ -72,6 +74,8 @@ export const loadLiveYeoman = () => loadLiveFile<YeomanFile>('yeoman', (f) => ['
 export const loadLiveHelm = () => loadLiveFile<HelmFile>('helm', (f) => ['ads', 'applications', 'events'].every((k) => Array.isArray((f as never)[k])));
 /** live/fastpaths.json from the ship probe: the coded fast paths, from Hermes' routing/fast-paths.json. */
 export const loadLiveFastPaths = () => loadLiveFile<FastPathsFile>('fastpaths', (f) => Array.isArray(f.paths));
+/** live/meters.json from the meter probe: spend by rail and station, hand-off speed, the leak share and the speed trials. */
+export const loadLiveMeters = () => loadLiveFile<MetersFile>('meters', (f) => ['spend', 'stations', 'handoffs', 'trials'].every((k) => Array.isArray((f as never)[k])) && !!f.leak && !!f.sources);
 /** live/shiplog.json from the ship probe: orders opening and closing, and the customs log. */
 export const loadLiveShipLog = () => loadLiveFile<ShipLogFile>('shiplog', (f) => Array.isArray(f.entries));
 

@@ -131,3 +131,37 @@ It runs as the `ops-probe` service: `python:3.12-alpine`, read-only, no network,
 
 Tests: `python -m unittest discover -s probe`. A test checks the code opens no connection, runs
 no command and lists no folder.
+
+# Meter probe and speed trial
+
+`meter_probe.py` writes `deploy/live/meters.json` every 5 minutes. With it the Science lab's
+Meters panel, and its Speed, Spend and Leak share views, show real figures in place of the
+samples (`fixtures/meters.json`). The panel says LIVE, or STALE when the file is over 15 minutes old.
+
+| Meter | Where it comes from |
+|---|---|
+| Spend | Hermes' session records: `state.db` of the default profile and of each profile in `profiles/`. Per session only its model, provider, start time, token counts (input, cached, output, reasoning), call count and cost where Hermes has a price. Never a message, a prompt or a title. Counted by rail for today, 7 days, 30 days and everything, and by station for the last 7 days. |
+| Cloud speed | `handoff/handoff-log.csv`: tokens over wall time per hand-off. That is how fast the work went, tools and waits included, not how fast the model talks. |
+| Leak share | `handoff/rails/leak-kpis.csv` from leak-kpis.py, added up per ISO week. The column names are matched loosely (v2: wait tokens + restart overhead; v1: wait + wall + restart tokens), and the file says which it used. An unmatched run is counted as unmatched, never as zero. |
+| Local speed | The speed trials' history, `deploy/scratch/trials/speed-trials.json`. |
+
+The session records are opened read-only as immutable: SQLite takes no lock and writes nothing,
+not even a `-shm` file, and a test checks every Hermes file is left byte for byte the same. The
+price of that: changes still in Hermes' `-wal` file show once Hermes checkpoints them.
+
+It runs as the `meter-probe` service: `python:3.12-alpine`, read-only, no network, no
+capabilities but reading, 64 MB of RAM.
+
+`speed_trial.py` is run by hand, as a run, not a probe. It asks the model Ollama already has
+loaded (so nothing is pushed out of VRAM) the same short question three times, and records the
+median time to first token (measured from sending to the first piece of answer, thinking
+included), tokens a second (Ollama's own count and time) and the prompt's tokens a second, as
+`SPD-<n>`. A failed trial is kept with its reason. It costs a few seconds of GPU time.
+
+```
+sudo docker compose -f deploy/compose.yaml run --rm speed-trial
+```
+
+Time to first token on the cloud rails isn't measured: it would take a paid call each time.
+
+Tests: `python -m unittest discover -s probe`.

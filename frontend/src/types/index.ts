@@ -1,7 +1,7 @@
 // Friendly names for the generated fixture types.
-import type { EngineeringFile, FastPathsFile, HelmFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile } from './fixtures';
+import type { EngineeringFile, FastPathsFile, HelmFile, MetersFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile } from './fixtures';
 
-export type { EngineeringFile, FastPathsFile, HelmFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile };
+export type { EngineeringFile, FastPathsFile, HelmFile, MetersFile, NasFile, NavFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, ViewscreenFile, YeomanFile };
 export type Station = StationsFile['stations'][number];
 export type Rail = RailsFile['rails'][number];
 export type RailId = Rail['id'];
@@ -29,6 +29,12 @@ export type Disk = OpsFile['disks'][number];
 export type Job = OpsFile['jobs'][number];
 export type Backup = OpsFile['backups'][number];
 export type Health = Host['state'];
+export type SpendRow = MetersFile['spend'][number];
+export type HandoffRow = MetersFile['handoffs'][number];
+export type LeakWeek = MetersFile['leak']['weeks'][number];
+export type Trial = MetersFile['trials'][number];
+export type MeterRail = SpendRow['rail'];
+export type MeterWindow = SpendRow['window'];
 export type Todo = YeomanFile['todos'][number];
 export type Reminder = YeomanFile['reminders'][number];
 export type WaitingFor = YeomanFile['waiting'][number];
@@ -65,6 +71,8 @@ export interface Fixtures {
   viewscreen: ViewscreenFile;
   /** The coded fast paths: the sample (patch P's words), or live/fastpaths.json from the ship probe (Hermes' routing/fast-paths.json). */
   fastpaths: FastPathsFile;
+  /** The Science lab's meters (spend, speed, leak share): the sample, or live/meters.json from the meter probe. */
+  meters: MetersFile;
   /** live/rail-log.json from the rails probe, when there is one. Its duty lines replace the samples. */
   raillog?: RailLogFile;
   /** live/nas.json from the Ops probe, when there is one. Its NAS and disks replace the sample ones in ops. */

@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
 NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops", "nas", "yeoman",
-         "helm", "nav", "viewscreen", "fastpaths"]
+         "helm", "nav", "viewscreen", "fastpaths", "meters"]
 
 
 def load(path):
@@ -236,6 +236,26 @@ class ScienceAgree(unittest.TestCase):
             for lesson in t["lessons"]:
                 if "run" in lesson:
                     self.assertIn(lesson["run"], self.runs)
+
+
+class MetersAgree(unittest.TestCase):
+    def test_meters_point_at_real_stations_and_windows(self):
+        m = load(FIX / "meters.json")
+        stations = {s["id"] for s in load(FIX / "stations.json")["stations"]}
+        windows = [w["id"] for w in m["windows"]]
+        self.assertEqual(windows, ["day", "week", "month", "all"])
+        for r in m["stations"]:
+            self.assertIn(r["station"], stations)
+        for r in m["spend"] + m["handoffs"]:
+            self.assertIn(r["window"], windows)
+        ids = [t["id"] for t in m["trials"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        for t in m["trials"]:
+            # A trial that worked has its numbers; one that failed says why.
+            self.assertEqual("ttftMs" in t, t["ok"], t["id"])
+            self.assertEqual("note" in t or t["ok"], True, t["id"])
+        for w in m["leak"]["weeks"]:
+            self.assertAlmostEqual(w["share"], round(w["leakTokens"] * 100 / w["tokens"], 1), places=1)
 
 
 class NoRealData(unittest.TestCase):

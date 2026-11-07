@@ -1,9 +1,9 @@
 // The Science lab (Deck 3). The room is the hero, like the Captain's Quarters: the eval
 // chamber shows every score in its glass, and the model shelf, the run console, the serving
 // rack, the study bench and the dataset archive each open a view on the work screen in place.
-// Every number links to the run that measured it. Around the room: the study bench, serving
-// and the rails on the right, the evals and the run log below, the comm badge at the bottom.
-// Sample data (fixtures/science.json).
+// Every number links to the run that measured it. Around the room: the study bench, serving,
+// the meters (speed, spend, leak) and the rails on the right, the evals and the run log below,
+// the comm badge at the bottom. Sample data (fixtures/science.json); the meters go live with the meter probe.
 import { memo, useCallback, useState } from 'react';
 import art from '../../assets/science.svg?raw';
 import type { BoardId } from '../../lib/board';
@@ -13,6 +13,7 @@ import { CommBadge } from '../CommBadge';
 import { RailsPanel } from '../Panels';
 import type { RailFilter } from '../SideRail';
 import { LabScreen, type Screen } from './LabScreen';
+import { MetersPanel } from './Meters';
 import { Chamber, EvalsTable, RunLogPanel, ServingPanel, StudyPanel } from './Panels';
 
 interface Props {
@@ -98,6 +99,7 @@ export function ScienceBoard({ ship, drills, target, onTarget, onBoard, onToast 
       </section>
       <aside className="side qside">
         <StudyPanel ship={ship} picked={screen.view === 'track' ? screen.id : undefined} onScreen={setScreen} />
+        <MetersPanel ship={ship} onScreen={setScreen} />
         <ServingPanel ship={ship} onScreen={setScreen} />
         <RailsPanel ship={ship} drills={drills} compact />
       </aside>
