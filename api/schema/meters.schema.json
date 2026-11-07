@@ -1,0 +1,465 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Starship · meters",
+  "description": "The Science lab's meters: what the crew spends (tokens, and dollars where Hermes knows a price) by rail, station and time window, from Hermes' own session records; how fast each cloud rail works, from the hand-off log; the weekly leak share, from leak-kpis.csv; and the speed trials on the local rail (time to first token and tokens a second). live/meters.json from the meter probe replaces the sample.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asOf",
+    "synthetic",
+    "sources",
+    "windows",
+    "spend",
+    "stations",
+    "handoffs",
+    "leak",
+    "trials"
+  ],
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "sources": {
+      "description": "Where each meter came from this time, and why one is empty.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sessions",
+        "handoffs",
+        "leak",
+        "trials"
+      ],
+      "properties": {
+        "sessions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "note"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "read",
+                "missing",
+                "error"
+              ]
+            },
+            "note": {
+              "type": "string"
+            },
+            "readAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+            }
+          }
+        },
+        "handoffs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "note"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "read",
+                "missing",
+                "error"
+              ]
+            },
+            "note": {
+              "type": "string"
+            },
+            "readAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+            }
+          }
+        },
+        "leak": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "note"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "read",
+                "missing",
+                "error"
+              ]
+            },
+            "note": {
+              "type": "string"
+            },
+            "readAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+            }
+          }
+        },
+        "trials": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "note"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "read",
+                "missing",
+                "error"
+              ]
+            },
+            "note": {
+              "type": "string"
+            },
+            "readAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+            }
+          }
+        }
+      }
+    },
+    "windows": {
+      "description": "The time windows the spend is counted over. 'all' has no start.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "all"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          }
+        }
+      }
+    },
+    "spend": {
+      "description": "One row per rail and window, from Hermes' session records (every profile's state.db).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rail",
+          "window",
+          "sessions",
+          "input",
+          "cached",
+          "output",
+          "reasoning"
+        ],
+        "properties": {
+          "rail": {
+            "enum": [
+              "local",
+              "codex",
+              "claude",
+              "other"
+            ]
+          },
+          "window": {
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "all"
+            ]
+          },
+          "sessions": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "calls": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Model calls, where Hermes counts them."
+          },
+          "input": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "cached": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "output": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reasoning": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "costUsd": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Only where Hermes has a price. A subscription or local rail has none."
+          }
+        }
+      }
+    },
+    "stations": {
+      "description": "This week's spend by station (the Hermes profile), most first.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "station",
+          "rail",
+          "sessions",
+          "tokens"
+        ],
+        "properties": {
+          "station": {
+            "type": "string"
+          },
+          "rail": {
+            "enum": [
+              "local",
+              "codex",
+              "claude",
+              "other"
+            ]
+          },
+          "sessions": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "costUsd": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "handoffs": {
+      "description": "Hand-offs to the cloud rails, from handoff-log.csv: how many, their tokens and wall time. tokensPerSec is tokens over wall time, tools and waits included, not the model's own speed.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rail",
+          "window",
+          "count",
+          "tokens",
+          "wallS"
+        ],
+        "properties": {
+          "rail": {
+            "enum": [
+              "local",
+              "codex",
+              "claude",
+              "other"
+            ]
+          },
+          "window": {
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "all"
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "wallS": {
+            "type": "number",
+            "minimum": 0
+          },
+          "costUsd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "tokensPerSec": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "leak": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basis",
+        "weeks"
+      ],
+      "properties": {
+        "basis": {
+          "type": "string",
+          "description": "Which columns of leak-kpis.csv the share was worked out from."
+        },
+        "weeks": {
+          "description": "One row per ISO week, newest first.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "week",
+              "from",
+              "runs",
+              "tokens",
+              "leakTokens",
+              "share"
+            ],
+            "properties": {
+              "week": {
+                "type": "string",
+                "pattern": "^\\d{4}-W\\d\\d$"
+              },
+              "from": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^\\d{4}-\\d\\d-\\d\\d$"
+              },
+              "runs": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "unmatched": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "tokens": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "leakTokens": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "share": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Leak tokens as a percent of all tokens, one decimal."
+              }
+            }
+          }
+        }
+      }
+    },
+    "trials": {
+      "description": "Speed trials on the local rail, newest first: the same short prompt a few times, timed. Each is a run of its own.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "at",
+          "engine",
+          "model",
+          "repeats",
+          "ok"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^SPD-\\d+$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+          },
+          "engine": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "repeats": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "ttftMs": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Time to first token, the median of the repeats, measured at the client."
+          },
+          "ttftMsMax": {
+            "type": "number",
+            "minimum": 0
+          },
+          "tokensPerSec": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Output tokens a second, from the engine's own count and time, median."
+          },
+          "promptTokensPerSec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "loadMs": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Time spent loading the model on the first repeat (0 when it was already loaded)."
+          },
+          "promptTokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "outputTokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

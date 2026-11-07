@@ -128,6 +128,57 @@ html:has(.board-science) body{background-color:#050d0e;background-image:var(--st
 .alog-link{text-align:left;font-size:13px;line-height:1.4;padding:0}
 .alog-link:hover{text-decoration:underline}
 
+/* ---------- the meters: speed, spend, leak ---------- */
+.lab-screen .ease{grid-auto-rows:minmax(0,1fr)}
+.lab-screen .ease .ease-figure{font-size:26px}
+.lab-screen .ease .ease-text{font-size:12px;line-height:1.3;flex:none;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+.lab-screen .ease .ease-tile{padding:8px 12px;gap:2px}
+.lab-screen .ease .ease-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px;flex:none}
+.lab-screen .ease .ease-figure{flex:none;line-height:1.1}
+.lab-screen .ease .ease-foot{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none;margin-top:auto}
+.meter-table td,.meter-table th{white-space:nowrap;padding-left:6px;padding-right:6px}
+.meter-table{font-size:12.5px}
+.trial-model{display:block;font-size:9.5px;color:var(--text-label)}
+.meter-table tbody tr{cursor:default}
+.meter-table tr.best td:first-child{box-shadow:inset 3px 0 0 var(--good)}
+.meter-table tr.failed td{color:var(--text-muted)}
+.meter-table tr.failed td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+.trial-failed{white-space:normal !important;font-size:12.5px}
+.spend-table .rail-cell{box-shadow:inset 3px 0 0 var(--c);padding-left:10px;font-family:var(--font-display);font-weight:600}
+.spend-table tr.total td{border-top:1px solid var(--border-strong);font-weight:600}
+.spend-table .strong{color:var(--lab)}
+.meter-src{margin:6px 0 12px;font-size:9.5px;letter-spacing:.06em;color:var(--text-muted);line-height:1.5}
+.meter-src.off{color:var(--captain)}
+.win-pick{display:inline-flex;gap:4px;margin-left:auto;margin-right:8px}
+.win-btn{padding:4px 8px;border-radius:6px;border:1px solid var(--border-strong);background:transparent;color:var(--text-label);font-size:9.5px;letter-spacing:.08em;cursor:pointer}
+.win-btn[aria-pressed="true"]{background:var(--lab);border-color:var(--lab);color:#041312}
+.win-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.rail-speeds,.station-spend,.leak-weeks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.rail-speeds li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:8px 12px;border-radius:9px;background:var(--surface-raised);border-left:3px solid var(--c)}
+.rs-name{font-family:var(--font-display);font-weight:600;font-size:14px}
+.rs-fig{font-size:15px;color:var(--text);text-align:right}
+.rs-sub{grid-column:1 / -1;font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
+.station-spend li,.leak-weeks li{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:6px 12px;border-radius:9px;background:var(--surface-raised)}
+.ss-name{font-family:var(--font-display);font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ss-bar,.lw-bar{display:block;height:8px;border-radius:2px;background:color-mix(in srgb, var(--text) 6%, transparent);overflow:hidden}
+.ss-bar b{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--c)}
+.ss-fig,.lw-fig{font-size:12.5px;text-align:right}
+.ss-sub,.lw-sub{grid-column:2 / -1;font-size:9px;letter-spacing:.06em;color:var(--text-label)}
+.lw-name{font-size:12px;letter-spacing:.06em}
+.lw-bar b{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--good)}
+.leak-weeks li.mid .lw-bar b{background:var(--captain)}
+.leak-weeks li.high .lw-bar b{background:var(--bad)}
+.leak-weeks li.high .lw-fig{color:var(--bad)}
+.meters-panel{padding:12px 16px}
+.mp-rows{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.mp-row{display:grid;grid-template-columns:104px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:6px 10px;border-radius:8px;border:none;border-left:3px solid var(--lab);background:var(--surface-raised);color:var(--text);text-align:left;cursor:pointer}
+.mp-row:hover{background:color-mix(in srgb, var(--surface-raised) 85%, var(--text))}
+.mp-row:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.mp-label{font-size:9px;letter-spacing:.1em;color:var(--text-label)}
+.mp-fig{font-family:var(--font-display);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mp-fig small{font-family:var(--font-body, inherit);font-weight:400;font-size:11px;color:var(--text-label)}
+.muted-fig{font-size:12px;font-weight:400;color:var(--text-label)}
+
 @media (prefers-reduced-motion: reduce){
   .room-art .l-blink,.room-art .l-cursor{animation:none}
 }

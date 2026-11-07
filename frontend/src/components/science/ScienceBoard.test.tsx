@@ -11,12 +11,13 @@ import quarters from '../../../../fixtures/quarters.json';
 import sensors from '../../../../fixtures/sensors.json';
 import engineering from '../../../../fixtures/engineering.json';
 import science from '../../../../fixtures/science.json';
+import meters from '../../../../fixtures/meters.json';
 import type { Fixtures } from '../../types';
 import { makeShipView } from '../../lib/ship';
-import { bestBySuite, nextLesson, trackProgress } from '../../lib/science';
+import { bestBySuite, metersSource, nextLesson, spendIn, spent, tokens, trackProgress } from '../../lib/science';
 import { ScienceBoard } from './ScienceBoard';
 
-const data = { ship, stations, rails, orders, shiplog, quarters, sensors, engineering, science } as unknown as Fixtures;
+const data = { ship, stations, rails, orders, shiplog, quarters, sensors, engineering, science, meters } as unknown as Fixtures;
 const noop = () => {};
 const board = (relieved = new Set<string>(), onBoard: (b: string) => void = noop) => render(
   <ScienceBoard ship={makeShipView(data, {}, relieved)} filter="all" drills={{}} target={null} onTarget={noop}
@@ -60,6 +61,42 @@ describe('science lab board', () => {
     expect(c.querySelector('.chamber')?.className).toContain('dark');
     fireEvent.click(c.querySelector('.lspot-bridge')!);
     expect(went).toEqual(['bridge']);
+  });
+});
+
+describe('the meters', () => {
+  it('the side panel opens speed, spend and the leak', () => {
+    const c = board();
+    const rows = c.querySelectorAll('.meters-panel .mp-row');
+    expect(rows[0].textContent).toContain('284 ms');
+    fireEvent.click(rows[0]);
+    expect(screen(c).querySelector('.con-title')?.textContent).toBe('Speed');
+    expect(screen(c).querySelectorAll('.meter-table tbody tr').length).toBe(3);
+    expect(screen(c).querySelector('tr.failed')?.textContent).toContain('timed out');
+    fireEvent.click(c.querySelectorAll('.meters-panel .mp-row')[2]);
+    expect(screen(c).querySelector('.con-title')?.textContent).toBe('Leak share');
+    expect(screen(c).querySelector('.leak-weeks li.high .lw-fig')?.textContent).toBe('32.7%');
+  });
+  it('spend switches window, and a rail with no price shows no dollars', () => {
+    const c = board();
+    fireEvent.click(c.querySelectorAll('.meters-panel .mp-row')[1]);
+    const total = () => screen(c).querySelector('.spend-table tr.total')?.textContent ?? '';
+    expect(total()).toContain('30.9M');
+    expect(total()).toContain('$3.42');
+    fireEvent.click([...screen(c).querySelectorAll('.win-btn')].find((b) => b.textContent === 'TODAY')!);
+    expect(total()).toContain('$0.61');
+    const codex = [...screen(c).querySelectorAll('.spend-table tbody tr')].find((r) => r.textContent?.startsWith('Codex'))!;
+    expect(codex.lastElementChild?.textContent).toBe('—');
+  });
+  it('counts and labels', () => {
+    expect(tokens(950)).toBe('950');
+    expect(tokens(12_400)).toBe('12.4k');
+    expect(tokens(31_200_000)).toBe('31.2M');
+    expect(spent(spendIn(data.meters, 'week').total)).toBe(30_910_000);
+    expect(metersSource(data.meters)).toBe('sample');
+    const live = { ...data.meters, synthetic: false, asOf: '2026-11-07T10:00:00Z' };
+    expect(metersSource(live, Date.parse('2026-11-07T10:10:00Z'))).toBe('live');
+    expect(metersSource(live, Date.parse('2026-11-07T10:20:00Z'))).toBe('stale');
   });
 });
 

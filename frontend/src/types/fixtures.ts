@@ -53,6 +53,138 @@ export interface EngineeringFile {
 }
 
 /**
+ * The Science lab's meters: what the crew spends (tokens, and dollars where Hermes knows a price) by rail, station and time window, from Hermes' own session records; how fast each cloud rail works, from the hand-off log; the weekly leak share, from leak-kpis.csv; and the speed trials on the local rail (time to first token and tokens a second). live/meters.json from the meter probe replaces the sample.
+ */
+export interface MetersFile {
+  asOf: string;
+  synthetic: boolean;
+  /**
+   * Where each meter came from this time, and why one is empty.
+   */
+  sources: {
+    sessions: {
+      state: "read" | "missing" | "error";
+      note: string;
+      readAt?: string;
+    };
+    handoffs: {
+      state: "read" | "missing" | "error";
+      note: string;
+      readAt?: string;
+    };
+    leak: {
+      state: "read" | "missing" | "error";
+      note: string;
+      readAt?: string;
+    };
+    trials: {
+      state: "read" | "missing" | "error";
+      note: string;
+      readAt?: string;
+    };
+  };
+  /**
+   * The time windows the spend is counted over. 'all' has no start.
+   */
+  windows: {
+    id: "day" | "week" | "month" | "all";
+    label: string;
+    from?: string;
+  }[];
+  /**
+   * One row per rail and window, from Hermes' session records (every profile's state.db).
+   */
+  spend: {
+    rail: "local" | "codex" | "claude" | "other";
+    window: "day" | "week" | "month" | "all";
+    sessions: number;
+    /**
+     * Model calls, where Hermes counts them.
+     */
+    calls?: number;
+    input: number;
+    cached: number;
+    output: number;
+    reasoning: number;
+    /**
+     * Only where Hermes has a price. A subscription or local rail has none.
+     */
+    costUsd?: number;
+  }[];
+  /**
+   * This week's spend by station (the Hermes profile), most first.
+   */
+  stations: {
+    station: string;
+    rail: "local" | "codex" | "claude" | "other";
+    sessions: number;
+    tokens: number;
+    costUsd?: number;
+  }[];
+  /**
+   * Hand-offs to the cloud rails, from handoff-log.csv: how many, their tokens and wall time. tokensPerSec is tokens over wall time, tools and waits included, not the model's own speed.
+   */
+  handoffs: {
+    rail: "local" | "codex" | "claude" | "other";
+    window: "day" | "week" | "month" | "all";
+    count: number;
+    tokens: number;
+    wallS: number;
+    costUsd?: number;
+    tokensPerSec?: number;
+  }[];
+  leak: {
+    /**
+     * Which columns of leak-kpis.csv the share was worked out from.
+     */
+    basis: string;
+    /**
+     * One row per ISO week, newest first.
+     */
+    weeks: {
+      week: string;
+      from: string;
+      runs: number;
+      unmatched?: number;
+      tokens: number;
+      leakTokens: number;
+      /**
+       * Leak tokens as a percent of all tokens, one decimal.
+       */
+      share: number;
+    }[];
+  };
+  /**
+   * Speed trials on the local rail, newest first: the same short prompt a few times, timed. Each is a run of its own.
+   */
+  trials: {
+    id: string;
+    at: string;
+    engine: string;
+    model: string;
+    repeats: number;
+    ok: boolean;
+    /**
+     * Time to first token, the median of the repeats, measured at the client.
+     */
+    ttftMs?: number;
+    ttftMsMax?: number;
+    /**
+     * Output tokens a second, from the engine's own count and time, median.
+     */
+    tokensPerSec?: number;
+    promptTokensPerSec?: number;
+    /**
+     * Time spent loading the model on the first repeat (0 when it was already loaded).
+     */
+    loadMs?: number;
+    promptTokens?: number;
+    outputTokens?: number;
+    note?: string;
+  }[];
+}
+
+/**
  * live/nas.json from the Ops probe: the NAS's own readings (memory, swap, CPU, uptime, temperature and the disks it is told to watch). The page puts them in place of the sample NAS and its disks in ops.json. The probe only reads /proc, /sys and the size of each disk.
  */
 export interface NasFile {

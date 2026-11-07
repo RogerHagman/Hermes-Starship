@@ -1,0 +1,357 @@
+{
+  "asOf": "2026-11-05T09:45:00Z",
+  "synthetic": true,
+  "sources": {
+    "sessions": {
+      "state": "read",
+      "note": "6 profiles read. Sample figures."
+    },
+    "handoffs": {
+      "state": "read",
+      "note": "77 hand-offs on file. Sample figures."
+    },
+    "leak": {
+      "state": "read",
+      "note": "48 card runs in leak-kpis.csv. Sample figures."
+    },
+    "trials": {
+      "state": "read",
+      "note": "3 speed trials on file. Sample figures."
+    }
+  },
+  "windows": [
+    {
+      "id": "day",
+      "label": "Today",
+      "from": "2026-11-04T23:00:00Z"
+    },
+    {
+      "id": "week",
+      "label": "Last 7 days",
+      "from": "2026-10-29T23:00:00Z"
+    },
+    {
+      "id": "month",
+      "label": "Last 30 days",
+      "from": "2026-10-06T22:00:00Z"
+    },
+    {
+      "id": "all",
+      "label": "Everything"
+    }
+  ],
+  "spend": [
+    {
+      "rail": "local",
+      "window": "day",
+      "sessions": 31,
+      "calls": 96,
+      "input": 412000,
+      "cached": 0,
+      "output": 38500,
+      "reasoning": 0
+    },
+    {
+      "rail": "local",
+      "window": "week",
+      "sessions": 214,
+      "calls": 655,
+      "input": 2876000,
+      "cached": 0,
+      "output": 251000,
+      "reasoning": 0
+    },
+    {
+      "rail": "local",
+      "window": "month",
+      "sessions": 802,
+      "calls": 2410,
+      "input": 10450000,
+      "cached": 0,
+      "output": 930000,
+      "reasoning": 0
+    },
+    {
+      "rail": "local",
+      "window": "all",
+      "sessions": 1190,
+      "calls": 3530,
+      "input": 15200000,
+      "cached": 0,
+      "output": 1360000,
+      "reasoning": 0
+    },
+    {
+      "rail": "codex",
+      "window": "day",
+      "sessions": 4,
+      "calls": 88,
+      "input": 3120000,
+      "cached": 2650000,
+      "output": 41000,
+      "reasoning": 18000
+    },
+    {
+      "rail": "codex",
+      "window": "week",
+      "sessions": 23,
+      "calls": 702,
+      "input": 26400000,
+      "cached": 22100000,
+      "output": 312000,
+      "reasoning": 141000
+    },
+    {
+      "rail": "codex",
+      "window": "month",
+      "sessions": 71,
+      "calls": 2380,
+      "input": 88900000,
+      "cached": 73400000,
+      "output": 1050000,
+      "reasoning": 486000
+    },
+    {
+      "rail": "codex",
+      "window": "all",
+      "sessions": 96,
+      "calls": 3190,
+      "input": 119000000,
+      "cached": 98200000,
+      "output": 1410000,
+      "reasoning": 650000
+    },
+    {
+      "rail": "claude",
+      "window": "day",
+      "sessions": 2,
+      "calls": 14,
+      "input": 184000,
+      "cached": 151000,
+      "output": 9200,
+      "reasoning": 0,
+      "costUsd": 0.61
+    },
+    {
+      "rail": "claude",
+      "window": "week",
+      "sessions": 9,
+      "calls": 77,
+      "input": 1020000,
+      "cached": 846000,
+      "output": 51000,
+      "reasoning": 0,
+      "costUsd": 3.42
+    },
+    {
+      "rail": "claude",
+      "window": "month",
+      "sessions": 30,
+      "calls": 251,
+      "input": 3310000,
+      "cached": 2740000,
+      "output": 168000,
+      "reasoning": 0,
+      "costUsd": 11.08
+    },
+    {
+      "rail": "claude",
+      "window": "all",
+      "sessions": 41,
+      "calls": 342,
+      "input": 4480000,
+      "cached": 3700000,
+      "output": 229000,
+      "reasoning": 0,
+      "costUsd": 14.95
+    }
+  ],
+  "stations": [
+    {
+      "station": "eng",
+      "rail": "codex",
+      "sessions": 11,
+      "tokens": 15400000
+    },
+    {
+      "station": "sys",
+      "rail": "codex",
+      "sessions": 6,
+      "tokens": 6900000
+    },
+    {
+      "station": "diag",
+      "rail": "codex",
+      "sessions": 6,
+      "tokens": 4412000
+    },
+    {
+      "station": "xo",
+      "rail": "local",
+      "sessions": 160,
+      "tokens": 2410000
+    },
+    {
+      "station": "science",
+      "rail": "claude",
+      "sessions": 5,
+      "tokens": 640000,
+      "costUsd": 2.1
+    },
+    {
+      "station": "yeoman",
+      "rail": "local",
+      "sessions": 54,
+      "tokens": 717000
+    },
+    {
+      "station": "sensors",
+      "rail": "claude",
+      "sessions": 4,
+      "tokens": 431000,
+      "costUsd": 1.32
+    }
+  ],
+  "handoffs": [
+    {
+      "rail": "codex",
+      "window": "day",
+      "count": 3,
+      "tokens": 2900000,
+      "wallS": 2650.0,
+      "tokensPerSec": 1094.3
+    },
+    {
+      "rail": "codex",
+      "window": "week",
+      "count": 19,
+      "tokens": 24800000,
+      "wallS": 21900.0,
+      "tokensPerSec": 1132.4
+    },
+    {
+      "rail": "codex",
+      "window": "month",
+      "count": 58,
+      "tokens": 81000000,
+      "wallS": 76400.0,
+      "tokensPerSec": 1060.2
+    },
+    {
+      "rail": "codex",
+      "window": "all",
+      "count": 77,
+      "tokens": 108000000,
+      "wallS": 104000.0,
+      "tokensPerSec": 1038.5
+    },
+    {
+      "rail": "claude",
+      "window": "day",
+      "count": 2,
+      "tokens": 190000,
+      "wallS": 410.0,
+      "costUsd": 0.61,
+      "tokensPerSec": 463.4
+    },
+    {
+      "rail": "claude",
+      "window": "week",
+      "count": 8,
+      "tokens": 1050000,
+      "wallS": 2380.0,
+      "costUsd": 3.42,
+      "tokensPerSec": 441.2
+    },
+    {
+      "rail": "claude",
+      "window": "month",
+      "count": 27,
+      "tokens": 3400000,
+      "wallS": 8100.0,
+      "costUsd": 11.08,
+      "tokensPerSec": 419.8
+    },
+    {
+      "rail": "claude",
+      "window": "all",
+      "count": 36,
+      "tokens": 4600000,
+      "wallS": 11200.0,
+      "costUsd": 14.95,
+      "tokensPerSec": 410.7
+    }
+  ],
+  "leak": {
+    "basis": "leak = wait_tokens + restart_overhead_tokens; all = input + output",
+    "weeks": [
+      {
+        "week": "2026-W45",
+        "from": "2026-11-02",
+        "runs": 17,
+        "tokens": 21800000,
+        "leakTokens": 1310000,
+        "share": 6.0
+      },
+      {
+        "week": "2026-W44",
+        "from": "2026-10-26",
+        "runs": 22,
+        "tokens": 48600000,
+        "leakTokens": 15900000,
+        "unmatched": 2,
+        "share": 32.7
+      },
+      {
+        "week": "2026-W43",
+        "from": "2026-10-19",
+        "runs": 9,
+        "tokens": 12100000,
+        "leakTokens": 2750000,
+        "share": 22.7
+      }
+    ]
+  },
+  "trials": [
+    {
+      "id": "SPD-903",
+      "at": "2026-11-05T09:30:00Z",
+      "engine": "ollama",
+      "model": "qwen3:32b-q4_K_M",
+      "repeats": 3,
+      "ok": true,
+      "ttftMs": 284.0,
+      "ttftMsMax": 2610.0,
+      "tokensPerSec": 34.1,
+      "promptTokensPerSec": 512.4,
+      "loadMs": 2290.0,
+      "promptTokens": 21,
+      "outputTokens": 128,
+      "note": "The model had to load first; the first answer's time to first token includes it."
+    },
+    {
+      "id": "SPD-902",
+      "at": "2026-11-03T18:15:00Z",
+      "engine": "ollama",
+      "model": "qwen3:32b-q4_K_M",
+      "repeats": 3,
+      "ok": true,
+      "ttftMs": 301.0,
+      "ttftMsMax": 322.0,
+      "tokensPerSec": 33.6,
+      "promptTokensPerSec": 498.0,
+      "loadMs": 0.0,
+      "promptTokens": 21,
+      "outputTokens": 128
+    },
+    {
+      "id": "SPD-901",
+      "at": "2026-11-01T20:40:00Z",
+      "engine": "ollama",
+      "model": "qwen3:32b-q4_K_M",
+      "repeats": 3,
+      "ok": false,
+      "note": "Failed after 0 of 3: timed out"
+    }
+  ]
+}

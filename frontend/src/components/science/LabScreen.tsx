@@ -4,10 +4,11 @@
 import { Fragment } from 'react';
 import { railColor } from '../../lib/lookups';
 import { dayAndTime } from '../../lib/format';
-import { LAB_ICONS, RUN_KIND, bestBySuite, byNewest, modelName, modelOf, nextLesson, runOf, trackProgress } from '../../lib/science';
+import { LAB_ICONS, RUN_KIND, bestBySuite, byNewest, dollars, lastTrial, leakNow, modelName, modelOf, nextLesson, runOf, spendIn, spent, tokens, trackProgress } from '../../lib/science';
 import type { ShipView } from '../../lib/ship';
 import type { Run, StudyTrack } from '../../types';
 import { ConHead, StationDetail, useEscape } from '../ShipConsole';
+import { LeakView, SpeedView, SpendView } from './Meters';
 
 export type Screen =
   | { view: 'ease' }
@@ -20,7 +21,10 @@ export type Screen =
   | { view: 'datasets' }
   | { view: 'study' }
   | { view: 'track'; id: string }
-  | { view: 'station'; id: string };
+  | { view: 'station'; id: string }
+  | { view: 'speed' }
+  | { view: 'spend' }
+  | { view: 'leak' };
 
 const css = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 const LAB = 'var(--lab)';
@@ -61,6 +65,9 @@ export function LabScreen({ ship, screen, onScreen }: { ship: ShipView; screen: 
       if (t) { colour = 'var(--captain)'; body = <TrackView t={t} ship={ship} onScreen={onScreen} onBack={() => onScreen({ view: 'study' })} />; }
       break;
     }
+    case 'speed': body = <SpeedView ship={ship} onBack={back} />; break;
+    case 'spend': body = <SpendView ship={ship} onBack={back} />; break;
+    case 'leak': body = <LeakView ship={ship} onBack={back} />; break;
     case 'station': {
       const st = ship.station(screen.id);
       if (st) { colour = railColor(st.rail); body = <StationDetail ship={ship} st={st} back="‹ The lab" onBack={back} here="science" />; }
@@ -86,6 +93,11 @@ function Lab({ ship, onScreen }: { ship: ShipView; onScreen: Go }) {
   const last = byNewest(s.runs)[0];
   const lessons = s.study.flatMap((t) => t.lessons);
   const nextTrack = s.study.find((t) => nextLesson(t));
+  const m = ship.data.meters;
+  const trial = lastTrial(m);
+  const week = spendIn(m, 'week');
+  const [leak, before] = leakNow(m);
+  const ms = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)} s` : `${Math.round(n)} ms`);
   return (
     <>
       <ConHead icon={LAB_ICONS.ease} title={off ? 'The lab is dark' : 'Science lab'}
@@ -106,6 +118,15 @@ function Lab({ ship, onScreen }: { ship: ShipView; onScreen: Go }) {
             text={nextTrack ? `Next: ${nextLesson(nextTrack)!.title}.` : 'Every lesson taken.'} foot={`${s.study.length} TRACKS · LEARNED FROM OUR OWN RUNS`} />
           <Tile icon="datasets" label="ARCHIVE · DATASETS" figure={String(s.datasets.length)} onClick={() => onScreen({ view: 'datasets' })}
             text={s.datasets.map((d) => `${d.name} (${d.state})`).join(', ') + '.'} foot={`${s.datasets.reduce((n, d) => n + d.rows, 0)} ROWS · KEPT ON THE LOCAL RAIL`} />
+          <Tile icon="speed" label="SPEED · LOCAL RAIL" figure={trial?.ttftMs !== undefined ? ms(trial.ttftMs) : '—'} onClick={() => onScreen({ view: 'speed' })}
+            text={trial ? `To the first token, then ${trial.tokensPerSec ?? '—'} tokens a second on ${trial.model}. Measured in ${trial.id}.` : 'No speed trial yet.'}
+            foot={`${m.trials.length} TRIALS · CLOUD RAILS PER HAND-OFF`} />
+          <Tile icon="spend" label="SPEND · LAST 7 DAYS" figure={tokens(spent(week.total))} onClick={() => onScreen({ view: 'spend' })}
+            text={week.rows.length ? week.rows.map((r) => `${r.rail[0].toUpperCase()}${r.rail.slice(1)} ${tokens(spent(r))}`).join(', ') + ' tokens.' : 'Nothing spent.'}
+            foot={`${week.total.sessions} SESSIONS${week.total.costUsd ? ` · ${dollars(week.total.costUsd)}` : ''} · TODAY ${tokens(spent(spendIn(m, 'day').total))}`} />
+          <Tile icon="leak" label="LEAK · THIS WEEK" figure={leak ? `${leak.share.toFixed(1)}%` : '—'} onClick={() => onScreen({ view: 'leak' })}
+            text={leak ? `${tokens(leak.leakTokens)} of ${tokens(leak.tokens)} tokens lost to polling and restarts${before ? `, against ${before.share.toFixed(1)}% the week before` : ''}.` : 'No leak figures yet.'}
+            foot={leak ? `${leak.runs} CARD RUNS · ${leak.week}` : 'FROM LEAK-KPIS.CSV'} />
         </div>
       </div>
     </>

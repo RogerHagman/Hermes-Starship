@@ -1,9 +1,11 @@
-# Hermes Starship · the boards, plus three read-only probes that keep live/ fresh: the rails probe
+# Hermes Starship · the boards, plus four read-only probes that keep live/ fresh: the rails probe
 # (live/rails.json, and live/rail-log.json, when each rail went out or came back), the ship
 # probe (live/orders.json, live/shiplog.json, live/records.json and live/yeoman.json, from Hermes'
 # order log, Kanban cards and the Yeoman's files) and the Ops probe (live/nas.json, the NAS's own memory, CPU, temperature and disks).
+# The meter probe (live/meters.json) gives the Science lab its spend, speed and leak meters; the
+# speed-trial service, run by hand, times the local rail.
 # nginx serves static files (about 10 MB of RAM). The probe is read-only towards Hermes and
-# writes only deploy/live/. No model runs: its one Ollama call is GET /api/ps, and its one
+# writes only deploy/live/. No probe runs a model: the one Ollama call is GET /api/ps, and the one
 # Anthropic call asks for the Claude usage (at most every 5 minutes).
 # Settings for this NAS go in deploy/.env (git ignores it), see deploy/env.example.
 services:
@@ -122,3 +124,58 @@ services:
       - ./scratch/ops:/scratch
       - ../probe/ops_probe.py:/app/ops_probe.py:ro
     command: python -u /app/ops_probe.py
+
+  # The meter probe: the Science lab's meters. What the crew spends (tokens, and dollars where
+  # Hermes has a price) by rail, station and window, from the number columns of Hermes' session
+  # records (never a message or a prompt); each cloud rail's tokens a second, from the hand-off
+  # log; the weekly leak share, from leak-kpis.csv; and the speed trials below. No network, no
+  # capabilities but reading. It writes only ./live/meters.json, every 5 minutes.
+  meter-probe:
+    image: python:3.12-alpine
+    container_name: hermes-starship-meters
+    restart: unless-stopped
+    mem_limit: 64m
+    read_only: true
+    network_mode: none
+    cap_drop: [ALL]
+    cap_add: [DAC_READ_SEARCH]
+    security_opt: [no-new-privileges:true]
+    environment:
+      STATE_DBS: /hermes/state.db;/hermes/profiles/*/state.db
+      HANDOFF_LOG: /hermes/handoff/handoff-log.csv
+      LEAK_CSV: /hermes/handoff/rails/leak-kpis.csv
+      TRIALS: /trials/speed-trials.json
+      ROSTER: /srv/fixtures/stations.json
+      OUT_DIR: /out
+      INTERVAL: "300"
+    volumes:
+      - ${HERMES_DATA_HOST:-/DATA/AppData/hermes}:/hermes:ro
+      - ../fixtures/stations.json:/srv/fixtures/stations.json:ro
+      - ./scratch/trials:/trials:ro
+      - ./live:/out
+      - ../probe/meter_probe.py:/app/meter_probe.py:ro
+    command: python -u /app/meter_probe.py
+
+  # A speed trial on the local rail, run by hand (never on its own: it is in the "trial" profile):
+  #   sudo docker compose -f deploy/compose.yaml run --rm speed-trial
+  # The same short prompt three times to the model Ollama already has loaded: time to first token
+  # and tokens a second. A few seconds of GPU time; it sees no Hermes data and writes only
+  # ./scratch/trials, which the meter probe reads.
+  speed-trial:
+    image: python:3.12-alpine
+    profiles: [trial]
+    container_name: hermes-starship-trial
+    mem_limit: 32m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      OLLAMA_URL: ${OLLAMA_URL:?set OLLAMA_URL in deploy/.env}
+      MODEL: ${TRIAL_MODEL:-}
+      REPEATS: "3"
+      TOKENS: "128"
+      TRIALS: /trials/speed-trials.json
+    volumes:
+      - ./scratch/trials:/trials
+      - ../probe/speed_trial.py:/app/speed_trial.py:ro
+    command: python -u /app/speed_trial.py

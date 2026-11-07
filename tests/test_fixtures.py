@@ -13,7 +13,7 @@ import jsonschema
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
-NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops", "nas", "yeoman"]
+NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops", "nas", "yeoman", "meters"]
 
 
 def load(path):
@@ -237,6 +237,26 @@ class ScienceAgree(unittest.TestCase):
                     self.assertIn(lesson["run"], self.runs)
 
 
+class MetersAgree(unittest.TestCase):
+    def test_meters_point_at_real_stations_and_windows(self):
+        m = load(FIX / "meters.json")
+        stations = {s["id"] for s in load(FIX / "stations.json")["stations"]}
+        windows = [w["id"] for w in m["windows"]]
+        self.assertEqual(windows, ["day", "week", "month", "all"])
+        for r in m["stations"]:
+            self.assertIn(r["station"], stations)
+        for r in m["spend"] + m["handoffs"]:
+            self.assertIn(r["window"], windows)
+        ids = [t["id"] for t in m["trials"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        for t in m["trials"]:
+            # A trial that worked has its numbers; one that failed says why.
+            self.assertEqual("ttftMs" in t, t["ok"], t["id"])
+            self.assertEqual("note" in t or t["ok"], True, t["id"])
+        for w in m["leak"]["weeks"]:
+            self.assertAlmostEqual(w["share"], round(w["leakTokens"] * 100 / w["tokens"], 1), places=1)
+
+
 class NoRealData(unittest.TestCase):
     PATTERNS = {
         "email": r"[\w.+-]+@[\w-]+\.[\w.]+",
@@ -248,8 +268,8 @@ class NoRealData(unittest.TestCase):
 
     def test_fixtures_hold_no_personal_or_secret_patterns(self):
         for path in FIX.glob("*.json"):
-            # Timestamps are expected; drop them so they don't read as phone numbers.
-            text = re.sub(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ", "", path.read_text(encoding="utf-8"))
+            # Timestamps and dates are expected; drop them so they don't read as phone numbers.
+            text = re.sub(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ|\"\d{4}-\d\d-\d\d\"", "", path.read_text(encoding="utf-8"))
             for label, pattern in self.PATTERNS.items():
                 with self.subTest(file=path.name, pattern=label):
                     self.assertIsNone(re.search(pattern, text), f"{label} in {path.name}")
