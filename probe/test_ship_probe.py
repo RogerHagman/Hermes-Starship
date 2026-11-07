@@ -161,6 +161,14 @@ class Files(unittest.TestCase):
         orders, _ = self.run_probe()
         self.assertEqual("2026-11-05T18:20:00Z", next(x for x in orders if x["id"] == "ORD-1202")["closedAt"])
 
+    def test_a_card_with_no_started_at_starts_at_its_first_run(self):
+        con = sqlite3.connect(self.d / "kanban.db")
+        con.execute("update tasks set started_at = null where id = 't_cc'")
+        con.commit()
+        con.close()
+        orders, _ = self.run_probe()
+        self.assertEqual("2026-11-05T18:10:05Z", next(x for x in orders if x["id"] == "ORD-1202")["startedAt"])
+
     def test_the_records_hold_at_most_records_keep(self):
         self.run_probe(RECORDS_KEEP="2")
         data = json.loads((self.d / "live" / "records.json").read_text())

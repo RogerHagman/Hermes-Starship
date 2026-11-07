@@ -216,8 +216,8 @@ function Terminal({ ship, all, list, query, onQuery, page, onPage, settings, sai
           {list.length > 0 && (
             <li className="thead mono" aria-hidden="true" style={css({ '--cols': colsOf(settings) })}>
               <span>ORDER</span><span>STATE</span>{settings.station === 'on' && <span className="tst">STATION</span>}<span>TITLE</span>
-              {settings.clock === 'on' && <span className="tclock">CLOCK</span>}
-              {settings.effective === 'on' && <span className="tclock">EFFECTIVE</span>}
+              {settings.clock === 'on' && <span className="tclock">TOTAL TIME</span>}
+              {settings.effective === 'on' && <span className="tclock">EFFECTIVE TIME</span>}
               {settings.dates !== 'off' && <span className="twhen">UPDATED</span>}
             </li>
           )}
@@ -259,7 +259,7 @@ function sourceWord(ship: ShipView): string {
 /** The list's grid: the columns the settings show, in their order. */
 function colsOf(s: CoreSettings): string {
   return ['74px', '86px', s.station === 'on' && '74px', 'minmax(0,1fr)', s.clock === 'on' && '92px',
-    s.effective === 'on' && '84px', s.dates !== 'off' && 'auto'].filter(Boolean).join(' ');
+    s.effective === 'on' && '100px', s.dates !== 'off' && 'auto'].filter(Boolean).join(' ');
 }
 
 function Row({ ship, o, settings, onOpen }: { ship: ShipView; o: Order; settings: CoreSettings; onOpen: (id: string) => void }) {
