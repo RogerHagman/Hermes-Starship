@@ -75,7 +75,16 @@ def table():
         f"/contents/__version__.py?ref={'a' * 40}": '__version__ = "0.2.17"\n',
         "/compare/main...holo/ORD-1251": {"commits": [{"commit": {"message": "Science labels", "committer": {"date": "2026-11-07T18:00:00Z"}}}], "files": []},
         "/pulls/31/files": [{"filename": "frontend/src/x.tsx", "additions": 1, "deletions": 0, "patch": "@@"}],
+        "/commits": [main_commit("1" * 40, "Merge pull request #31"), main_commit("2" * 40, "Holodeck legend", login="RogerHagman")],
+        f"/commits/{'1' * 40}/pulls": [{"number": 31, "merged_at": "2026-11-07T21:05:00Z", "base": {"ref": "main"}}],
+        f"/commits/{'2' * 40}/pulls": [{"number": 31, "merged_at": "2026-11-07T21:05:00Z", "base": {"ref": "main"}}],
     }
+
+
+def main_commit(sha, message, login=None, name="Holodeck Officer"):
+    return {"sha": sha, "html_url": f"{WEB}/commit/{sha}", "author": {"login": login} if login else None,
+            "commit": {"message": message, "author": {"name": name, "date": "2026-11-07T21:30:00Z"},
+                       "committer": {"date": "2026-11-07T21:30:00Z"}}}
 
 
 def probe(t):
@@ -149,6 +158,37 @@ class Cycle(unittest.TestCase):
         with tempfile.TemporaryDirectory() as out:
             holo_probe.atomic_write(out, data, "holo.json")
             self.assertNotIn("secret-value", (Path(out) / "holo.json").read_text())
+
+
+class MainWatch(unittest.TestCase):
+    def test_main_is_clean_when_every_commit_came_through_a_merged_pr(self):
+        main = probe(table())[0].cycle(NOW)["main"]
+        self.assertEqual(main, {"since": "2026-11-07T21:00:00Z", "checked": 2, "unreviewed": []})
+
+    def test_a_push_straight_to_main_is_flagged_with_its_author(self):
+        t = table()
+        t["/commits"].insert(0, main_commit("3" * 40, "Direct push\n\nbody"))
+        t[f"/commits/{'3' * 40}/pulls"] = []
+        main = probe(t)[0].cycle(NOW)["main"]
+        self.assertEqual(main["unreviewed"], [{"sha": "3" * 12, "title": "Direct push", "author": "Holodeck Officer",
+                                               "at": "2026-11-07T21:30:00Z", "url": f"{WEB}/commit/{'3' * 40}"}])
+
+    def test_an_open_or_other_base_pr_does_not_count(self):
+        t = table()
+        t["/commits"].insert(0, main_commit("4" * 40, "Sneaky"))
+        t[f"/commits/{'4' * 40}/pulls"] = [{"number": 41, "merged_at": None, "base": {"ref": "main"}},
+                                          {"number": 42, "merged_at": "2026-11-07T21:00:00Z", "base": {"ref": "other"}}]
+        self.assertEqual(len(probe(t)[0].cycle(NOW)["main"]["unreviewed"]), 1)
+
+    def test_a_cleared_commit_stops_counting_and_reviewed_ones_are_asked_once(self):
+        t = table()
+        t["/commits"].insert(0, main_commit("3" * 40, "Direct push"))
+        t[f"/commits/{'3' * 40}/pulls"] = []
+        p, fake = probe(t)
+        p.main_ok = {"3" * 12}
+        self.assertEqual(p.cycle(NOW)["main"]["unreviewed"], [])
+        p.cycle(NOW)
+        self.assertEqual(sum(f"/commits/{'1' * 40}/pulls" in r.full_url for r in fake.seen), 1)
 
 
 class PathsAgree(unittest.TestCase):

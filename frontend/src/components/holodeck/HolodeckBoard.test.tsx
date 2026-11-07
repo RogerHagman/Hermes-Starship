@@ -118,4 +118,17 @@ describe('drafts', () => {
     const c = board();
     expect(screen(c).textContent).toContain('1 READY · 1 FAILED · 1 BUILDING · SAMPLE');
   });
+
+  it('the main watch says main is clean, and lists a commit that came in without a PR', () => {
+    const c = board();
+    expect(c.querySelector('.rv-main')?.textContent).toBe('MAIN CLEAN · 6 COMMITS CHECKED, ALL THROUGH PRS');
+    cleanup();
+    const bad = { ...holo, main: { ...holo.main, unreviewed: [
+      { sha: '3333333333aa', title: 'Direct push', author: 'Holodeck Officer', at: '2026-11-07T21:30:00Z', url: holo.items[0].run!.url }] } };
+    const c2 = render(<HolodeckBoard ship={makeShipView({ ...data, holo: bad } as unknown as Fixtures, {}, new Set())} filter="all" drills={{}}
+      target={null} onTarget={noop} onBoard={noop} onToast={noop} />).container;
+    expect(c2.querySelector('.rv-main')?.textContent).toBe('MAIN · 1 WITHOUT A PR · CONDITION RED');
+    fireEvent.click(button(c2.querySelector('.holo-review') as HTMLElement, 'OPEN'));
+    expect(c2.querySelector('.rv-main-banner')?.textContent).toContain('Direct push');
+  });
 });

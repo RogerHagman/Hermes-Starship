@@ -8,7 +8,11 @@ It reads the Holodeck Officer's work from GitHub and changes nothing there (GET 
   log when a step failed;
 - the files each branch changes against main, with their diffs, each one flagged when it is
   outside the Holodeck's paths (.github/holo-paths.txt);
-- holo's report, holodeck/reports/<ORD>.md, and the version the branch bumps to.
+- holo's report, holodeck/reports/<ORD>.md, and the version the branch bumps to;
+- the main watch: every commit on main since WATCH_FROM that did not come in through a merged
+  PR. GitHub doesn't enforce rulesets on this private repo, so a push straight to main (by holo's
+  deploy key or anyone) shows here, and the boards go to CONDITION RED until it is cleared
+  (MAIN_OK lists commits the Captain has looked at).
 
 It never reads Hermes' files. Its one secret is a read-only GitHub sign-in for this repo
 (GITHUB_READ, from deploy/.env). It is sent only to api.github.com, never printed, and never
@@ -18,7 +22,8 @@ Work that is finished (merged or closed) is fetched once and kept in memory, so 
 two calls a cycle.
 
 Settings come from the environment: GITHUB_READ, REPO (owner/name), HOLO_PATHS (the paths file),
-OUT_DIR, INTERVAL (seconds; 0 runs once), KEEP_DONE (merged or closed items kept). Standard
+OUT_DIR, INTERVAL (seconds; 0 runs once), KEEP_DONE (merged or closed items kept), WATCH_FROM
+(when the main watch starts) and MAIN_OK (cleared commits, comma-separated, short or full). Standard
 library only.
 """
 import json
@@ -220,12 +225,38 @@ def pr_of(raw):
             "title": raw["title"], "sha": raw["head"]["sha"], "updatedAt": iso(raw.get("updated_at"))}
 
 
+MAIN_KEEP = 30   # the newest commits on main the watch looks at
+
+
 class Probe:
-    def __init__(self, gh, paths, keep_done=10):
+    def __init__(self, gh, paths, keep_done=10, watch_from="2026-11-07T21:00:00Z", main_ok=()):
         self.gh = gh
         self.paths = paths
         self.keep_done = keep_done
         self.done = {}   # branch -> item, for merged and closed work (it doesn't change)
+        self.watch_from = watch_from
+        self.main_ok = set(main_ok)   # commits the Captain has looked at and cleared (MAIN_OK)
+        self.via_pr = set()           # commits on main that came in through a merged PR (that doesn't change)
+
+    def main_watch(self):
+        """Commits on main since watch_from that came in without a merged PR. GitHub doesn't
+        enforce a ruleset on this private repo, so this is how a push straight to main shows."""
+        commits = self.gh.get("/commits", query={"sha": "main", "since": self.watch_from, "per_page": MAIN_KEEP})
+        unreviewed = []
+        for c in commits:
+            sha = c["sha"]
+            if sha in self.via_pr or sha[:12] in self.main_ok or sha in self.main_ok:
+                continue
+            pulls = self.gh.get(f"/commits/{sha}/pulls")
+            if any(p.get("merged_at") and p.get("base", {}).get("ref") == "main" for p in pulls):
+                self.via_pr.add(sha)
+                continue
+            info = c["commit"]
+            unreviewed.append({"sha": sha[:12], "title": info["message"].splitlines()[0][:200],
+                               "author": ((c.get("author") or {}).get("login") or info.get("author", {}).get("name") or "unknown")[:80],
+                               "at": iso(info.get("committer", {}).get("date")) or iso(info.get("author", {}).get("date")),
+                               "url": c["html_url"]})
+        return {"since": self.watch_from, "checked": len(commits), "unreviewed": unreviewed}
 
     def cycle(self, now):
         branches = [b for b in self.gh.get("/branches", query={"per_page": 100}) if b["name"].startswith("holo/")]
@@ -248,7 +279,7 @@ class Probe:
         open_items = sorted([i for i in items if i["state"] not in ("merged", "closed")], key=lambda i: i["updatedAt"], reverse=True)
         finished = sorted([i for i in items if i["state"] in ("merged", "closed")], key=lambda i: i["updatedAt"], reverse=True)
         return {"asOf": utc_stamp(now), "synthetic": False, "repo": self.gh.repo,
-                "items": (open_items + finished[:self.keep_done])[:ITEMS_KEEP]}
+                "items": (open_items + finished[:self.keep_done])[:ITEMS_KEEP], "main": self.main_watch()}
 
 
 def atomic_write(out_dir, data, name):
@@ -276,7 +307,8 @@ def main():
     except ValueError:
         interval = 120
     probe = Probe(GitHub(env.get("REPO", "RogerHagman/Hermes-Starship"), signin),
-                  read_paths(env.get("HOLO_PATHS", "/app/holo-paths.txt")), int(env.get("KEEP_DONE", "10")))
+                  read_paths(env.get("HOLO_PATHS", "/app/holo-paths.txt")), int(env.get("KEEP_DONE", "10")),
+                  env.get("WATCH_FROM", "2026-11-07T21:00:00Z"), [x.strip() for x in env.get("MAIN_OK", "").split(",") if x.strip()])
     said = None
     while True:
         if signin:

@@ -177,6 +177,10 @@ services:
       OUT_DIR: /out
       INTERVAL: "120"
       KEEP_DONE: "10"
+      # The main watch flags commits on main since this time that came in without a merged PR.
+      WATCH_FROM: "2026-11-07T21:00:00Z"
+      # Commits you have looked at and cleared (comma-separated, short sha is fine), from deploy/.env.
+      MAIN_OK: ${MAIN_OK:-}
     volumes:
       - ./live:/out
       - ../.github/holo-paths.txt:/app/holo-paths.txt:ro

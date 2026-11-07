@@ -1,5 +1,6 @@
 // Board title, condition lamp and the ship's clock.
 import { useEffect, useState } from 'react';
+import { mainAlert } from '../lib/review';
 import type { BoardId } from '../lib/board';
 import { clockTime, dateLine } from '../lib/format';
 import type { ShipView } from '../lib/ship';
@@ -76,7 +77,9 @@ const BOARD_TEXT: Record<BoardId, { deck: string; title: string; intro: string }
 
 export function Header({ ship, board, error }: { ship: ShipView | null; board: BoardId; error: string | null }) {
   const anyOut = ship ? RAIL_IDS.some((r) => ship.rail(r) === 'out') : false;
-  const level = anyOut ? 'yellow' : ship?.data.ship.condition ?? 'green';
+  // A commit on main without a merged PR outranks everything: GitHub doesn't enforce main's rules here.
+  const alert = ship ? mainAlert(ship.data) : null;
+  const level = alert ? 'red' : anyOut ? 'yellow' : ship?.data.ship.condition ?? 'green';
   const name = ship ? `${ship.data.ship.name.toUpperCase()} · ${ship.data.ship.registry}` : 'HERMES';
   const text = BOARD_TEXT[board];
   const conn = ship?.data.ship.captain.conn === 'captain';
@@ -97,8 +100,8 @@ export function Header({ ship, board, error }: { ship: ShipView | null; board: B
             {conn ? 'YOU HAVE THE CONN' : 'NUMBER ONE HAS THE CONN'}
           </span>
         )}
-        <div className={`condition ${level}`} title={anyOut ? 'A rail is out, so its crew are off duty' : 'All rails up'}>
-          <span className="lamp" /><span className="mono">CONDITION {level.toUpperCase()}</span>
+        <div className={`condition ${level}`} title={alert ?? (anyOut ? 'A rail is out, so its crew are off duty' : 'All rails up')}>
+          <span className="lamp" /><span className="mono">CONDITION {level.toUpperCase()}{alert ? ' · MAIN' : ''}</span>
         </div>
         <Clock />
         {ship && <Sources board={board} ship={ship} />}

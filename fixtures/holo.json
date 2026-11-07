@@ -399,5 +399,10 @@
       ],
       "report": "# ORD-9022 · Meter labels under the bars\n\n**What changed:** each meter's label sits under its bar instead of beside it."
     }
-  ]
+  ],
+  "main": {
+    "since": "2026-11-07T21:00:00Z",
+    "checked": 6,
+    "unreviewed": []
+  }
 }
