@@ -1,6 +1,6 @@
 // The task clock on an order: ticks each second while the order is open, stops when it closes.
 import { useEffect, useState } from 'react';
-import { clockNow, taskClock } from '../lib/clock';
+import { clockNow, taskClock, type Clock } from '../lib/clock';
 import type { ShipView } from '../lib/ship';
 import type { Order } from '../types';
 
@@ -23,11 +23,8 @@ export function TaskClock({ ship, order, className = 'taskclock', short = false,
 }) {
   const clock = useClock(ship, order);
   if (!clock) return null;
-  // The worked time alone, for the terminal's EFFECTIVE column: a dash when no card was claimed.
-  if (effective) {
-    return <span className={`${className} ${clock.effective ? clock.kind : 'done'}`}
-      title={clock.effective ? `Effective: worked ${clock.effective}` : 'No card was claimed'}>{clock.effective ?? '–'}</span>;
-  }
+  // The effective time alone, for the terminal's EFFECTIVE column: always a duration.
+  if (effective) return <span className={`${className} ${clock.kind}`} title={EFFECTIVE_WHY[clock.effectiveFrom]}>{clock.effective}</span>;
   return (
     <span className={`${className} ${clock.kind}`} title={short ? clock.text : clock.kind === 'done'
       ? 'Task clock: from the order coming in to it closing'
@@ -48,21 +45,14 @@ export function ClockRow({ ship, order }: { ship: ShipView; order: Order }) {
   return (
     <>
       <div><dt>CLOCK</dt><dd><span className={cls} title="From the order coming in to now, or to its close">{clock.main}</span></dd></div>
-      <div><dt>EFFECTIVE</dt><dd>{clock.effective
-        ? <span className={cls} title="From a crew member starting on it (the first card claimed) to now, or to its close">{clock.effective}</span>
-        : <span className="taskclock done" title={noStartWhy(order)}>{noStartWord(order)}</span>}</dd></div>
+      <div><dt>EFFECTIVE</dt><dd><span className={cls} title={EFFECTIVE_WHY[clock.effectiveFrom]}>{clock.effective}</span></dd></div>
     </>
   );
 }
 
-/** What EFFECTIVE says when there is no start time: no card at all, a card not yet claimed, or a card with no start on file. */
-export function noStartWord(o: Order): string {
-  if (!o.cards) return o.state === 'done' ? 'no card' : 'not started';
-  return o.state === 'queued' ? 'not started' : 'no start time';
-}
-
-function noStartWhy(o: Order): string {
-  if (!o.cards) return 'No card was filed: answered in chat, or not picked up yet';
-  if (o.state === 'queued') return 'The card is waiting for a crew member to claim it';
-  return 'The card has no start time on file (the ship probe writes it from the card’s started_at)';
-}
+/** Where the effective time comes from, for its tooltip. */
+const EFFECTIVE_WHY: Record<Clock['effectiveFrom'], string> = {
+  start: 'Effective: from a crew member starting on it (the first card claimed) to now, or to its close',
+  waiting: 'Effective: 0 s, no crew member has started on it yet',
+  whole: 'Effective: the whole clock, no card start on file (answered in chat, or the card has no start time)',
+};
