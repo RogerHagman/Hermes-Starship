@@ -126,16 +126,14 @@ describe('computer core', () => {
     expect(facts).toContain('TOOK 8 MIN');
     expect(facts).toContain('CARDS1');
   });
-  it('an order with no speed word says the station\'s default speed was used: Impulse, unless the station has its own', () => {
-    const plain = { ...data, orders: { ...data.orders, orders: data.orders.orders.map((o) => (o.id === 'ORD-9008' ? { ...o, speed: undefined } : o)) } };
+  it('an order with no speed word says the station\'s default speed was used: its own, else Impulse', () => {
+    const plain = { ...data, orders: { ...data.orders, orders: data.orders.orders.map((o) => (['ORD-9008', 'ORD-9010'].includes(o.id) ? { ...o, speed: undefined } : o)) } };
     const c = board(plain as Fixtures);
-    type(c, 'ORD-9008');
+    type(c, 'ORD-9008');   // the Yeoman runs at Thrusters
+    expect(screen(c).querySelector('.tfacts')!.textContent).toContain('SPEEDThrusters · default');
+    fireEvent.click([...screen(c).querySelectorAll('.con-back')].find((b) => b.textContent === '‹ Records')!);
+    type(c, 'ORD-9010');   // Cartography has no default of its own
     expect(screen(c).querySelector('.tfacts')!.textContent).toContain('SPEEDImpulse · default');
-    cleanup();
-    const own = { ...plain, stations: { ...data.stations, stations: data.stations.stations.map((s) => (s.id === 'yeoman' ? { ...s, defaultSpeed: 'Thrusters' } : s)) } };
-    const c2 = board(own as Fixtures);
-    type(c2, 'ORD-9008');
-    expect(screen(c2).querySelector('.tfacts')!.textContent).toContain('SPEEDThrusters · default');
   });
   it('the order log opens a record by its number', () => {
     const c = board();
