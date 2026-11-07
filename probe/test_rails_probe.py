@@ -1,4 +1,5 @@
 """Tests for the rails probe. Run: python -m unittest discover -s probe"""
+import base64
 import json
 import os
 import sys
@@ -66,7 +67,114 @@ class Codex(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             rail = rails_probe.codex_rail(d, NOW)
         self.assertEqual([], rail["meters"])
-        self.assertIn("No Codex window record found", rail["note"])
+        self.assertIn("no Codex log has a window record", rail["note"])
+
+
+def jwt(exp, account="acct-1"):
+    def part(obj):
+        return base64.urlsafe_b64encode(json.dumps(obj).encode()).decode().rstrip("=")
+    return ".".join([part({"alg": "none"}), part({"exp": exp, "https://api.openai.com/auth": {"chatgpt_account_id": account}}), "sig"])
+
+
+class CodexUsage(unittest.TestCase):
+    USAGE = {"plan_type": "plus", "rate_limit": {"allowed": True, "limit_reached": False,
+             "primary_window": {"used_percent": 31, "limit_window_seconds": 18000, "reset_after_seconds": 9000, "reset_at": 1793847600},
+             "secondary_window": {"used_percent": 4, "limit_window_seconds": 604800, "reset_after_seconds": 500000, "reset_at": 1794452400}}}
+
+    def hermes(self, d, tokens_exp=None, pool_exp=None):
+        store = {"providers": {}, "credential_pool": {}}
+        if tokens_exp is not None:
+            store["providers"]["openai-codex"] = {"tokens": {"access_token": jwt(tokens_exp), "refresh_token": "r"}}
+        if pool_exp is not None:
+            store["credential_pool"]["openai-codex"] = [{"id": "x", "access_token": jwt(pool_exp, "acct-2")}]
+        Path(d, "auth.json").write_text(json.dumps(store))
+        return d
+
+    def answer(self, payload):
+        class Answer:
+            def __enter__(self):
+                return self
+            def __exit__(self, *a):
+                return False
+            def read(self, *a):
+                return json.dumps(payload).encode()
+        return Answer()
+
+    def test_the_usage_answer_wins_over_an_old_log(self):
+        with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as logs:
+            Path(logs, "s.jsonl").write_text(record("2026-11-04T10:00:00Z", 0, 1, 53, 1794452400))
+            gauge = rails_probe.CodexGauge(self.hermes(d, tokens_exp=NOW.timestamp() + 3600))
+            with patch.object(rails_probe, "urlopen", return_value=self.answer(self.USAGE)) as call:
+                rail = rails_probe.codex_rail(logs, NOW, gauge)
+        request = call.call_args[0][0]
+        self.assertEqual(rails_probe.CODEX_USAGE_URL, request.full_url)
+        self.assertEqual("GET", request.get_method())
+        self.assertEqual("acct-1", request.get_header("Chatgpt-account-id"))
+        self.assertEqual([("window", 31), ("week", 4)], [(m["id"], m["percent"]) for m in rail["meters"]])
+        self.assertEqual(["2026-11-05T03:00:00Z", "2026-11-12T03:00:00Z"], [m["resetsAt"] for m in rail["meters"]])
+        self.assertNotIn("Old reading", rail["note"])
+
+    def test_windows_are_named_by_their_length(self):
+        only_week = {"rate_limit": {"primary_window": {"used_percent": 7, "limit_window_seconds": 604800, "reset_at": 1794452400}}}
+        self.assertEqual([("week", "Week", 7)], [(m["id"], m["label"], m["percent"]) for m in rails_probe.codex_meters(only_week, NOW)])
+
+    def test_the_freshest_unexpired_token_is_used(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.hermes(d, tokens_exp=NOW.timestamp() - 10, pool_exp=NOW.timestamp() + 600)
+            profile = Path(d, "profiles", "forge")
+            profile.mkdir(parents=True)
+            Path(profile, "auth.json").write_text(json.dumps({"providers": {"openai-codex": {"tokens": {"access_token": jwt(NOW.timestamp() + 9000, "acct-3")}}}}))
+            token, why = rails_probe.codex_signin(d, NOW)
+        self.assertEqual("acct-3", rails_probe.jwt_claims(token)["https://api.openai.com/auth"]["chatgpt_account_id"])
+
+    def test_an_expired_signin_is_not_used_and_the_old_log_says_so(self):
+        with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as logs:
+            Path(logs, "s.jsonl").write_text(record("2026-11-04T10:00:00Z", 20, 1794452400, 53, 1794452400))
+            gauge = rails_probe.CodexGauge(self.hermes(d, tokens_exp=1000))
+            with patch.object(rails_probe, "urlopen") as call:
+                rail = rails_probe.codex_rail(logs, NOW, gauge)
+        call.assert_not_called()
+        self.assertEqual([20, 53], [m["percent"] for m in rail["meters"]])
+        self.assertIn("Old reading", rail["note"])
+        self.assertIn("expired", rail["note"])
+
+    def test_a_refused_ask_never_logs_the_token(self):
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.CodexGauge(self.hermes(d, tokens_exp=NOW.timestamp() + 3600))
+            token, _ = rails_probe.codex_signin(d, NOW)
+            from urllib.error import HTTPError
+            refused = HTTPError(rails_probe.CODEX_USAGE_URL, 401, "Unauthorized", {}, None)
+            with patch.object(rails_probe, "urlopen", side_effect=refused), patch.object(rails_probe, "log") as logged:
+                rail = rails_probe.codex_rail(d, NOW, gauge)
+        self.assertIn("OpenAI answered 401", rail["note"])
+        self.assertNotIn(token, " ".join(str(c) for c in logged.call_args_list) + json.dumps(rail))
+
+    def test_a_full_window_is_out(self):
+        full = json.loads(json.dumps(self.USAGE))
+        full["rate_limit"]["primary_window"]["used_percent"] = 100
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.CodexGauge(self.hermes(d, tokens_exp=NOW.timestamp() + 3600))
+            with patch.object(rails_probe, "urlopen", return_value=self.answer(full)):
+                self.assertEqual("out", rails_probe.codex_rail(d, NOW, gauge)["state"])
+
+    def test_the_file_with_codex_meters_matches_the_schema(self):
+        import jsonschema
+        schema = json.loads((ROOT / "api/schema/rails.schema.json").read_text())
+        with tempfile.TemporaryDirectory() as d:
+            gauge = rails_probe.CodexGauge(self.hermes(d, tokens_exp=NOW.timestamp() + 3600))
+            with patch.object(rails_probe, "urlopen", return_value=self.answer(self.USAGE)):
+                reading = rails_probe.build_reading("http://localhost:9", 24, d, "/nonexistent", NOW, codex=gauge)
+        jsonschema.validate(reading, schema)
+        self.assertEqual(2, len(reading["rails"][1]["meters"]))
+
+    def test_the_signin_file_is_never_written(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.hermes(d, tokens_exp=NOW.timestamp() + 3600)
+            before = Path(d, "auth.json").stat().st_mtime_ns, Path(d, "auth.json").read_bytes()
+            gauge = rails_probe.CodexGauge(d)
+            with patch.object(rails_probe, "urlopen", return_value=self.answer(self.USAGE)):
+                gauge.read(NOW)
+            self.assertEqual(before, (Path(d, "auth.json").stat().st_mtime_ns, Path(d, "auth.json").read_bytes()))
 
 
 class Local(unittest.TestCase):

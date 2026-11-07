@@ -4,8 +4,10 @@
 Read-only. It looks at three things and changes none of them:
 - Local: one GET to Ollama's /api/ps (which models are loaded, and their VRAM). Nothing else
   is ever asked of Ollama, so no model runs.
-- Codex: the newest Codex session logs, for the last 5-hour and weekly window use they record.
-  Only the few newest files are opened, and only their rate-limit records are read.
+- Codex: the ChatGPT account's 5-hour and weekly use, asked from OpenAI at most every 5 minutes
+  with the Codex sign-in Hermes already keeps in its auth.json (the same answer as Codex's
+  /status). The sign-in is only read: never written, refreshed, copied or logged. No model runs.
+  If that fails, the newest Codex CLI session logs, marked as an old reading when they are.
 - Claude: the account's 5-hour and weekly use, asked from Anthropic at most every 5 minutes
   with the sign-in Claude Code already keeps (the same answer as Claude Code's usage screen).
   The sign-in file is only read: never written, refreshed, copied or logged. No model runs.
@@ -19,10 +21,12 @@ The file has the shape of api/schema/rails.schema.json, with "synthetic": false.
 atomically (a temp file, then a rename), so the page never reads half a file. A missing source
 never stops the probe: that rail shows what it can and the probe logs one line.
 
-Settings come from the environment: OLLAMA_URL, VRAM_GB, CODEX_SESSIONS, BURN_FILE,
-CLAUDE_SIGNIN (the .credentials.json Claude Code keeps), CLAUDE_EVERY (seconds between asks),
+Settings come from the environment: OLLAMA_URL, VRAM_GB, CODEX_SESSIONS, CODEX_SIGNIN (Hermes'
+data folder, read-only), BURN_FILE,
+CLAUDE_SIGNIN (the .credentials.json Claude Code keeps), CLAUDE_EVERY (seconds between asks, both providers),
 OUT_DIR and INTERVAL (seconds; 0 runs once). Standard library only.
 """
+import base64
 import json
 import os
 import sys
@@ -141,21 +145,34 @@ def newest_rate_limits(sessions_dir):
     return newest
 
 
-def codex_rail(sessions_dir, now):
+LOG_FRESH = 15 * 60   # a log record older than this is shown with its time, as an old reading
+
+
+def codex_rail(sessions_dir, now, gauge=None):
+    """The Codex windows: OpenAI's usage answer first, else the newest Codex session log."""
     rail = {"id": "codex", "label": "Codex", "engine": "codex top, mid and small models", "host": "cloud",
             "state": "up", "meters": [], "note": "Port nacelle. Engineering and food scans."}
-    found = newest_rate_limits(sessions_dir)
-    if found is None:
-        rail["note"] += " No Codex window record found."
-        log("codex: no rate-limit record found")
-        return rail
-    _, primary, secondary = found
-    for meter_id, label, window in (("window", "5 h window", primary), ("week", "Week", secondary)):
-        reset = datetime.fromtimestamp(float(window["resets_at"]), UTC)
-        used = 0 if reset <= now else percent(window["used_percent"])   # a passed reset starts at 0
-        rail["meters"].append({"id": meter_id, "label": label, "percent": used, "resetsAt": utc_stamp(reset)})
-        if used >= 100:
-            rail["state"] = "out"
+    meters, why = gauge.read(now) if gauge else ([], "not set up")
+    if meters:
+        rail["meters"] = [dict(m) for m in meters]
+        rail["note"] += " The whole ChatGPT account, as Codex's /status shows it."
+    else:
+        found = newest_rate_limits(sessions_dir)
+        if found is None:
+            rail["note"] = f"Not measured right now: {why or 'no fresh answer'}, and no Codex log has a window record."
+            log("codex: no usage answer and no rate-limit record found")
+            return rail
+        at, primary, secondary = found
+        for meter_id, label, window in (("window", "5 h window", primary), ("week", "Week", secondary)):
+            reset = datetime.fromtimestamp(float(window["resets_at"]), UTC)
+            used = 0 if reset <= now else percent(window["used_percent"])   # a passed reset starts at 0
+            rail["meters"].append({"id": meter_id, "label": label, "percent": used, "resetsAt": utc_stamp(reset)})
+        if (now - at).total_seconds() > LOG_FRESH:
+            stamp = at.astimezone(ZoneInfo("Europe/Stockholm")).strftime("%a %H:%M")
+            rail["note"] = (f"Old reading, from the last Codex log ({stamp}): Codex use through Hermes writes no log. "
+                            f"OpenAI's usage answer: {why or 'none yet'}.")
+    if any(m["percent"] >= 100 for m in rail["meters"]):
+        rail["state"] = "out"
     return rail
 
 
@@ -203,15 +220,26 @@ def usage_meters(payload, now):
     return meters
 
 
-class ClaudeGauge:
-    """Asks Anthropic for the Claude usage at most every `every` seconds, and keeps the last answer."""
+class UsageGauge:
+    """Asks a provider for the account's usage at most every `every` seconds, and keeps the last answer.
+
+    A subclass names the provider (`name`, `url`, `user_agent`) and says how to find the sign-in
+    (`credentials`) and read the answer (`meters_from`). The sign-in is only read, never renewed.
+    """
+    name, provider, url, user_agent = "usage", "the provider", "", "hermes-starship-rails-probe"
 
     def __init__(self, signin, every=CLAUDE_EVERY):
         self.signin, self.every = signin, every
-        self.wait = every         # seconds until the next ask; longer after Anthropic says "too many"
+        self.wait = every         # seconds until the next ask; longer after the provider says "too many"
         self.asked_at = None      # when we last asked (monotonic seconds)
         self.meters, self.got_at = [], None   # the last good answer and when it came (datetime)
         self.why = "not asked yet"
+
+    def credentials(self, now):   # (headers, "") or (None, why)
+        raise NotImplementedError
+
+    def meters_from(self, payload, now):   # the meters, or None for an answer of unknown shape
+        raise NotImplementedError
 
     def read(self, now, clock=time.monotonic):
         if self.asked_at is None or clock() - self.asked_at >= self.wait:
@@ -227,32 +255,156 @@ class ClaudeGauge:
         return self.meters, self.why
 
     def ask(self, now):
-        token, why = signin_token(self.signin, now)
-        if token is None:
+        headers, why = self.credentials(now)
+        if headers is None:
             self.why = why
-            log(f"claude usage: {why}")
+            log(f"{self.name} usage: {why}")
             return
-        request = Request(USAGE_URL, method="GET", headers={
-            "Authorization": f"Bearer {token}", "anthropic-beta": "oauth-2025-04-20",
-            "Accept": "application/json", "User-Agent": "hermes-starship-rails-probe"})
+        request = Request(self.url, method="GET", headers={
+            **headers, "Accept": "application/json", "User-Agent": self.user_agent})
         try:
             with urlopen(request, timeout=8) as response:
-                meters = usage_meters(json.load(response), now)
+                meters = self.meters_from(json.load(response), now)
         except HTTPError as exc:          # the status only: never the request, which holds the token
-            self.why = f"Anthropic answered {exc.code}"
+            self.why = f"{self.provider} answered {exc.code}"
             if exc.code == 429:           # asked too often: wait three times as long before the next ask
                 self.wait = self.every * 3
-            log(f"claude usage unavailable: HTTP {exc.code}")
+            log(f"{self.name} usage unavailable: HTTP {exc.code}")
             return
         except (OSError, ValueError) as exc:
-            self.why = "Anthropic did not answer"
-            log(f"claude usage unavailable: {type(exc).__name__}")
+            self.why = f"{self.provider} did not answer"
+            log(f"{self.name} usage unavailable: {type(exc).__name__}")
             return
         if meters is None:
-            self.why = "Anthropic's answer has a shape the probe doesn't know"
-            log("claude usage: unexpected answer")
+            self.why = f"{self.provider}'s answer has a shape the probe doesn't know"
+            log(f"{self.name} usage: unexpected answer")
             return
         self.meters, self.got_at, self.why, self.wait = meters, now, "", self.every
+
+
+class ClaudeGauge(UsageGauge):
+    """The Claude account's 5 h and weekly use, from Anthropic, with Claude Code's sign-in."""
+    name, provider, url = "claude", "Anthropic", USAGE_URL
+
+    def credentials(self, now):
+        token, why = signin_token(self.signin, now)
+        if token is None:
+            return None, why
+        return {"Authorization": f"Bearer {token}", "anthropic-beta": "oauth-2025-04-20"}, ""
+
+    def meters_from(self, payload, now):
+        return usage_meters(payload, now)
+
+
+# ---------- Codex: OpenAI's usage answer ----------
+
+CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage"   # what Codex's /status and Hermes' /usage ask
+CODEX_WINDOWS = {18000: ("window", "5 h window"), 604800: ("week", "Week")}   # by limit_window_seconds
+CODEX_POSITIONS = (("primary_window", "window", "5 h window"), ("secondary_window", "week", "Week"))
+
+
+def jwt_claims(token):
+    """The claims of a JWT, without checking its signature (only its expiry and account are read)."""
+    try:
+        part = token.split(".")[1]
+        return json.loads(base64.urlsafe_b64decode(part + "=" * (-len(part) % 4)))
+    except (AttributeError, IndexError, ValueError, TypeError):
+        return {}
+
+
+def codex_tokens(store):
+    """Every Codex access token in one sign-in file: Hermes' auth.json (its openai-codex sign-in and
+    credential pool) or the Codex CLI's own auth.json."""
+    if not isinstance(store, dict):
+        return []
+    found = []
+    providers = store.get("providers")
+    state = providers.get("openai-codex") if isinstance(providers, dict) else None
+    for tokens in (state.get("tokens") if isinstance(state, dict) else None, store.get("tokens")):
+        if isinstance(tokens, dict):
+            found.append(tokens.get("access_token"))
+    pool = store.get("credential_pool")
+    entries = pool.get("openai-codex") if isinstance(pool, dict) else None
+    if isinstance(entries, list):
+        found += [e.get("access_token") for e in entries if isinstance(e, dict)]
+    return [t for t in found if isinstance(t, str) and t.count(".") == 2]
+
+
+def codex_signin(hermes_dir, now):
+    """The freshest unexpired Codex access token Hermes keeps, or (None, why). Files are only read."""
+    root = Path(hermes_dir)
+    files = [root / "auth.json", *sorted(root.glob("profiles/*/auth.json")), root / "home" / ".codex" / "auth.json"]
+    best, best_exp, seen = None, 0.0, False
+    for path in files:
+        try:
+            with path.open("r", encoding="utf-8") as handle:
+                tokens = codex_tokens(json.load(handle))
+        except (OSError, ValueError):
+            continue
+        for token in tokens:
+            seen = True
+            try:
+                exp = float(jwt_claims(token).get("exp") or 0)
+            except (TypeError, ValueError):
+                continue
+            if exp > now.timestamp() and exp > best_exp:
+                best, best_exp = token, exp
+    if best:
+        return best, ""
+    if seen:
+        return None, "the Codex sign-in has expired and waits for Hermes to renew it"
+    return None, "no Codex sign-in found in Hermes' auth.json"
+
+
+def codex_meters(payload, now):
+    """The meters from OpenAI's usage answer, or None if it doesn't have the shape we know."""
+    limits = payload.get("rate_limit") if isinstance(payload, dict) else None
+    if not isinstance(limits, dict):
+        return None
+    meters = {}
+    for key, meter_id, label in CODEX_POSITIONS:
+        window = limits.get(key)
+        if not isinstance(window, dict) or window.get("used_percent") is None:
+            continue
+        try:   # name the window by its length; the answer puts the week first when it is the only one
+            meter_id, label = CODEX_WINDOWS.get(int(window.get("limit_window_seconds")), (meter_id, label))
+        except (TypeError, ValueError):
+            pass
+        reset = None
+        try:
+            if window.get("reset_at") is not None:
+                reset = datetime.fromtimestamp(float(window["reset_at"]), UTC)
+            elif window.get("reset_after_seconds") is not None:
+                reset = now + timedelta(seconds=float(window["reset_after_seconds"]))
+        except (TypeError, ValueError, OverflowError, OSError):
+            reset = None
+        used = 0 if reset and reset <= now else percent(window["used_percent"])   # a passed reset starts at 0
+        meter = {"id": meter_id, "label": label, "percent": used}
+        if reset:
+            meter["resetsAt"] = utc_stamp(reset)
+        meters.setdefault(meter_id, meter)
+    if not meters:
+        return None
+    return [meters[i] for i in ("window", "week") if i in meters]
+
+
+class CodexGauge(UsageGauge):
+    """The ChatGPT account's Codex windows, from OpenAI, with the sign-in Hermes keeps for forge."""
+    name, provider, url = "codex", "OpenAI", CODEX_USAGE_URL
+    user_agent = "codex-cli"   # the same as Hermes' own /usage ask
+
+    def credentials(self, now):
+        token, why = codex_signin(self.signin, now)
+        if token is None:
+            return None, why
+        headers = {"Authorization": f"Bearer {token}"}
+        account = jwt_claims(token).get("https://api.openai.com/auth") or {}
+        if isinstance(account, dict) and isinstance(account.get("chatgpt_account_id"), str):
+            headers["ChatGPT-Account-ID"] = account["chatgpt_account_id"]
+        return headers, ""
+
+    def meters_from(self, payload, now):
+        return codex_meters(payload, now)
 
 
 def claude_rail(gauge, burn_file, now):
@@ -339,7 +491,7 @@ class RailLog:
 
 # ---------- the file ----------
 
-def build_reading(ollama_url, vram_gb, codex_sessions, burn_file, now=None, claude=None):
+def build_reading(ollama_url, vram_gb, codex_sessions, burn_file, now=None, claude=None, codex=None):
     now = now or datetime.now(UTC)
     local_state, vram = read_ollama(ollama_url, vram_gb)
     return {
@@ -349,7 +501,7 @@ def build_reading(ollama_url, vram_gb, codex_sessions, burn_file, now=None, clau
             {"id": "local", "label": "Local", "engine": "qwen 27B on Ollama", "host": "gpu-host",
              "state": local_state, "meters": [{"id": "vram", "label": "VRAM", "percent": vram}],
              "note": "Warp core. Rule 0 data stays here."},
-            codex_rail(codex_sessions, now),
+            codex_rail(codex_sessions, now, codex),
             claude_rail(claude, burn_file, now),
         ],
     }
@@ -383,12 +535,13 @@ def main():
     except ValueError:
         every = CLAUDE_EVERY
     claude = ClaudeGauge(env("CLAUDE_SIGNIN", "/data/claude/.credentials.json"), max(every, 60))
+    codex = CodexGauge(env("CODEX_SIGNIN", "/data/hermes"), max(every, 60))
     out_dir = env("OUT_DIR", ".")
     rail_log = RailLog(out_dir)
     while True:
         reading = build_reading(env("OLLAMA_URL", ""), env("VRAM_GB", "24"),
                                 env("CODEX_SESSIONS", "/data/codex-sessions"), env("BURN_FILE", "/data/burn.json"),
-                                claude=claude)
+                                claude=claude, codex=codex)
         atomic_write(out_dir, reading)
         if rail_log.note(reading) or not rail_log.path.exists():
             atomic_write(out_dir, rail_log.file(datetime.now(UTC)), RAIL_LOG)
