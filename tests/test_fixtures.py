@@ -13,7 +13,7 @@ import jsonschema
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "fixtures"
 SCHEMA = ROOT / "api" / "schema"
-NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops", "nas"]
+NAMES = ["stations", "rails", "orders", "shiplog", "ship", "quarters", "raillog", "sensors", "engineering", "science", "ops", "nas", "yeoman"]
 
 
 def load(path):
@@ -292,6 +292,28 @@ class OpsAgree(unittest.TestCase):
         # Ops knows the network, but addresses stay out of the repo.
         text = (FIX / "ops.json").read_text()
         self.assertNotRegex(text, r"\b(10|172|192)\.\d+\.\d+\.\d+\b")
+
+
+class YeomanAgree(unittest.TestCase):
+    """The Yeoman's sample list: ids that never look real, and sample orders only."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.y = load(FIX / "yeoman.json")
+
+    def test_ids_unique_and_in_the_900s(self):
+        ids = [x["id"] for key in ("todos", "reminders", "waiting", "recurring", "done") for x in self.y[key]]
+        self.assertEqual(len(ids), len(set(ids)))
+        for i in ids:
+            with self.subTest(id=i):
+                self.assertRegex(i, r"-9\d\d$")
+
+    def test_source_orders_are_samples(self):
+        for key in ("todos", "reminders", "waiting", "recurring", "done"):
+            for x in self.y[key]:
+                if "sourceOrd" in x:
+                    with self.subTest(id=x["id"]):
+                        self.assertTrue(x["sourceOrd"].startswith("ORD-9"))
 
 
 if __name__ == "__main__":

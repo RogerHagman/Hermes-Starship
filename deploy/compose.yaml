@@ -1,7 +1,7 @@
 # Hermes Starship · the boards, plus three read-only probes that keep live/ fresh: the rails probe
 # (live/rails.json, and live/rail-log.json, when each rail went out or came back), the ship
-# probe (live/orders.json, live/shiplog.json and live/records.json, from Hermes' order log and
-# Kanban cards) and the Ops probe (live/nas.json, the NAS's own memory, CPU, temperature and disks).
+# probe (live/orders.json, live/shiplog.json, live/records.json and live/yeoman.json, from Hermes'
+# order log, Kanban cards and the Yeoman's files) and the Ops probe (live/nas.json, the NAS's own memory, CPU, temperature and disks).
 # nginx serves static files (about 10 MB of RAM). The probe is read-only towards Hermes and
 # writes only deploy/live/. No model runs: its one Ollama call is GET /api/ps, and its one
 # Anthropic call asks for the Claude usage (at most every 5 minutes).
@@ -84,6 +84,7 @@ services:
       INTERVAL: "60"
       DAYS: "7"
       RECORDS_KEEP: "1000"
+      YEOMAN_DIR: /hermes/yeoman
     volumes:
       - ${HERMES_DATA_HOST:-/DATA/AppData/hermes}:/hermes:ro
       - ../fixtures/stations.json:/srv/fixtures/stations.json:ro

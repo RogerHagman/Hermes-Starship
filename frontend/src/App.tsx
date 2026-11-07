@@ -16,6 +16,7 @@ import { SensorsBoard } from './components/sensors/SensorsBoard';
 import { EngineeringBoard } from './components/engineering/EngineeringBoard';
 import { OpsBoard } from './components/ops/OpsBoard';
 import { ComputerBoard } from './components/computer/ComputerBoard';
+import { YeomanBoard } from './components/yeoman/YeomanBoard';
 import { ScienceBoard } from './components/science/ScienceBoard';
 import { SideRail, type RailFilter } from './components/SideRail';
 import { useFit, useFullscreenKey } from './lib/fit';
@@ -107,6 +108,10 @@ export function App() {
             )}
             {ship && board === 'computer' && (
               <ComputerBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
+                onBoard={goBoard} onToast={showToast} />
+            )}
+            {ship && board === 'yeoman' && (
+              <YeomanBoard ship={ship} filter={filter} drills={drills} target={target} onTarget={setTarget}
                 onBoard={goBoard} onToast={showToast} />
             )}
             {ship && board === 'science' && (

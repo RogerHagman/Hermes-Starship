@@ -210,7 +210,7 @@
       "rank": "po",
       "dept": "command",
       "deck": 2,
-      "profile": "yeoman (not created)",
+      "profile": "yeoman",
       "aliases": [
         "yeoman",
         "todo",
@@ -224,7 +224,7 @@
       ],
       "head": false,
       "duty": "Keeps the captain's todos, reminders, waiting-for list and recurring dates.",
-      "note": "Approved, not built. Sits at the captain's door.",
+      "note": "Sits at the captain's door: its post is on Deck 2. Code keeps the times and fires the reminders; the model never decides when.",
       "activeOrder": null
     },
     {

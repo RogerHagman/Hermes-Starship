@@ -1,0 +1,230 @@
+/* Hermes Starship · the Yeoman's post (Deck 2), by the Captain's door.
+   Yeoman teal (--yeo) for the room, on warm dark surfaces. The four boxes keep one colour each,
+   everywhere on this board: Do first green, Schedule blue, Delegate amber, Don't do red. The kinds
+   keep theirs: todo gold, reminder teal, waiting amber, recurring periwinkle. Text stays in text ink;
+   a colour only ever marks a box or a kind, next to its word. Reuses the Quarters layout. */
+
+.board-yeoman{
+  --bg:#07090b;
+  --surface:#0f1416;
+  --surface-raised:#151c1f;
+  --surface-selected:#1d2c2c;
+  --border:#22302f;
+  --border-strong:#36504c;
+  --text:#ecf2ef;
+  --text-label:#adbfba;
+  --text-muted:#9cada8;
+  --lcars-frame:#7fd8c0;
+  --lcars-dark:#0f1a19;
+  --focus:#d6f6ec;
+  --yeo:#7fd8c0;
+}
+html:has(.board-yeoman) body{background-color:#07090b;background-image:var(--stars), radial-gradient(1400px 800px at 30% 20%, rgba(127,216,192,.08), transparent 70%)}
+.board-btn.yeoman:not([aria-current]):not(.not-built){border-left-color:#7fd8c0}
+
+/* one colour per kind, then per box (a box wins where both are set) */
+.yk-todo{--pc:#e8c37a}
+.yk-reminder{--pc:#3fc1a5}
+.yk-waiting{--pc:#f5a83a}
+.yk-recurring{--pc:#8fa8e0}
+.yb-first{--pc:#8fd14f}
+.yb-schedule{--pc:#5aa7f0}
+.yb-delegate{--pc:#f5a83a}
+.yb-drop{--pc:#f0605a}
+.ypill{display:inline-block;padding:1px 7px;border-radius:99px;border:1px solid var(--pc);color:var(--pc);font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;line-height:1.5;white-space:nowrap}
+.ylate{display:inline-block;margin-left:8px;padding:0 6px;border-radius:99px;background:color-mix(in srgb, var(--bad) 18%, transparent);border:1px solid var(--bad);color:var(--bad);font-size:9px;letter-spacing:.08em;vertical-align:2px}
+
+/* ---------- the room ---------- */
+.yeo-pic{background:#07090b}
+.yeo-pic .spot-label{border-color:rgba(127,216,192,.45)}
+.yeo-pic .spot:hover .spot-label,.yeo-pic .spot:focus-visible .spot-label{border-color:var(--yeo);background:rgba(12,24,22,.94)}
+.yeo-pic .spot-meta{color:var(--yeo)}
+.yeo-pic .spot[aria-pressed="true"] .spot-label{background:var(--yeo);border-color:var(--yeo);color:#05110e}
+.yeo-pic .spot[aria-pressed="true"] .spot-meta{color:#05110e}
+.yeo-pic .yspot-door .spot-label{border-color:rgba(232,195,122,.5)}
+.yeo-pic .yspot-door .spot-meta{color:var(--captain)}
+.yeo-pic .yspot-door:hover .spot-label,.yeo-pic .yspot-door:focus-visible .spot-label{border-color:var(--captain);background:rgba(42,34,20,.94)}
+.room-art .y-hl{opacity:0;transition:opacity .25s ease}
+.yeo-pic[data-on="clock"] #y-hl-clock,.yeo-pic[data-on="calendar"] #y-hl-calendar,.yeo-pic[data-on="waiting"] #y-hl-waiting,
+.yeo-pic[data-on="chime"] #y-hl-chime,.yeo-pic[data-on="done"] #y-hl-done,.yeo-pic[data-on="intray"] #y-hl-intray,
+.yeo-pic[data-on="desk"] #y-hl-desk{opacity:.55}
+.yeo-pic[data-hot="clock"] #y-hl-clock,.yeo-pic[data-hot="calendar"] #y-hl-calendar,.yeo-pic[data-hot="waiting"] #y-hl-waiting,
+.yeo-pic[data-hot="chime"] #y-hl-chime,.yeo-pic[data-hot="done"] #y-hl-done,.yeo-pic[data-hot="intray"] #y-hl-intray,
+.yeo-pic[data-hot="desk"] #y-hl-desk,.yeo-pic[data-hot="door"] #y-hl-door,.yeo-pic[data-hot="bridge"] #y-hl-bridge{opacity:1}
+.room-art .y-lamp{animation:qarm 3.2s ease-in-out infinite}
+/* The clock's hand turns while the Yeoman's timer beats, and stops when it goes quiet. */
+.room-art .y-hand{animation:yhand 60s linear infinite}
+@keyframes yhand{to{transform:rotate(360deg)}}
+.yeo-pic[data-beat="stale"] .room-art .y-hand,.yeo-pic[data-beat="unknown"] .room-art .y-hand{animation:none}
+.yeo-pic[data-beat="stale"] .room-art .y-hand *{stroke:var(--bad);fill:var(--bad)}
+/* The bell rings when a reminder fires within the hour. */
+.room-art .y-ring{opacity:0;transition:opacity .4s ease}
+.yeo-pic[data-ring="on"] .room-art .y-ring{animation:yring 1.4s ease-in-out infinite}
+@keyframes yring{0%,100%{opacity:.25}50%{opacity:1}}
+/* A late flag on the pigeonholes while something you wait for is past its nudge. */
+.yeo-pic[data-late="off"] .room-art .y-late{opacity:0}
+.yeo-pic[data-late="on"] .room-art .y-late{animation:ylate 1.8s steps(2, jump-none) infinite}
+@keyframes ylate{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ---------- the matrix on the desk ---------- */
+.ymatrix-board{position:absolute;padding:8px 10px}
+.ymb-cols{list-style:none;margin:0;padding:0;height:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ymb-cols li{min-width:0}
+.ymb-box{width:100%;height:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) auto;align-items:start;gap:2px 6px;padding:6px 10px;
+  border-radius:7px;border:1px solid color-mix(in srgb, var(--pc) 40%, transparent);border-top:3px solid var(--pc);background:rgba(5,9,9,.66);color:var(--text);cursor:pointer;text-align:left}
+.ymb-box:hover{border-color:var(--pc)}
+.ymb-box:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.ymb-box[aria-pressed="true"]{background:color-mix(in srgb, var(--pc) 22%, rgba(5,9,9,.9));border-color:var(--pc)}
+.ymb-name{font-family:var(--font-display);font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ymb-n{grid-row:1;grid-column:2;font-family:var(--font-display);font-weight:600;font-size:30px;line-height:1}
+.ymb-rule{grid-column:1 / -1;align-self:end;font-size:8px;line-height:1.35;letter-spacing:.08em;color:var(--pc)}
+
+/* ---------- the wall screen ---------- */
+.yeo-screen{background:linear-gradient(180deg, rgba(13,22,21,.98), rgba(6,10,10,.98)) !important}
+.yeo-screen .linkish{color:var(--yeo);text-decoration-color:color-mix(in srgb, var(--yeo) 40%, transparent)}
+.yeo-screen .linkish:hover{color:#dcfbf2}
+.yeo-screen .con-icon svg{stroke:var(--yeo)}
+.ynote{margin:0;font-size:13px;line-height:1.45;color:var(--text-muted)}
+.ysec{display:flex;flex-direction:column;gap:6px}
+
+/* the list: four boxes */
+.ymatrix{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px}
+.yquad{min-height:0;display:flex;flex-direction:column;border-radius:10px;background:var(--surface-raised);border:1px solid var(--border);border-top:3px solid var(--pc);overflow:hidden}
+.yq-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:0 8px;padding:6px 12px 3px;border:none;background:transparent;color:var(--text);text-align:left;cursor:pointer}
+.yq-head:hover{background:color-mix(in srgb, var(--pc) 10%, transparent)}
+.yq-name{font-family:var(--font-display);font-weight:600;font-size:15px}
+.yq-n{grid-row:1 / span 2;grid-column:2;align-self:center;font-family:var(--font-display);font-weight:600;font-size:24px;line-height:1}
+.yq-rule{font-size:8.5px;letter-spacing:.08em;color:var(--pc)}
+.yq-list{list-style:none;margin:0;padding:0 6px 4px;flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.yq-none{padding:4px 6px;font-size:12px;color:var(--text-muted)}
+.yq-item{width:100%;display:flex;flex-direction:column;gap:0;padding:3px 6px;border:none;border-radius:6px;background:transparent;color:var(--text);text-align:left;cursor:pointer}
+.yq-item:hover,.yq-item:focus-visible{background:color-mix(in srgb, var(--pc) 9%, var(--surface-selected));outline:none}
+.yq-item:focus-visible{box-shadow:inset 2px 0 0 var(--pc)}
+.yq-text{font-size:13.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yq-why{font-size:10px;letter-spacing:.02em;color:var(--text-label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* rows: one box, reminders, waiting, recurring */
+.yroute{margin:0;padding:8px 12px;border-radius:8px;background:var(--surface-raised);border-left:3px solid var(--pc);font-size:13px;line-height:1.45}
+.yroute b{font-size:9.5px;letter-spacing:.08em;color:var(--pc);font-weight:500}
+.yrows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.yrow{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:8px 12px;border:none;border-radius:9px;border-left:3px solid var(--pc, var(--yeo));
+  background:var(--surface-raised);color:var(--text);text-align:left;cursor:pointer}
+.yrow:hover,.yrow:focus-visible{background:var(--surface-selected);outline:none}
+.yrow.snoozed{opacity:.7;border-left-style:dashed}
+.yrow.late{background:color-mix(in srgb, var(--bad) 8%, var(--surface-raised))}
+.yr-text{font-family:var(--font-display);font-weight:600;font-size:14.5px;min-width:0}
+.yr-when{font-size:9.5px;letter-spacing:.06em;color:var(--text-label);white-space:nowrap;padding-top:3px}
+.yr-why{grid-column:1 / -1;font-size:12.5px;line-height:1.4;color:var(--text-muted)}
+
+/* one item */
+.yfacts{margin:0;display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:6px 14px;padding:10px 12px;border-radius:8px;background:var(--surface-raised);border:1px solid var(--border)}
+.yfacts div{min-width:0}
+.yfacts dt{font-size:9px;letter-spacing:.08em;color:var(--text-label)}
+.yfacts dd{margin:2px 0 0;font-size:12px;color:var(--text);display:flex;flex-wrap:wrap;gap:4px 8px}
+.ystory{display:flex;flex-direction:column;gap:3px}
+.ystory .cb-head{color:var(--yeo)}
+.ystory p{margin:0;font-size:14px;line-height:1.45}
+
+/* the next 48 hours: dots on a line, reminders above, todo dues below */
+.y48{gap:12px}
+.yline{position:relative;padding:4px 34px 0 22px;border-radius:10px;background:#050909;border:1px solid color-mix(in srgb, var(--yeo) 18%, transparent)}
+.yl-lane{position:relative;height:30px}
+.yl-axis{position:relative;height:0;border-top:1px solid color-mix(in srgb, var(--text-label) 45%, transparent)}
+.yl-tick{position:absolute;top:-4px;width:1px;height:8px;background:color-mix(in srgb, var(--text-label) 50%, transparent)}
+.yl-tick.end{top:-7px;height:14px;background:var(--yeo)}
+.yl-labels{position:relative;height:22px}
+.yl-when{position:absolute;top:6px;transform:translateX(-50%);font-size:8.5px;letter-spacing:.05em;color:var(--text-label);white-space:nowrap}
+.yl-when.now,.yl-when.edge{color:var(--yeo)}
+.ydot{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;padding:0;border-radius:50%;border:none;background:var(--pc);box-shadow:0 0 0 2px #050909;cursor:pointer}
+.ydot.snoozed{background:#050909;box-shadow:inset 0 0 0 2px var(--pc), 0 0 0 2px #050909}
+.ydot:hover,.ydot:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.yl-lane.up .ydot{top:auto;bottom:6px;margin-top:0}
+.yl-lane.down .ydot{top:6px;margin-top:0}
+.yl-lane.up .ydot::after{content:"";position:absolute;left:5.5px;top:12px;width:1px;height:6px;background:color-mix(in srgb, var(--pc) 60%, transparent)}
+.yl-lane.down .ydot::after{content:"";position:absolute;left:5.5px;bottom:12px;width:1px;height:6px;background:color-mix(in srgb, var(--pc) 60%, transparent)}
+.ymarks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.ymark{width:100%;display:grid;grid-template-columns:86px 92px minmax(0,1fr) auto;gap:10px;align-items:center;padding:5px 8px;border:none;border-radius:7px;background:transparent;color:var(--text);text-align:left;cursor:pointer;font-size:13.5px}
+.ymark:hover,.ymark:focus-visible{background:var(--surface-raised);outline:none}
+.ymark time{font-size:10px;color:var(--text-label)}
+.ym-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ym-until{font-size:10px;color:var(--text-label);white-space:nowrap}
+
+/* the timer's proof */
+.ybeat{margin:0;display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:color-mix(in srgb, var(--good) 8%, var(--surface-raised));border:1px solid color-mix(in srgb, var(--good) 35%, transparent);font-size:10px;letter-spacing:.06em;color:var(--text)}
+.yb-lamp{width:8px;height:8px;border-radius:50%;background:var(--good);animation:qarm 2s ease-in-out infinite}
+.ybeat.stale{background:color-mix(in srgb, var(--bad) 10%, var(--surface-raised));border-color:color-mix(in srgb, var(--bad) 45%, transparent)}
+.ybeat.stale .yb-lamp{background:var(--bad);animation:none}
+.ybeat.unknown{background:var(--surface-raised);border-color:var(--border);color:var(--text-muted)}
+
+/* the done log */
+.ydone{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;overflow:auto;min-height:0}
+.yd-row{width:100%;display:grid;grid-template-columns:86px 82px minmax(0,1fr) auto;gap:10px;align-items:center;padding:5px 8px;border:none;border-radius:7px;background:transparent;color:var(--text);text-align:left;cursor:pointer;font-size:13.5px}
+.yd-row:hover,.yd-row:focus-visible{background:var(--surface-raised);outline:none}
+.yd-row time{font-size:10px;color:var(--text-label)}
+.yd-how{justify-self:start;padding:1px 7px;border-radius:99px;border:1px solid var(--hw);color:var(--hw);font-size:9px;letter-spacing:.08em}
+.yd-row{--hw:var(--text-label)}
+.yd-row.yh-ticked{--hw:var(--good)}
+.yd-row.yh-fired{--hw:#3fc1a5}
+.yd-row.yh-arrived{--hw:#f5a83a}
+.yd-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yh-cancelled .yd-text{color:var(--text-muted);text-decoration:line-through;text-decoration-color:color-mix(in srgb, var(--text-muted) 60%, transparent)}
+.yd-kind{font-size:9px;letter-spacing:.07em;color:var(--text-label);white-space:nowrap}
+
+/* how to say it */
+.ysay{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:8px}
+.ysay li{display:flex;flex-direction:column;gap:4px;padding:9px 12px;border-radius:9px;background:var(--surface-raised);border-left:3px solid var(--yeo)}
+.ys-kind{font-size:9px;letter-spacing:.1em;color:var(--yeo)}
+.ys-say{font-size:12.5px;color:var(--text)}
+.ys-say::before{content:"“"}
+.ys-say::after{content:"”"}
+.ys-gets{font-size:12.5px;line-height:1.4;color:var(--text-muted)}
+
+/* ---------- panels ---------- */
+.ygrid .qside > .panel{padding:14px 16px}
+.ynext{display:flex;flex-direction:column;min-height:0;flex:1}
+.ynext-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;overflow:auto;min-height:0}
+.ynext-row{width:100%;display:grid;grid-template-columns:82px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:6px 10px;border:none;border-radius:8px;background:transparent;color:var(--text);text-align:left;cursor:pointer;font-size:13.5px}
+.ynext-row:hover,.ynext-row:focus-visible{background:var(--surface-raised);outline:none}
+.ynext-row time{font-size:10px;color:var(--text-label)}
+.yn-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yn-until{font-size:10px;color:var(--text-label);white-space:nowrap;min-width:64px;text-align:right}
+.ymore{align-self:flex-start;margin-top:8px;color:var(--yeo);font-size:13px;text-decoration-color:color-mix(in srgb, var(--yeo) 40%, transparent)}
+.ywait-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.ywait-row{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:1px 10px;align-items:center;padding:7px 10px;border:none;border-radius:8px;border-left:3px solid #f5a83a;background:var(--surface-raised);color:var(--text);text-align:left;cursor:pointer}
+.ywait-row:hover,.ywait-row:focus-visible{background:var(--surface-selected);outline:none}
+.ywait-row.late{border-left-color:var(--bad)}
+.yw-what{font-family:var(--font-display);font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yw-meta{grid-row:2;font-size:9.5px;letter-spacing:.06em;color:var(--text-label)}
+.ywait-row .ylate{grid-row:1 / span 2;grid-column:2}
+.ydone-panel .ydone{margin-top:10px}
+.yweek-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px;margin-top:10px}
+.ykpis{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:6px;align-content:start}
+.ykpis li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:9px;background:var(--surface-raised)}
+.yk-n{font-family:var(--font-display);font-weight:600;font-size:22px;line-height:1.1}
+.ykpis li.small .yk-n{font-size:17px}
+.yk-l{font-size:9px;letter-spacing:.07em;color:var(--text-label)}
+.ydays{list-style:none;margin:0;padding:8px 10px 6px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;min-height:120px;border-radius:10px;background:#050909;border:1px solid color-mix(in srgb, var(--yeo) 18%, transparent)}
+.ydays li{display:grid;grid-template-rows:14px minmax(0,1fr) 14px;align-items:end;justify-items:center;min-width:0}
+.yd-n{font-size:10px;color:var(--text)}
+.yd-bar{width:min(18px, 70%);height:100%;display:flex;align-items:flex-end;border-bottom:1px solid color-mix(in srgb, var(--text-label) 35%, transparent)}
+.yd-bar b{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--yeo);min-height:0}
+.ydays li:hover .yd-bar b{background:color-mix(in srgb, var(--yeo) 75%, #fff)}
+.yd-day{font-size:9px;color:var(--text-label)}
+.yd-day.today{color:var(--yeo)}
+
+/* ---------- smaller boards ---------- */
+@container board (max-width: 760px){
+  .ymb-rule{display:none}
+  .ymb-name{font-size:11px}
+  .ymb-n{font-size:18px}
+  .ymatrix{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .yfacts{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .ymark,.yd-row{grid-template-columns:76px minmax(0,1fr) auto}
+  .ymark .ypill,.yd-row .yd-how{display:none}
+  .ysay{grid-template-columns:minmax(0,1fr)}
+  .yweek-body{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion: reduce){
+  .room-art .y-hand,.room-art .y-lamp,.room-art .y-late,.yb-lamp{animation:none}
+  .yeo-pic[data-ring="on"] .room-art .y-ring{animation:none;opacity:1}
+}

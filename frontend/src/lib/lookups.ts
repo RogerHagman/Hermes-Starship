@@ -56,6 +56,7 @@ export const BOARDS: { id: string; label: string; deck?: number; phase?: string;
   { id: 'bridge',      label: 'Bridge',             deck: 1, built: true },
   { id: 'ops',         label: 'Ops',                deck: 1, built: true },
   { id: 'quarters',    label: "Captain's Quarters", deck: 2, built: true },
+  { id: 'yeoman',      label: "Yeoman's post",      deck: 2, built: true },
   { id: 'holodeck',    label: 'Holodeck',           deck: 4, built: true },
   { id: 'computer',    label: 'Computer core',      deck: 3, built: true },
   { id: 'science',     label: 'Science lab',        deck: 3, built: true },

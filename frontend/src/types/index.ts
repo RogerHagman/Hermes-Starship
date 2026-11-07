@@ -1,7 +1,7 @@
 // Friendly names for the generated fixture types.
-import type { EngineeringFile, NasFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile } from './fixtures';
+import type { EngineeringFile, NasFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, YeomanFile } from './fixtures';
 
-export type { EngineeringFile, NasFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile };
+export type { EngineeringFile, NasFile, OpsFile, OrdersFile, QuartersFile, RailLogFile, RailsFile, ScienceFile, SensorsFile, ShipFile, ShipLogFile, StationsFile, YeomanFile };
 export type Station = StationsFile['stations'][number];
 export type Rail = RailsFile['rails'][number];
 export type RailId = Rail['id'];
@@ -28,6 +28,11 @@ export type Disk = OpsFile['disks'][number];
 export type Job = OpsFile['jobs'][number];
 export type Backup = OpsFile['backups'][number];
 export type Health = Host['state'];
+export type Todo = YeomanFile['todos'][number];
+export type Reminder = YeomanFile['reminders'][number];
+export type WaitingFor = YeomanFile['waiting'][number];
+export type Recurring = YeomanFile['recurring'][number];
+export type Closed = YeomanFile['done'][number];
 
 /** Everything the boards read, one object per fixture file. */
 export interface Fixtures {
@@ -41,6 +46,8 @@ export interface Fixtures {
   engineering: EngineeringFile;
   science: ScienceFile;
   ops: OpsFile;
+  /** The Yeoman's list: the sample, or live/yeoman.json from the ship probe. */
+  yeoman: YeomanFile;
   /** live/rail-log.json from the rails probe, when there is one. Its duty lines replace the samples. */
   raillog?: RailLogFile;
   /** live/nas.json from the Ops probe, when there is one. Its NAS and disks replace the sample ones in ops. */

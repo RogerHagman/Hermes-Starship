@@ -1,0 +1,205 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "heartbeat": "2026-11-04T19:29:30Z",
+  "todos": [
+    {
+      "id": "todo-901",
+      "text": "Pay the electricity bill",
+      "addedAt": "2026-11-02T08:10:00Z",
+      "due": "2026-11-04T22:59:00Z",
+      "important": true,
+      "sourceOrd": "ORD-9001"
+    },
+    {
+      "id": "todo-902",
+      "text": "Answer the housing association",
+      "addedAt": "2026-11-03T17:40:00Z",
+      "due": "2026-11-05T16:00:00Z",
+      "important": true
+    },
+    {
+      "id": "todo-903",
+      "text": "Book winter tires",
+      "addedAt": "2026-10-25T09:13:00Z",
+      "important": true
+    },
+    {
+      "id": "todo-904",
+      "text": "Plan the November training block",
+      "addedAt": "2026-11-01T10:00:00Z",
+      "due": "2026-11-09T12:00:00Z",
+      "important": true
+    },
+    {
+      "id": "todo-905",
+      "text": "Buy contact lenses before the offer ends",
+      "addedAt": "2026-10-25T09:13:00Z",
+      "due": "2026-11-06T10:00:00Z",
+      "important": false
+    },
+    {
+      "id": "todo-906",
+      "text": "Check the NAS disk health",
+      "addedAt": "2026-11-03T20:00:00Z",
+      "due": "2026-11-05T09:00:00Z",
+      "important": false,
+      "sourceOrd": "ORD-9006"
+    },
+    {
+      "id": "todo-907",
+      "text": "Sort the cable drawer",
+      "addedAt": "2026-10-28T19:00:00Z",
+      "important": false
+    },
+    {
+      "id": "todo-908",
+      "text": "Write a cover letter for the sample job ad",
+      "addedAt": "2026-11-04T11:25:00Z",
+      "important": false,
+      "sourceOrd": "ORD-9003"
+    },
+    {
+      "id": "todo-909",
+      "text": "Look at a cheaper phone plan",
+      "addedAt": "2026-10-30T12:00:00Z",
+      "important": false
+    }
+  ],
+  "reminders": [
+    {
+      "id": "rem-901",
+      "text": "Take the bins out",
+      "dueAt": "2026-11-05T06:00:00Z",
+      "status": "open",
+      "surface": "telegram"
+    },
+    {
+      "id": "rem-902",
+      "text": "Answer the housing association",
+      "dueAt": "2026-11-05T06:30:00Z",
+      "status": "snoozed",
+      "surface": "desktop"
+    },
+    {
+      "id": "rem-903",
+      "text": "Call the dentist back",
+      "dueAt": "2026-11-05T17:00:00Z",
+      "status": "open",
+      "surface": "telegram",
+      "sourceOrd": "ORD-9008"
+    },
+    {
+      "id": "rem-904",
+      "text": "Water the plants",
+      "dueAt": "2026-11-07T08:00:00Z",
+      "status": "open",
+      "surface": "telegram"
+    }
+  ],
+  "waiting": [
+    {
+      "id": "wait-901",
+      "what": "Reply about the lease",
+      "since": "2026-10-20T09:00:00Z",
+      "fromWhom": "the landlord",
+      "nudgeAfter": "2026-10-24T08:00:00Z"
+    },
+    {
+      "id": "wait-902",
+      "what": "Parcel from the hardware store",
+      "since": "2026-10-22T14:00:00Z",
+      "fromWhom": "the shop",
+      "nudgeAfter": "2026-11-04T08:00:00Z"
+    },
+    {
+      "id": "wait-903",
+      "what": "Quote for the winter tires",
+      "since": "2026-11-02T10:00:00Z",
+      "fromWhom": "the tire shop",
+      "nudgeAfter": "2026-11-06T08:00:00Z"
+    }
+  ],
+  "recurring": [
+    {
+      "id": "rec-901",
+      "text": "Pay the rent",
+      "rule": "monthly:25",
+      "nextDue": "2026-11-25T08:00:00Z",
+      "surface": "telegram"
+    },
+    {
+      "id": "rec-902",
+      "text": "Weigh-in, then tell the Quartermaster",
+      "rule": "weekly:sun",
+      "nextDue": "2026-11-08T07:00:00Z",
+      "surface": "telegram"
+    },
+    {
+      "id": "rec-903",
+      "text": "The burn window opens",
+      "rule": "weekly:wed 10:00",
+      "nextDue": "2026-11-11T09:00:00Z",
+      "surface": "desktop"
+    },
+    {
+      "id": "rec-904",
+      "text": "Car insurance renewal",
+      "rule": "yearly:11-01",
+      "nextDue": "2027-11-01T08:00:00Z",
+      "surface": "telegram"
+    }
+  ],
+  "done": [
+    {
+      "id": "rem-905",
+      "kind": "reminder",
+      "text": "Take the bins out",
+      "closedAt": "2026-11-04T06:00:09Z",
+      "how": "fired"
+    },
+    {
+      "id": "todo-910",
+      "kind": "todo",
+      "text": "Renew the parking permit",
+      "closedAt": "2026-11-04T12:10:00Z",
+      "how": "ticked"
+    },
+    {
+      "id": "rem-906",
+      "kind": "reminder",
+      "text": "Stand-up notes for Helm",
+      "closedAt": "2026-11-03T08:00:04Z",
+      "how": "fired",
+      "sourceOrd": "ORD-9003"
+    },
+    {
+      "id": "wait-904",
+      "kind": "waiting",
+      "text": "Refund from the optician",
+      "closedAt": "2026-11-03T15:20:00Z",
+      "how": "arrived"
+    },
+    {
+      "id": "todo-911",
+      "kind": "todo",
+      "text": "Sort the receipts",
+      "closedAt": "2026-11-02T18:00:00Z",
+      "how": "cancelled"
+    },
+    {
+      "id": "todo-912",
+      "kind": "todo",
+      "text": "Book the car service",
+      "closedAt": "2026-11-02T10:00:00Z",
+      "how": "ticked"
+    },
+    {
+      "id": "rec-905",
+      "kind": "recurring",
+      "text": "Pay the rent",
+      "closedAt": "2026-10-25T08:00:02Z",
+      "how": "fired"
+    }
+  ]
+}

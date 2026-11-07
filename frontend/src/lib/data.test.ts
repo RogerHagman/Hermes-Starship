@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { loadLiveOrders, loadLiveRails, loadLiveRecords, loadLiveShipLog, nasSource, railsSource, withLive, withLiveNas, withLiveOrders } from './data';
-import type { Fixtures, NasFile, OrdersFile, ShipLogFile } from '../types';
+import { loadLiveOrders, loadLiveRails, loadLiveRecords, loadLiveShipLog, loadLiveYeoman, nasSource, railsSource, withLive, withLiveNas, withLiveOrders } from './data';
+import type { Fixtures, NasFile, OrdersFile, ShipLogFile, YeomanFile } from '../types';
 
 const live = { asOf: '2026-11-05T09:00:00Z', synthetic: false, rails: [] };
 
@@ -154,5 +154,26 @@ describe('live NAS readings', () => {
     const b = await base();
     expect(withLiveNas(b, null)).toBe(b);
     expect(nasSource(b)).toBe('sample');
+  });
+});
+
+describe("the Yeoman's live list", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const list = { asOf: '2026-11-07T00:10:00Z', synthetic: false, todos: [], reminders: [], waiting: [], recurring: [], done: [] } as YeomanFile;
+
+  it('reads live/yeoman.json only when it is real and has all five lists', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(list))));
+    expect(await loadLiveYeoman()).toEqual(list);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ ...list, done: undefined }))));
+    expect(await loadLiveYeoman()).toBeNull();
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })));
+    expect(await loadLiveYeoman()).toBeNull();
+  });
+  it('replaces the sample list, and leaves it when there is none', async () => {
+    const sample = (await import('../../../fixtures/yeoman.json')).default as unknown as YeomanFile;
+    const b = { yeoman: sample } as unknown as Fixtures;
+    const none = { rails: null, raillog: null, orders: null, shiplog: null };
+    expect(withLive(b, { ...none, yeoman: list }).yeoman).toBe(list);
+    expect(withLive(b, none).yeoman).toBe(sample);
   });
 });
