@@ -1,0 +1,149 @@
+{
+  "asOf": "2026-11-04T19:30:00Z",
+  "synthetic": true,
+  "events": [
+    {
+      "id": "ev-907",
+      "title": "Parents' evening at school",
+      "start": "2026-11-03T16:30:00Z",
+      "end": "2026-11-03T18:00:00Z",
+      "place": "Lidk\u00f6ping",
+      "kind": "personal"
+    },
+    {
+      "id": "ev-901",
+      "title": "Dentist",
+      "start": "2026-11-05T08:00:00Z",
+      "end": "2026-11-05T08:45:00Z",
+      "place": "Lidk\u00f6ping",
+      "kind": "appointment",
+      "sourceOrd": "ORD-9005"
+    },
+    {
+      "id": "ev-902",
+      "title": "Gym \u00b7 intervals",
+      "start": "2026-11-05T16:00:00Z",
+      "end": "2026-11-05T17:00:00Z",
+      "kind": "personal"
+    },
+    {
+      "id": "ev-903",
+      "title": "First call \u00b7 Falk\u00f6ping Fiber",
+      "start": "2026-11-06T09:00:00Z",
+      "end": "2026-11-06T09:30:00Z",
+      "kind": "work"
+    },
+    {
+      "id": "ev-904",
+      "title": "Train to G\u00f6teborg",
+      "start": "2026-11-07T06:12:00Z",
+      "end": "2026-11-07T08:05:00Z",
+      "kind": "travel",
+      "sourceOrd": "ORD-9018"
+    },
+    {
+      "id": "ev-905",
+      "title": "Hold: tire change",
+      "start": "2026-11-09T13:00:00Z",
+      "end": "2026-11-09T14:00:00Z",
+      "place": "Lidk\u00f6ping",
+      "kind": "hold"
+    },
+    {
+      "id": "ev-908",
+      "title": "Car service",
+      "start": "2026-11-10T07:30:00Z",
+      "end": "2026-11-10T09:00:00Z",
+      "place": "Lidk\u00f6ping",
+      "kind": "appointment"
+    }
+  ],
+  "trips": [
+    {
+      "id": "trip-902",
+      "title": "Commute options, Thursday",
+      "from": "Lidk\u00f6ping",
+      "to": "Skara",
+      "depart": "2026-11-05T05:40:00Z",
+      "status": "planned",
+      "sourceOrd": "ORD-9004",
+      "legs": [
+        {
+          "mode": "bus",
+          "from": "Lidk\u00f6ping",
+          "to": "Skara",
+          "depart": "2026-11-05T05:40:00Z",
+          "arrive": "2026-11-05T06:25:00Z"
+        }
+      ]
+    },
+    {
+      "id": "trip-901",
+      "title": "Weekend in G\u00f6teborg",
+      "from": "Lidk\u00f6ping",
+      "to": "G\u00f6teborg",
+      "depart": "2026-11-07T06:12:00Z",
+      "back": "2026-11-08T16:00:00Z",
+      "status": "planned",
+      "sourceOrd": "ORD-9018",
+      "legs": [
+        {
+          "mode": "train",
+          "from": "Lidk\u00f6ping",
+          "to": "Herrljunga",
+          "depart": "2026-11-07T06:12:00Z",
+          "arrive": "2026-11-07T06:45:00Z"
+        },
+        {
+          "mode": "train",
+          "from": "Herrljunga",
+          "to": "G\u00f6teborg",
+          "depart": "2026-11-07T06:58:00Z",
+          "arrive": "2026-11-07T08:05:00Z"
+        }
+      ]
+    },
+    {
+      "id": "trip-903",
+      "title": "Christmas at the coast",
+      "from": "Lidk\u00f6ping",
+      "to": "Sm\u00f6gen",
+      "depart": "2026-12-23T09:00:00Z",
+      "status": "idea"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "bk-902",
+      "what": "Train tickets to G\u00f6teborg and back",
+      "when": "2026-11-07T06:12:00Z",
+      "where": "SJ",
+      "status": "held",
+      "heldUntil": "2026-11-05T19:00:00Z",
+      "sourceOrd": "ORD-9018"
+    },
+    {
+      "id": "bk-901",
+      "what": "Tire change",
+      "when": "2026-11-09T13:00:00Z",
+      "where": "The tire shop, Lidk\u00f6ping",
+      "status": "held",
+      "heldUntil": "2026-11-05T11:00:00Z"
+    },
+    {
+      "id": "bk-903",
+      "what": "Dentist",
+      "when": "2026-11-05T08:00:00Z",
+      "where": "Lidk\u00f6ping",
+      "status": "confirmed",
+      "sourceOrd": "ORD-9005"
+    },
+    {
+      "id": "bk-904",
+      "what": "Hotel in G\u00f6teborg, one night",
+      "when": "2026-11-07T14:00:00Z",
+      "where": "G\u00f6teborg",
+      "status": "released"
+    }
+  ]
+}

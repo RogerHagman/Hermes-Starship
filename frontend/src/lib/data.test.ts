@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { loadLiveOrders, loadLiveRails, loadLiveRecords, loadLiveShipLog, loadLiveYeoman, nasSource, railsSource, withLive, withLiveNas, withLiveOrders } from './data';
-import type { Fixtures, NasFile, OrdersFile, ShipLogFile, YeomanFile } from '../types';
+import { loadLiveHelm, loadLiveOrders, loadLiveRails, loadLiveRecords, loadLiveShipLog, loadLiveYeoman, nasSource, railsSource, withLive, withLiveNas, withLiveOrders } from './data';
+import type { Fixtures, HelmFile, NasFile, OrdersFile, ShipLogFile, YeomanFile } from '../types';
 
 const live = { asOf: '2026-11-05T09:00:00Z', synthetic: false, rails: [] };
 
@@ -175,5 +175,26 @@ describe("the Yeoman's live list", () => {
     const none = { rails: null, raillog: null, orders: null, shiplog: null };
     expect(withLive(b, { ...none, yeoman: list }).yeoman).toBe(list);
     expect(withLive(b, none).yeoman).toBe(sample);
+  });
+});
+
+describe("Helm's live application tracker", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const file = { asOf: '2026-11-07T00:10:00Z', synthetic: false, ads: [], applications: [], events: [] } as HelmFile;
+
+  it('reads live/helm.json only when it is real and has all three lists', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(file))));
+    expect(await loadLiveHelm()).toEqual(file);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ ...file, synthetic: true }))));
+    expect(await loadLiveHelm()).toBeNull();
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ ...file, events: undefined }))));
+    expect(await loadLiveHelm()).toBeNull();
+  });
+  it('replaces the sample tracker, and leaves it when there is none', async () => {
+    const sample = (await import('../../../fixtures/helm.json')).default as unknown as HelmFile;
+    const b = { helm: sample } as unknown as Fixtures;
+    const none = { rails: null, raillog: null, orders: null, shiplog: null };
+    expect(withLive(b, { ...none, helm: file }).helm).toBe(file);
+    expect(withLive(b, none).helm).toBe(sample);
   });
 });
