@@ -134,7 +134,7 @@ function reopen(list: YeomanFile, d: Closed) {
 /** What the Yeoman can reopen from the done log: anything but a reminder that already fired. */
 export const reopenable = (d: Closed) => !(d.kind === 'reminder' && d.how === 'fired');
 
-/** A short line for a toast or a pending tag: "Ticked off", "Marked important", ... */
+/** A short line for a toast or a pending tag: "Marked done", "Marked important", ... */
 export function actionWord(a: { op: string; value?: unknown }): string {
   switch (a.op) {
     case 'tick': return 'Marked done';
