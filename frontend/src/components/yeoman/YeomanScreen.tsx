@@ -1,15 +1,22 @@
 // The Yeoman's wall screen. One view at a time, in place: the list in its four boxes with the reason
 // each todo sits where it does, one box, one item, the next 48 hours, the reminders with the timer's
 // proof, waiting for, the recurring rules, the done log, how to say things, and the Yeoman's card.
-// Reading only: nothing here reaches Hermes. Ticking, snoozing and cancelling stay with the Yeoman.
+// Changes (tick, "!", due dates, edit, cancel, reopen, snooze, arrived, add, drag) go to the Yeoman's
+// desk (Desk.tsx); the Yeoman's own code applies them. Without the desk, the screen reads only.
 import type { ReactNode } from 'react';
 import { dayAndTime, dayLine } from '../../lib/format';
 import type { ShipView } from '../../lib/ship';
 import {
   BEAT_STALE_MIN, BOX, BOXES, HOW_WORD, KIND_WORD, PHRASES, URGENT_H, YEOMAN_ICONS, along, boxOf, findItem, heartbeat, late, matrix,
-  moveHint, next48, nowOf, overdue, ruleWords, until, when, why, type Box, type Kind, type Mark,
+  fatigued, moveHint, next48, nowOf, overdue, ruleWords, until, when, why, FATIGUE_WORD, type Box, type Kind, type Mark,
 } from '../../lib/yeoman';
+import { canWrite } from '../../lib/desk';
+import {
+  AddTodo, DoneActions, FatigueTag, PendingTag, RecurringActions, ReminderActions, StarToggle, TickBox, TodoActions, WaitingActions,
+  useBoxDrop, useDesk, useRowDrag,
+} from './Desk';
 import type { Closed, Todo } from '../../types';
+import { LOAD, OVERDUE_WEIGHT, fatigue, load } from '../../lib/yeoman';
 import { ConHead, StationDetail, useEscape } from '../ShipConsole';
 
 export type Screen =
@@ -92,33 +99,66 @@ function ListView({ ship, onScreen, onOpen }: { ship: ShipView; onScreen: (s: Sc
   const now = nowOf(ship.data);
   const m = matrix(y, now);
   const late = overdue(y, now).length;
+  const tired = fatigued(m);
+  const desk = useDesk();
   return (
     <>
       <ConHead icon={YEOMAN_ICONS.ease} title="The list · four boxes"
-        sub={`${y.todos.length} TODOS${late ? ` · ${late} OVERDUE` : ''} · URGENT: DUE WITHIN ${URGENT_H} H · IMPORTANT: YOUR "!" · ${sourceWord(ship)}`} />
+        sub={`${y.todos.length} TODOS${late ? ` · ${late} OVERDUE` : ''}${tired.length ? ` · ${FATIGUE_WORD[tired[0].level]} IN ${up(BOX[tired[0].box].name)}` : ''} · URGENT: DUE WITHIN ${URGENT_H} H · IMPORTANT: YOUR "!" · ${sourceWord(ship)}`} />
+      <div className="ylist-tools">
+        <LoadMeter m={m} now={now} />
+        <AddTodo />
+        {canWrite(desk.state) && <span className="ynote mono">TICK, STAR, OR DRAG A TODO TO ANOTHER BOX OR PLACE</span>}
+      </div>
       <div className="ymatrix" role="group" aria-label="The four boxes">
-        {BOXES.map((b) => (
-          <div key={b} className={`yquad yb-${b}`}>
-            <button type="button" className="yq-head" onClick={() => onScreen({ view: 'box', box: b })}>
-              <span className="yq-name">{BOX[b].name}</span>
-              <span className="yq-n">{m[b].length}</span>
-              <span className="yq-rule mono">{BOX[b].rule}</span>
-            </button>
-            <ol className="yq-list">
-              {m[b].length === 0 && <li className="yq-none">Nothing here.</li>}
-              {m[b].map((t) => (
-                <li key={t.id}>
-                  <button type="button" className="yq-item" onClick={() => onOpen(t.id)}>
-                    <span className="yq-text">{t.text}</span>
-                    <span className="yq-why mono">{why(t, now)}</span>
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </div>
-        ))}
+        {BOXES.map((b) => <Quad key={b} box={b} list={m[b]} now={now} onScreen={onScreen} onOpen={onOpen} />)}
       </div>
     </>
+  );
+}
+
+/** The whole list's weighted load: Do first counts 1.5, Schedule 1.25, Delegate 0.75, Don't do 0.5, overdue 2. */
+export function LoadMeter({ m, now }: { m: Record<Box, Todo[]>; now: number }) {
+  const { score, level, parts, overdue } = load(m, now);
+  const words = [...parts.map((p) => `${BOX[p.box].name} ${p.n} × ${p.weight}`), `Overdue ${overdue} × ${OVERDUE_WEIGHT}`].join(' + ');
+  return (
+    <span className={`yload mono yfat-${level}`} title={`${words} = ${score}. Amber over ${LOAD.warn}, red over ${LOAD.flag}.`}>
+      <span className="yload-bar" aria-hidden="true"><b style={{ width: `${Math.min(100, (score / LOAD.flag) * 100)}%` }} /></span>
+      LOAD {score} · {FATIGUE_WORD[level]}
+    </span>
+  );
+}
+
+function Quad({ box: b, list, now, onScreen, onOpen }: { box: Box; list: Todo[]; now: number; onScreen: (s: Screen) => void; onOpen: (id: string) => void }) {
+  const drop = useBoxDrop(b);
+  return (
+    <div className={`yquad yb-${b}${drop.over ? ' drop-over' : ''}`} data-fatigue={fatigue(list.length)} {...drop.props}>
+      <button type="button" className="yq-head" onClick={() => onScreen({ view: 'box', box: b })}>
+        <span className="yq-name">{BOX[b].name}</span>
+        <span className="yq-n">{list.length}</span>
+        <span className="yq-rule mono">{BOX[b].rule}</span>
+        <FatigueTag n={list.length} />
+      </button>
+      <ol className="yq-list">
+        {list.length === 0 && <li className="yq-none">Nothing here.</li>}
+        {list.map((t) => <QuadItem key={t.id} t={t} box={b} now={now} onOpen={onOpen} />)}
+      </ol>
+    </div>
+  );
+}
+
+function QuadItem({ t, box, now, onOpen }: { t: Todo; box: Box; now: number; onOpen: (id: string) => void }) {
+  const drag = useRowDrag(t, box);
+  const desk = useDesk();
+  return (
+    <li className={'yq-li' + (drag.over ? ' drop-before' : '') + (desk.pending.has(t.id) ? ' pending' : '') + (desk.dragging === t.id ? ' dragging' : '')} {...drag.props}>
+      <TickBox t={t} />
+      <button type="button" className="yq-item" onClick={() => onOpen(t.id)}>
+        <span className="yq-text">{t.text}</span>
+        <span className="yq-why mono">{why(t, now)}<PendingTag id={t.id} /></span>
+      </button>
+      <StarToggle t={t} />
+    </li>
   );
 }
 
@@ -131,25 +171,29 @@ function BoxView({ ship, box, onOpen, onBack }: { ship: ShipView; box: Box; onOp
     <>
       <ConHead icon={YEOMAN_ICONS.box} title={`${BOX[box].name} · ${list.length}`} back="‹ The list" onBack={onBack}
         sub={`${BOX[box].rule} · ${up(BOX[box].help)}`} />
-      <div className={`con-body ybox yb-${box}`}>
-        <p className="yroute"><b className="mono">WHAT HAPPENS · </b>{BOX[box].route}</p>
+      <div className={`con-body ybox yb-${box}`} data-fatigue={fatigue(list.length)}>
+        <p className="yroute"><b className="mono">WHAT HAPPENS · </b>{BOX[box].route}<FatigueTag n={list.length} /></p>
         {list.length === 0 && <p className="ynote">Nothing in this box right now.</p>}
         <ol className="yrows">
-          {list.map((t) => <TodoRow key={t.id} t={t} now={now} onOpen={onOpen} />)}
+          {list.map((t) => <TodoRow key={t.id} t={t} box={box} now={now} onOpen={onOpen} />)}
         </ol>
       </div>
     </>
   );
 }
 
-function TodoRow({ t, now, onOpen }: { t: Todo; now: number; onOpen: (id: string) => void }) {
+function TodoRow({ t, box, now, onOpen }: { t: Todo; box: Box; now: number; onOpen: (id: string) => void }) {
+  const drag = useRowDrag(t, box);
+  const desk = useDesk();
   return (
-    <li>
+    <li className={'yrow-li' + (drag.over ? ' drop-before' : '') + (desk.pending.has(t.id) ? ' pending' : '')} {...drag.props}>
+      <TickBox t={t} />
       <button type="button" className="yrow" onClick={() => onOpen(t.id)}>
         <span className="yr-text">{t.text}</span>
-        <span className="yr-when mono">{t.due ? `DUE ${up(when(t.due))}` : 'NO DUE DATE'}</span>
+        <span className="yr-when mono">{t.due ? `DUE ${up(when(t.due))}` : 'NO DUE DATE'}<PendingTag id={t.id} /></span>
         <span className="yr-why">{why(t, now)} {moveHint(t, now)}</span>
       </button>
+      <StarToggle t={t} />
     </li>
   );
 }
@@ -232,7 +276,7 @@ function ItemView({ ship, id, onScreen, back, onBack }: { ship: ShipView; id: st
         <div><dt>WAS</dt><dd>{up(KIND_WORD[d.kind])}</dd></div>
         {source(d.sourceOrd)}
       </>;
-      story = <Story head="ON FILE">The Yeoman's code wrote this line to the done log when it closed. Nothing on this board can reopen it.</Story>;
+      story = <Story head="ON FILE">The Yeoman's code wrote this line to the done log when it closed.</Story>;
     }
   }
   const text = found.kind === 'waiting' ? found.item.what : found.item.text;
@@ -242,7 +286,13 @@ function ItemView({ ship, id, onScreen, back, onBack }: { ship: ShipView; id: st
       <div className="con-body yitem">
         <dl className="yfacts mono"><div><dt>ID</dt><dd>{id}</dd></div>{facts}</dl>
         {story}
-        {found.kind !== 'done' && <p className="ynote">To tick it off, snooze it or drop it, tell the Yeoman in chat and name {id}. This board only reads the list.</p>}
+        <PendingTag id={id} />
+        {found.kind === 'todo' && <TodoActions key={id} t={found.item} />}
+        {found.kind === 'reminder' && <ReminderActions key={id} r={found.item} />}
+        {found.kind === 'waiting' && <WaitingActions key={id} w={found.item} />}
+        {found.kind === 'recurring' && <RecurringActions key={id} id={id} />}
+        {found.kind === 'done' && <DoneActions key={id} c={found.item} />}
+        {found.kind !== 'done' && <p className="ynote">You can also tell the Yeoman in chat and name {id}.</p>}
       </div>
     </>
   );

@@ -3,7 +3,7 @@
 // worked out the way its code does it: urgent = due within 48 hours (or past), important = the
 // Captain's "!". Every time is measured from the list's own asOf, so the page reads the same
 // whenever it is opened. The list is live/yeoman.json from the ship probe, else the sample.
-import { dayAndTime, dayKey, dayLine } from './format';
+import { dayAndTime, dayKey, dayLine, fromInputTime } from './format';
 import type { Closed, Fixtures, Recurring, Reminder, Todo, WaitingFor, YeomanFile } from '../types';
 
 export const ROOM = { w: 1600, h: 740 };
@@ -90,12 +90,92 @@ export function moveHint(t: Todo, now: number): string {
   }
 }
 
-/** The open todos in each box, the soonest due first, then the oldest. */
+/** The open todos in each box: the Captain's own order first (rank, set by dragging), then the soonest due, then the oldest. */
 export function matrix(y: YeomanFile, now: number): Record<Box, Todo[]> {
   const out: Record<Box, Todo[]> = { first: [], schedule: [], delegate: [], drop: [] };
   for (const t of y.todos) out[boxOf(t, now)].push(t);
-  for (const b of BOXES) out[b].sort((a, c) => (a.due ?? '9').localeCompare(c.due ?? '9') || a.addedAt.localeCompare(c.addedAt));
+  const rank = (t: Todo) => t.rank ?? Number.POSITIVE_INFINITY;
+  for (const b of BOXES) out[b].sort((a, c) => (rank(a) - rank(c)) || (a.due ?? '9').localeCompare(c.due ?? '9') || a.addedAt.localeCompare(c.addedAt));
   return out;
+}
+
+// ---------- task fatigue ----------
+
+/** Five words for how loaded a box (or the whole list) is. Heavy is amber, Fatigue red; the rest are calm. */
+export type Fatigue = 'clear' | 'light' | 'steady' | 'heavy' | 'fatigue';
+export const FATIGUE_WORD: Record<Fatigue, string> = { clear: 'CLEAR', light: 'LIGHT', steady: 'STEADY', heavy: 'HEAVY', fatigue: 'FATIGUE' };
+/** A box: up to 2 is light, up to 4 steady, more than FATIGUE.warn heavy (amber), more than FATIGUE.flag fatigue (red). */
+export const FATIGUE = { light: 2, warn: 4, flag: 8 };
+export const flagged = (f: Fatigue) => f === 'heavy' || f === 'fatigue';
+
+export function fatigue(n: number): Fatigue {
+  return n === 0 ? 'clear' : n <= FATIGUE.light ? 'light' : n <= FATIGUE.warn ? 'steady' : n <= FATIGUE.flag ? 'heavy' : 'fatigue';
+}
+
+/** The weighted load of the whole list: each todo counts by its box, Do first the most, Don't do the least,
+ *  and an overdue todo counts OVERDUE_WEIGHT whatever its box. The box weights average 1, so the score
+ *  reads like a count of todos (four in every box, none overdue, is 16). */
+export const LOAD_WEIGHT: Record<Box, number> = { first: 1.5, schedule: 1.25, delegate: 0.75, drop: 0.5 };
+export const OVERDUE_WEIGHT = 2;
+/** The whole list: 0 is clear, up to LOAD.light light, up to LOAD.warn steady, up to LOAD.flag heavy (amber), more is fatigue (red). */
+export const LOAD = { light: 4, warn: 8, flag: 16 };
+
+export interface Load { score: number; level: Fatigue; parts: { box: Box; n: number; weight: number }[]; overdue: number }
+
+export function load(m: Record<Box, Todo[]>, now: number): Load {
+  const late = (t: Todo) => !!t.due && Date.parse(t.due) < now;
+  const parts = BOXES.map((box) => ({ box, n: m[box].filter((t) => !late(t)).length, weight: LOAD_WEIGHT[box] }));
+  const overdue = BOXES.reduce((n, b) => n + m[b].filter(late).length, 0);
+  const score = Math.round((parts.reduce((sum, p) => sum + p.n * p.weight, 0) + overdue * OVERDUE_WEIGHT) * 100) / 100;
+  const level: Fatigue = score === 0 ? 'clear' : score <= LOAD.light ? 'light' : score <= LOAD.warn ? 'steady' : score <= LOAD.flag ? 'heavy' : 'fatigue';
+  return { score, level, parts, overdue };
+}
+
+/** The boxes that are over the line, worst first. */
+export function fatigued(m: Record<Box, Todo[]>): { box: Box; n: number; level: Fatigue }[] {
+  return BOXES.map((box) => ({ box, n: m[box].length, level: fatigue(m[box].length) }))
+    .filter((x) => flagged(x.level))
+    .sort((a, b) => b.n - a.n);
+}
+
+// ---------- moving todos on the board ----------
+
+export const URGENT_BOX: Record<Box, boolean> = { first: true, schedule: false, delegate: true, drop: false };
+export const IMPORTANT_BOX: Record<Box, boolean> = { first: true, schedule: true, delegate: false, drop: false };
+
+/** What a drop into another box changes. due: 'set' needs a date within 48 hours (one is offered),
+ *  'clear' needs the date gone or moved past 48 hours (no date is offered), null leaves it. */
+export interface DropPlan { to: Box; important: boolean | null; due: 'set' | 'clear' | null; offer: string | null }
+
+export function dropPlan(t: Todo, to: Box, now: number): DropPlan | null {
+  const from = boxOf(t, now);
+  if (from === to) return null;
+  const important = IMPORTANT_BOX[from] === IMPORTANT_BOX[to] ? null : IMPORTANT_BOX[to];
+  const u = urgent(t, now);
+  const due = URGENT_BOX[to] === u ? null : URGENT_BOX[to] ? 'set' : 'clear';
+  return { to, important, due, offer: due === 'set' ? endOfTomorrow(now) : null };
+}
+
+/** The offered due date for something made urgent: tomorrow at 23:59, ship's time. Always within 48 hours. */
+export function endOfTomorrow(now: number): string {
+  const [y, m, d] = dayKey(new Date(now)).split('-').map(Number);
+  const day = new Date(Date.UTC(y, m - 1, d + 1, 12)).toISOString().slice(0, 10);
+  return fromInputTime(`${day}T23:59`)!;
+}
+
+/** Whether a due date picked in the drop dialog lands the todo in the box it was dropped on. */
+export function dueFits(iso: string | null, to: Box, now: number): boolean {
+  const u = !!iso && Date.parse(iso) - now <= URGENT_H * HOUR;
+  return u === URGENT_BOX[to];
+}
+
+/** The new ranks for a box after a todo is placed before another one (or at the end): 10, 20, 30...
+ *  Only the todos whose rank changes are returned. */
+export function reorder(list: Todo[], moved: Todo, before: string | null): { id: string; rank: number }[] {
+  const rest = list.filter((t) => t.id !== moved.id);
+  const at = before === null ? rest.length : Math.max(0, rest.findIndex((t) => t.id === before));
+  const order = [...rest.slice(0, at), moved, ...rest.slice(at)];
+  return order.map((t, i) => ({ id: t.id, rank: (i + 1) * 10 })).filter((x, i) => order[i].rank !== x.rank);
 }
 
 // ---------- the next 48 hours ----------

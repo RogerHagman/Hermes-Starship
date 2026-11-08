@@ -282,6 +282,38 @@ class Yeoman(unittest.TestCase):
         self.assertEqual([("rem-ee01", "reminder", "fired"), ("todo-aa03", "todo", "ticked")],
                          [(d["id"], d["kind"], d["how"]) for d in data["done"]])
 
+    def test_no_inbox_means_no_desk_and_no_rank(self):
+        data = self.run_probe()
+        self.assertNotIn("desk", data)
+        self.assertNotIn("rank", data["todos"][0])
+
+    def test_rank_and_the_board_actions_from_the_inbox(self):
+        y = self.d / "yeoman"
+        (y / "todos.csv").write_text(
+            "id,added_at,text,due_at,source_ord,important,status,rank\n"
+            "todo-aa01,2026-11-04T10:00:00Z,Write the cover letter,,ORD-1232,,open,20\n"
+            "todo-aa04,2026-11-04T11:00:00Z,Book tyres,,ORD-1240,,open,x\n")
+        inbox = y / "inbox"
+        (inbox / "done").mkdir(parents=True)
+        (inbox / "b-2.json").write_text(json.dumps({"id": "b-2", "at": "2026-11-05T19:58:00Z", "op": "due", "item": "todo-aa01",
+                                                    "value": "2026-11-06T17:00:00Z", "from": "board", "extra": "dropped"}))
+        (inbox / "b-1.json").write_text(json.dumps({"id": "b-1", "at": "2026-11-05T19:57:00Z", "op": "important", "item": "todo-aa01", "value": True}))
+        (inbox / "bad.json").write_text("{not json")
+        (inbox / "odd.json").write_text(json.dumps({"id": "b-9", "at": "2026-11-05T19:57:00Z", "op": "rm -rf"}))
+        (inbox / "done" / "b-0.json").write_text(json.dumps({"id": "b-0", "at": "2026-11-05T19:50:00Z", "op": "tick", "item": "todo-aa09"}))
+        (inbox / "results.jsonl").write_text(
+            json.dumps({"id": "b-0", "op": "tick", "item": "todo-aa09", "ok": True, "applied_at": "2026-11-05T19:51:00Z"}) + "\n"
+            + "junk\n"
+            + json.dumps({"id": "b-00", "op": "edit", "item": "todo-zz", "ok": False, "error": "no such item", "applied_at": "2026-11-05T19:52:00Z"}) + "\n")
+        data = self.run_probe()
+        jsonschema.validate(data, schema("yeoman"))
+        self.assertEqual({"todo-aa01": 20}, {t["id"]: t["rank"] for t in data["todos"] if "rank" in t})
+        self.assertEqual(["b-1", "b-2"], [a["id"] for a in data["desk"]["pending"]])   # oldest first, the done/ folder left out
+        self.assertEqual({"id": "b-2", "at": "2026-11-05T19:58:00Z", "op": "due", "item": "todo-aa01", "value": "2026-11-06T17:00:00Z"},
+                         data["desk"]["pending"][1])
+        self.assertEqual([("b-00", False, "no such item"), ("b-0", True, None)],
+                         [(r["id"], r["ok"], r.get("error")) for r in data["desk"]["results"]])   # newest first
+
     def test_without_the_folder_nothing_is_written(self):
         with tempfile.TemporaryDirectory() as scratch:
             ship_probe.run_once({"ORDERS_CSV": str(self.d / "missing.csv"), "YEOMAN_DIR": str(self.d / "nope"),

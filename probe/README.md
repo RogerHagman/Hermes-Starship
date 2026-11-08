@@ -59,7 +59,11 @@ It also writes `deploy/live/yeoman.json` (schema `api/schema/yeoman.schema.json`
 own files in `yeoman/`: the Captain's open todos, reminders, waiting-fors and recurring dates, the
 newest 200 closed items from `done.csv`, and when the Yeoman's timer last beat (`.timer-heartbeat`).
 Rows whose `source_ord` says test are left out, and the `chat_id` column is never copied. The
-Yeoman's post (Deck 2) and the Captain's PADD read it.
+Yeoman's post (Deck 2) and the Captain's PADD read it. Each todo carries its `rank` (the Captain's
+own order inside a box, set by dragging) when the column has one. Once the Yeoman has its inbox
+(patch B2-45), the file also has `desk`: the board's actions still waiting in `yeoman/inbox/*.json`
+and the newest 50 results from `inbox/results.jsonl`, so the board can show what is pending and
+what the Yeoman refused.
 
 It also writes `deploy/live/helm.json` (schema `api/schema/helm.schema.json`) from Helm's
 application tracker in `helm/app-tracker/` (`HELM_DIR`): the job ads, the applications and the
@@ -181,3 +185,25 @@ work is fetched once and kept in memory, so a quiet repo costs two calls a cycle
 
 It runs as the `holo-probe` service: `python:3.12-alpine`, read-only, no capabilities, 32 MB.
 Without `GITHUB_READ` it logs one line, writes nothing, and the Review bay keeps its sample.
+
+# Yeoman's desk
+
+`yeoman_desk.py` is the one way the Yeoman board can change the Captain's list. The board posts one
+action to `/desk/action` (nginx passes POST only for `/desk/`, everything else stays GET and HEAD):
+tick, cancel, reopen, arrived, important (true/false), due (a UTC time or null), snooze (a UTC
+time), edit (the new text), rank (a number) or add ({text, important, due}). The desk checks the
+shape, drops unknown keys, and writes the action as one file, `yeoman/inbox/<id>.json`, through a
+temp file and a rename. It never opens the Yeoman's CSV files: the Yeoman's own code applies the
+inbox on its timer, within about a minute, writes `inbox/results.jsonl`, and sends the Captain one
+short Telegram line for what changed (patch B2-45 in Hermes). `GET /desk/health` says whether the
+inbox is there; the board shows "desk offline" or "waiting for the Yeoman patch" until it is, and
+reads only.
+
+A post from another site is refused (its Origin must name this host, and the body must be JSON),
+bodies are at most 8 KB, and texts at most 2000 characters. No model, no Hermes call.
+
+It runs as the `yeoman-desk` service: `python:3.12-alpine`, read-only, no capabilities, 32 MB, as
+the Yeoman's user (10000), with only `yeoman/inbox/` mounted read-write and no ports (nginx reaches
+it on the compose network). It is in the `desk` profile, so it starts only by name, and the mount
+has `create_host_path: false`, so Docker never makes the inbox as root. Start it after the patch:
+`sudo docker compose -f /DATA/AppData/hermes-starship/deploy/compose.yaml up -d yeoman-desk`.

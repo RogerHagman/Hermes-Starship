@@ -65,6 +65,10 @@
             "type": "string",
             "pattern": "^ORD-\\d{4}$",
             "description": "The order the Captain gave it in."
+          },
+          "rank": {
+            "type": "number",
+            "description": "The Captain's own order inside a box: lower sits higher. Set by dragging on the board."
           }
         }
       }
@@ -226,6 +230,106 @@
             "type": "string",
             "pattern": "^ORD-\\d{4}$",
             "description": "The order the Captain gave it in."
+          }
+        }
+      }
+    },
+    "desk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pending",
+        "results"
+      ],
+      "description": "The board's changes, once the Yeoman has its inbox (patch B2-45): what the Yeoman hasn't applied yet, and its newest results.",
+      "properties": {
+        "pending": {
+          "type": "array",
+          "description": "Actions waiting in the inbox, oldest first. The Yeoman's timer applies them within a minute.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "at",
+              "op",
+              "item"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+              },
+              "op": {
+                "enum": [
+                  "tick",
+                  "cancel",
+                  "reopen",
+                  "arrived",
+                  "important",
+                  "due",
+                  "snooze",
+                  "edit",
+                  "rank",
+                  "add"
+                ]
+              },
+              "item": {
+                "type": "string",
+                "description": "The Yeoman id, empty for add."
+              },
+              "value": {
+                "description": "What the op sets: true/false, a time, a text, a number, or {text, important, due} for add.",
+                "type": [
+                  "boolean",
+                  "number",
+                  "string",
+                  "object",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "results": {
+          "type": "array",
+          "description": "What the Yeoman did with each action, newest first.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "op",
+              "item",
+              "ok"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "op": {
+                "type": "string"
+              },
+              "item": {
+                "type": "string"
+              },
+              "ok": {
+                "type": "boolean"
+              },
+              "appliedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ$"
+              },
+              "error": {
+                "type": "string",
+                "description": "Why it was not applied."
+              }
+            }
           }
         }
       }

@@ -2,6 +2,9 @@
 
 The source may only load its own files, the fixtures and live/ (the rails probe's file). No external hosts,
 no model endpoints, no write requests. The built page must be committed and current.
+
+The one exception: lib/desk.ts, the Yeoman board's desk, may POST to desk/action (and read desk/health).
+The desk only drops the action into the Yeoman's inbox; the Yeoman's own code applies it, no model.
 """
 import re
 import unittest
@@ -11,6 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "frontend"
 SRC = WEB / "src"
 CODE = [p for p in SRC.rglob("*") if p.suffix in {".ts", ".tsx", ".css"}] + [WEB / "index.html"]
+DESK = SRC / "lib" / "desk.ts"
 
 
 class OneRule(unittest.TestCase):
@@ -37,6 +41,11 @@ class OneRule(unittest.TestCase):
                   r"EventSource", r"/v1/(chat|messages|completions|responses)", r"/api/(generate|chat|embed)", r":11434"]
         for path in CODE:
             text = path.read_text(encoding="utf-8")
+            if path == DESK:
+                # The desk's one write: a POST to desk/action, nothing else.
+                self.assertEqual(re.findall(r"method\s*:\s*['\"](\w+)", text), ["POST"])
+                self.assertEqual(sorted(set(re.findall(r"fetcher\(\s*['\"]([^'\"]+)", text))), ["desk/action", "desk/health"])
+                text = re.sub(r"method\s*:\s*['\"]POST['\"]", "", text)
             for pattern in banned:
                 with self.subTest(file=path.name, pattern=pattern):
                     self.assertIsNone(re.search(pattern, text, re.I))
