@@ -1,7 +1,7 @@
 // The Yeoman's post: the list in four boxes with the reasons, the matrix on the desk, the things in the
 // room, the doors out, and the panels that open an item on the wall screen.
-import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import ship from '../../../../fixtures/ship.json';
 import stations from '../../../../fixtures/stations.json';
 import rails from '../../../../fixtures/rails.json';
@@ -14,14 +14,14 @@ import { YeomanBoard } from './YeomanBoard';
 
 const data = { ship, stations, rails, orders, shiplog, yeoman } as unknown as Fixtures;
 const noop = () => {};
-const board = (d: Fixtures = data, onBoard: (b: string) => void = noop) => render(
-  <YeomanBoard ship={makeShipView(d, {}, new Set())} filter="all" drills={{}} target={null} onTarget={noop} onBoard={onBoard} onToast={noop} />).container;
+const board = (d: Fixtures = data, onBoard: (b: string) => void = noop, onToast: (t: string) => void = noop) => render(
+  <YeomanBoard ship={makeShipView(d, {}, new Set())} filter="all" drills={{}} target={null} onTarget={noop} onBoard={onBoard} onToast={onToast} />).container;
 const screen = (c: HTMLElement) => c.querySelector('.yeo-screen') as HTMLElement;
 const title = (c: HTMLElement) => screen(c).querySelector('.con-title')?.textContent;
 const quad = (c: HTMLElement, box: string) => screen(c).querySelector(`.yquad.yb-${box}`) as HTMLElement;
 const texts = (el: Element, sel: string) => [...el.querySelectorAll(sel)].map((x) => x.textContent);
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("the Yeoman's post", () => {
   it('the wall screen starts on the list: four boxes, each todo with the reason it sits there', () => {
@@ -113,5 +113,107 @@ describe("the Yeoman's post", () => {
     const c = board(live);
     expect(screen(c).textContent).not.toContain('SAMPLE LIST');
     expect(screen(c).textContent).toContain('LIVE · READ WED 20:30');
+  });
+});
+
+describe('changing the list from the board', () => {
+  const live = { ...data, yeoman: { ...(yeoman as unknown as YeomanFile), synthetic: false } } as Fixtures;
+  /** A desk that answers: health on, and each action accepted with the next id. */
+  const desk = (inbox = true) => {
+    const posts: { op: string; item: string; value?: unknown }[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === 'desk/health') return new Response(JSON.stringify({ inbox, pending: 0 }), { status: 200 });
+      posts.push(JSON.parse(init!.body as string));
+      return new Response(JSON.stringify({ id: `b-${posts.length}`, at: '2026-11-04T19:31:00Z' }), { status: 202 });
+    }));
+    return posts;
+  };
+  const row = (c: HTMLElement, text: string) => [...screen(c).querySelectorAll('.yq-li')].find((li) => li.textContent?.includes(text)) as HTMLElement;
+  const ready = async (c: HTMLElement) => waitFor(() => expect(c.querySelector('.room-hint')?.textContent).toContain('DESK ON'));
+
+  it('the sample list reads only: the controls show, switched off, and nothing is sent', () => {
+    const posts = desk();
+    const c = board();
+    expect(screen(c).querySelectorAll('.ytick')).toHaveLength(9);
+    expect([...screen(c).querySelectorAll<HTMLButtonElement>('.ytick, .ystar')].every((b) => b.disabled)).toBe(true);
+    expect(c.querySelector('.room-hint')?.textContent).toContain('READ ONLY');
+    expect(posts).toEqual([]);
+  });
+  it('without the inbox the desk says it waits for the Yeoman patch', async () => {
+    desk(false);
+    const c = board(live);
+    await waitFor(() => expect(c.querySelector('.room-hint')?.textContent).toContain('WAITING FOR THE YEOMAN PATCH'));
+    expect(screen(c).querySelector<HTMLButtonElement>('.ytick')!.disabled).toBe(true);
+  });
+  it('a tick goes to the desk and the todo leaves the list at once, as pending', async () => {
+    const posts = desk();
+    const toasts: string[] = [];
+    const c = board(live, noop, (t) => toasts.push(t));
+    await ready(c);
+    await act(async () => { fireEvent.click(row(c, 'Sort the cable drawer').querySelector('.ytick')!); });
+    expect(posts).toEqual([{ op: 'tick', item: 'todo-907', value: null }]);
+    await waitFor(() => expect(row(c, 'Sort the cable drawer')).toBeUndefined());
+    expect(c.querySelector('.room-hint')?.textContent).toContain('1 WITH THE YEOMAN');
+    expect(toasts[0]).toContain('Marked done');
+  });
+  it('the star flips the "!" and the todo moves box', async () => {
+    const posts = desk();
+    const c = board(live);
+    await ready(c);
+    await act(async () => { fireEvent.click(row(c, 'Sort the cable drawer').querySelector('.ystar')!); });
+    expect(posts).toEqual([{ op: 'important', item: 'todo-907', value: true }]);
+    await waitFor(() => expect(quad(c, 'schedule').textContent).toContain('Sort the cable drawer'));
+    expect(row(c, 'Sort the cable drawer').querySelector('.ypending')?.textContent).toBe('WITH THE YEOMAN');
+  });
+  it('dropping on an urgent box asks for a due date first, then sends the "!" and the date', async () => {
+    const posts = desk();
+    const c = board(live);
+    await ready(c);
+    const li = row(c, 'Sort the cable drawer');
+    fireEvent.dragStart(li, { dataTransfer: { setData: noop, getData: () => 'todo-907' } });
+    fireEvent.drop(quad(c, 'first'), { dataTransfer: { getData: () => 'todo-907' } });
+    const dialog = c.querySelector('.wall-slot .ydialog')!;
+    expect(dialog.textContent).toContain('MOVE TO DO FIRST');
+    expect(dialog.querySelector<HTMLInputElement>('input[type="datetime-local"]')!.value).toBe('2026-11-05T23:59');
+    await act(async () => { fireEvent.click([...dialog.querySelectorAll('button')].find((b) => b.textContent === 'Move')!); });
+    expect(posts).toEqual([
+      { op: 'important', item: 'todo-907', value: true },
+      { op: 'due', item: 'todo-907', value: '2026-11-05T22:59:00Z' },
+    ]);
+    await waitFor(() => expect(quad(c, 'first').textContent).toContain('Sort the cable drawer'));
+  });
+  it('an item opens with its buttons: cancel asks once before it goes', async () => {
+    const posts = desk();
+    const c = board(live);
+    await ready(c);
+    fireEvent.click(row(c, 'Sort the cable drawer').querySelector('.yq-item')!);
+    const bar = screen(c).querySelector('.yactions')!;
+    fireEvent.click([...bar.querySelectorAll('button')].find((b) => b.textContent === 'Cancel')!);
+    expect(bar.textContent).toContain('CANCEL THIS TODO?');
+    await act(async () => { fireEvent.click([...bar.querySelectorAll('button')].find((b) => b.textContent === 'Yes')!); });
+    expect(posts).toEqual([{ op: 'cancel', item: 'todo-907', value: null }]);
+  });
+  it('a new todo can be added from the list', async () => {
+    const posts = desk();
+    const c = board(live);
+    await ready(c);
+    fireEvent.click(screen(c).querySelector('.yadd-open')!);
+    fireEvent.change(screen(c).querySelector('.yadd-text')!, { target: { value: 'Buy coffee filters' } });
+    await act(async () => { fireEvent.submit(screen(c).querySelector('.yadd')!); });
+    expect(posts).toEqual([{ op: 'add', item: '', value: { text: 'Buy coffee filters', important: false, due: null } }]);
+    await waitFor(() => expect(quad(c, 'drop').textContent).toContain('Buy coffee filters'));
+  });
+  it('task fatigue: each box has its word, over 8 is red, and the load meter adds up the list', () => {
+    const many = Array.from({ length: 9 }, (_, i) => ({ id: `todo-x${i}`, text: `Extra ${i}`, addedAt: '2026-11-01T10:00:00Z', important: false }));
+    const heavy = { ...data, yeoman: { ...(yeoman as unknown as YeomanFile), todos: [...(yeoman as unknown as YeomanFile).todos, ...many] } } as Fixtures;
+    const c = board(heavy);
+    expect(quad(c, 'drop').getAttribute('data-fatigue')).toBe('fatigue');
+    expect(quad(c, 'drop').querySelector('.yfat')?.textContent).toBe('FATIGUE · OVER 8');
+    expect(quad(c, 'first').getAttribute('data-fatigue')).toBe('light');
+    expect(quad(c, 'first').querySelector('.yfat')?.textContent).toBe('LIGHT');
+    expect(screen(c).querySelector('.yload')?.textContent).toBe('LOAD 13 · HEAVY');
+    expect(c.querySelector('.room-hint')?.textContent).toContain('LOAD HEAVY');
+    expect(c.querySelector('.ymb-box.yb-drop')?.getAttribute('data-fatigue')).toBe('fatigue');
+    expect(board(data).querySelector('.yload')?.textContent).toBe('LOAD 8.5 · HEAVY');
   });
 });

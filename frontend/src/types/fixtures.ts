@@ -1111,6 +1111,10 @@ export interface YeomanFile {
      * The order the Captain gave it in.
      */
     sourceOrd?: string;
+    /**
+     * The Captain's own order inside a box: lower sits higher. Set by dragging on the board.
+     */
+    rank?: number;
   }[];
   reminders: {
     id: string;
@@ -1168,4 +1172,39 @@ export interface YeomanFile {
      */
     sourceOrd?: string;
   }[];
+  /**
+   * The board's changes, once the Yeoman has its inbox (patch B2-45): what the Yeoman hasn't applied yet, and its newest results.
+   */
+  desk?: {
+    /**
+     * Actions waiting in the inbox, oldest first. The Yeoman's timer applies them within a minute.
+     */
+    pending: {
+      id: string;
+      at: string;
+      op: "tick" | "cancel" | "reopen" | "arrived" | "important" | "due" | "snooze" | "edit" | "rank" | "add";
+      /**
+       * The Yeoman id, empty for add.
+       */
+      item: string;
+      /**
+       * What the op sets: true/false, a time, a text, a number, or {text, important, due} for add.
+       */
+      value?: boolean | number | string | {} | null;
+    }[];
+    /**
+     * What the Yeoman did with each action, newest first.
+     */
+    results: {
+      id: string;
+      op: string;
+      item: string;
+      ok: boolean;
+      appliedAt?: string;
+      /**
+       * Why it was not applied.
+       */
+      error?: string;
+    }[];
+  };
 }

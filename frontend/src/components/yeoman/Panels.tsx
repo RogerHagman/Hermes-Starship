@@ -1,9 +1,9 @@
 // The panels around the Yeoman's post: the matrix laid on the desk (a count per box), the next 48
-// hours and waiting for on the side, and the done log and the week below. Reading only.
+// hours and waiting for on the side, and the done log and the week below.
 import { dayAndTime, dayLine } from '../../lib/format';
 import type { ShipView } from '../../lib/ship';
 import {
-  BOX, BOXES, HOW_WORD, ROOM, TABLE, URGENT_H, late, matrix, next48, nowOf, pct, until, week, type Box,
+  BOX, BOXES, HOW_WORD, ROOM, TABLE, URGENT_H, fatigue, late, matrix, next48, nowOf, pct, until, week, type Box,
 } from '../../lib/yeoman';
 import { BoxPill, DoneRow, KindPill, sourceWord } from './YeomanScreen';
 import { Src } from '../Src';
@@ -18,7 +18,7 @@ export function MatrixBoard({ ship, on, onBox }: { ship: ShipView; on: Box | nul
       <ol className="ymb-cols">
         {BOXES.map((b) => (
           <li key={b}>
-            <button type="button" className={`ymb-box yb-${b}`} aria-pressed={on === b}
+            <button type="button" className={`ymb-box yb-${b}`} aria-pressed={on === b} data-fatigue={fatigue(m[b].length)}
               aria-label={`${BOX[b].name}, ${m[b].length} todos`} onClick={() => onBox(b)}>
               <span className="ymb-name">{BOX[b].name}</span>
               <span className="ymb-n">{m[b].length}</span>

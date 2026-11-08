@@ -14,7 +14,8 @@ Read-only, like the rails probe. It reads four of Hermes' own records and change
 - The station roster (fixtures/stations.json): which Hermes profile is which station.
 - The Yeoman's five files (yeoman/*.csv) and its timer heartbeat: live/yeoman.json, the Captain's
   open todos, reminders, waiting-fors and recurring dates, and the newest closed ones. Test rows
-  are left out, and a chat id is never copied.
+  are left out, and a chat id is never copied. With the inbox (patch B2-45) it also
+  carries the board's actions the Yeoman has not applied yet and its newest results.
 - Helm's application tracker (helm/app-tracker/*.csv): live/helm.json, the job ads, applications
   and what happened to them. Contact details, salary asks, ad links and file paths are never copied.
 
@@ -31,6 +32,7 @@ Standard library only.
 """
 import csv
 import json
+import math
 import os
 import re
 import shutil
@@ -470,6 +472,71 @@ def stamped(item, name, value):
     return item
 
 
+def yeoman_rank(value):
+    """The Captain's own order inside a box (the rank column), or None when it is blank or not a number."""
+    try:
+        rank = float(value)
+    except (TypeError, ValueError):
+        return None
+    return (int(rank) if rank.is_integer() else rank) if math.isfinite(rank) else None
+
+
+DESK_OPS = {"tick", "cancel", "reopen", "arrived", "important", "due", "snooze", "edit", "rank", "add"}
+DESK_PENDING_KEEP = 100
+DESK_RESULTS_KEEP = 50
+
+
+def desk_action(data):
+    """One board action, with only the fields the board needs, or None when it doesn't fit the shape."""
+    if not isinstance(data, dict) or data.get("op") not in DESK_OPS or not isinstance(data.get("id"), str):
+        return None
+    at = parse_time(data.get("at", ""))
+    if not at:
+        return None
+    out = {"id": data["id"][:40], "at": utc_stamp(at), "op": data["op"], "item": str(data.get("item") or "")[:64]}
+    value = data.get("value")
+    if isinstance(value, (bool, int, float, str)) or (isinstance(value, dict) and data["op"] == "add"):
+        out["value"] = value if not isinstance(value, str) else value[:2000]
+    return out
+
+
+def read_desk(folder):
+    """The board's actions the Yeoman hasn't applied yet (inbox/*.json), and its newest results
+    (inbox/results.jsonl), or None before the inbox exists (patch B2-45 creates it)."""
+    if not folder.is_dir():
+        return None
+    pending = []
+    for path in sorted(folder.glob("*.json")):
+        try:
+            action = desk_action(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, ValueError):
+            continue
+        if action:
+            pending.append(action)
+    pending.sort(key=lambda a: a["at"])
+    results = []
+    try:
+        lines = (folder / "results.jsonl").read_text(encoding="utf-8").splitlines()[-DESK_RESULTS_KEEP:]
+    except OSError:
+        lines = []
+    for line in lines:
+        try:
+            data = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(data, dict) or not isinstance(data.get("id"), str):
+            continue
+        item = {"id": data["id"][:40], "op": str(data.get("op", ""))[:12], "item": str(data.get("item") or "")[:64],
+                "ok": data.get("ok") is True}
+        when = parse_time(data.get("applied_at", ""))
+        if when:
+            item["appliedAt"] = utc_stamp(when)
+        if not item["ok"] and data.get("error"):
+            item["error"] = str(data["error"])[:200]
+        results.append(item)
+    return {"pending": pending[:DESK_PENDING_KEEP], "results": results[::-1]}
+
+
 def read_yeoman(folder):
     """The Yeoman's list from its five files: what is open, and the newest closed. None without the folder."""
     base = Path(folder)
@@ -481,6 +548,9 @@ def read_yeoman(folder):
         if yeoman_row(row) and row.get("id") and added:
             item = {"id": row["id"], "text": row.get("text", ""), "addedAt": utc_stamp(added),
                     "important": row.get("important", "").lower() in ("yes", "true", "1", "!")}
+            rank = yeoman_rank(row.get("rank", ""))
+            if rank is not None:
+                item["rank"] = rank
             out["todos"].append(with_ord(stamped(item, "due", first(row, "due_at", "due_utc", "due")), row))
     for row in read_rows(base / "reminders.csv"):
         due = parse_time(first(row, "due_at", "due_at_utc"))
@@ -517,6 +587,9 @@ def read_yeoman(folder):
     out["recurring"].sort(key=lambda r: r.get("nextDue") or "9999")
     out["done"].sort(key=lambda d: d["closedAt"], reverse=True)
     out["done"] = out["done"][:YEOMAN_DONE_KEEP]
+    desk = read_desk(base / "inbox")
+    if desk is not None:
+        out["desk"] = desk
     beat = base / ".timer-heartbeat"
     try:
         when = parse_time(beat.read_text(encoding="utf-8").strip()) or datetime.fromtimestamp(beat.stat().st_mtime, UTC)

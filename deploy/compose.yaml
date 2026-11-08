@@ -5,7 +5,8 @@
 # The meter probe (live/meters.json) gives the Science lab its spend, speed and leak meters; the
 # speed-trial service, run by hand, times the local rail.
 # nginx serves static files (about 10 MB of RAM). The probe is read-only towards Hermes and
-# writes only deploy/live/. No probe runs a model: the one Ollama call is GET /api/ps, and the one
+# writes only deploy/live/. The one write path is the Yeoman's desk (below): board actions go
+# into the Yeoman's inbox, and the Yeoman's own code applies them. No probe runs a model: the one Ollama call is GET /api/ps, and the one
 # Anthropic call asks for the Claude usage (at most every 5 minutes).
 # Settings for this NAS go in deploy/.env (git ignores it), see deploy/env.example.
 services:
@@ -195,6 +196,37 @@ services:
       - ../.github/holo-paths.txt:/app/holo-paths.txt:ro
       - ../probe/holo_probe.py:/app/holo_probe.py:ro
     command: python -u /app/holo_probe.py
+
+  # The Yeoman's desk: the one way the Yeoman board can change the Captain's list. The board posts
+  # one action (tick, cancel, reopen, important, due, edit, add, rank, snooze, arrived) to
+  # /desk/action; the desk checks it and drops it as one JSON file in the Yeoman's inbox. It never
+  # opens the Yeoman's CSV files: the Yeoman's own code applies the inbox on its timer (patch B2-45
+  # in Hermes). It runs as the Yeoman's user (10000) and sees only yeoman/inbox/, read-write. No
+  # ports: only nginx (the starship service) reaches it, on the compose network.
+  # In the "desk" profile until the Yeoman patch has created yeoman/inbox/ (owned by 10000), so it
+  # never starts by accident and Docker never creates the folder as root. Start it by name:
+  #   sudo docker compose -f /DATA/AppData/hermes-starship/deploy/compose.yaml up -d yeoman-desk
+  yeoman-desk:
+    image: python:3.12-alpine
+    profiles: [desk]
+    container_name: hermes-starship-desk
+    restart: unless-stopped
+    mem_limit: 32m
+    read_only: true
+    user: "10000:10000"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      INBOX: /inbox
+      PORT: "8090"
+    volumes:
+      - type: bind
+        source: ${HERMES_DATA_HOST:-/DATA/AppData/hermes}/yeoman/inbox
+        target: /inbox
+        bind:
+          create_host_path: false
+      - ../probe/yeoman_desk.py:/app/yeoman_desk.py:ro
+    command: python -u /app/yeoman_desk.py
 
   # A speed trial on the local rail, run by hand (never on its own: it is in the "trial" profile):
   #   sudo docker compose -f deploy/compose.yaml run --rm speed-trial

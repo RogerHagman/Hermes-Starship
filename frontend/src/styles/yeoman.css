@@ -228,3 +228,96 @@ html:has(.board-yeoman) body{background-color:#07090b;background-image:var(--sta
   .room-art .y-hand,.room-art .y-lamp,.room-art .y-late,.yb-lamp{animation:none}
   .yeo-pic[data-ring="on"] .room-art .y-ring{animation:none;opacity:1}
 }
+
+/* ---------- the desk: changing the list ---------- */
+.yeo-screen{--heavy:#f5a83a;--tired:#f0605a;position:relative}
+.ylist-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 6px}
+.ylist-tools .ynote{font-size:9.5px;letter-spacing:.08em}
+.ybtn{--bc:var(--yeo);font:inherit;font-size:12.5px;font-weight:600;padding:4px 12px;border-radius:999px;border:1px solid color-mix(in srgb, var(--bc) 60%, transparent);background:transparent;color:var(--bc);cursor:pointer}
+.ybtn:hover:not(:disabled){background:color-mix(in srgb, var(--bc) 16%, transparent);border-color:var(--bc)}
+.ybtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.ybtn:disabled{opacity:.4;cursor:not-allowed}
+.ybtn.primary{background:var(--bc);border-color:var(--bc);color:#05110e}
+.ybtn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--bc) 80%, white)}
+/* one colour per order: Done green, Important gold, Edit blue, Due teal, Snooze amber, Cancel red */
+.ybtn:not([class*="c-"]){--bc:var(--text-label)}
+.ybtn.c-done{--bc:#8fd14f}
+.ybtn.c-imp{--bc:#ffd166}
+.ybtn.c-edit{--bc:#5aa7f0}
+.ybtn.c-due{--bc:#7fd8c0}
+.ybtn.c-snooze{--bc:#f5a83a}
+.ybtn.c-cancel{--bc:#f0605a}
+.ybtn.c-cancel.primary{color:#fff}
+.ybtn.c-imp[aria-pressed="true"]{background:color-mix(in srgb, var(--bc) 16%, transparent)}
+
+/* tick box and star on each todo; the rows can be dragged */
+.yq-li,.yrow-li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:2px;border-radius:6px;position:relative}
+.yq-li[draggable="true"],.yrow-li[draggable="true"]{cursor:grab}
+.yq-li.dragging{opacity:.4}
+.yq-li.drop-before::before,.yrow-li.drop-before::before{content:"";position:absolute;left:4px;right:4px;top:-2px;height:2px;border-radius:2px;background:var(--pc, var(--yeo))}
+.yq-li.pending,.yrow-li.pending{outline:1px dashed color-mix(in srgb, var(--yeo) 60%, transparent);outline-offset:-1px}
+.ytick,.ystar{display:grid;place-items:center;width:24px;height:24px;padding:0;border:none;border-radius:6px;background:transparent;cursor:pointer;color:var(--text-label)}
+.ytick svg,.ystar svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round}
+.ytick .ytick-mark{opacity:0}
+.ytick:hover:not(:disabled){color:var(--pc, var(--yeo))}
+.ytick:hover:not(:disabled) .ytick-mark{opacity:1}
+.ystar.on{color:#ffd166}
+.ystar.on svg{fill:#ffd166}
+.ystar:hover:not(:disabled){color:#ffd166}
+.ytick:disabled,.ystar:disabled{cursor:default}
+.ytick:disabled{opacity:.35}
+.ytick:focus-visible,.ystar:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.yrow-li .yrow{border-radius:9px}
+.ypending{margin-left:6px;padding:0 5px;border-radius:4px;font-size:8.5px;letter-spacing:.08em;color:#05110e;background:var(--yeo)}
+.yquad.drop-over{background:color-mix(in srgb, var(--pc) 12%, var(--surface-raised));border-color:var(--pc)}
+
+/* task fatigue: amber over 4 in a box, red over 8; and the whole list's weighted load */
+.yfat{display:inline-block;margin-left:6px;padding:0 6px;border-radius:4px;font-size:8.5px;letter-spacing:.08em;white-space:nowrap}
+.yq-head .yfat{grid-column:1 / -1;justify-self:start;margin:2px 0 0}
+.yfat-clear,.yfat-light,.yfat-steady{color:var(--text-label);background:color-mix(in srgb, var(--yeo) 12%, transparent)}
+.yfat-clear{opacity:.7}
+.yfat-heavy{color:#1a0f02;background:var(--heavy)}
+.yfat-fatigue{color:#fff;background:var(--tired)}
+.yquad[data-fatigue="heavy"]{border-color:color-mix(in srgb, var(--heavy) 55%, var(--border))}
+.yquad[data-fatigue="fatigue"]{border-color:var(--tired);box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tired) 40%, transparent)}
+.ymb-box[data-fatigue="heavy"] .ymb-n{color:#f5a83a}
+.ymb-box[data-fatigue="fatigue"] .ymb-n{color:#f0605a}
+.ymb-box[data-fatigue="fatigue"]{box-shadow:inset 0 0 0 2px #f0605a}
+.yload{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.08em;color:var(--text-label);background:none !important}
+.yload-bar{width:70px;height:6px;border-radius:3px;background:color-mix(in srgb, var(--yeo) 15%, transparent);overflow:hidden}
+.yload-bar b{display:block;height:100%;background:var(--yeo)}
+.yload.yfat-heavy{color:var(--heavy)}
+.yload.yfat-heavy .yload-bar b{background:var(--heavy)}
+.yload.yfat-fatigue{color:var(--tired)}
+.yload.yfat-fatigue .yload-bar b{background:var(--tired)}
+
+/* adding a todo */
+.yadd{display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap}
+.yadd-text{flex:1;min-width:180px}
+.yadd input,.yactions input,.yactions textarea,.ydialog input{font:inherit;font-size:13px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:#050909;color:var(--text);color-scheme:dark}
+.yadd input:focus,.yactions input:focus,.yactions textarea:focus,.ydialog input:focus{outline:2px solid var(--focus);outline-offset:1px}
+.yadd-imp{display:flex;align-items:center;gap:4px;font-size:12px}
+
+/* the action bar on one item */
+.yactions{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:10px;background:var(--surface-raised);border:1px solid color-mix(in srgb, var(--yeo) 25%, transparent)}
+.ya-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ya-when,.ya-lead{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.08em;color:var(--text-label)}
+.ya-edit{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.ya-edit textarea{width:100%;resize:vertical}
+.yconfirm{display:inline-flex;align-items:center;gap:6px}
+.yconfirm .mono{font-size:10px;letter-spacing:.08em;color:#ffc3bd}
+
+/* the drop dialog */
+.ydialog{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:rgba(3,6,6,.72);border-radius:inherit}
+.ydialog-card{width:min(440px, 92%);display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:12px;background:#0b1514;border:1px solid var(--border);border-top:3px solid var(--pc)}
+.ydialog-card p{margin:0;font-size:13.5px;line-height:1.45}
+.ydialog-card .cb-head{color:var(--pc)}
+.yd-choice{display:flex;gap:14px;font-size:13px}
+.yd-when{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.08em;color:var(--text-label)}
+.yd-warn{font-size:9.5px !important;letter-spacing:.08em;color:var(--heavy)}
+.yd-buttons{display:flex;gap:8px;margin-top:4px}
+/* when the wall screen drops below the room, the dialog covers the screen instead */
+@container board (max-width: 1950px){
+  .ydialog{position:fixed;border-radius:0}
+}
+.yitem > .ypending{align-self:flex-start;margin-left:0}
