@@ -175,7 +175,7 @@ describe('changing the list from the board', () => {
     const dialog = c.querySelector('.wall-slot .ydialog')!;
     expect(dialog.textContent).toContain('MOVE TO DO FIRST');
     expect(dialog.querySelector<HTMLInputElement>('input[type="datetime-local"]')!.value).toBe('2026-11-05T23:59');
-    await act(async () => { fireEvent.click([...dialog.querySelectorAll('button')].find((b) => b.textContent === 'Move it')!); });
+    await act(async () => { fireEvent.click([...dialog.querySelectorAll('button')].find((b) => b.textContent === 'Move')!); });
     expect(posts).toEqual([
       { op: 'important', item: 'todo-907', value: true },
       { op: 'due', item: 'todo-907', value: '2026-11-05T22:59:00Z' },
@@ -190,7 +190,7 @@ describe('changing the list from the board', () => {
     const bar = screen(c).querySelector('.yactions')!;
     fireEvent.click([...bar.querySelectorAll('button')].find((b) => b.textContent === 'Cancel')!);
     expect(bar.textContent).toContain('CANCEL THIS TODO?');
-    await act(async () => { fireEvent.click([...bar.querySelectorAll('button')].find((b) => b.textContent === 'Yes, cancel')!); });
+    await act(async () => { fireEvent.click([...bar.querySelectorAll('button')].find((b) => b.textContent === 'Yes')!); });
     expect(posts).toEqual([{ op: 'cancel', item: 'todo-907', value: null }]);
   });
   it('a new todo can be added from the list', async () => {

@@ -233,14 +233,22 @@ html:has(.board-yeoman) body{background-color:#07090b;background-image:var(--sta
 .yeo-screen{--heavy:#f5a83a;--tired:#f0605a;position:relative}
 .ylist-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 6px}
 .ylist-tools .ynote{font-size:9.5px;letter-spacing:.08em}
-.ybtn{font:inherit;font-size:12.5px;padding:4px 11px;border-radius:999px;border:1px solid color-mix(in srgb, var(--yeo) 45%, transparent);background:transparent;color:var(--text);cursor:pointer}
-.ybtn:hover:not(:disabled){background:color-mix(in srgb, var(--yeo) 14%, transparent);border-color:var(--yeo)}
+.ybtn{--bc:var(--yeo);font:inherit;font-size:12.5px;font-weight:600;padding:4px 12px;border-radius:999px;border:1px solid color-mix(in srgb, var(--bc) 60%, transparent);background:transparent;color:var(--bc);cursor:pointer}
+.ybtn:hover:not(:disabled){background:color-mix(in srgb, var(--bc) 16%, transparent);border-color:var(--bc)}
 .ybtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-.ybtn:disabled{opacity:.45;cursor:not-allowed}
-.ybtn.primary{background:var(--yeo);border-color:var(--yeo);color:#05110e;font-weight:600}
-.ybtn.primary:hover:not(:disabled){background:#a6eedb}
-.ybtn.danger{border-color:color-mix(in srgb, var(--tired) 55%, transparent);color:#ffc3bd}
-.ybtn.danger:hover:not(:disabled){background:color-mix(in srgb, var(--tired) 16%, transparent);border-color:var(--tired)}
+.ybtn:disabled{opacity:.4;cursor:not-allowed}
+.ybtn.primary{background:var(--bc);border-color:var(--bc);color:#05110e}
+.ybtn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--bc) 80%, white)}
+/* one colour per order: Done green, Important gold, Edit blue, Due teal, Snooze amber, Cancel red */
+.ybtn:not([class*="c-"]){--bc:var(--text-label)}
+.ybtn.c-done{--bc:#8fd14f}
+.ybtn.c-imp{--bc:#ffd166}
+.ybtn.c-edit{--bc:#5aa7f0}
+.ybtn.c-due{--bc:#7fd8c0}
+.ybtn.c-snooze{--bc:#f5a83a}
+.ybtn.c-cancel{--bc:#f0605a}
+.ybtn.c-cancel.primary{color:#fff}
+.ybtn.c-imp[aria-pressed="true"]{background:color-mix(in srgb, var(--bc) 16%, transparent)}
 
 /* tick box and star on each todo; the rows can be dragged */
 .yq-li,.yrow-li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:2px;border-radius:6px;position:relative}
