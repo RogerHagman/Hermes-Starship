@@ -50,7 +50,7 @@ export function StarToggle({ t }: { t: Todo }) {
   const on = canWrite(d.state);
   return (
     <button type="button" className={'ystar' + (t.important ? ' on' : '')} disabled={!on} aria-pressed={t.important}
-      title={offTitle(d.state) ?? (t.important ? 'Important. Press to take the "!" off' : 'Not important. Press to mark it "!"')}
+      title={offTitle(d.state) ?? (t.important ? 'Important. Press to mark it not important' : 'Not important. Press to mark it important')}
       aria-label={`${t.important ? 'Important' : 'Not important'}: ${t.text}`}
       onClick={() => d.act([{ op: 'important', item: t.id, value: !t.important }])}>
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6l1.9 4 4.4.5-3.3 3 .9 4.3L8 11.2l-3.9 2.2.9-4.3-3.3-3 4.4-.5z" /></svg>
@@ -123,7 +123,7 @@ export function DropDialog({ t, plan, now, onMove, onClose }: {
   const iso = plan.due === 'clear' && mode === 'none' ? null : fromInputTime(when);
   const fits = plan.due === 'clear' && mode === 'none' ? true : !!iso && dueFits(iso, plan.to, now);
   const what = [
-    plan.important === true ? 'marks it important ("!")' : plan.important === false ? 'takes the "!" off' : null,
+    plan.important === true ? 'marks it important' : plan.important === false ? 'marks it not important' : null,
     plan.due === 'set' ? `needs a due date within ${URGENT_H} hours` : `takes the due date away, or moves it more than ${URGENT_H} hours out`,
   ].filter(Boolean).join(', and ');
   return (
@@ -172,7 +172,7 @@ export function AddTodo() {
   return (
     <form className="yadd" onSubmit={submit} aria-label="Add a todo">
       <input className="yadd-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="What needs doing" aria-label="Todo text" autoFocus maxLength={2000} />
-      <label className="yadd-imp mono"><input type="checkbox" checked={important} onChange={(e) => setImportant(e.target.checked)} /> "!"</label>
+      <label className="yadd-imp mono"><input type="checkbox" checked={important} onChange={(e) => setImportant(e.target.checked)} /> Important</label>
       <input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} aria-label="Due date (optional)" />
       <button type="submit" className="ybtn primary" disabled={!text.trim()}>Add</button>
       <button type="button" className="ybtn" onClick={() => setOpen(false)}>Close</button>
@@ -217,7 +217,7 @@ export function TodoActions({ t }: { t: Todo }) {
       <div className="ya-row">
         <button type="button" className="ybtn primary" disabled={!on} onClick={() => d.act([{ op: 'tick', item: t.id }])}>Tick it off</button>
         <button type="button" className="ybtn" disabled={!on} aria-pressed={t.important}
-          onClick={() => d.act([{ op: 'important', item: t.id, value: !t.important }])}>{t.important ? 'Take the "!" off' : 'Mark it "!"'}</button>
+          onClick={() => d.act([{ op: 'important', item: t.id, value: !t.important }])}>{t.important ? 'Not important' : 'Mark important'}</button>
         <button type="button" className="ybtn" disabled={!on} onClick={() => { setText(t.text); setEditing(!editing); }}>Edit text</button>
         <Confirm label="Cancel it" ask="CANCEL THIS TODO?" yes="Yes, cancel" onYes={() => d.act([{ op: 'cancel', item: t.id }])} />
       </div>
