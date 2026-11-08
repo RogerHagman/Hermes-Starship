@@ -32,7 +32,10 @@ describe('off duty', () => {
     const all = { local: true, codex: true, claude: true };
     expect(offDuty(data, all, st('captain'))).toBeNull();
     expect(offDuty(data, all, st('lounge'))).toBeNull();
-    expect(offDuty(data, all, st('holo'))).toBeNull();
+    expect(offDuty(data, all, st('doctor'))).toBeNull();   // reserved, not built yet
+  });
+  it('the Holodeck Officer is live, so a Claude drill sends it off duty', () => {
+    expect(offDuty(data, { claude: true }, st('holo'))).toMatch(/out$/);
   });
 });
 
@@ -45,8 +48,11 @@ describe('acting heads', () => {
     expect(acting.eng).toBe('dark');      // Systems and Diagnostics are Codex too
     expect(acting.sci).toBe('archives');
   });
-  it('with Claude out, Cartography would act for Holodeck only if the Holodeck Officer were live', () => {
-    expect(actingHeads(data, { claude: true }).holo).toBeUndefined();
+  it('with Claude out, Holodeck goes dark: Cartography runs on Claude too', () => {
+    expect(actingHeads(data, { claude: true }).holo).toBe('dark');
+  });
+  it('relieving the Holodeck Officer hands Holodeck to Cartography', () => {
+    expect(actingHeads(data, {}, new Set(['holo']))).toEqual({ holo: 'carto' });
   });
   it('never hands command to enlisted crew', () => {
     const acting = actingHeads(data, { local: true });
@@ -72,7 +78,7 @@ describe('relieve and recall (Captain\'s Quarters)', () => {
   });
   it('the Captain, the Ship\'s Computer, places and unbuilt stations cannot be relieved', () => {
     const everyone = new Set(data.stations.stations.map((s) => s.id));
-    for (const id of ['captain', 'computer', 'quarters', 'holo', 'doctor']) {
+    for (const id of ['captain', 'computer', 'quarters', 'doctor']) {
       expect(canRelieve(st(id))).toBe(false);
       expect(offDuty(data, {}, st(id), everyone)).toBeNull();
     }

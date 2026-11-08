@@ -71,9 +71,9 @@ describe('the rail log becomes the duty log', () => {
     const data = { stations, shiplog } as never;
     const merged = withLiveDuty(data, log([{ at: '2026-11-05T08:00:00Z', rail: 'claude', state: 'out' }]));
     const duty = merged.shiplog.entries.filter((e) => e.kind === 'duty');
-    expect(duty.map((e) => e.station).sort()).toEqual(['carto', 'sensors']);
+    expect(duty.map((e) => e.station).sort()).toEqual(['carto', 'holo', 'sensors']);
     const others = (shiplog as { entries: { kind: string }[] }).entries.filter((e) => e.kind !== 'duty').length;
-    expect(merged.shiplog.entries.length).toBe(others + 2);
+    expect(merged.shiplog.entries.length).toBe(others + 3);
     expect(withLiveDuty(data, null)).toBe(data);
   });
 });
