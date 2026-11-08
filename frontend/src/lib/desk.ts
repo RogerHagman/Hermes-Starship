@@ -137,7 +137,7 @@ export const reopenable = (d: Closed) => !(d.kind === 'reminder' && d.how === 'f
 /** A short line for a toast or a pending tag: "Ticked off", "Marked important", ... */
 export function actionWord(a: { op: string; value?: unknown }): string {
   switch (a.op) {
-    case 'tick': return 'Ticked off';
+    case 'tick': return 'Marked done';
     case 'cancel': return 'Cancelled';
     case 'reopen': return 'Reopened';
     case 'arrived': return 'Marked arrived';

@@ -154,7 +154,7 @@ describe('changing the list from the board', () => {
     expect(posts).toEqual([{ op: 'tick', item: 'todo-907', value: null }]);
     await waitFor(() => expect(row(c, 'Sort the cable drawer')).toBeUndefined());
     expect(c.querySelector('.room-hint')?.textContent).toContain('1 WITH THE YEOMAN');
-    expect(toasts[0]).toContain('Ticked off');
+    expect(toasts[0]).toContain('Marked done');
   });
   it('the star flips the "!" and the todo moves box', async () => {
     const posts = desk();
@@ -188,7 +188,7 @@ describe('changing the list from the board', () => {
     await ready(c);
     fireEvent.click(row(c, 'Sort the cable drawer').querySelector('.yq-item')!);
     const bar = screen(c).querySelector('.yactions')!;
-    fireEvent.click([...bar.querySelectorAll('button')].find((b) => b.textContent === 'Cancel it')!);
+    fireEvent.click([...bar.querySelectorAll('button')].find((b) => b.textContent === 'Cancel')!);
     expect(bar.textContent).toContain('CANCEL THIS TODO?');
     await act(async () => { fireEvent.click([...bar.querySelectorAll('button')].find((b) => b.textContent === 'Yes, cancel')!); });
     expect(posts).toEqual([{ op: 'cancel', item: 'todo-907', value: null }]);

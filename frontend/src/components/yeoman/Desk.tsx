@@ -37,8 +37,8 @@ export function TickBox({ t }: { t: Todo }) {
   const d = useDesk();
   const on = canWrite(d.state);
   return (
-    <button type="button" className="ytick" disabled={!on} title={offTitle(d.state) ?? 'Tick it off'}
-      aria-label={`Tick off: ${t.text}`} onClick={() => d.act([{ op: 'tick', item: t.id }])}>
+    <button type="button" className="ytick" disabled={!on} title={offTitle(d.state) ?? 'Mark done'}
+      aria-label={`Mark done: ${t.text}`} onClick={() => d.act([{ op: 'tick', item: t.id }])}>
       <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="13" rx="2" /><path className="ytick-mark" d="M4 8.5l3 3 5-6" /></svg>
     </button>
   );
@@ -215,11 +215,11 @@ export function TodoActions({ t }: { t: Todo }) {
   return (
     <Bar>
       <div className="ya-row">
-        <button type="button" className="ybtn primary" disabled={!on} onClick={() => d.act([{ op: 'tick', item: t.id }])}>Tick it off</button>
+        <button type="button" className="ybtn primary" disabled={!on} onClick={() => d.act([{ op: 'tick', item: t.id }])}>Mark done</button>
         <button type="button" className="ybtn" disabled={!on} aria-pressed={t.important}
           onClick={() => d.act([{ op: 'important', item: t.id, value: !t.important }])}>{t.important ? 'Not important' : 'Mark important'}</button>
         <button type="button" className="ybtn" disabled={!on} onClick={() => { setText(t.text); setEditing(!editing); }}>Edit text</button>
-        <Confirm label="Cancel it" ask="CANCEL THIS TODO?" yes="Yes, cancel" onYes={() => d.act([{ op: 'cancel', item: t.id }])} />
+        <Confirm label="Cancel" ask="CANCEL THIS TODO?" yes="Yes, cancel" onYes={() => d.act([{ op: 'cancel', item: t.id }])} />
       </div>
       <div className="ya-row">
         <label className="ya-when mono">DUE <input type="datetime-local" value={when} disabled={!on} onChange={(e) => setWhen(e.target.value)} aria-label="Due date" /></label>
@@ -254,7 +254,7 @@ export function ReminderActions({ r }: { r: Reminder }) {
         <input type="datetime-local" value={when} disabled={!on} onChange={(e) => setWhen(e.target.value)} aria-label="Snooze until" />
         <button type="button" className="ybtn" disabled={!on || !picked} onClick={() => picked && snooze(picked)}>Snooze until then</button>
       </div>
-      <div className="ya-row"><Confirm label="Cancel it" ask="CANCEL THIS REMINDER?" yes="Yes, cancel" onYes={() => d.act([{ op: 'cancel', item: r.id }])} /></div>
+      <div className="ya-row"><Confirm label="Cancel" ask="CANCEL THIS REMINDER?" yes="Yes, cancel" onYes={() => d.act([{ op: 'cancel', item: r.id }])} /></div>
     </Bar>
   );
 }
@@ -264,7 +264,7 @@ export function WaitingActions({ w }: { w: WaitingFor }) {
   return (
     <Bar>
       <div className="ya-row">
-        <button type="button" className="ybtn primary" disabled={!canWrite(d.state)} onClick={() => d.act([{ op: 'arrived', item: w.id }])}>It arrived</button>
+        <button type="button" className="ybtn primary" disabled={!canWrite(d.state)} onClick={() => d.act([{ op: 'arrived', item: w.id }])}>Arrived</button>
         <Confirm label="Stop waiting" ask="STOP WAITING FOR IT?" yes="Yes, cancel" onYes={() => d.act([{ op: 'cancel', item: w.id }])} />
       </div>
     </Bar>
@@ -286,7 +286,7 @@ export function DoneActions({ c }: { c: Closed }) {
   return (
     <Bar>
       <div className="ya-row">
-        <button type="button" className="ybtn" disabled={!canWrite(d.state)} onClick={() => d.act([{ op: 'reopen', item: c.id }])}>Reopen it</button>
+        <button type="button" className="ybtn" disabled={!canWrite(d.state)} onClick={() => d.act([{ op: 'reopen', item: c.id }])}>Reopen</button>
         <span className="ynote">Puts it back on its list, as it was before it closed.</span>
       </div>
     </Bar>
