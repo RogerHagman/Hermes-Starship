@@ -384,11 +384,11 @@
       "short": "Holodeck",
       "kind": "station",
       "rail": "claude",
-      "status": "approved",
+      "status": "live",
       "rank": "ltcmdr",
       "dept": "holo",
       "deck": 4,
-      "profile": "holo (not created)",
+      "profile": "holo",
       "aliases": [
         "holodeck",
         "holo",
@@ -401,7 +401,7 @@
       ],
       "head": true,
       "duty": "Builds the ship's own interface, the dashboard front end, from these canvas boards. The Chief Engineer owns the backend.",
-      "note": "Approved, not built. Until then the Stellar Cartographer leads the department.",
+      "note": "Builds from design files, the API schema and fixtures only.",
       "activeOrder": null
     },
     {

@@ -32,7 +32,9 @@ describe('holodeck board', () => {
     const placed = data.stations.stations.filter((s) => s.id in SHIP_MAP.places);
     expect(c.querySelectorAll('.holo-room').length).toBe(placed.length);
     // Rooms whose crew is not aboard yet show as not built.
-    expect(c.querySelector('.holo-room[aria-label^="Holodeck Officer"]')?.className).toContain('approved');
+    expect(c.querySelector('.holo-room[aria-label^="Chief Strategist"]')?.className).toContain('approved');
+    // The Holodeck Officer is aboard now.
+    expect(c.querySelector('.holo-room[aria-label^="Holodeck Officer"]')?.className).toContain('live');
   });
   it('picking a room on the hologram opens it on the work screen, with its art and place', () => {
     const c = board();
