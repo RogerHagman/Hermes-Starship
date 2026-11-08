@@ -312,31 +312,80 @@ def doctor():
 # ---------- Deck 4 ----------
 
 def holo():
-    """The Holodeck: the gold grid on black, the arch and its panel."""
+    """The Holodeck, running: the gold grid lit, a warm glow from the arch, the cube shining.
+
+    Drawn in two layers. The dark room underneath (the faint grid, the arch frame) never dims.
+    Everything that makes it look switched on sits in groups with the GLOW style, so when the
+    station is off duty the page lowers --sa-glow and the room falls back to nearly black.
+    """
     p, out = "hd-", []
     out.append(f'<rect width="{W}" height="{H}" fill="#050608"/>')
     vx, vy = 260, 170                         # the vanishing point
-    for k in range(-8, 9):                    # floor lines running away
-        out.append(f'<line x1="{vx}" y1="{vy}" x2="{vx + k * 80}" y2="{H}" stroke="{GOLD}" stroke-opacity=".35" stroke-width="1"/>')
-    for j in range(1, 9):                     # floor lines across
-        y = vy + (H - vy) * (j / 8) ** 1.8
-        out.append(f'<line x1="0" y1="{f(y)}" x2="{W}" y2="{f(y)}" stroke="{GOLD}" stroke-opacity=".3" stroke-width="1"/>')
-    for k in range(-8, 9):                    # back wall and ceiling lines
-        out.append(f'<line x1="{vx}" y1="{vy}" x2="{vx + k * 80}" y2="0" stroke="{GOLD}" stroke-opacity=".18" stroke-width="1"/>')
-    out.append(f'<rect x="200" y="122" width="120" height="96" fill="#050608" stroke="{GOLD}" stroke-opacity=".5"/>')
-    # the arch with its panel, lit while the program runs
-    out.append(f'<path d="M150 440 L150 150 Q150 96 210 96 L310 96 Q370 96 370 150 L370 440" fill="none" stroke="#3a3220" stroke-width="22"/>')
-    out.append(f'<path d="M150 440 L150 150 Q150 96 210 96 L310 96 Q370 96 370 150 L370 440" fill="none" stroke="{GOLD}" stroke-width="2" stroke-opacity=".7" style="{GLOW}"/>')
-    out.append(f'<rect x="384" y="210" width="44" height="80" rx="6" fill="#141820" stroke="{GOLD}" stroke-opacity=".5"/>')
+
+    def grid(o_floor, o_across, o_wall, width):
+        """The holodeck grid at the given strengths: floor rays, cross lines, wall and ceiling rays."""
+        g = []
+        for k in range(-8, 9):                # floor lines running away
+            g.append(f'<line x1="{vx}" y1="{vy}" x2="{vx + k * 80}" y2="{H}" stroke-opacity="{o_floor}"/>')
+        for j in range(1, 9):                 # floor lines across, closer together near the back
+            y = vy + (H - vy) * (j / 8) ** 1.8
+            g.append(f'<line x1="0" y1="{f(y)}" x2="{W}" y2="{f(y)}" stroke-opacity="{o_across}"/>')
+        for k in range(-8, 9):                # back wall and ceiling lines
+            g.append(f'<line x1="{vx}" y1="{vy}" x2="{vx + k * 80}" y2="0" stroke-opacity="{o_wall}"/>')
+        return f'<g stroke="{GOLD}" stroke-width="{width}">{"".join(g)}</g>'
+
+    # the dark room: the faint grid that is always there, even with the program off
+    out.append(grid(".35", ".3", ".18", 1))
+    # the running program: a warm light spilling out of the arch over the floor (dims off duty)
+    out.append(f'<g style="{GLOW}">'
+               f'<rect width="{W}" height="{H}" fill="url(#{p}warm)"/>'
+               f'<ellipse cx="260" cy="330" rx="230" ry="90" fill="url(#{p}floorlight)"/>'
+               f'</g>')
+    # ...and the grid lit up bright gold on top of it (dims off duty)
+    out.append(f'<g style="{GLOW}">{grid(".75", ".65", ".4", 1.2)}</g>')
+    # the far wall, an opening into the program
+    out.append(f'<rect x="200" y="122" width="120" height="96" fill="#0a0906" stroke="{GOLD}" stroke-opacity=".5"/>')
+    out.append(f'<rect x="200" y="122" width="120" height="96" fill="url(#{p}doorway)" stroke="{GOLD}" stroke-opacity=".9" style="{GLOW}"/>')
+    # the arch with its panel: a dark frame, then a wide soft halo and a bright gold edge (both dim)
+    arch = "M150 440 L150 150 Q150 96 210 96 L310 96 Q370 96 370 150 L370 440"
+    out.append(f'<path d="{arch}" fill="none" stroke="#3a3220" stroke-width="22"/>')
+    out.append(f'<g fill="none" style="{GLOW}">'
+               f'<path d="{arch}" stroke="#ffd27a" stroke-width="30" stroke-opacity=".12"/>'
+               f'<path d="{arch}" stroke="#ffd27a" stroke-width="12" stroke-opacity=".22"/>'
+               f'<path d="{arch}" stroke="{GOLD}" stroke-width="2.4"/>'
+               f'</g>')
+    out.append(f'<rect x="384" y="210" width="44" height="80" rx="6" fill="#141820" stroke="{GOLD}" stroke-opacity=".7"/>')
     out.append(lights(392, 222, 2, 16, [GOLD, CLAUDE], w=12, h=5) + lights(392, 236, 2, 16, [CLAUDE, GOLD], w=12, h=5))
-    out.append(f'<rect x="392" y="254" width="28" height="26" rx="4" fill="{CLAUDE}" opacity=".35" class="sa-key" style="{GLOW}"/>')
-    # a half-built program: a wireframe cube turning in the middle
+    # the big key blinks (sa-key animates opacity, which beats an inline style), so the GLOW dimming
+    # goes on a group round it instead
+    out.append(f'<g style="{GLOW}"><rect x="392" y="254" width="28" height="26" rx="4" fill="{CLAUDE}" opacity=".55" class="sa-key"/></g>')
+    # a pool of light on the floor under the program (dims off duty)
+    out.append(f'<ellipse cx="262" cy="340" rx="80" ry="16" fill="url(#{p}trim-glow)" style="{GLOW}"/>')
+    # a half-built program: a wireframe cube turning in the middle, lit from inside
     cube = []
     for (x1, y1, x2, y2) in [(-30, -30, 30, -30), (30, -30, 30, 30), (30, 30, -30, 30), (-30, 30, -30, -30),
                              (-14, -44, 46, -44), (46, -44, 46, 16), (-30, -30, -14, -44), (30, -30, 46, -44), (30, 30, 46, 16)]:
         cube.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}"/>')
-    out.append(f'<g transform="translate(256 300)" stroke="{CLAUDE}" stroke-width="1.6" fill="none" class="sa-holo" style="{GLOW}">{"".join(cube)}</g>')
-    return finish(p, defs(p, trim_defs(p, CLAUDE)) + "\n" + "\n".join(out))
+    edges = "".join(cube)
+    faces = (f'<path d="M-30 -30 L30 -30 L30 30 L-30 30 Z" fill="{CLAUDE}" fill-opacity=".16"/>'     # front face
+             f'<path d="M-30 -30 L-14 -44 L46 -44 L30 -30 Z" fill="{CLAUDE}" fill-opacity=".1"/>'    # top
+             f'<path d="M30 -30 L46 -44 L46 16 L30 30 Z" fill="{CLAUDE}" fill-opacity=".07"/>')      # side
+    out.append(f'<g transform="translate(256 300)" class="sa-holo" style="{GLOW}">'
+               f'<circle cx="8" cy="-8" r="64" fill="url(#{p}cubeglow)"/>'                          # light round it
+               f'{faces}'
+               f'<g stroke="{CLAUDE}" fill="none" stroke-linecap="round">'
+               f'<g stroke-width="7" stroke-opacity=".18">{edges}</g>'                             # soft halo on the edges
+               f'<g stroke-width="2">{edges}</g>'                                                   # the edges themselves
+               f'</g></g>')
+    extra = (f'<radialGradient id="{p}warm" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#ffcf7a" stop-opacity=".22"/>'
+             f'<stop offset=".55" stop-color="#d89a3a" stop-opacity=".08"/><stop offset="1" stop-color="#d89a3a" stop-opacity="0"/></radialGradient>'
+             f'<radialGradient id="{p}floorlight"><stop offset="0" stop-color="#ffd890" stop-opacity=".2"/>'
+             f'<stop offset="1" stop-color="#ffd890" stop-opacity="0"/></radialGradient>'
+             f'<linearGradient id="{p}doorway" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe2a8" stop-opacity=".1"/>'
+             f'<stop offset="1" stop-color="#ffcf7a" stop-opacity=".32"/></linearGradient>'
+             f'<radialGradient id="{p}cubeglow"><stop offset="0" stop-color="{CLAUDE}" stop-opacity=".35"/>'
+             f'<stop offset="1" stop-color="{CLAUDE}" stop-opacity="0"/></radialGradient>')
+    return finish(p, defs(p, trim_defs(p, CLAUDE) + extra) + "\n" + "\n".join(out))
 
 
 def carto():
