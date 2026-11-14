@@ -3,6 +3,8 @@
 // then move the boxes here to match.
 
 export const ROOM = { w: 1600, h: 740 };
+/** The panorama on the wide board (assets/quarters-wide.svg): the same room, then the lounge to its right. */
+export const ROOM_WIDE = { w: 2400, h: 740 };
 
 /** The things in the room you can pick. Each one opens a view on the wall screen. */
 export type RoomObject = 'viewport' | 'chair' | 'reading' | 'orders' | 'log' | 'yeoman' | 'bridge';

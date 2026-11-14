@@ -12,6 +12,7 @@ import './styles/computer.css';
 import './styles/yeoman.css';
 import './styles/posts.css';
 import './styles/science.css';
+import './styles/wide.css';
 import { App } from './App';
 
 createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);

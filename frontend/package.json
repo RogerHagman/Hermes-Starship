@@ -1,7 +1,7 @@
 {
   "name": "hermes-starship-frontend",
   "private": true,
-  "version": "0.2.24",
+  "version": "0.2.25",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,8 @@
     "test": "vitest run",
     "check": "npm run types -- --check && tsc -b && vitest run",
     "single": "vite build --mode single",
-    "board": "vite build --mode single && node tools/board-viewer.mjs"
+    "board": "vite build --mode single && node tools/board-viewer.mjs",
+    "board:wide": "vite build --mode single && node tools/board-viewer.mjs --wide"
   },
   "dependencies": {
     "react": "19.3.1",

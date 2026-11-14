@@ -18,6 +18,21 @@ standing in for the Holodeck Officer.
   Main Viewscreen (`#/viewscreen`: what is on screen, the tape of actions, what waits for your OK). One room, one set of
   parts and one stylesheet for all four (`components/post`, `lib/post.ts`, `styles/posts.css`), each with its own accent.
 
+## The wide boards (5120 × 1440)
+
+On a 32:9 screen the page uses a 5120 × 1440 stage instead of the 2560 one (`src/lib/fit.ts` picks it from the
+window's shape; a 21:9 screen stays on 2560). The wide layouts are all in `src/styles/wide.css`, so the 2560 boards
+are untouched.
+
+- **Bridge**: its own ship, `src/assets/ship-wide.svg` (3200 × 1060) with `SHIP_MAP_WIDE` in `src/lib/shipmap.ts`:
+  a long saucer with the bridge as one row of posts on top, the same rooms below. Its generator is
+  `holodeck/ship-wide-src/genwide.py` in the project files (it also writes the numbers for `SHIP_MAP_WIDE`).
+- **Captain's Quarters**: a panorama, `src/assets/quarters-wide.svg` (2400 × 740), drawn by
+  `tools/make_quarters_wide_svg.py`: the room as it was, then the lounge to its right.
+- **The other rooms** are not redrawn yet. They show the 2560 room enlarged, with their panels on a wing each side.
+
+`npm run board:wide` builds the fixed 5120 × 1440 preview in `dist-board/bridge-wide.html`.
+
 ## Reading the code
 
 Start at `src/App.tsx`, which holds what both boards share and picks the board. Each component is a function that
