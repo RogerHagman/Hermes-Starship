@@ -6,6 +6,7 @@ import { LIVE_EVERY_MS, loadLive, loadSample, withLive, type Live } from './lib/
 import { useBoard } from './lib/board';
 import { DEPTS, RAIL } from './lib/lookups';
 import { makeShipView, type Drills, type Relieved } from './lib/ship';
+import { SHIP_MAP, SHIP_MAP_WIDE, ShipMapContext } from './lib/shipmap';
 import type { Fixtures, RailId } from './types';
 import { BridgeBoard } from './components/BridgeBoard';
 import { Frame } from './components/Frame';
@@ -24,7 +25,7 @@ import { NavBoard } from './components/nav/NavBoard';
 import { ViewscreenBoard } from './components/viewscreen/ViewscreenBoard';
 import { ScienceBoard } from './components/science/ScienceBoard';
 import { SideRail, type RailFilter } from './components/SideRail';
-import { useFit, useFullscreenKey } from './lib/fit';
+import { WideContext, useFit, useFullscreenKey } from './lib/fit';
 
 export function App() {
   const [data, setData] = useState<Fixtures | null>(null);
@@ -35,7 +36,7 @@ export function App() {
   const [relieved, setRelieved] = useState<Relieved>(new Set());
   const [target, setTarget] = useState<string | null>(null);   // who the comm badge speaks to
   const [toast, showToast] = useToast();
-  const fit = useFit();   // scale the 2560 x 1440 board to the window (see lib/fit.ts)
+  const fit = useFit();   // scale the board to the window: 2560 x 1440, or 5120 x 1440 on a 32:9 screen (lib/fit.ts)
   useFullscreenKey();
 
   // The sample fixtures, kept as they were loaded, so each live reading is laid over them afresh.
@@ -85,9 +86,11 @@ export function App() {
 
   return (
     <>
-      <div className={`stage board-${board}` + (fit.fit ? ' fit' : '')}
+      <div className={`stage board-${board}` + (fit.fit ? ' fit' : '') + (fit.wide ? ' wide' : '')}
         style={fit.fit ? { transform: `scale(${fit.scale})`, left: fit.left, top: fit.top } : undefined}>
         <SrcData.Provider value={ship?.data ?? null}>
+        <WideContext.Provider value={fit.wide}>
+        <ShipMapContext.Provider value={fit.wide ? SHIP_MAP_WIDE : SHIP_MAP}>
         <Frame ship={ship} board={board} side={
           <SideRail registry={data?.ship.registry ?? 'HX-01'} board={board} onBoard={goBoard}
             filter={filter} onFilter={setFilter} drills={drills} onDrill={drill} onToast={showToast} />
@@ -148,6 +151,8 @@ export function App() {
             )}
           </main>
         </Frame>
+        </ShipMapContext.Provider>
+        </WideContext.Provider>
         </SrcData.Provider>
       </div>
       <div className={'toast' + (toast ? ' show' : '')} role="status" aria-live="polite">{toast}</div>

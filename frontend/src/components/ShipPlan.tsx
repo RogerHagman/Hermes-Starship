@@ -2,11 +2,13 @@
 // (CrewTokens.tsx). The Labels control switches the tile text: role, rank, or off so the rooms show.
 // The art is ship.svg (built from DeckPlanV4); rail state dims the nacelles and the warp core.
 // To redraw the ship later, swap the SVG and the positions in lib/shipmap.ts; nothing else changes.
+// The wide board (5120 x 1440) shows the wide ship: ship-wide.svg with SHIP_MAP_WIDE.
 import type { BoardId } from '../lib/board';
 import { memo, useEffect, useRef, useState } from 'react';
 import shipSvg from '../assets/ship.svg?raw';
+import shipWideSvg from '../assets/ship-wide.svg?raw';
 import { RAIL, RANK, STATUS, railColor } from '../lib/lookups';
-import { SHIP_MAP } from '../lib/shipmap';
+import { SHIP_MAP_WIDE, useShipMap, type ShipMap } from '../lib/shipmap';
 import type { ShipView } from '../lib/ship';
 import type { Station } from '../types';
 import { CrewTokens, crewed } from './CrewTokens';
@@ -45,12 +47,14 @@ function useLabels(): [Labels, (l: Labels) => void] {
 
 // The SVG is our own file, never fixture text, so it is safe to insert as markup.
 // memo keeps React from re-inserting it on every redraw.
-const ShipArt = memo(function ShipArt() {
-  return <div className="ship-art-svg" dangerouslySetInnerHTML={{ __html: shipSvg }} />;
+const ShipArt = memo(function ShipArt({ wide }: { wide: boolean }) {
+  return <div className="ship-art-svg" dangerouslySetInnerHTML={{ __html: wide ? shipWideSvg : shipSvg }} />;
 });
 
 export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onBoard, onRelieve }: Props) {
   const selected = pick?.station ?? null;
+  const map = useShipMap();
+  const wide = map === SHIP_MAP_WIDE;
   const artRef = useRef<HTMLDivElement>(null);
   const codexUp = ship.rail('codex') !== 'out';
   const claudeUp = ship.rail('claude') !== 'out';
@@ -65,7 +69,7 @@ export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onBoard, 
     set('lbl-codex', codexUp ? 'CODEX · PORT NACELLE · CHIEF · SYSTEMS · DIAGNOSTICS' : 'CODEX · WINDOW OUT · CREW IN QUARTERS');
     set('lbl-claude', claudeUp ? 'CLAUDE · STARBOARD NACELLE' : 'CLAUDE · WINDOW OUT');
     set('lbl-core', localUp ? '◂ WARP CORE · LOCAL QWEN' : '◂ WARP CORE COLD · OLLAMA DOWN');
-  }, [codexUp, claudeUp, localUp]);
+  }, [codexUp, claudeUp, localUp, wide]);
 
   const artStyle = {
     '--codex-glow': codexUp ? 1 : 0.16, '--codex-text': codexUp ? '#1a1206' : '#f0a948',
@@ -88,12 +92,12 @@ export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onBoard, 
           <Legend />
         </div>
       </div>
-      <div className="ship-wrap">
+      <div className={'ship-wrap' + (wide ? ' ship-wrap-wide' : '')}>
       <div className="ship">
-        <div className="ship-art" ref={artRef} style={artStyle} aria-hidden="true"><ShipArt /></div>
+        <div className="ship-art" ref={artRef} style={artStyle} aria-hidden="true"><ShipArt wide={wide} /></div>
         <div className={'ship-tiles' + (labels === 'off' ? ' bare' : '')}>
           {ship.data.stations.stations.map((st) => (
-            <Tile key={st.id} st={st} ship={ship} filter={filter} labels={labels} selected={selected === st.id} onPick={onPick} />
+            <Tile key={st.id} st={st} map={map} ship={ship} filter={filter} labels={labels} selected={selected === st.id} onPick={onPick} />
           ))}
           <CrewTokens ship={ship} filter={filter} selected={selected} slots={labels !== 'off'} onPick={onPick} />
         </div>
@@ -104,10 +108,10 @@ export function ShipPlan({ ship, filter, pick, onPick, onDept, onBack, onBoard, 
   );
 }
 
-function Tile({ st, ship, filter, labels, selected, onPick }: {
-  st: Station; ship: ShipView; filter: RailFilter; labels: Labels; selected: boolean; onPick: (id: string) => void;
+function Tile({ st, map, ship, filter, labels, selected, onPick }: {
+  st: Station; map: ShipMap; ship: ShipView; filter: RailFilter; labels: Labels; selected: boolean; onPick: (id: string) => void;
 }) {
-  const at = (SHIP_MAP.places as Record<string, { x: number; y: number; w: number }>)[st.id];
+  const at = map.places[st.id];
   if (!at) return null;
   const off = ship.off(st);
   const acting = ship.actingFor(st.id);
@@ -123,7 +127,7 @@ function Tile({ st, ship, filter, labels, selected, onPick }: {
     : st.status === 'live' ? RAIL[st.rail].label + (st.activeOrder ? ` · ${st.activeOrder}` : '')
     : STATUS[st.status].label;
   const style = {
-    left: pct(at.x, SHIP_MAP.width), top: pct(at.y, SHIP_MAP.height), width: pct(at.w, SHIP_MAP.width),
+    left: pct(at.x, map.width), top: pct(at.y, map.height), width: pct(at.w, map.width),
     '--c': st.kind === 'place' ? 'var(--border-strong)' : railColor(st.rail),
     '--ls': STATUS[st.status].line,
   } as React.CSSProperties;
@@ -131,7 +135,7 @@ function Tile({ st, ship, filter, labels, selected, onPick }: {
     <button type="button" className={cls.join(' ')} style={style} aria-pressed={selected}
       aria-label={`${st.name}, ${role.toLowerCase()}`} onClick={() => onPick(st.id)}>
       {/* A crewed station's icon is its crew token (CrewTokens.tsx), so the tile leaves it out. */}
-      {!crewed(st) && <Icon path={(SHIP_MAP.icons as Record<string, string>)[st.id]} className="ticon" />}
+      {!crewed(st) && <Icon path={map.icons[st.id]} className="ticon" />}
       <span className="t1">{st.short}</span>
       {labels === 'rank' && st.kind === 'station'
         ? <span className="t2 rank">{RANK[st.rank].officer && <Pips rank={st.rank} />}{RANK[st.rank].short.toUpperCase()}</span>

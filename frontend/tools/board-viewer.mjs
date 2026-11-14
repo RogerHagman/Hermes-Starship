@@ -1,21 +1,24 @@
 // Wrap the single-file build in a design-board viewer: the board renders at exactly
 // 2560 x 1440 inside an iframe (so its own layout never reflows) and is scaled to fit
 // the window, like the boards on the Starship Deck canvas. Fit / 1:1 / Full screen.
-//   npm run board   ->  dist-board/bridge.html
+//   npm run board        ->  dist-board/bridge.html       (2560 x 1440)
+//   npm run board:wide   ->  dist-board/bridge-wide.html  (5120 x 1440, the wide boards)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const here = import.meta.dirname;
 const board = readFileSync(resolve(here, '../dist-single/index.html'));
 const b64 = board.toString('base64');
-const W = 2560, H = 1440;
+const wide = process.argv.includes('--wide');
+const W = wide ? 5120 : 2560, H = 1440;
+const out = wide ? 'bridge-wide.html' : 'bridge.html';
 
 const html = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hermes Starship · Bridge</title>
+<title>Hermes Starship · ${wide ? 'Wide boards' : 'Bridge'}</title>
 <style>
   :root{--bg:#04070d;--bar:#0c1526;--line:#2e4569;--text:#e6ecf5;--label:#9fb0cc;--gold:#e8c37a}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:13px/1.3 'JetBrains Mono',ui-monospace,monospace;overflow:hidden}
@@ -34,7 +37,7 @@ const html = `<!doctype html>
 </style>
 </head>
 <body>
-<div id="viewport"><div id="stage"><iframe id="board" title="Hermes Starship Bridge, 2560 by 1440"></iframe></div></div>
+<div id="viewport"><div id="stage"><iframe id="board" title="Hermes Starship boards, ${W} by ${H}"></iframe></div></div>
 <div id="bar" role="toolbar" aria-label="Board view">
   <span id="size">${W} × ${H}</span>
   <button type="button" id="fit" aria-pressed="true">Fit</button>
@@ -101,5 +104,5 @@ const html = `<!doctype html>
 </html>
 `;
 mkdirSync(resolve(here, '../dist-board'), { recursive: true });
-writeFileSync(resolve(here, '../dist-board/bridge.html'), html);
-console.log('dist-board/bridge.html', html.length, 'bytes');
+writeFileSync(resolve(here, '../dist-board', out), html);
+console.log('dist-board/' + out, html.length, 'bytes');

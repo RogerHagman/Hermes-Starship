@@ -2,12 +2,15 @@
 // The wall screen (passed in as children) is laid over the picture's own screen.
 import { memo, useState, type ReactNode } from 'react';
 import art from '../../assets/quarters.svg?raw';
-import { ROOM, SPOTS, WALL, pct, type RoomObject } from '../../lib/quarters';
+import artWide from '../../assets/quarters-wide.svg?raw';
+import { useWide } from '../../lib/fit';
+import { ROOM, ROOM_WIDE, SPOTS, WALL, pct, type RoomObject } from '../../lib/quarters';
 import type { ShipView } from '../../lib/ship';
 
 // The SVG is our own file, never fixture text, so it is safe to insert as markup.
-const Art = memo(function Art() {
-  return <div className="room-art-svg" dangerouslySetInnerHTML={{ __html: art }} />;
+// The wide board shows the panorama: the same room, with the lounge carrying on to the right.
+const Art = memo(function Art({ wide }: { wide: boolean }) {
+  return <div className="room-art-svg" dangerouslySetInnerHTML={{ __html: wide ? artWide : art }} />;
 });
 
 export interface SpotLabel { name: string; meta?: string }
@@ -22,6 +25,8 @@ interface Props {
 
 export function Room({ ship, on, labels, onPick, children }: Props) {
   const [hot, setHot] = useState<RoomObject | null>(null);
+  const wide = useWide();
+  const ROOM_NOW = wide ? ROOM_WIDE : ROOM;
   const burning = ship.data.rails.rails.some((r) => r.burn?.active && ship.rail(r.id) !== 'out');
   // The armrest lights follow the rails, and warp streaks pass the window while the burn is on.
   const look = {
@@ -38,12 +43,12 @@ export function Room({ ship, on, labels, onPick, children }: Props) {
         <p className="mono hero-label room-hint">ESC RETURNS THE WALL SCREEN TO AT EASE</p>
       </div>
       <div className="room-wrap">
-        <div className="room-pic" data-hot={hot ?? ''} data-on={on ?? ''} style={look}>
-          <div className="room-art" aria-hidden="true"><Art /></div>
+        <div className={'room-pic' + (wide ? ' room-pic-wide' : '')} data-hot={hot ?? ''} data-on={on ?? ''} style={look}>
+          <div className="room-art" aria-hidden="true"><Art wide={wide} /></div>
           {SPOTS.map(({ id, box: [x, y, w, h], label: [lx, ly], hang }) => (
             <button key={id} type="button" className={`spot spot-${id}`} aria-pressed={on === id}
               aria-label={labels[id].meta ? `${labels[id].name}, ${labels[id].meta}` : labels[id].name}
-              style={{ left: pct(x, ROOM.w), top: pct(y, ROOM.h), width: pct(w, ROOM.w), height: pct(h, ROOM.h) }}
+              style={{ left: pct(x, ROOM_NOW.w), top: pct(y, ROOM_NOW.h), width: pct(w, ROOM_NOW.w), height: pct(h, ROOM_NOW.h) }}
               onPointerEnter={() => setHot(id)} onPointerLeave={() => setHot(null)}
               onFocus={() => setHot(id)} onBlur={() => setHot(null)}
               onClick={() => onPick(id)}>
@@ -55,7 +60,7 @@ export function Room({ ship, on, labels, onPick, children }: Props) {
           ))}
         </div>
         <div className="wall-slot" style={{
-          '--x': pct(WALL.x, ROOM.w), '--y': pct(WALL.y, ROOM.h), '--w': pct(WALL.w, ROOM.w), '--h': pct(WALL.h, ROOM.h),
+          '--x': pct(WALL.x, ROOM_NOW.w), '--y': pct(WALL.y, ROOM_NOW.h), '--w': pct(WALL.w, ROOM_NOW.w), '--h': pct(WALL.h, ROOM_NOW.h),
         } as React.CSSProperties}>
           {children}
         </div>

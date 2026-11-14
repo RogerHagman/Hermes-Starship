@@ -1,0 +1,96 @@
+/* The wide boards: 5120 x 1440, for a 32:9 screen (lib/fit.ts picks the stage).
+   Nothing new is drawn here. The same parts get more room: the picture (the ship or the room)
+   becomes the centrepiece, and the panels stand open on a wing to each side of it.
+   Every rule sits inside the container query, so the 2560 boards are untouched. */
+.stage.fit.wide{width:5120px}
+
+@container board (min-width: 5000px){
+  /* ---------- frame ---------- */
+  .frame{grid-template-columns:340px minmax(0,1fr);padding:20px 32px}
+  .main{padding-left:36px}
+  .intro{max-width:1400px}
+  .seg-gold{width:240px}
+  .seg-local{width:112px}
+  .seg-claude{width:400px}
+  .seg-end{width:80px}
+
+  /* ---------- Bridge: wing, ship, roster, wing ---------- */
+  .board-bridge .grid{
+    grid-template-columns:780px minmax(0,1fr) 800px;
+    grid-template-rows:auto minmax(0,1.25fr) minmax(0,1fr) auto;
+    grid-template-areas:
+      "hails hero rails"
+      "flight hero roster"
+      "log hero roster"
+      "log badge roster";
+    gap:18px 24px;
+  }
+  .board-bridge .side{display:contents}
+  .board-bridge .side > [aria-labelledby="hails-title"]{grid-area:hails}
+  .board-bridge .side > [aria-labelledby="flight-title"]{grid-area:flight;min-height:0}
+  .board-bridge .side > [aria-labelledby="rails-title"]{grid-area:rails}
+  .board-bridge .hero{align-self:center}
+  /* The wide ship (ship-wide.svg, 3200 x 1060) with SHIP_MAP_WIDE. The room cards keep the size they
+     were drawn at: the sizes below are the 2200-wide ship's, times 2200 / 3200. */
+  .ship-wrap-wide .ship{aspect-ratio:3200 / 1060}
+  .ship-wrap-wide .tile{padding:0 .31cqw 0 1.58cqw;border-radius:.31cqw}
+  .ship-wrap-wide .tile .ticon{left:.38cqw;width:.93cqw;height:.93cqw}
+  .ship-wrap-wide .tile .t1{font-size:clamp(9px, .51cqw, 19px)}
+  .ship-wrap-wide .tile .t2{font-size:clamp(7px, .345cqw, 13px)}
+  .ship-wrap-wide .tile .busy{right:.34cqw;top:.31cqw;width:.34cqw;height:.34cqw}
+  .ship-wrap-wide .tile .t2.rank .pips i{width:.21cqw;height:.21cqw}
+  .ship-wrap-wide .slot,.ship-wrap-wide .tok{width:1.25%}
+  /* The console sits in the open space under the saucer, ahead of the engineering hull. */
+  .ship-wrap-wide .console{left:56.6%;top:57.2%;width:42.8%;height:41.3%;font-size:clamp(12px,.56cqw,17px);padding:16px 20px}
+  .board-bridge .roster-panel{display:flex;flex-direction:column}
+  .board-bridge .roster{flex:1;grid-template-columns:repeat(2, minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:12px 14px}
+  .board-bridge .dept{padding:12px 14px}
+  .board-bridge .members{gap:7px}
+
+
+  /* ---------- the deck boards (Quarters, Engineering, Ops, ... and the Bridge posts) ----------
+     They share one grid (.qgrid): the room, a side column and two bottom panels. Wide, the
+     side column is the left wing, the room is the centrepiece with the comm badge under it,
+     and the two bottom panels stand full height on the right. */
+  .qgrid{
+    grid-template-columns:740px minmax(0,1fr) 800px 940px;
+    grid-template-rows:minmax(0,1fr) auto;
+    grid-template-areas:"side room b1 b2" "side badge b1 b2";
+    gap:18px 24px;
+  }
+  .qgrid .room{align-self:center}
+  /* The room, with everything on it (labels, the wall screen, the desk), is drawn as on the
+     2560 board and enlarged as one piece: 2128 px of room here over 1522 px there. */
+  .qgrid .room-wrap{zoom:1.398}
+  /* The wings read from further off on a 32:9 screen, so their panels are enlarged a little
+     too. Each is laid out at the width it has on the 2560 board. */
+  .qgrid .qside > .panel,.qgrid .qbottom > *,.board-bridge .grid > .panel,.board-bridge .side > .panel{zoom:1.15}
+  .qgrid .qbottom{display:contents}
+  .qgrid .qbottom > :nth-child(1){grid-area:b1;min-height:0}
+  .qgrid .qbottom > :nth-child(2){grid-area:b2;min-height:0}
+
+  /* The four Bridge posts and the Yeoman's post have shorter lists, so their right wing is two
+     stacked columns instead of two full-height panels: the main list alone on the left wing,
+     then the second side panel over the rails, and the two bottom panels over each other. */
+  .pgrid,.ygrid{
+    grid-template-columns:740px minmax(0,1fr) 780px 860px;
+    grid-template-rows:minmax(0,1fr) auto auto;
+    grid-template-areas:"p1 room p2 b1" "p1 room rails b2" "p1 badge rails b2";
+  }
+  .pgrid .room-wrap,.ygrid .room-wrap{zoom:1.464}
+  .pgrid .qside,.ygrid .qside{display:contents}
+  .pgrid .qside > :nth-child(1),.ygrid .qside > :nth-child(1){grid-area:p1;min-height:0}
+  .pgrid .qside > :nth-child(2),.ygrid .qside > :nth-child(2){grid-area:p2;min-height:0}
+  .pgrid .qside > :nth-child(3),.ygrid .qside > :nth-child(3){grid-area:rails}
+
+  /* ---------- Captain's Quarters: the panorama ----------
+     The room is quarters-wide.svg (2400 x 740): the room as it was, then the lounge. It takes the
+     middle; hails, rails and the duty roster stand on the left, campaigns over the order log on the right. */
+  .board-quarters .qgrid{
+    grid-template-columns:720px minmax(0,1fr) 900px;
+    grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:"side room b1" "side room b2" "side badge b2";
+  }
+  .board-quarters .room-pic-wide{aspect-ratio:2400 / 740}
+  .board-quarters .room-wrap{zoom:1.31}
+}

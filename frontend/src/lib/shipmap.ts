@@ -1,5 +1,7 @@
 // Where each station sits on the ship art (ship.svg viewBox 0 0 2200 1060), and its icon.
 // Layout is design data from DeckPlanV4, so it lives with the frontend, not in the fixtures.
+import { createContext, useContext } from 'react';
+
 export const SHIP_MAP = {
   width: 2200,
   height: 1060,
@@ -74,3 +76,62 @@ export const SHIP_MAP = {
     calib: 'M12 3a9 9 0 1 0 0.01 0 M12 8a4 4 0 1 0 0.01 0 M12 1v4 M12 19v4 M1 12h4 M19 12h4'
   }
 } as const;
+
+/** What a ship drawing needs to say about itself: its size, where the rooms, cabins and lifts are. */
+export interface ShipMap {
+  width: number;
+  height: number;
+  tileHeight: number;
+  cabins: { x: number; y: number; step: number };
+  lifts: { saucer: number; engineering: number; deck6: number; neckFoot: { x: number; y: number }; neckTop: { x: number; y: number } };
+  cabinOrder: readonly string[];
+  places: Record<string, { x: number; y: number; w: number }>;
+  icons: Record<string, string>;
+}
+
+// The wide ship (ship-wide.svg, viewBox 0 0 3200 1060), drawn for the 5120 x 1440 Bridge: a long
+// saucer with the bridge as one row of posts on top, the same rooms below. The numbers come from
+// the drawing's generator (holodeck/ship-wide-src/genwide.py writes shipmap-wide.json).
+export const SHIP_MAP_WIDE: ShipMap = {
+  width: 3200,
+  height: 1060,
+  tileHeight: 64,
+  cabins: { x: 1743, y: 502, step: 48 },
+  lifts: { saucer: 1530, engineering: 811, deck6: 764, neckFoot: { x: 1300, y: 700 }, neckTop: { x: 1530, y: 502 } },
+  cabinOrder: SHIP_MAP.cabinOrder,
+  places: {
+    xo: { x: 1734, y: 86, w: 166 },
+    captain: { x: 1912, y: 86, w: 166 },
+    screen: { x: 2446, y: 86, w: 166 },
+    nav: { x: 1556, y: 86, w: 166 },
+    helm: { x: 2090, y: 86, w: 166 },
+    ops: { x: 2268, y: 86, w: 166 },
+    lounge: { x: 1497, y: 182, w: 530 },
+    strategist: { x: 2039, y: 182, w: 170 },
+    yeoman: { x: 2221, y: 182, w: 170 },
+    quarters: { x: 2403, y: 182, w: 180 },
+    computer: { x: 1403, y: 278, w: 240 },
+    archives: { x: 1657, y: 278, w: 240 },
+    science: { x: 1911, y: 278, w: 240 },
+    sensors: { x: 2165, y: 278, w: 240 },
+    doctor: { x: 2419, y: 278, w: 240 },
+    holo: { x: 1393, y: 374, w: 240 },
+    carto: { x: 1647, y: 374, w: 240 },
+    crewq: { x: 1513, y: 470, w: 1072 },
+    life: { x: 360, y: 732, w: 200 },
+    security: { x: 572, y: 732, w: 200 },
+    qm: { x: 850, y: 732, w: 200 },
+    comms: { x: 1062, y: 732, w: 200 },
+    away: { x: 360, y: 828, w: 200 },
+    eng: { x: 850, y: 828, w: 200 },
+    design: { x: 420, y: 924, w: 180 },
+    calib: { x: 610, y: 924, w: 180 },
+    sys: { x: 850, y: 924, w: 190 },
+    diag: { x: 1050, y: 924, w: 190 }
+  },
+  icons: SHIP_MAP.icons,
+};
+
+/** Which ship drawing the ship plan shows. App.tsx gives the wide one to the wide board. */
+export const ShipMapContext = createContext<ShipMap>(SHIP_MAP);
+export const useShipMap = () => useContext(ShipMapContext);
