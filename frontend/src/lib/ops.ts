@@ -5,6 +5,7 @@
 import type { Backup, Container, Disk, Health, Host, Job, OpsFile, RailId } from '../types';
 import type { ShipView } from './ship';
 import { RAIL_IDS } from './ship';
+import { shipTimeZone } from './format';
 
 export const ROOM = { w: 1600, h: 740 };
 
@@ -170,9 +171,9 @@ export function until(asOf: string, iso: string): string {
   return `${Math.round(h / 24)} days`;
 }
 
-/** The chronometer hand's angle for a time: a full turn a day, midnight at the top (ship's time, Stockholm). */
+/** The chronometer hand's angle for a time: a full turn a day, midnight at the top (ship's time). */
 export function handAngle(at: Date): number {
-  const [h, m] = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Stockholm' })
+  const [h, m] = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: shipTimeZone() })
     .format(at).split(':').map(Number);
   return ((h + m / 60) / 24) * 360;
 }

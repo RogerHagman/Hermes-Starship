@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { mainAlert } from '../lib/review';
 import type { BoardId } from '../lib/board';
-import { clockTime, dateLine } from '../lib/format';
+import { clockTime, dateLine, shipPlace } from '../lib/format';
 import type { ShipView } from '../lib/ship';
 import { RAIL_IDS } from '../lib/ship';
 import { boardSources } from '../lib/sources';
@@ -119,7 +119,7 @@ function Clock() {
   return (
     <div className="clock">
       <span className="clock-time">{clockTime(now)}</span>
-      <span className="mono clock-sub">{dateLine(now)} · STOCKHOLM</span>
+      <span className="mono clock-sub">{dateLine(now)} · {shipPlace()}</span>
     </div>
   );
 }

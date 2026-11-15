@@ -1,6 +1,6 @@
 # Hermes Starship
 
-The look of Roger's Hermes crew: a starship whose stations are agents, drawn as a deck plan you can walk around. This guide is taken from the boards already on the Starship Deck canvas (the deck plan, Captain's Quarters, the Strategist console, the viewscreen and the station consoles). It is the reference the Holodeck handover (handover 3) builds from.
+The look of the Hermes crew: a starship whose stations are agents, drawn as a deck plan you can walk around. This guide is taken from the boards already on the Starship Deck canvas (the deck plan, Captain's Quarters, the Strategist console, the viewscreen and the station consoles). It is the reference the Holodeck handover (handover 3) builds from.
 
 ## The idea in one line
 
@@ -9,7 +9,7 @@ The look of Roger's Hermes crew: a starship whose stations are agents, drawn as 
 ## Principles
 
 1. **Colour means a rail.** Teal is local qwen, amber is Codex, pink is Claude, periwinkle is a mixed station. A station's tile, icon, top bar and pills all take its rail colour, so you can see where work runs without reading.
-2. **Gold means Roger.** Captain gold is spent on Approve, on links and on anything waiting for the captain. One gold primary per view.
+2. **Gold means the Captain.** Captain gold is spent on Approve, on links and on anything waiting for the captain. One gold primary per view.
 3. **Line style means status.** Solid is live, dashed is new or proposed, dotted is a future hire. Proposed tiles also drop to 80% opacity and future ones to 60%.
 4. **Red means stop.** Tier 3 and the red alert lamp are the only reds. Errors use the softer `bad` coral.
 5. **Moving around never calls a model.** Opening a board, filtering, tabs, status and the viewscreen in display mode are read from local files. Order buttons may run a prompt or a saved skill, and free text from the comm badge is fully intelligent.
@@ -73,4 +73,4 @@ The UI speaks like a calm first officer: short, plain sentences, the captain add
 
 ## Privacy on screen
 
-The dashboard may show Roger's first name, campaign and mission names, general goals, job titles and city. It never shows personnummer, phone, address, email, account or card numbers, keys, raw health readings or full receipts. Those stay in the local stores and are referred to by ID.
+The dashboard may show the Captain's first name, campaign and mission names, general goals, job titles and city. It never shows personnummer, phone, address, email, account or card numbers, keys, raw health readings or full receipts. Those stay in the local stores and are referred to by ID.

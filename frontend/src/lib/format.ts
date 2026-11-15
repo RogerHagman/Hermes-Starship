@@ -1,5 +1,29 @@
-// Time formatting. All times show in the ship's time zone.
-const TZ = 'Europe/Stockholm';
+// Time formatting. All times show in the ship's time zone: "timezone" in fixtures/ship.json
+// (an IANA name such as Europe/Stockholm), set once when the fixtures load.
+const DEFAULT_TZ = 'Europe/Stockholm';
+let TZ = DEFAULT_TZ;
+let DAY_KEY: Intl.DateTimeFormat | null = null;
+let INPUT_PARTS: Intl.DateTimeFormat | null = null;
+
+/** Sets the ship's time zone. An unknown or missing name keeps the default. Returns the zone in use. */
+export function setShipTimeZone(tz?: string | null): string {
+  let next = DEFAULT_TZ;
+  if (tz) {
+    try { new Intl.DateTimeFormat('en-GB', { timeZone: tz }); next = tz; } catch { /* unknown zone: keep the default */ }
+  }
+  if (next !== TZ) { TZ = next; DAY_KEY = null; INPUT_PARTS = null; }
+  return TZ;
+}
+
+/** The ship's time zone, for formatters elsewhere. */
+export function shipTimeZone(): string {
+  return TZ;
+}
+
+/** The place under the clock: the city of the time zone, like STOCKHOLM or NEW YORK (UTC stays UTC). */
+export function shipPlace(): string {
+  return (TZ.split('/').pop() ?? TZ).replace(/_/g, ' ').toUpperCase();
+}
 
 export function clockTime(iso: string | Date): string {
   return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: TZ }).format(new Date(iso));
@@ -27,16 +51,16 @@ export function age(asOf: string, iso: string): string {
 }
 
 /** The ship's day an instant falls on, as YYYY-MM-DD. */
-const DAY_KEY = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: TZ });
 export function dayKey(iso: string | Date): string {
+  DAY_KEY ??= new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: TZ });
   return DAY_KEY.format(new Date(iso));
 }
 
 /** An instant as the value of a datetime-local input, in the ship's time zone: 2026-11-08T17:00. */
-const INPUT_PARTS = new Intl.DateTimeFormat('en-CA', {
-  year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: TZ,
-});
 export function toInputTime(iso: string | number): string {
+  INPUT_PARTS ??= new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: TZ,
+  });
   const p = Object.fromEntries(INPUT_PARTS.formatToParts(new Date(iso)).map((x) => [x.type, x.value]));
   return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
 }

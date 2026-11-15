@@ -1,5 +1,6 @@
 // Loads the fixture files, and the live rails and rail log when the NAS probe writes them. Moving around
 // never calls a model: these are local files only, served by the page's own nginx.
+import { setShipTimeZone } from './format';
 import type { FastPathsFile, Fixtures, HelmFile, HoloFile, LogEntry, MetersFile, NasFile, OrdersFile, RailId, RailLogFile, RailsFile, ShipLogFile, Station, YeomanFile } from '../types';
 
 const FILES = ['ship', 'stations', 'rails', 'orders', 'shiplog', 'quarters', 'sensors', 'engineering', 'science', 'ops', 'yeoman', 'helm', 'nav', 'viewscreen', 'fastpaths', 'meters', 'holo'] as const;
@@ -10,6 +11,12 @@ declare global {
 
 /** The sample fixtures as shipped, before any live file replaces a part of them. */
 export async function loadSample(): Promise<Fixtures> {
+  const fx = await readSample();
+  setShipTimeZone(fx.ship?.timezone);
+  return fx;
+}
+
+async function readSample(): Promise<Fixtures> {
   if (window.FIXTURES) return window.FIXTURES;
   const parts = await Promise.all(FILES.map(async (name) => {
     const res = await fetch(`fixtures/${name}.json`, { cache: 'no-store' });
