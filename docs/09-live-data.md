@@ -9,6 +9,42 @@ Rules that hold for every source:
 - **Headers by name.** CSV files are read by header name, so the column order doesn't matter and extra columns are ignored. Times are UTC ISO 8601 (`2026-11-15T13:00:00Z`) unless a column says `_local`.
 - **What a board shows** is fixed by the schema in [`api/schema/`](../api/schema/). Each live file is checked against the same schema as its sample.
 
+## A first test in five minutes
+
+You can see a board go live before you have a crew. With the live stack running (README, "Going live"), write one order by hand into your Hermes data folder:
+
+```sh
+mkdir -p "$HERMES_DATA_HOST/handoff"
+printf 'order_id,received_at,from_surface,station,kind,status,closed_at,speed\nORD-1001,%s,desktop,forge,ask,open,,\n' \
+  "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$HERMES_DATA_HOST/handoff/orders.csv"
+```
+
+Within a minute the ship probe writes `deploy/live/orders.json`. Reload the Bridge: the ORDERS chip turns from SAMPLE to live, and ORD-1001 shows as queued at Engineering (`forge` is the Chief Engineer's profile in `fixtures/stations.json`). To go back to the sample, delete both `handoff/orders.csv` and `deploy/live/orders.json`.
+
+## What a stock Hermes gives you, and what you add
+
+A stock Hermes Agent already writes some of what the probes read. The rest came from the original ship's patches, and you can produce it your own way.
+
+| Part | On a stock Hermes | What to add |
+|---|---|---|
+| Host readings (Ops) | Works | Nothing |
+| Local rail (Rails) | Works with Ollama | Set `OLLAMA_URL` |
+| Cloud rails' usage (Rails) | Works when the sign-in files are inside the data folder (`home/.claude/` for Claude Code, Hermes's `auth.json` for Codex) | Nothing, or point Claude Code's config folder there |
+| Spend meters (Science lab) | Works: Hermes keeps the `sessions` table in `state.db` itself | Name your profiles in `fixtures/stations.json` |
+| Kanban cards | Hermes keeps `kanban.db` itself | Cards join an order only when their title carries its `ORD-` number |
+| Orders and the ship's log | Not there | Something that appends a row to `handoff/orders.csv` when a message arrives, and sets `status` to `done` when its work is finished |
+| Yeoman's list | Not there | The five CSV files in `yeoman/`, written by a skill, a script, or by hand |
+| Helm's tracker | Not there | The three CSV files in `helm/app-tracker/` |
+| Customs lines, speed, leak share | Not there | `handoff/handoff-log.csv`, one row per hand-off to a cloud rail |
+| Burn window | Not there | A small `handoff/burn.json`, written once by hand |
+
+**Hints for the order log**, the part most boards depend on:
+
+- **Let code write it, not the model.** The original ship first let the model mint order numbers. It was slow and it reused numbers. A hook that runs when a message arrives (Hermes loads hooks from its data folder) can append the row in milliseconds. See capability 1 in [patches/catalogue.md](../patches/catalogue.md) for the behaviour and its tests, and [03-orders-and-cards.md](03-orders-and-cards.md) for the design.
+- **Start smaller if you like.** A script that scans `kanban.db` every minute and writes one `orders.csv` row per card (inventing an `ORD-` number and putting it in the card's title) gets the Bridge live without touching Hermes's code.
+- **Closing matters.** An order stays "in flight" until its row says `done` and has a `closed_at`. The original ship closes it from a hook on card completion.
+- **Ask your own crew.** Each row in the table above is a well-sized first job for your Chief Engineer: hand it this page and the matching catalogue entry as the brief.
+
 ## Without Hermes data at all
 
 | Part | Probe | Source |
