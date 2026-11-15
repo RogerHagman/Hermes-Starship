@@ -23,7 +23,7 @@ cd Hermes-Starship
 docker compose -f deploy/compose.demo.yaml up -d
 ```
 
-Open <http://localhost:8650>. Every board runs on the synthetic data in [fixtures/](fixtures/). There's no Hermes, no model, no login, and nothing leaves your machine. Pick a room on the ship or a board on the left. The Captain's Quarters (`#/quarters`) is a good second stop.
+Open <http://localhost:8650>. Every board runs on the made-up sample data in [fixtures/](fixtures/), which [fixtures/README.md](fixtures/README.md) explains file by file. There's no Hermes, no model, no login, and nothing leaves your machine. Pick a room on the ship or a board on the left. The Captain's Quarters (`#/quarters`) is a good second stop.
 
 To stop it, run `docker compose -f deploy/compose.demo.yaml down`.
 
@@ -46,7 +46,7 @@ The live stack is the same boards behind a login, plus probes that read your Her
 3. Start: run `docker compose -f deploy/compose.yaml up -d`.
 4. Open `http://<host>:8650` and sign in.
 
-If a required setting is missing, compose stops and names it. Each probe is described in [probe/README.md](probe/README.md), and [docs/09-live-data.md](docs/09-live-data.md) lists every file the probes read, with the format and who writes it. That lets you feed the boards from your own Hermes setup without the original ship's patches.
+If a required setting is missing, compose stops and names it. Each probe is described in [probe/README.md](probe/README.md), and [docs/09-live-data.md](docs/09-live-data.md) lists every file the probes read, with the format and who writes it. That lets you feed the boards from your own Hermes setup without the original ship's patches. It starts with a five-minute first test, and says what a stock Hermes already provides and what you add.
 
 **Safety by design:** each probe gets read-only mounts, no capabilities beyond reading, a small memory cap, and no network unless it needs one. The only write path is the optional Yeoman's desk (the `desk` profile), which drops a board action as one file into the Yeoman's inbox and never touches the Yeoman's own files.
 
