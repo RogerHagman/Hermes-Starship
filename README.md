@@ -1,97 +1,124 @@
 # Hermes Starship
 
-> **Try it in one command.** You need Docker and nothing else:
->
-> ```sh
-> git clone https://github.com/RogerHagman/Hermes-Starship.git
-> cd Hermes-Starship
-> docker compose -f deploy/compose.demo.yaml up -d
-> ```
->
-> Then open <http://localhost:8650>. That is the ship on its sample data: no Hermes, no models, no login,
-> nothing sent anywhere. Stop it with `docker compose -f deploy/compose.demo.yaml down`.
-> Wiring the boards to a live Hermes crew is in [deploy/compose.yaml](deploy/compose.yaml) and
-> [setup/setup-guide.md](setup/setup-guide.md); a fuller getting-started guide is on its way.
+A starship-style control room for a crew of AI agents built on [Hermes Agent](https://github.com/NousResearch/hermes-agent) (Nous Research).
 
-## The idea
+One orchestrator, **Number One**, only routes. A dozen **stations** each own one kind of work. Each station runs on the **rail** that suits the job: a local model for anything private, Codex for code, and Claude for research, writing and design. The boards in this repo let you walk the decks and see the whole crew at a glance: who is working on what, which rail is up or out of quota, what is waiting for you, and what crossed from your machine to a cloud rail.
 
-### What this is
+![The Bridge on sample data](docs/images/bridge.jpg)
 
-Hermes is my personal crew of AI agents. Instead of one assistant doing everything, the work is split into stations on a starship. Each station has one job and an owner, and it works on the rail that suits that job:
+This repo has two halves:
 
-- **local:** a model running on my own hardware, for anything private
-- **Codex:** for engineering and anything that needs precise structured output
-- **Claude:** for research, writing, design and planning
+- **The ship** (`frontend/`, `deploy/`, `probe/`): the boards (React, served as static files by nginx) and small read-only probes that turn your Hermes data into live readings. No board ever calls a model.
+- **The crew kit** (`crew/`, `docs/`, `patches/`, `setup/`): the design behind the crew, including the system prompt template, routing rules, hand-off contract, the patch catalogue and a build order. Use it to set up the same crew on your own Hermes.
 
-I'm the Captain. Number One runs the bridge and routes my requests to the right station. The Chief Engineer builds and fixes. The Quartermaster keeps the stores, which means food, receipts and budget. Sensors researches, and Cartography makes things look good. The Ship's Computer keeps the memory, and Security checks everything that leaves the ship.
+For the original idea and the reasons behind it, see [IDEA.md](IDEA.md).
 
-This repo is going to be **the ship itself**: a place where I can walk the decks and see my crew at work.
+## Quick start: the boards on sample data
 
-## The crew
+You need Docker and nothing else.
 
-I'm the Captain, and **Number One** (Hermes itself) runs the bridge: it routes my requests, keeps track of bigger jobs, chairs the Briefing Room and reports back. Twelve stations do the work:
+```sh
+git clone https://github.com/RogerHagman/Hermes-Starship.git
+cd Hermes-Starship
+docker compose -f deploy/compose.demo.yaml up -d
+```
 
-| Station | Rail | What it owns |
+Open <http://localhost:8650>. Every board runs on the synthetic data in [fixtures/](fixtures/). There's no Hermes, no model, no login, and nothing leaves your machine. Pick a room on the ship or a board on the left. The Captain's Quarters (`#/quarters`) is a good second stop.
+
+To stop it, run `docker compose -f deploy/compose.demo.yaml down`.
+
+To change the time zone the boards show, set `"timezone"` in [fixtures/ship.json](fixtures/ship.json) to an IANA name, for example `"America/New_York"`, then reload the page.
+
+## Going live: the boards on your own Hermes
+
+The live stack is the same boards behind a login, plus probes that read your Hermes data folder **read-only** and write small JSON files to `deploy/live/`. A board uses a live file when there is one and falls back to its sample when there isn't, so you can bring parts live one at a time. The header chips show which parts are LIVE and which are still SAMPLE.
+
+**What you need**
+
+- A Docker host that can see Hermes's data folder (the folder mounted as `/opt/data` in the Hermes container).
+- [Ollama](https://ollama.com) or similar for the local rail (the rails probe reads its loaded models).
+- Optional: the Codex CLI and Claude Code signed in through Hermes, for the cloud rails' usage meters.
+
+**Steps** (from the repo folder)
+
+1. Settings: run `cp deploy/env.example deploy/.env`, then fill in `HERMES_DATA_HOST` and `OLLAMA_URL`. Everything else is optional and explained in the file.
+2. Login: run `sh deploy/make-htpasswd.sh <user>`. It asks for a password and writes `deploy/starship.htpasswd`, which git ignores.
+3. Start: run `docker compose -f deploy/compose.yaml up -d`.
+4. Open `http://<host>:8650` and sign in.
+
+If a required setting is missing, compose stops and names it. Each probe is described in [probe/README.md](probe/README.md), and [docs/09-live-data.md](docs/09-live-data.md) lists every file the probes read, with the format and who writes it. That lets you feed the boards from your own Hermes setup without the original ship's patches.
+
+**Safety by design:** each probe gets read-only mounts, no capabilities beyond reading, a small memory cap, and no network unless it needs one. The only write path is the optional Yeoman's desk (the `desk` profile), which drops a board action as one file into the Yeoman's inbox and never touches the Yeoman's own files.
+
+## Setting up the crew
+
+The boards show a crew. To build one, read these in order:
+
+| # | File | What you get |
 |---|---|---|
-| **Ship's Computer** | local | The memory. The only station that reads and writes what the crew knows. |
-| **Ops** | local | System health, read-only: NAS, models, Docker, disks, scheduled jobs, and how each rail is doing. |
-| **Quartermaster** | local (food photos on Codex) | The stores: food and weight log, receipts, budget and finance categories. |
-| **Chief Engineer** | Codex | Building and fixing: code, features, tests, pull requests, scripts. |
-| **Science Officer** | Codex writes, local runs | Model tests, quantising and serving. Numbers only from a run on my own hardware. |
-| **Sensors** | Claude | Research with sources, price and competitor watches, job-board scans. |
-| **Away Team** | local (repo analysis on Codex) | Look-only visits to remote systems, GitHub and repos. |
-| **Security Chief** | local (second opinion on a cloud rail when I ask) | Checks everything before it leaves the ship, and reviews high-stakes work. |
-| **Helm** | local | My career course: applications, timing, CV and letters. |
-| **Stellar Cartographer** | Claude | Making things look good: PDFs, decks, dashboards, the budget sheet. |
-| **Archivist** | local | The library, reading lists and reading goals. |
-| **Navigation** | local | Travel: trips, itineraries, bookings and commutes. |
+| 1 | [docs/01-architecture.md](docs/01-architecture.md) | The whole ship on one page: rails, stations, order flow and patches |
+| 2 | [crew/crew-manifest.md](crew/crew-manifest.md) | Every station: alias, profile, rail, duty, rank and department |
+| 3 | [crew/SOUL.template.md](crew/SOUL.template.md) | Number One's system prompt, ready to fill in |
+| 4 | [crew/routing-rules.md](crew/routing-rules.md) | The rules injected into Number One's prompt |
+| 5 | [docs/02-three-rails.md](docs/02-three-rails.md) | What each rail owns, and the stacking pattern |
+| 6 | [docs/03-orders-and-cards.md](docs/03-orders-and-cards.md) | ORD numbers, cards, missions and campaigns |
+| 7 | [crew/handoff-contract.md](crew/handoff-contract.md) | The envelope for every cloud hand-off, with pre-send checks |
+| 8 | [docs/05-brief-format.md](docs/05-brief-format.md) | How every brief is written (GOAL / CONTEXT / CONSTRAINTS / DONE WHEN) |
+| 9 | [patches/README.md](patches/README.md), [patches/catalogue.md](patches/catalogue.md) | How changes to Hermes's own code are shipped, and what each one does |
+| 10 | [setup/setup-guide.md](setup/setup-guide.md) | The build order, from a stock Hermes to a working crew |
+| 11 | [docs/lessons-learned.md](docs/lessons-learned.md) | What went wrong, and the rule or patch that fixed it |
+| 12 | [docs/roadmap.md](docs/roadmap.md) | Milestones done, in flight and parked |
 
-Helm and Navigation do their thinking locally and call Sensors and Cartography when they need research or a nice document.
+Then, as needed: [docs/04-speed-scale.md](docs/04-speed-scale.md) (speed words), [docs/06-engineering-split.md](docs/06-engineering-split.md) (plan, build and verify with cheaper models), [docs/07-conn-handoff.md](docs/07-conn-handoff.md) (auto-approval while you're away), [docs/08-memory-and-records.md](docs/08-memory-and-records.md), [crew/stations/yeoman.md](crew/stations/yeoman.md), the future handovers in [handovers/](handovers/) and the interface design work in [holodeck/](holodeck/).
 
-Not hired yet, names kept for later: the Comms Officer (email), the Ship's Doctor (training and recovery), Life Support (the smart home) and the Chief Strategist. Until then, their kind of work goes to the closest station.
+The original crew ran on an 8 GB NAS with a 27B Qwen model on a 24 GB GPU. The cloud rails sign in with subscriptions: Codex with a ChatGPT plan and Claude Code with a Claude plan. Memory, secrets and raw personal data never leave the local rail ("rule 0").
 
-## Why
+**What the kit is not:** it isn't the patch code. The original patches were written against one Hermes version (v0.22.x) and live on the original ship. [patches/catalogue.md](patches/catalogue.md) carries their specifications and acceptance tests, which is what you hand your own Chief Engineer to rebuild them against your Hermes version. It also isn't a finished product. It's a working design that grew one fix at a time.
 
-Today the crew lives in chat and in files. That works, but I can't *see* it:
-- who is working, and on what
-- which rail the work is running on, and whether a rail is down or out of quota
-- what is waiting for me to approve
-- what crossed from my machine to a cloud rail, and whether it was checked
-- how my bigger goals (campaigns) and projects (missions) are moving
+## Words used throughout
 
-A ship you can look around should make all of that obvious at a glance, and make the crew feel like a crew.
+| Word | Meaning |
+|---|---|
+| Captain | You, the human. The only one who approves, applies patches or changes models |
+| Number One | Hermes's default profile. Routes, tracks and reports; never does station work |
+| Station | A Hermes profile with one duty (for example the Chief Engineer = profile `forge`) |
+| Rail | Where a model runs: `local`, `codex` or `claude` |
+| ORD | An order number (ORD-1001 and up), minted by code when a message arrives |
+| Card | A Hermes Kanban task. Every order becomes one or more cards |
+| Rule 0 | Memory, secrets, raw personal data and writes to your systems stay on the local rail |
+| Patch | A reviewed diff to Hermes's own code, applied by the Captain |
+| Speed word | "Warp 9:" and friends at the start of a message; code turns it into a reasoning level |
 
-## The picture in my head
+## Repo layout
 
-- **The deck plan.** The ship from above, with every station on it, coloured by the rail it runs on. I can pick a station and see what it does, who it calls, and how it's doing.
-- **The Captain's Quarters.** My own room: campaigns, missions, the order log, and everything awaiting my orders.
-- **The station consoles.** Engineering, the Sensor array, the Science lab, the Quartermaster's stores, Navigation, the Archives, Cartography and the Strategist's plotting table. Each one shows that station's own work.
-- **The sector chart.** The home network: machines, rails and health.
-- **The Briefing Room.** Where several stations and I discuss something bigger together.
-- **The main viewscreen.** Where I can put any plan, order or document up big.
-- **The comm badge.** One place to ask, order or approve from anywhere on the ship.
+| Path | What's there |
+|---|---|
+| `frontend/` | The boards: React + TypeScript + Vite. `dist/` is the committed build, so running the boards needs no Node. See [frontend/README.md](frontend/README.md) |
+| `fixtures/`, `api/schema/` | The sample data every board starts from, and the JSON Schema it is checked against |
+| `deploy/` | `compose.demo.yaml` (sample data only), `compose.yaml` (the live stack), nginx configs, `env.example`, `make-htpasswd.sh` |
+| `probe/` | The read-only probes and the Yeoman's desk, with their tests |
+| `crew/`, `docs/`, `patches/`, `setup/`, `handovers/` | The crew kit |
+| `holodeck/`, `design-system/` | Concept art, ship plans and the LCARS-style design tokens |
+| `tests/` | Fixture and schema checks |
 
-The ship is built on the **Holodeck**. The Holodeck Officer lays the first bricks there, turning designs into working decks. Once a deck is built, I use it from the bridge, not from the Holodeck.
+## Development
 
-## Ideas I want to hold on to
+```sh
+cd frontend
+npm ci
+npm run dev      # http://localhost:8650, with fixtures/ and deploy/live/ served like nginx does
+npm run check    # schema types, TypeScript and logic tests
+npm run build    # rebuild dist/ and commit it (CI checks that it matches)
+```
 
-- **Moving around should be instant.** Walking the ship and looking at things should never wait on an AI. The intelligence is for orders, not for opening a door.
-- **Work has levels.** An *order* is one task for one station. A *mission* is a set of orders with a clear "done when". A *campaign* is a long-term goal that only I open or close.
-- **Nothing important happens without me.** The ship shows; I decide. Anything that acts goes through the same approval rules the crew already follows.
-- **Private stays private.** Memory, secrets and personal data stay on my own machines. The ship can show my campaigns and missions, but never things like personal numbers, card details or health readings.
-- **Start small.** The first version only looks: a few decks on made-up data. Live data comes next, and buttons that act come last.
+The Python tests run with `pip install jsonschema==4.26.0`, then `python -m unittest discover -s tests` and `python -m unittest discover -s probe`. CI runs all of them on every pull request.
 
-## Not decided yet
+## License and credits
 
-On purpose. These get worked out together with the crew, starting with a Briefing Room session:
-- the tech stack
-- where it's hosted, and how it fits next to Hermes's own dashboard
-- the look and feel in detail
-- how live data gets in and how actions get out
+Hermes Starship is licensed under the [GNU General Public License v3.0](LICENSE).
 
-## First steps
+- The bundled fonts, Barlow, Chakra Petch and JetBrains Mono, are under the SIL Open Font License 1.1. See the notices in [frontend/src/fonts/](frontend/src/fonts/).
+- Hermes Agent is a separate project by Nous Research. This repo contains none of its code.
+- The look is a fan homage to the LCARS style of *Star Trek: The Next Generation*. This is an unofficial personal project with no connection to, or endorsement from, Paramount or CBS. Star Trek and LCARS belong to their owners.
 
-1. This document.
-2. A Briefing Room session on how to build it.
-3. A first static version of the deck plan and the sector chart.
-
+See [SECURITY.md](SECURITY.md) to report a security problem.
