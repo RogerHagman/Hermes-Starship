@@ -185,7 +185,7 @@ describe("Helm's post", () => {
   });
   it('a card opens its application with the timeline, and Esc goes back', () => {
     const c = mount(HelmBoard);
-    fireEvent.click([...c.querySelectorAll('.hcard')].find((b) => b.textContent?.includes('Tidaholm'))!);
+    fireEvent.click([...c.querySelectorAll('.hcard')].find((b) => b.textContent?.includes('Granholm'))!);
     expect(title(c)).toBe('A-9004 · Support Technician');
     expect(c.querySelector('.post-screen')?.textContent).toContain('one short follow-up is due');
     expect(c.querySelectorAll('.post-screen .htime li').length).toBeGreaterThan(0);
@@ -207,7 +207,7 @@ describe("Helm's post", () => {
   it('the side panels say what waits for you and what is due', () => {
     const c = mount(HelmBoard);
     expect(c.querySelector('#hgate-title')?.closest('section')?.querySelectorAll('.plist-row')).toHaveLength(4);
-    expect(c.querySelector('#hdue-title')?.closest('section')?.textContent).toContain('Send one follow-up · Tidaholm Tech');
+    expect(c.querySelector('#hdue-title')?.closest('section')?.textContent).toContain('Send one follow-up · Granholm Tech');
   });
 });
 
@@ -218,7 +218,7 @@ describe("Navigation's post", () => {
     const days = [...c.querySelectorAll('.nweek > li')];
     expect(days).toHaveLength(7);
     expect(days[0].className).toBe('today');
-    expect(days[3].querySelector('.nw-trip')?.textContent).toBe('GÖTEBORG');
+    expect(days[3].querySelector('.nw-trip')?.textContent).toBe('VÄSTHAMN');
     expect(days[1].textContent).toContain('Dentist');
   });
   it('the booking terminal shows the holds first; Navigation never confirms', () => {
@@ -230,9 +230,9 @@ describe("Navigation's post", () => {
   it('the star chart opens a trip with its legs', () => {
     const c = mount(NavBoard);
     fireEvent.click(spot(c, 'nspot-chart'));
-    fireEvent.click([...c.querySelectorAll('.post-screen .prow')].find((b) => b.textContent?.includes('Weekend in Göteborg'))!);
-    expect(title(c)).toBe('Weekend in Göteborg');
-    expect([...c.querySelectorAll('.post-screen .ncourse li')].map((l) => l.textContent)).toEqual(['Lidköping', 'Herrljunga', 'Göteborg']);
+    fireEvent.click([...c.querySelectorAll('.post-screen .prow')].find((b) => b.textContent?.includes('Weekend in Västhamn'))!);
+    expect(title(c)).toBe('Weekend in Västhamn');
+    expect([...c.querySelectorAll('.post-screen .ncourse li')].map((l) => l.textContent)).toEqual(['Norrvik', 'Aspby', 'Västhamn']);
   });
   it('the slot board lists the Schedule box and the free windows', () => {
     const c = mount(NavBoard);
