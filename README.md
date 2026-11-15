@@ -1,6 +1,21 @@
-# Hermes Starship · the idea
+# Hermes Starship
 
-## What this is
+> **Try it in one command.** You need Docker and nothing else:
+>
+> ```sh
+> git clone https://github.com/RogerHagman/Hermes-Starship.git
+> cd Hermes-Starship
+> docker compose -f deploy/compose.demo.yaml up -d
+> ```
+>
+> Then open <http://localhost:8650>. That is the ship on its sample data: no Hermes, no models, no login,
+> nothing sent anywhere. Stop it with `docker compose -f deploy/compose.demo.yaml down`.
+> Wiring the boards to a live Hermes crew is in [deploy/compose.yaml](deploy/compose.yaml) and
+> [setup/setup-guide.md](setup/setup-guide.md); a fuller getting-started guide is on its way.
+
+## The idea
+
+### What this is
 
 Hermes is my personal crew of AI agents. Instead of one assistant doing everything, the work is split into stations on a starship. Each station has one job and an owner, and it works on the rail that suits that job:
 
