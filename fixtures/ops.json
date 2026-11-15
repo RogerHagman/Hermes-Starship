@@ -5,7 +5,7 @@
     {
       "id": "nas",
       "name": "NAS",
-      "role": "ZimaOS. Hermes, the boards and the probes run here.",
+      "role": "Hermes, the boards and the probes run here.",
       "state": "ok",
       "seenAt": "2026-11-04T19:30:00Z",
       "uptimeH": 316,
@@ -82,13 +82,13 @@
     { "id": "CR-908", "name": "Dilithium burn window", "every": "Wed 10:00 to Thu 10:00", "owner": "xo", "last": "skipped", "lastAt": "2026-11-04T09:00:00Z", "nextAt": "2026-11-11T09:00:00Z", "note": "Skipped this week: the Claude window was already low." }
   ],
   "backups": [
-    { "id": "BK-901", "what": "Hermes data", "from": "/DATA/AppData/hermes", "to": "Backup disk", "lastAt": "2026-11-04T02:30:00Z", "sizeGb": 2.4, "verified": "ok", "keep": "7 daily, 4 weekly", "warnAfterH": 30 },
+    { "id": "BK-901", "what": "Hermes data", "from": "The Hermes data folder", "to": "Backup disk", "lastAt": "2026-11-04T02:30:00Z", "sizeGb": 2.4, "verified": "ok", "keep": "7 daily, 4 weekly", "warnAfterH": 30 },
     { "id": "BK-902", "what": "Patch rollbacks", "from": "Hermes, before each patch", "to": "/opt/data/backups", "lastAt": "2026-11-03T20:40:00Z", "sizeGb": 0.1, "verified": "ok", "keep": "One per patch", "warnAfterH": 720, "note": "The pre-patch tar the patch bay's backup step makes. It prints its file count." },
     { "id": "BK-903", "what": "Starship repo", "from": "The NAS clone", "to": "GitHub", "lastAt": "2026-11-04T18:02:00Z", "verified": "ok", "keep": "Every commit", "warnAfterH": 720 },
     { "id": "BK-904", "what": "Hermes config copies", "from": "config.yaml", "to": "Next to the file", "lastAt": "2026-10-24T20:10:00Z", "verified": "never", "keep": "By hand", "warnAfterH": 168, "note": "Hand copies only (.bak-good-1024). Nothing checks they still load." }
   ],
   "cautions": [
-    { "id": "CA-901", "text": "Don't change a memory cap in the ZimaOS portal.", "why": "It rebuilds the container, and every patch inside it is lost. Apply them again (apply.sh, check.sh, restart) before using Hermes. It happened on 24 and 25 October." },
+    { "id": "CA-901", "text": "Don't change a memory cap in the NAS app portal.", "why": "It rebuilds the container, and every patch inside it is lost. Apply them again (apply.sh, check.sh, restart) before using Hermes. It happened on 24 and 25 October." },
     { "id": "CA-902", "text": "Watch the NAS swap.", "why": "The NAS has 7.5 GB of RAM. On 24 October the swap filled and everything hung." },
     { "id": "CA-903", "text": "Ollama has no sign-in.", "why": "Port 11434 stays on the LAN. Never forward it on the router." },
     { "id": "CA-904", "text": "Ops only reads.", "why": "Ops reports and flags. You make every change on the NAS, with docker commands." }

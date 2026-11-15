@@ -168,7 +168,7 @@ def codex_rail(sessions_dir, now, gauge=None):
             used = 0 if reset <= now else percent(window["used_percent"])   # a passed reset starts at 0
             rail["meters"].append({"id": meter_id, "label": label, "percent": used, "resetsAt": utc_stamp(reset)})
         if (now - at).total_seconds() > LOG_FRESH:
-            stamp = at.astimezone(ZoneInfo("Europe/Stockholm")).strftime("%a %H:%M")
+            stamp = at.astimezone(ZoneInfo(os.environ.get("SHIP_TIMEZONE") or "Europe/Stockholm")).strftime("%a %H:%M")
             rail["note"] = (f"Old reading, from the last Codex log ({stamp}): Codex use through Hermes writes no log. "
                             f"OpenAI's usage answer: {why or 'none yet'}.")
     if any(m["percent"] >= 100 for m in rail["meters"]):

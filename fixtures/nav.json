@@ -7,7 +7,7 @@
       "title": "Parents' evening at school",
       "start": "2026-11-03T16:30:00Z",
       "end": "2026-11-03T18:00:00Z",
-      "place": "Lidk\u00f6ping",
+      "place": "Norrvik",
       "kind": "personal"
     },
     {
@@ -15,7 +15,7 @@
       "title": "Dentist",
       "start": "2026-11-05T08:00:00Z",
       "end": "2026-11-05T08:45:00Z",
-      "place": "Lidk\u00f6ping",
+      "place": "Norrvik",
       "kind": "appointment",
       "sourceOrd": "ORD-9005"
     },
@@ -35,7 +35,7 @@
     },
     {
       "id": "ev-904",
-      "title": "Train to G\u00f6teborg",
+      "title": "Train to V\u00e4sthamn",
       "start": "2026-11-07T06:12:00Z",
       "end": "2026-11-07T08:05:00Z",
       "kind": "travel",
@@ -46,7 +46,7 @@
       "title": "Hold: tire change",
       "start": "2026-11-09T13:00:00Z",
       "end": "2026-11-09T14:00:00Z",
-      "place": "Lidk\u00f6ping",
+      "place": "Norrvik",
       "kind": "hold"
     },
     {
@@ -54,7 +54,7 @@
       "title": "Car service",
       "start": "2026-11-10T07:30:00Z",
       "end": "2026-11-10T09:00:00Z",
-      "place": "Lidk\u00f6ping",
+      "place": "Norrvik",
       "kind": "appointment"
     }
   ],
@@ -62,16 +62,16 @@
     {
       "id": "trip-902",
       "title": "Commute options, Thursday",
-      "from": "Lidk\u00f6ping",
-      "to": "Skara",
+      "from": "Norrvik",
+      "to": "Ekby",
       "depart": "2026-11-05T05:40:00Z",
       "status": "planned",
       "sourceOrd": "ORD-9004",
       "legs": [
         {
           "mode": "bus",
-          "from": "Lidk\u00f6ping",
-          "to": "Skara",
+          "from": "Norrvik",
+          "to": "Ekby",
           "depart": "2026-11-05T05:40:00Z",
           "arrive": "2026-11-05T06:25:00Z"
         }
@@ -79,9 +79,9 @@
     },
     {
       "id": "trip-901",
-      "title": "Weekend in G\u00f6teborg",
-      "from": "Lidk\u00f6ping",
-      "to": "G\u00f6teborg",
+      "title": "Weekend in V\u00e4sthamn",
+      "from": "Norrvik",
+      "to": "V\u00e4sthamn",
       "depart": "2026-11-07T06:12:00Z",
       "back": "2026-11-08T16:00:00Z",
       "status": "planned",
@@ -89,15 +89,15 @@
       "legs": [
         {
           "mode": "train",
-          "from": "Lidk\u00f6ping",
-          "to": "Herrljunga",
+          "from": "Norrvik",
+          "to": "Aspby",
           "depart": "2026-11-07T06:12:00Z",
           "arrive": "2026-11-07T06:45:00Z"
         },
         {
           "mode": "train",
-          "from": "Herrljunga",
-          "to": "G\u00f6teborg",
+          "from": "Aspby",
+          "to": "V\u00e4sthamn",
           "depart": "2026-11-07T06:58:00Z",
           "arrive": "2026-11-07T08:05:00Z"
         }
@@ -106,7 +106,7 @@
     {
       "id": "trip-903",
       "title": "Christmas at the coast",
-      "from": "Lidk\u00f6ping",
+      "from": "Norrvik",
       "to": "Sm\u00f6gen",
       "depart": "2026-12-23T09:00:00Z",
       "status": "idea"
@@ -115,7 +115,7 @@
   "bookings": [
     {
       "id": "bk-902",
-      "what": "Train tickets to G\u00f6teborg and back",
+      "what": "Train tickets to V\u00e4sthamn and back",
       "when": "2026-11-07T06:12:00Z",
       "where": "SJ",
       "status": "held",
@@ -126,7 +126,7 @@
       "id": "bk-901",
       "what": "Tire change",
       "when": "2026-11-09T13:00:00Z",
-      "where": "The tire shop, Lidk\u00f6ping",
+      "where": "The tire shop, Norrvik",
       "status": "held",
       "heldUntil": "2026-11-05T11:00:00Z"
     },
@@ -134,15 +134,15 @@
       "id": "bk-903",
       "what": "Dentist",
       "when": "2026-11-05T08:00:00Z",
-      "where": "Lidk\u00f6ping",
+      "where": "Norrvik",
       "status": "confirmed",
       "sourceOrd": "ORD-9005"
     },
     {
       "id": "bk-904",
-      "what": "Hotel in G\u00f6teborg, one night",
+      "what": "Hotel in V\u00e4sthamn, one night",
       "when": "2026-11-07T14:00:00Z",
-      "where": "G\u00f6teborg",
+      "where": "V\u00e4sthamn",
       "status": "released"
     }
   ]

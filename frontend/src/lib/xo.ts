@@ -286,7 +286,7 @@ export function routeOf(text: string, stations: Station[], paths: FastRoute[]): 
 export const TRY_THESE = [
   'Warp: remind me at 21:00 to call the garage',
   'Helm, shortlist the new job ads',
-  'Ask Navigation for the train times to Gothenburg',
+  'Ask Navigation for the train times to Västhamn',
   "What's the weather tomorrow?",
 ];
 

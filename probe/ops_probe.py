@@ -189,7 +189,7 @@ def run_once(env, state, now=None):
     host = {
         "id": env.get("HOST_ID", "nas"),
         "name": env.get("HOST_NAME", "NAS"),
-        "role": env.get("HOST_ROLE", "ZimaOS. Hermes, the boards and the probes run here."),
+        "role": env.get("HOST_ROLE", "Hermes, the boards and the probes run here."),
         "state": "ok" if ram else "unknown",
         "seenAt": stamp,
     }

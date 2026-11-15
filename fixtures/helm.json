@@ -5,9 +5,9 @@
     {
       "id": "J-9006",
       "found": "2026-11-04",
-      "company": "Hjo Infra",
+      "company": "Sjövik Infra",
       "role": "Network Engineer",
-      "location": "Hjo, on site",
+      "location": "Sjövik, on site",
       "source": "Platsbanken",
       "deadline": "2026-11-07",
       "match": 35,
@@ -18,9 +18,9 @@
     {
       "id": "J-9005",
       "found": "2026-11-03",
-      "company": "Skara Drift",
+      "company": "Ekby Drift",
       "role": "IT Technician",
-      "location": "Skara, on site",
+      "location": "Ekby, on site",
       "source": "Platsbanken",
       "match": 66,
       "fit": "fair",
@@ -29,7 +29,7 @@
     {
       "id": "J-9004",
       "found": "2026-11-02",
-      "company": "L\u00e4ck\u00f6 Labs",
+      "company": "Strand\u00f6 Labs",
       "role": "Inference Engineer",
       "location": "Stockholm, hybrid",
       "source": "company site",
@@ -41,7 +41,7 @@
     {
       "id": "J-9003",
       "found": "2026-10-30",
-      "company": "Kinnekulle Systems",
+      "company": "Bergvik Systems",
       "role": "Software Engineer",
       "location": "Remote",
       "source": "Platsbanken",
@@ -54,7 +54,7 @@
       "found": "2026-10-29",
       "company": "Nordkust GPU",
       "role": "Systems Engineer",
-      "location": "G\u00f6teborg, hybrid",
+      "location": "V\u00e4sthamn, hybrid",
       "source": "Platsbanken",
       "deadline": "2026-11-06",
       "match": 61,
@@ -65,9 +65,9 @@
     {
       "id": "J-9001",
       "found": "2026-10-28",
-      "company": "V\u00e4nern Datahall",
+      "company": "Bl\u00e5sj\u00f6n Datahall",
       "role": "Support Engineer",
-      "location": "Lidk\u00f6ping, on site",
+      "location": "Norrvik, on site",
       "source": "company site",
       "match": 74,
       "fit": "good",
@@ -77,9 +77,9 @@
     {
       "id": "J-9007",
       "found": "2026-10-25",
-      "company": "Mariestad Media",
+      "company": "Björkstad Media",
       "role": "Web Developer",
-      "location": "Mariestad",
+      "location": "Björkstad",
       "source": "Platsbanken",
       "match": 38,
       "fit": "weak",
@@ -89,9 +89,9 @@
     {
       "id": "J-9008",
       "found": "2026-10-14",
-      "company": "Tidaholm Tech",
+      "company": "Granholm Tech",
       "role": "Support Technician",
-      "location": "Tidaholm",
+      "location": "Granholm",
       "source": "Platsbanken",
       "match": 70,
       "fit": "good",
@@ -135,7 +135,7 @@
     {
       "id": "A-9003",
       "job": "J-9003",
-      "company": "Kinnekulle Systems",
+      "company": "Bergvik Systems",
       "role": "Software Engineer",
       "status": "ready",
       "created": "2026-11-01",
@@ -146,7 +146,7 @@
     {
       "id": "A-9001",
       "job": "J-9001",
-      "company": "V\u00e4nern Datahall",
+      "company": "Bl\u00e5sj\u00f6n Datahall",
       "role": "Support Engineer",
       "status": "applied",
       "created": "2026-10-30",
@@ -158,7 +158,7 @@
     {
       "id": "A-9004",
       "job": "J-9008",
-      "company": "Tidaholm Tech",
+      "company": "Granholm Tech",
       "role": "Support Technician",
       "status": "applied",
       "created": "2026-10-15",
@@ -196,7 +196,7 @@
       "date": "2026-11-04",
       "id": "J-9006",
       "kind": "found",
-      "text": "Network Engineer, Hjo Infra (Platsbanken)"
+      "text": "Network Engineer, Sjövik Infra (Platsbanken)"
     },
     {
       "date": "2026-11-03",
@@ -208,13 +208,13 @@
       "date": "2026-11-03",
       "id": "J-9005",
       "kind": "found",
-      "text": "IT Technician, Skara Drift (Platsbanken)"
+      "text": "IT Technician, Ekby Drift (Platsbanken)"
     },
     {
       "date": "2026-11-02",
       "id": "A-9001",
       "kind": "sent",
-      "text": "Sent to V\u00e4nern Datahall; the CV and letter are frozen"
+      "text": "Sent to Bl\u00e5sj\u00f6n Datahall; the CV and letter are frozen"
     },
     {
       "date": "2026-11-02",
@@ -226,7 +226,7 @@
       "date": "2026-11-01",
       "id": "A-9003",
       "kind": "started",
-      "text": "Tailoring the CV for Kinnekulle Systems"
+      "text": "Tailoring the CV for Bergvik Systems"
     },
     {
       "date": "2026-10-31",
@@ -238,7 +238,7 @@
       "date": "2026-10-30",
       "id": "A-9001",
       "kind": "started",
-      "text": "Tailoring the CV for V\u00e4nern Datahall"
+      "text": "Tailoring the CV for Bl\u00e5sj\u00f6n Datahall"
     },
     {
       "date": "2026-10-30",
@@ -256,7 +256,7 @@
       "date": "2026-10-28",
       "id": "J-9001",
       "kind": "found",
-      "text": "Support Engineer, V\u00e4nern Datahall (company site)"
+      "text": "Support Engineer, Bl\u00e5sj\u00f6n Datahall (company site)"
     },
     {
       "date": "2026-10-27",
@@ -274,7 +274,7 @@
       "date": "2026-10-16",
       "id": "A-9004",
       "kind": "sent",
-      "text": "Sent to Tidaholm Tech"
+      "text": "Sent to Granholm Tech"
     },
     {
       "date": "2026-10-05",

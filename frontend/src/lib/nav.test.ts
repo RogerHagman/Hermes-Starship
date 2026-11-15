@@ -23,8 +23,8 @@ describe('Navigation', () => {
   });
   it('trips: planned first by departure, then ideas; stops along the legs', () => {
     expect(trips(f).map((t) => t.id)).toEqual(['trip-902', 'trip-901', 'trip-903']);
-    expect(stops(trips(f)[1])).toEqual(['Lidköping', 'Herrljunga', 'Göteborg']);
-    expect(stops(trips(f)[2])).toEqual(['Lidköping', 'Smögen']);
+    expect(stops(trips(f)[1])).toEqual(['Norrvik', 'Aspby', 'Västhamn']);
+    expect(stops(trips(f)[2])).toEqual(['Norrvik', 'Smögen']);
   });
   it('offers free windows of an hour or more between 08:00 and 20:00', () => {
     const free = freeSlots(f);

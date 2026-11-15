@@ -46,11 +46,14 @@ services:
     environment:
       OLLAMA_URL: ${OLLAMA_URL:?set OLLAMA_URL in deploy/.env}
       VRAM_GB: ${VRAM_GB:-24}
-      CODEX_SESSIONS: /data/codex-sessions
-      BURN_FILE: /data/burn.json
+      # Everything below is read inside Hermes' data folder, mounted once, read-only, at
+      # /data/hermes. Nothing is mounted by its own path: Docker would create a missing path on
+      # the host, inside Hermes' folder.
+      CODEX_SESSIONS: /data/hermes/home/.codex/sessions
+      BURN_FILE: /data/hermes/handoff/burn.json
       # Claude: the sign-in Claude Code keeps for the ship's Claude stations, read-only. The probe
       # asks Anthropic for the 5 h and weekly use with it at most every CLAUDE_EVERY seconds.
-      CLAUDE_SIGNIN: /data/claude/.credentials.json
+      CLAUDE_SIGNIN: /data/hermes/home/.claude/.credentials.json
       CLAUDE_EVERY: "300"
       # Codex: forge calls Codex through Hermes, which writes no Codex session logs, so the probe
       # asks OpenAI for the 5 h and weekly use (what Codex's /status shows) with the Codex sign-in
@@ -59,16 +62,13 @@ services:
       CODEX_SIGNIN: /data/hermes
       OUT_DIR: /out
       INTERVAL: "60"
+      SHIP_TIMEZONE: ${SHIP_TIMEZONE:-Europe/Stockholm}
     volumes:
       # Hermes' data folder on this host (/opt/data inside Hermes), from HERMES_DATA_HOST. Read-only.
-      - ${CODEX_SESSIONS_HOST:-${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}/home/.codex/sessions}:/data/codex-sessions:ro
-      - ${BURN_FILE_HOST:-${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}/handoff/burn.json}:/data/burn.json:ro
-      # The folder, not the file: when Claude Code renews the sign-in it replaces the file, and a
-      # mount of the file alone would keep showing the old one.
-      - ${CLAUDE_HOME_HOST:-${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}/home/.claude}:/data/claude:ro
-      # Hermes' folder for its auth.json files (the root one, each profile's, and the Codex CLI's).
-      # The folder, not the files: Hermes replaces auth.json when it renews the sign-in. Read-only,
-      # and the probe opens only the auth.json files in it.
+      # The whole folder, not single files: Hermes and Claude Code replace their sign-in files when
+      # they renew them, and a mount of one file would keep showing the old one. Read-only. The
+      # probe opens only burn.json, the newest Codex session logs, Claude Code's sign-in and the
+      # auth.json files (the root one, each profile's, and the Codex CLI's).
       - ${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}:/data/hermes:ro
       - ./live:/out
       - ../probe/rails_probe.py:/app/rails_probe.py:ro
@@ -163,6 +163,7 @@ services:
       ROSTER: /srv/fixtures/stations.json
       OUT_DIR: /out
       INTERVAL: "300"
+      SHIP_TIMEZONE: ${SHIP_TIMEZONE:-Europe/Stockholm}
     volumes:
       - ${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}:/hermes:ro
       - ../fixtures/stations.json:/srv/fixtures/stations.json:ro
