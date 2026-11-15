@@ -5,7 +5,7 @@
     {
       "id": "nas",
       "name": "NAS",
-      "role": "ZimaOS. Hermes, the boards and the probes run here.",
+      "role": "Hermes, the boards and the probes run here.",
       "state": "ok",
       "seenAt": "2026-11-04T19:30:00Z",
       "uptimeH": 316,

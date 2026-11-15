@@ -59,6 +59,7 @@ services:
       CODEX_SIGNIN: /data/hermes
       OUT_DIR: /out
       INTERVAL: "60"
+      SHIP_TIMEZONE: ${SHIP_TIMEZONE:-Europe/Stockholm}
     volumes:
       # Hermes' data folder on this host (/opt/data inside Hermes), from HERMES_DATA_HOST. Read-only.
       - ${CODEX_SESSIONS_HOST:-${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}/home/.codex/sessions}:/data/codex-sessions:ro
@@ -163,6 +164,7 @@ services:
       ROSTER: /srv/fixtures/stations.json
       OUT_DIR: /out
       INTERVAL: "300"
+      SHIP_TIMEZONE: ${SHIP_TIMEZONE:-Europe/Stockholm}
     volumes:
       - ${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}:/hermes:ro
       - ../fixtures/stations.json:/srv/fixtures/stations.json:ro

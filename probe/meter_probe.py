@@ -16,7 +16,7 @@ Read-only, with no network at all. It reads four things and changes none of them
   hand): time to first token and tokens a second on the local rail.
 
 Spend is counted over four windows: today, the last 7 days, the last 30 days and everything.
-Days start at midnight in Stockholm.
+Days start at midnight in the ship's time zone (SHIP_TIMEZONE, default Europe/Stockholm).
 
 The file has the shape of api/schema/meters.schema.json, with "synthetic": false, written
 atomically. A missing source never stops the probe: its meter is empty and "sources" says why.
@@ -39,7 +39,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 UTC = timezone.utc
-HOME = ZoneInfo("Europe/Stockholm")
+HOME = ZoneInfo(os.environ.get("SHIP_TIMEZONE") or "Europe/Stockholm")
 WINDOWS = [("day", "Today"), ("week", "Last 7 days"), ("month", "Last 30 days"), ("all", "Everything")]
 RAILS = ["local", "codex", "claude", "other"]
 LEAK_WEEKS = 12
@@ -104,7 +104,7 @@ def source(state, note, read_at=None):
 # ---------- windows and rails ----------
 
 def window_starts(now):
-    """{window id: start (UTC) or None}. Days start at midnight in Stockholm."""
+    """{window id: start (UTC) or None}. Days start at midnight in the ship's time zone."""
     midnight = now.astimezone(HOME).replace(hour=0, minute=0, second=0, microsecond=0)
     return {"day": midnight.astimezone(UTC), "week": (midnight - timedelta(days=6)).astimezone(UTC),
             "month": (midnight - timedelta(days=29)).astimezone(UTC), "all": None}
