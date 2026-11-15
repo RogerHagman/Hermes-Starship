@@ -48,7 +48,7 @@ takes props (its inputs) and returns the markup it draws.
 ## Commands
 
 ```
-npm ci              # install (on Minted Penguin or in CI, never on the NAS)
+npm ci              # install (on your workstation or in CI, not on a small server)
 npm run dev         # http://localhost:8650, with /fixtures/ served from ../fixtures
 npm run check       # types up to date + TypeScript + logic tests
 npm run build       # writes dist/ — commit it

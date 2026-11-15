@@ -6,3 +6,5 @@ frontend/tools/.*.tmp.json
 frontend/dist-board/
 deploy/live/
 deploy/.env
+deploy/scratch/
+deploy/starship.htpasswd

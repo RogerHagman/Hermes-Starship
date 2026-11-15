@@ -8,7 +8,10 @@
 # writes only deploy/live/. The one write path is the Yeoman's desk (below): board actions go
 # into the Yeoman's inbox, and the Yeoman's own code applies them. No probe runs a model: the one Ollama call is GET /api/ps, and the one
 # Anthropic call asks for the Claude usage (at most every 5 minutes).
-# Settings for this NAS go in deploy/.env (git ignores it), see deploy/env.example.
+# Settings for your machine go in deploy/.env (git ignores it): copy deploy/env.example and fill it in.
+# HERMES_DATA_HOST (your Hermes data folder, /opt/data inside Hermes) and OLLAMA_URL are required.
+# The login for the boards is deploy/starship.htpasswd (git ignores it): make it with deploy/make-htpasswd.sh.
+# Run every command from the repo folder: docker compose -f deploy/compose.yaml up -d
 services:
   starship:
     image: nginx:1.27-alpine
@@ -36,7 +39,7 @@ services:
     mem_limit: 32m
     read_only: true
     cap_drop: [ALL]
-    # Hermes' files belong to its own user (10000) and are private. This lets the probe read
+    # Hermes' files belong to its own user (HERMES_UID, 10000 in the Hermes image) and are private. This lets the probe read
     # them without being able to change anything; it writes only ./live, which it owns.
     cap_add: [DAC_READ_SEARCH]
     security_opt: [no-new-privileges:true]
@@ -57,16 +60,16 @@ services:
       OUT_DIR: /out
       INTERVAL: "60"
     volumes:
-      # Hermes keeps its data in /DATA/AppData/hermes (/opt/data inside Hermes). Read-only.
-      - ${CODEX_SESSIONS_HOST:-/DATA/AppData/hermes/home/.codex/sessions}:/data/codex-sessions:ro
-      - ${BURN_FILE_HOST:-/DATA/AppData/hermes/handoff/burn.json}:/data/burn.json:ro
+      # Hermes' data folder on this host (/opt/data inside Hermes), from HERMES_DATA_HOST. Read-only.
+      - ${CODEX_SESSIONS_HOST:-${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}/home/.codex/sessions}:/data/codex-sessions:ro
+      - ${BURN_FILE_HOST:-${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}/handoff/burn.json}:/data/burn.json:ro
       # The folder, not the file: when Claude Code renews the sign-in it replaces the file, and a
       # mount of the file alone would keep showing the old one.
-      - ${CLAUDE_HOME_HOST:-/DATA/AppData/hermes/home/.claude}:/data/claude:ro
+      - ${CLAUDE_HOME_HOST:-${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}/home/.claude}:/data/claude:ro
       # Hermes' folder for its auth.json files (the root one, each profile's, and the Codex CLI's).
       # The folder, not the files: Hermes replaces auth.json when it renews the sign-in. Read-only,
       # and the probe opens only the auth.json files in it.
-      - ${HERMES_DATA_HOST:-/DATA/AppData/hermes}:/data/hermes:ro
+      - ${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}:/data/hermes:ro
       - ./live:/out
       - ../probe/rails_probe.py:/app/rails_probe.py:ro
     command: python -u /app/rails_probe.py
@@ -100,14 +103,14 @@ services:
       HELM_DIR: /hermes/helm/app-tracker
       FAST_PATHS: /hermes/routing/fast-paths.json
     volumes:
-      - ${HERMES_DATA_HOST:-/DATA/AppData/hermes}:/hermes:ro
+      - ${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}:/hermes:ro
       - ../fixtures/stations.json:/srv/fixtures/stations.json:ro
       - ./live:/out
       - ./scratch:/scratch
       - ../probe/ship_probe.py:/app/ship_probe.py:ro
     command: python -u /app/ship_probe.py
 
-  # The Ops probe: the NAS's own readings for the Ops board. It reads /proc and /sys (memory,
+  # The Ops probe: the host's own readings for the Ops board. It reads /proc and /sys (memory,
   # swap, CPU, uptime, temperature) and asks each disk below for its size, nothing more: no file
   # on a disk is opened or listed, and it sees none of Hermes' data. No network, no capabilities,
   # 32 MB of RAM. It writes only ./live/nas.json and its own disk history in ./scratch/ops.
@@ -123,13 +126,13 @@ services:
     environment:
       # Each disk: the path in here, its DK- id on the board, its name, and its mount on the NAS.
       # Add the backup disk in deploy/.env once its mount is known (see env.example).
-      DISKS: ${OPS_DISKS:-/disks/1|DK-901|NAS data|/DATA;/disks/2|DK-903|NAS system|/}
+      DISKS: ${OPS_DISKS:-/disks/1|DK-901|Data disk|/;/disks/2|DK-903|System disk|/}
       OUT_DIR: /out
       SCRATCH: /scratch
       INTERVAL: "60"
     volumes:
       # Any folder or file on a disk gives that disk's size. These are small, harmless ones.
-      - ${DISK_1_HOST:-/DATA/AppData/hermes-starship}:/disks/1:ro
+      - ${DISK_1_HOST:-..}:/disks/1:ro
       - ${DISK_2_HOST:-/etc/os-release}:/disks/2:ro
       - ${DISK_3_HOST:-/etc/os-release}:/disks/3:ro
       - ./live:/out
@@ -161,7 +164,7 @@ services:
       OUT_DIR: /out
       INTERVAL: "300"
     volumes:
-      - ${HERMES_DATA_HOST:-/DATA/AppData/hermes}:/hermes:ro
+      - ${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}:/hermes:ro
       - ../fixtures/stations.json:/srv/fixtures/stations.json:ro
       - ./scratch/trials:/trials:ro
       - ./live:/out
@@ -182,13 +185,14 @@ services:
     security_opt: [no-new-privileges:true]
     environment:
       GITHUB_READ: ${GITHUB_READ:-}
-      REPO: RogerHagman/Hermes-Starship
+      # Your fork, owner/name, so the Review bay shows your own PRs.
+      REPO: ${STARSHIP_REPO:-RogerHagman/Hermes-Starship}
       HOLO_PATHS: /app/holo-paths.txt
       OUT_DIR: /out
       INTERVAL: "120"
       KEEP_DONE: "10"
       # The main watch flags commits on main since this time that came in without a merged PR.
-      WATCH_FROM: "2026-11-07T21:00:00Z"
+      WATCH_FROM: ${WATCH_FROM:-2026-11-07T21:00:00Z}
       # Commits you have looked at and cleared (comma-separated, short sha is fine), from deploy/.env.
       MAIN_OK: ${MAIN_OK:-}
     volumes:
@@ -201,11 +205,11 @@ services:
   # one action (tick, cancel, reopen, important, due, edit, add, rank, snooze, arrived) to
   # /desk/action; the desk checks it and drops it as one JSON file in the Yeoman's inbox. It never
   # opens the Yeoman's CSV files: the Yeoman's own code applies the inbox on its timer (patch B2-45
-  # in Hermes). It runs as the Yeoman's user (10000) and sees only yeoman/inbox/, read-write. No
+  # in Hermes). It runs as the Yeoman's user (HERMES_UID) and sees only yeoman/inbox/, read-write. No
   # ports: only nginx (the starship service) reaches it, on the compose network.
-  # In the "desk" profile until the Yeoman patch has created yeoman/inbox/ (owned by 10000), so it
+  # In the "desk" profile until the Yeoman patch has created yeoman/inbox/ (owned by HERMES_UID), so it
   # never starts by accident and Docker never creates the folder as root. Start it by name:
-  #   sudo docker compose -f /DATA/AppData/hermes-starship/deploy/compose.yaml up -d yeoman-desk
+  #   docker compose -f deploy/compose.yaml up -d yeoman-desk
   yeoman-desk:
     image: python:3.12-alpine
     profiles: [desk]
@@ -213,7 +217,7 @@ services:
     restart: unless-stopped
     mem_limit: 32m
     read_only: true
-    user: "10000:10000"
+    user: "${HERMES_UID:-10000}:${HERMES_GID:-10000}"
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     environment:
@@ -221,7 +225,7 @@ services:
       PORT: "8090"
     volumes:
       - type: bind
-        source: ${HERMES_DATA_HOST:-/DATA/AppData/hermes}/yeoman/inbox
+        source: ${HERMES_DATA_HOST:?set HERMES_DATA_HOST in deploy/.env}/yeoman/inbox
         target: /inbox
         bind:
           create_host_path: false
@@ -229,7 +233,7 @@ services:
     command: python -u /app/yeoman_desk.py
 
   # A speed trial on the local rail, run by hand (never on its own: it is in the "trial" profile):
-  #   sudo docker compose -f deploy/compose.yaml run --rm speed-trial
+  #   docker compose -f deploy/compose.yaml run --rm speed-trial
   # The same short prompt three times to the model Ollama already has loaded: time to first token
   # and tokens a second. A few seconds of GPU time; it sees no Hermes data and writes only
   # ./scratch/trials, which the meter probe reads.
