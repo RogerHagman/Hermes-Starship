@@ -4,7 +4,7 @@
 # 2. The same checks as the Bridge workflow: fixtures, probes, types and logic tests.
 # 3. Build frontend/dist and commit it to the branch, so holo never needs Node.
 # 4. Open the PR (or update its text), with holo's report holodeck/reports/<ORD>.md as the body.
-# Roger reviews in the Review bay on the Holodeck board and merges on GitHub. Main takes PRs only.
+# The Captain reviews in the Review bay on the Holodeck board and merges on GitHub. Main takes PRs only.
 # Pushes made here with the workflow's own sign-in don't start another run, so there is no loop.
 name: holo
 on:

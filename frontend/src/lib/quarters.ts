@@ -2,6 +2,8 @@
 // and the small helpers the Quarters board uses. Redraw the room in tools/make_quarters_svg.py,
 // then move the boxes here to match.
 
+import { shipTimeZone } from './format';
+
 export const ROOM = { w: 1600, h: 740 };
 
 /** The things in the room you can pick. Each one opens a view on the wall screen. */
@@ -40,9 +42,9 @@ export const ROOM_ICONS: Record<RoomObject | 'ease', string> = {
   bridge: 'M12 3l7 18-7-4-7 4z',
 };
 
-/** "Good evening" by the ship's clock (Stockholm). */
+/** "Good evening" by the ship's clock. */
 export function greeting(now: Date): string {
-  const h = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Europe/Stockholm' }).format(now));
+  const h = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: shipTimeZone() }).format(now));
   if (h >= 5 && h < 12) return 'Good morning, Captain.';
   if (h >= 12 && h < 17) return 'Good afternoon, Captain.';
   if (h >= 17 && h < 23) return 'Good evening, Captain.';
@@ -61,10 +63,9 @@ export function stardate(now: Date): string {
   return `${y}.${String(part).padStart(3, '0')}`;
 }
 
-/** Local hour and minute in Stockholm, for the windows chart. */
-const HM = new Intl.DateTimeFormat('en-GB', { hour: 'numeric', minute: 'numeric', hourCycle: 'h23', timeZone: 'Europe/Stockholm' });
+/** Local hour and minute in the ship's time zone, for the windows chart. */
 export function localHM(t: number): [number, number] {
-  const parts = HM.formatToParts(new Date(t));
+  const parts = new Intl.DateTimeFormat('en-GB', { hour: 'numeric', minute: 'numeric', hourCycle: 'h23', timeZone: shipTimeZone() }).formatToParts(new Date(t));
   return [Number(parts.find((p) => p.type === 'hour')!.value), Number(parts.find((p) => p.type === 'minute')!.value)];
 }
 

@@ -3,7 +3,7 @@
 # is live yet (patches AG/AH/AI, the apply.sh W_b fix, the core terminal update, the Science lab
 # meters and speed trial, fast paths from a file, the ship probe).
 #
-#   sudo sh /DATA/AppData/hermes-starship/deploy/whats-live.sh
+#   sudo sh deploy/whats-live.sh   (from the repo folder)
 #
 # It changes nothing. It runs check.sh in Hermes (read-only by design), reads a few files in
 # Hermes and in the Starship folder, asks Docker which containers run, and lets
